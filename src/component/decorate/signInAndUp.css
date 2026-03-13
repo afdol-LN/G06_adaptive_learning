@@ -1,0 +1,409 @@
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --navy:    #f2f7fa; /* สีฟ้าอ่อนมากๆ สำหรับพื้นหลังเว็บ (อิงจาก #82C8E5 แต่ทำให้อ่อนลง) */
+  --navy2:   #ffffff; /* สีพื้นหลังของการ์ด (ขาวล้วน) */
+  --navy3:   #e9f0f5; /* สีพื้นหลังช่อง Input */
+
+  /* -------------------------------------
+     เส้นขอบ (Borders)
+  -------------------------------------- */
+  --border:  #c2d3e0; /* สีเส้นขอบทั่วไป */
+  --border2: #6D8196; /* สีเทาอมฟ้าจากพาเลทของคุณ สำหรับเส้นขอบที่ชัดขึ้น */
+
+  /* -------------------------------------
+     สีไฮไลต์ (Cobalt Sky Palette)
+  -------------------------------------- */
+  --gold:    #0047AB; /* Cobalt Blue (สีหลักสำหรับ ปุ่ม, Checkbox, Icon) */
+  --gold2:   #82C8E5; /* Sky Blue (สีรองสำหรับ แสงเงา, Gradient, Hover) */
+  --gold3:   #000080; /* Navy Blue (สำหรับ หัวข้อ, โลโก้, เน้นคำ) */
+
+  /* -------------------------------------
+     ตัวอักษร (Text)
+  -------------------------------------- */
+  --text:    #000080; /* Navy Blue: สีตัวอักษรหลัก (เข้ม อ่านง่าย) */
+  --muted:   #6D8196; /* Slate Grey: สีเทาจากพาเลทคุณ สำหรับตัวอักษรรอง */
+  --muted2:  #8fa3b5; /* สี Placeholder */
+
+  /* -------------------------------------
+     สถานะ (Status)
+  -------------------------------------- */
+  --danger:  #e05c5c;
+  --success: #38b874;
+}
+
+html, body {
+  height: 100%;
+  background: var(--navy);
+  font-family: 'DM Sans', sans-serif;
+  color: var(--text);
+  overflow-x: hidden;
+}
+
+/* ── Background ── */
+.bg-layer {
+  position: fixed; inset: 0; z-index: 0;
+  background:
+    radial-gradient(ellipse 80% 60% at 20% 10%, rgba(130, 200, 229, 0.25) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 80% at 85% 90%, rgba(0, 71, 171, 0.08) 0%, transparent 60%),
+    var(--navy);
+}
+
+/* แสงลอยๆ (Orbs) อิงสีจาก Cobalt Sky */
+
+
+/* grid lines */
+.bg-grid {
+  position: fixed; inset: 0; z-index: 0; opacity: 0.04;
+  background-image:
+    linear-gradient(var(--gold) 1px, transparent 1px),
+    linear-gradient(90deg, var(--gold) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+
+/* floating orbs */
+.orb {
+  position: fixed; border-radius: 50%; filter: blur(80px); z-index: 0; pointer-events: none;
+  animation: drift 18s ease-in-out infinite alternate;
+}
+.orb-1 { width: 500px; height: 500px; background: rgba(0, 71, 171, 0.06); top: -100px; left: -120px; animation-duration: 22s; }
+.orb-2 { width: 380px; height: 380px; background: rgba(0, 0, 128, 0.04); bottom: -80px; right: -60px; animation-duration: 16s; animation-delay: -8s; }
+.orb-3 { width: 240px; height: 240px; background: rgba(130, 200, 229, 0.15); top: 40%; left: 60%; animation-duration: 26s; animation-delay: -4s; }
+
+@keyframes drift {
+  0%   { transform: translate(0, 0) scale(1); }
+  100% { transform: translate(30px, 20px) scale(1.08); }
+}
+
+/* ── Layout ── */
+.page {
+  position: relative; z-index: 1;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+}
+
+/* logo / brand */
+.brand {
+  text-align: center;
+  margin-bottom: 32px;
+  animation: fadeDown 0.6s ease both;
+}
+.brand-mark {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+.brand-icon {
+  width: 40px; height: 40px;
+  border: 1.5px solid var(--gold);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+  background: #ffffff;
+  color: #000080;
+  box-shadow: 0 0 15px rgba(130, 200, 229, 0.3); /* เงาสีฟ้า Sky Blue */
+}
+.brand-name {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 20px;
+  color: var(--gold3);
+  letter-spacing: 0.05em;
+}
+.brand-sub {
+  font-size: 12px;
+  color: var(--muted);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+/* ── Card ── */
+.card {
+  width: 100%;
+  max-width: 460px;
+  background: var(--navy2);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 12px 40px rgba(0, 0, 128, 0.08); /* เงาสี Navy */
+  animation: fadeUp 0.7s ease both 0.1s;
+}
+
+/* ── Tabs ── */
+.tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border-bottom: 1px solid var(--border);
+  border-top: 1px solid var(--border);
+  background: #ffffff;
+  border-radius: 14px;
+}
+.tab-btn {
+  padding: 18px 0;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #000000;
+  background: none;
+  border: none ;
+  cursor: pointer;
+  position: relative;
+  transition: color 0.25s;
+}
+.tab-btn::after {
+  content: '';
+  position: absolute;
+  bottom: -1px; left: 20%; right: 20%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  opacity: 0;
+  transition: opacity 0.25s;
+}
+.tab-btn.active { color: var(--navy); background: linear-gradient(135deg, #0056d6, #0047AB); box-shadow: 0 4px 20px rgba(0, 71, 171, 0.25); }
+.tab-btn.active::after { opacity: 1; }
+.tab-btn:hover:not(.active) { color: var(--border2); background-color: #fafafa; transition: transform 0.15s}
+
+/* ── Panels ── */
+.panel { display: none; padding: 32px 36px 36px; }
+.panel.active { display: block; animation: fadeIn 0.3s ease; }
+
+.panel-title {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 28px;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+.panel-sub {
+  font-size: 13px;
+  color: #0000;
+  margin-bottom: 28px;
+}
+
+/* ── Form fields ── */
+.field { margin-bottom: 18px; }
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 18px; }
+
+label {
+  display: block;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #0b1120;
+  margin-bottom: 7px;
+}
+
+input, select {
+  width: 100%;
+  padding: 12px 16px;
+  background: #f4f8fb;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--muted);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+  -webkit-appearance: none;
+  appearance: none;
+}
+input::placeholder { color: var(--muted); }
+input:focus, select:focus {
+  border-color: var(--gold); /* กรอบสี Cobalt Blue #0047AB */
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(0, 71, 171, 0.15);
+}
+input.error { border-color: var(--danger); box-shadow: 0 0 0 3px #e05c5c14; }
+input.ok    { border-color: var(--success); }
+
+/* select arrow */
+.select-wrap { position: relative; }
+.select-wrap::after {
+  content: '▾';
+  position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
+  color: var(--muted); font-size: 20px; pointer-events: none;
+}
+select { padding-right: 36px; cursor: pointer; color: var(--muted); }
+select option { background: #ffffff; color: var(--muted); }
+
+/* date input */
+input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(0.5) sepia(1) saturate(2) hue-rotate(10deg);
+  cursor: pointer; opacity: 0.6;
+}
+input[type="date"]::-webkit-calendar-picker-indicator:hover { opacity: 1; }
+
+/* password wrapper */
+.pw-wrap { position: relative; }
+.pw-toggle {
+  position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
+  background: none; border: none; cursor: pointer; color: var(--muted);
+  font-size: 16px; padding: 0; line-height: 1;
+  transition: color 0.2s;
+}
+.pw-toggle:hover { color: var(--gold); }
+
+/* ── Remember me ── */
+.remember {
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 24px;
+  cursor: pointer;
+  user-select: none;
+}
+.remember input[type="checkbox"] { display: none; }
+.check-box {
+  width: 18px; height: 18px;
+  border: 1.5px solid var(--border2); /* ใช้สีเทา #6D8196 เป็นขอบตอนยังไม่ติ๊ก */
+  border-radius: 5px;
+  background: #ffffff;
+  display: flex; align-items: center; justify-content: center;
+  transition: border-color 0.2s, background 0.2s;
+  flex-shrink: 0;
+}
+.check-box .tick {
+  width: 10px; height: 10px;
+  stroke: #ffffff; /* เครื่องหมายถูกสีขาว */
+  stroke-width: 2.5;
+  fill: none;
+  opacity: 0;
+  transform: scale(0.5);
+  transition: opacity 0.15s, transform 0.15s;
+}
+.remember input:checked ~ .check-box {
+  border-color: var(--gold);
+  background: var(--gold); /* กล่องติ๊กถูกเปลี่ยนเป็นสี Cobalt Blue */
+}
+.remember input:checked ~ .check-box .tick {
+  opacity: 1; transform: scale(1);
+}
+
+.remember span { font-size: 13px; color: var(--muted2); }
+
+/* ── Buttons ── */
+.btn-primary {
+  width: 100%;
+  padding: 14px;
+  background: linear-gradient(135deg, #0056d6, #0047AB); /* ไล่สีฟ้า-น้ำเงิน Cobalt */
+  border: none;
+  border-radius: 10px;
+  color: #ffffff; /* ตัวอักษรสีขาว */
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.15s, box-shadow 0.15s;
+  box-shadow: 0 4px 20px rgba(0, 71, 171, 0.25);
+}
+.btn-primary::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(135deg, #0047AB, #000080); /* เมื่อเอาเมาส์ชี้จะเข้มขึ้นเป็น Navy */
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.btn-primary:hover { transform: translateY(-1px); box-shadow: 0 8px 28px #c9a84c44; }
+.btn-primary:hover::before { opacity: 1; }
+.btn-primary:active { transform: translateY(0); }
+.btn-primary span { position: relative; z-index: 1; }
+
+/* loading state */
+.btn-primary.loading { pointer-events: none; opacity: 0.8; }
+.btn-primary.loading span::after {
+  content: '';
+  display: inline-block;
+  width: 12px; height: 12px;
+  border: 2px solid #ffffff;
+  border-top-color: var(--gold2);
+  border-radius: 50%;
+  margin-left: 8px;
+  vertical-align: middle;
+  animation: spin 0.6s linear infinite;
+}
+
+/* ── Validation message ── */
+.field-msg {
+  font-size: 11px;
+  margin-top: 5px;
+  min-height: 16px;
+  transition: all 0.2s;
+  
+}
+.field-msg.err {
+  color: #dc2626;
+  /* background: #dc2626;
+  border-radius: 6px; */
+  padding: 4px 10px;
+}
+.field-msg.ok {
+  color: #16a34a;
+  /* background: #16a34a;
+  border-radius: 6px; */
+  padding: 4px 10px;
+}
+
+/* ── Divider ── */
+.divider {
+  display: flex; align-items: center; gap: 12px;
+  margin: 20px 0;
+}
+.divider-line { flex: 1; height: 1px; background: var(--border); }
+.divider-text { font-size: 11px; color: var(--muted); letter-spacing: 0.08em; }
+
+/* ── Footer note ── */
+.card-footer {
+  padding: 16px 36px;
+  border-top: 1px solid var(--border);
+  background: #f8fafc;
+  text-align: center;
+  font-size: 12px;
+  color: var(--muted);
+}
+.card-footer a { color: var(--gold); text-decoration: none; }
+.card-footer a:hover { color: var(--gold3); }
+
+/* ── Animations ── */
+@keyframes fadeDown { from { opacity: 0; transform: translateY(-16px); } to { opacity: 1; transform: none; } }
+@keyframes fadeUp   { from { opacity: 0; transform: translateY(20px);  } to { opacity: 1; transform: none; } }
+@keyframes fadeIn   { from { opacity: 0; }                               to { opacity: 1; } }
+@keyframes spin     { to { transform: rotate(360deg); } }
+
+/* ── Toast ── */
+.toast {
+  position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%) translateY(80px);
+  background: white;
+  border: 1px solid var(--gold3);
+  border-radius: 10px;
+  padding: 14px 24px;
+  font-size: 13px;
+  color: var(--text);
+  /* box-shadow: 0 8px 32px var(--gold); */
+  z-index: 100;
+  opacity: 0;
+  transition: transform 0.35s cubic-bezier(.34,1.56,.64,1), opacity 0.35s;
+  white-space: nowrap;
+}
+.toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+.toast.success { background-color: var(--gold3); color: #ffff; box-shadow: 0 8px 32px var(--gold3); border-color: #000000; }
+.toast.error   { background-color: var(--danger); color: #ffff; box-shadow: 0 8px 32px var(--danger); border-color: #e9f0f5;}
+
+/* scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--navy); }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+@media (max-width: 500px) {
+  .card { border-radius: 16px; }
+  .panel { padding: 24px 22px 28px; }
+  .field-row { grid-template-columns: 1fr; gap: 0; }
+  .card-footer { padding: 14px 22px; }
+}

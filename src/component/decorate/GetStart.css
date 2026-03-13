@@ -1,0 +1,161 @@
+:root {
+  /* Cobalt Sky Light Mode Palette */
+  --navy:    #f2f7fa; 
+  --navy2:   #ffffff;
+  --navy3:   #e9f0f5;
+  --border:  #c2d3e0;
+  --border2: #6D8196;
+  --gold:    #0047AB; /* Cobalt Blue */
+  --gold2:   #82C8E5; /* Sky Blue */
+  --gold3:   #000080; /* Navy Blue */
+  --text:    #000080; /* Navy Text */
+  --muted:   #6D8196; /* Slate Grey */
+  --muted2:  #8fa3b5;
+}
+
+body {
+  margin: 0;
+  font-family: 'DM Sans', sans-serif;
+  background-color: var(--navy);
+  color: var(--text);
+  overflow-x: hidden;
+}
+
+.bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background:
+    radial-gradient(ellipse 80% 60% at 20% 10%, rgba(130, 200, 229, 0.25) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 80% at 85% 90%, rgba(0, 71, 171, 0.08) 0%, transparent 60%),
+    var(--navy);
+  z-index: -2;
+}
+
+.bg-grid {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: 
+    linear-gradient(var(--gold2) 1px, transparent 1px),
+    linear-gradient(90deg, var(--gold2) 1px, transparent 1px);
+  background-size: 40px 40px;
+  opacity: 0.15;
+  z-index: -1;
+  mask-image: radial-gradient(circle at center, black 40%, transparent 100%);
+}
+
+.orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.5;
+  z-index: -1;
+}
+
+.orb-1 { width: 300px; height: 300px; background: var(--gold2); top: 10%; left: 20%; opacity: 0.4; }
+.orb-2 { width: 400px; height: 400px; background: var(--gold); bottom: 10%; right: 10%; opacity: 0.1; }
+.orb-3 { width: 200px; height: 200px; background: var(--gold2); top: 40%; left: 60%; opacity: 0.3; }
+.orb-4 { width: 250px; height: 250px; background: var(--gold3); bottom: 20%; left: 10%; opacity: 0.1; }
+
+.stars {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  pointer-events: none;
+}
+
+.star {
+  position: absolute;
+  background: var(--gold);
+  border-radius: 50%;
+  animation: twinkle linear infinite;
+}
+
+@keyframes twinkle {
+  0% { opacity: 0; transform: scale(0.5); }
+  50% { opacity: 0.6; transform: scale(1); }
+  100% { opacity: 0; transform: scale(0.5); }
+}
+
+.page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 2rem;
+  position: relative;
+  z-index: 1;
+}
+
+.icon-ring {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 1.5px solid var(--gold);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.5rem;
+  color: var(--gold3);
+  box-shadow: 0 0 30px rgba(130, 200, 229, 0.4);
+  margin-bottom: 2rem;
+}
+
+.eyebrow {
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--gold);
+  margin-bottom: 1rem;
+  font-weight: 600;
+}
+
+.title {
+  font-size: 3.5rem;
+  line-height: 1.1;
+  font-weight: 800;
+  margin: 0 0 1rem 0;
+  color: var(--gold3);
+  background: none;
+  -webkit-text-fill-color: initial;
+}
+
+.subtitle-line { font-size: 1.25rem; color: var(--muted); margin-bottom: 2rem; }
+.sep { width: 60px; height: 4px; background: var(--gold); margin: 0 auto 2rem auto; border-radius: 2px; }
+.desc { font-size: 1.1rem; color: var(--muted); max-width: 600px; margin: 0 auto 3rem auto; line-height: 1.6; }
+
+.btn-wrap {
+  margin-top: 1rem;
+}
+
+.btn-start {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  background: linear-gradient(135deg, var(--gold) 0%, var(--gold3) 100%);
+  color: #ffffff;
+  padding: 16px 40px;
+  border-radius: 100px;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 1.125rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 20px rgba(0, 71, 171, 0.25);
+  border: none;
+}
+
+.btn-start:hover { transform: translateY(-2px) scale(1.02); box-shadow: 0 8px 30px rgba(0, 71, 171, 0.4); }
+.btn-start:active { transform: translateY(0) scale(0.98); }
+.btn-arrow { transition: transform 0.3s ease; }
+.btn-start:hover .btn-arrow { transform: translateX(4px); }
