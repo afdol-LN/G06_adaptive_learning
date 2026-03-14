@@ -273,8 +273,7 @@ export default function Exercise() {
               {ps >= 85 ? '🎉 ยอดเยี่ยม! Score     ทุก skill ขึ้นสูงมาก' : ps >= 60 ? 'ดีมาก! BKT อัปเดต P(L) สำเร็จ' : 'BKT อัปเดตแล้ว — แนะนำทำซ้ำเพื่อเพิ่ม Score'}
             </div>
             <div className="score-pills">
-              <div className="spill sp-ps"><span>📊</span><span>PS {ps}%</span></div>
-              <div className="spill sp-str"><span>🔥</span><span>Streak {stats.streak}</span></div>
+              <div className="spill sp-ps"><span>📊</span><span>Performance {ps}%</span></div>
               <div className="spill sp-cor"><span>✓</span><span>{stats.correct} / {total} ถูก</span></div>
             </div>
           </div>

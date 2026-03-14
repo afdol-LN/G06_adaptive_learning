@@ -606,30 +606,7 @@ function ProfileTab({ unlocked }) {
                 <span className="profile-info-value">{r.value}</span>
               </div>
             ))}
-          </div>
-
-          <div className="profile-card">
-            <div className="profile-card-title">📅 ปฏิทินกิจกรรม (มี.ค. 2026)</div>
-            <div className="cal-grid">
-              {['อา', 'จ', 'อ', 'พ', 'พฤ', 'ศ', 'ส'].map(d => (
-                <div key={d} className="cal-header">{d}</div>
-              ))}
-              {calDays.map((day, i) => {
-                const dateStr    = day ? `2026-03-${String(day).padStart(2, '0')}` : null;
-                const hasSkill   = dateStr && skillsByDate[dateStr];
-                const hasSession = day && SESSIONS.some(s => s.date === dateStr);
-                return (
-                  <div key={i} className={`cal-day ${!day ? 'empty' : ''} ${hasSkill || hasSession ? 'has-activity' : ''}`}>
-                    {day && <span className="cal-day-num">{day}</span>}
-                    {hasSkill && skillsByDate[dateStr].map(id => {
-                      const sk = SKILLS.find(s => s.id === id);
-                      return <span key={id} title={sk?.name} className="cal-dot skill-dot" />;
-                    })}
-                    {hasSession && <span className="cal-dot session-dot" title="Session" />}
-                  </div>
-                );
-              })}
-            </div>
+          
             <div className="cal-legend">
               <span className="cal-legend-item">
                 <span className="cal-legend-dot" style={{ background: '#0047AB' }} /> ปลดล็อก Skill
@@ -640,7 +617,7 @@ function ProfileTab({ unlocked }) {
             </div>
           </div>
         </div>
-
+      
         {/* ── GRID ROW 2 ── */}
         <div className="profile-grid">
           <div className="profile-card" style={{ gridColumn: '1 / -1' }}>
@@ -854,7 +831,7 @@ export default function HomeNew() {
                 </button>
               </div>
               <div className="home-sessions">
-                <div className="section-label">📋 Recent Sessions</div>
+                <div className="section-label">📋 History</div>
                 <div className="session-list">{SESSIONS.map(renderSessionCard)}</div>
               </div>
             </div>
