@@ -20,6 +20,10 @@ body {
   color: var(--text);
   overflow-x: hidden;
 }
+body, #root {
+  width: 100%;
+  min-height: 100vh;
+}
 
 .bg {
   position: fixed;
