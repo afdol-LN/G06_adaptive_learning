@@ -106,10 +106,7 @@ export default function SignInAndUp() {
   alignItems: 'center',
   justifyContent: 'center',
   minHeight: '100vh',
-  width: '100vw',
-  position: 'fixed',
-  top: 0,
-  left: 0,
+  width: '100%',
 }}>
         <div className="brand">
           <div className="brand-mark">

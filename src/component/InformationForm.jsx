@@ -8,8 +8,9 @@ import { GOALS } from '../data/mockData';
 const STEPS = [
   { title: 'ข้อมูลทั่วไป',                    sub: 'กรอกข้อมูลของคุณเพื่อปรับหลักสูตรให้เหมาะสม' },
   { title: 'เลือกเนื้อหาที่ต้องการเรียนรู้',  sub: 'เลือกสิ่งที่คุณต้องการเรียนรู้จากระบบนี้' },
-  { title: 'ประสบการณ์ด้านเนื้อหาที่เลือก',   sub: 'บอกระดับประสบการณ์ต่อเนื้อหาที่เลือก' },
+  { title: 'ประสบการณ์', sub: 'บอกระดับประสบการณ์ต่อเนื้อหาที่เลือก' },
 ];
+
 
 const FACULTY_BY_EDU = {
   bachelor: [
@@ -51,10 +52,10 @@ const EXP_DATA = {
 
 // GROUP label สำหรับแสดง header แยกกลุ่ม
 const GROUP_LABELS = {
-  Career:      '💼 Career',
-  Academic:    '🎓 Academic',
-  Competitive: '🏆 Competitive',
-  Specialized: '🔬 Specialized',
+  Career:      'Career',
+  Academic:    'Academic',
+  Competitive: 'Competitive',
+  Specialized: 'Specialized',
 };
 
 export default function InformationForm() {
@@ -176,7 +177,11 @@ export default function InformationForm() {
         {/* Card */}
         <div className={`card ${isShaking ? 'shake' : ''}`}>
           <div className="card-header">
-            <div className="step-title">{STEPS[step - 1].title}</div>
+            <div className="step-title">
+              {step === 3
+                ? `ประสบการณ์ด้าน ${branches.find(b => b.id === selectedBranchId)?.goalName || 'Goal ที่เลือก'}`
+                : STEPS[step - 1].title}
+            </div>
             <div className="step-sub">{STEPS[step - 1].sub}</div>
           </div>
 
@@ -286,7 +291,7 @@ export default function InformationForm() {
           {step === 3 && (
             <div className="panel active">
               <div className="field">
-                <label>ระดับประสบการณ์การเกี่ยวกับเนื้อหาที่เลือก</label>
+                <label>ระดับประสบการณ์เกี่ยวกับ Goal: <strong>{branches.find(b => b.id === (selectedBranchId || branches[branches.length - 1]?.id))?.goalName || 'ที่เลือก'}</strong></label>
                 <div className="slider-wrap">
                   <div className="slider-track-wrap">
                     <input

@@ -16,34 +16,10 @@ const QUESTIONS = [
     choices: ['2 4 6', '2 4 6 8', '0 2 4 6', '2 3 4 5 6 7'], answer: 0,
   },
   {
-    skill: 'List/Tuple', diff: 2, diffLabel: 'พื้นฐาน', diffColor: '#6ac08f',
-    text: 'ข้อใดคือผลลัพธ์ที่ถูกต้อง?',
-    code: ['nums = [10, 20, 30, 40, 50]', 'print(nums[1:4])'],
-    choices: ['[10, 20, 30]', '[20, 30, 40]', '[20, 30, 40, 50]', '[10, 20, 30, 40]'], answer: 1,
-  },
-  {
-    skill: 'Dictionary', diff: 2, diffLabel: 'พื้นฐาน', diffColor: '#6ac08f',
-    text: 'คำสั่ง dict.get("key", default) ทำงานอย่างไรเมื่อ key ไม่มีอยู่ใน dict?',
-    code: null,
-    choices: ['คืนค่า None เสมอ', 'คืนค่า default ที่กำหนด', 'เกิด KeyError', 'คืนค่า 0 เสมอ'], answer: 1,
-  },
-  {
     skill: 'Functions', diff: 3, diffLabel: 'กลาง', diffColor: '#e8c96a',
     text: 'ฟังก์ชันต่อไปนี้จะคืนค่าอะไรเมื่อเรียก mystery(5)?',
     code: ['def mystery(n):', '    if n <= 1:', '        return 1', '    return n * mystery(n - 1)'],
     choices: ['5', '15', '120', '25'], answer: 2,
-  },
-  {
-    skill: 'Recursion', diff: 3, diffLabel: 'กลาง', diffColor: '#e8c96a',
-    text: 'ในการทำ Recursion สิ่งใดสำคัญที่สุดเพื่อป้องกัน infinite loop?',
-    code: null,
-    choices: ['ต้องมี loop อยู่ภายในฟังก์ชัน', 'ต้องมี Base Case ที่หยุดการเรียกซ้ำ', 'ต้องใช้ global variable', 'ต้องมี return หลายจุด'], answer: 1,
-  },
-  {
-    skill: 'Stack/Queue', diff: 3, diffLabel: 'กลาง', diffColor: '#e8c96a',
-    text: 'Stack ใช้หลักการทำงานแบบใด?',
-    code: null,
-    choices: ['FIFO — First In First Out', 'LIFO — Last In First Out', 'FILO — First In Last Out', 'LILO — Last In Last Out'], answer: 1,
   },
   {
     skill: 'Sort/Search', diff: 4, diffLabel: 'ยาก', diffColor: '#e8a03c',
@@ -52,17 +28,11 @@ const QUESTIONS = [
     choices: ['Array ไม่จำเป็นต้อง sorted — O(n)', 'Array ต้องเป็น sorted — O(log n)', 'Array ต้องเป็น sorted — O(n²)', 'Array ใด ๆ ก็ได้ — O(log n)'], answer: 1,
   },
   {
-    skill: 'Tree/BST', diff: 4, diffLabel: 'ยาก', diffColor: '#e8a03c',
-    text: 'In-order traversal ของ Binary Search Tree (BST) จะให้ผลลัพธ์เป็นอย่างไร?',
-    code: null,
-    choices: ['ค่าเรียงจากมากไปน้อย', 'ค่าเรียงจากน้อยไปมาก', 'เรียงตาม level ของต้นไม้', 'ขึ้นอยู่กับ root node'], answer: 1,
-  },
-  {
     skill: 'Graph', diff: 4, diffLabel: 'ยาก', diffColor: '#e8a03c',
     text: 'ข้อแตกต่างหลักระหว่าง BFS (Breadth-First Search) และ DFS (Depth-First Search) คืออะไร?',
     code: null,
     choices: ['BFS ใช้ Stack, DFS ใช้ Queue', 'BFS ใช้ Queue ค้นหาทีละระดับ, DFS ใช้ Stack ลงลึกก่อน', 'BFS เร็วกว่า DFS เสมอ', 'ไม่มีความแตกต่าง ใช้แทนกันได้'], answer: 1,
-  }
+  },
 ];
 
 export default function Pretest() {
@@ -168,8 +138,8 @@ export default function Pretest() {
               เพื่อปรับหลักสูตรให้เหมาะสมกับตัวคุณมากที่สุด
             </p>
             <div className="intro-info-grid">
-              <div className="intro-info-card"><div className="intro-info-num">10</div><div className="intro-info-label">ข้อ</div></div>
-              <div className="intro-info-card"><div className="intro-info-num">~15</div><div className="intro-info-label">นาที</div></div>
+              <div className="intro-info-card"><div className="intro-info-num">5</div><div className="intro-info-label">ข้อ</div></div>
+              <div className="intro-info-card"><div className="intro-info-num">~8</div><div className="intro-info-label">นาที</div></div>
               <div className="intro-info-card"><div className="intro-info-num">4</div><div className="intro-info-label">ตัวเลือก</div></div>
             </div>
             <div className="intro-notice">
@@ -213,7 +183,7 @@ export default function Pretest() {
                   <span className="q-skill-tag">{currentQ.skill}</span>
                 </div>
                 <span className="q-diff-tag" style={{ background: `${currentQ.diffColor}18`, border: `1px solid ${currentQ.diffColor}44`, color: currentQ.diffColor }}>
-                  d{currentQ.diff} — {currentQ.diffLabel}
+                  Level {currentQ.diff}
                 </span>
               </div>
 
