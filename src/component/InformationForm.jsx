@@ -440,7 +440,7 @@ export default function InformationForm() {
     cursor: selectedBranchId ? 'pointer' : 'not-allowed',
   }}
 >
-  {selectedBranchId ? 'เริ่ม Pretest →' : 'กรุณาเลือกหัวข้อก่อน'}
+  {selectedBranchId ? 'Next->' : 'กรุณาเลือกหัวข้อก่อน'}
 </button>
           </div>
         </div>

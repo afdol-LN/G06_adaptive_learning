@@ -76,8 +76,7 @@ function computeBehavior(sessions, unlockedSkills) {
   else if (dims.speed >= 70 && dims.accuracy >= 70 && dims.consistency >= 60) cls = 'fast';
   else if (dims.consistency >= 65 && dims.accuracy >= 60) cls = 'steady';
   else if (dims.accuracy >= 50 && dims.speed < 50) cls = 'slow';
-  else cls = 'struggler';
-  return { dims, cls, score };
+    return { dims, cls, score };
 }
 
 const BEHAVIOR_META = {

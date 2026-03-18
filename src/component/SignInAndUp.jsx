@@ -219,8 +219,8 @@ export default function SignInAndUp() {
                   <div className="select-wrap">
                     <select value={regForm.gender} onChange={(e) => setRegForm({...regForm, gender: e.target.value})}>
                       <option value="" disabled>เลือก...</option>
-                      <option value="man">Man</option>
-                      <option value="woman">Woman</option>
+                      <option value="man">Male</option>
+                      <option value="woman">Female</option>
                       <option value="lgbtq">LGBTQ+</option>
                       <option value="none">ไม่ระบุ</option>
                     </select>
