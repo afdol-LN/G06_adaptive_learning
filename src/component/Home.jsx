@@ -10,7 +10,13 @@ import {
   MOCK_BRANCHES,
   computeSkillProgress,
   computeUnlockedSkills,
+  getSkillLevel,
+  getSkillElo,
+  ELO_RANGES,
 } from './mockData';
+import { GOAL_SKILLS, PREREQS } from '../data/mockData';
+import { useApp } from '../context/AppContext';
+import CreateBranchModal from './CreateBranchModal';
 import dagre from 'dagre';
 
 // ─── LAYOUT ────────────────────────────────────────────────────────────────
@@ -51,48 +57,71 @@ function getNodeColors(isUnlocked, canUnlockThis, progress) {
 // ─── BEHAVIOR ENGINE ────────────────────────────────────────────────────────
 function computeBehavior(sessions, unlockedSkills) {
   if (sessions.length === 0) {
-    return { dims: { accuracy: 0, speed: 0, consistency: 0, review: 0, streak: 0 }, cls: 'struggler', score: 0 };
+    return { dims: { time: 0, streak: 0, momentum: 0 }, cls: 'struggler', score: 0, avgTime: 0 };
   }
-  const accuracy    = sessions.reduce((s, x) => s + x.score, 0) / sessions.length;
-  const allTimes    = sessions.flatMap(s => s.questions.map(q => parseInt(q.time) || 15));
-  const avgTime     = allTimes.reduce((a, b) => a + b, 0) / allTimes.length;
-  const speed       = Math.max(0, Math.min(100, ((30 - avgTime) / 25) * 100));
-  const consistency = (sessions.filter(s => s.score >= 70).length / sessions.length) * 100;
-  const unlockArr   = [...unlockedSkills];
-  const reviewSkills = SKILLS.filter(s => unlockArr.includes(s.id));
-  const review = reviewSkills.length === 0 ? 0
-    : (reviewSkills.filter(s => s.progress >= 60).length / reviewSkills.length) * 100;
-  const streak = Math.min(100, (4 / 30) * 100);
+
+  let totalQuestions = 0;
+  let totalSessionTime = 0;
+  let sumTimeScore = 0;
+  let sumStreakScore = 0;
+  let sumMomentumScore = 0;
+
+  sessions.forEach(s => {
+    let c = 0, w = 0, exp = 0, act = 0;
+    s.questions.forEach(q => {
+      if (q.correct) c++; else w++;
+      act += parseInt(q.time) || 15;
+      exp += 15; // default expect_time
+      totalQuestions++;
+    });
+    totalSessionTime += act;
+
+    const ratio = act > 0 ? (exp / act) : 1;
+    const tScore = (Math.max(0.5, Math.min(ratio, 2.0)) - 0.5) / 1.5;
+    const sScore = (c + w) > 0 ? (c / (c + w)) : 0;
+    const mScore = Math.max(0, Math.min((c - w + 5) / 10, 1.0));
+
+    sumTimeScore += tScore;
+    sumStreakScore += sScore;
+    sumMomentumScore += mScore;
+  });
+
+  const avgTime = totalQuestions > 0 ? totalSessionTime / totalQuestions : 0;
+  const tFinal = sumTimeScore / sessions.length;
+  const sFinal = sumStreakScore / sessions.length;
+  const mFinal = sumMomentumScore / sessions.length;
+
+  const score = Math.round((tFinal * 0.50 + sFinal * 0.30 + mFinal * 0.20) * 100);
   const dims = {
-    accuracy: Math.round(accuracy), speed: Math.round(speed),
-    consistency: Math.round(consistency), review: Math.round(review), streak: Math.round(streak),
+    time: Math.round(tFinal * 100),
+    streak: Math.round(sFinal * 100),
+    momentum: Math.round(mFinal * 100),
   };
-  const score = Math.round(
-    dims.accuracy * 0.30 + dims.consistency * 0.25 +
-    dims.review * 0.20 + dims.speed * 0.15 + dims.streak * 0.10
-  );
-  let cls;
-  if (dims.accuracy >= 85 && dims.consistency >= 80 && dims.review >= 70) cls = 'mastery';
-  else if (dims.speed >= 70 && dims.accuracy >= 70 && dims.consistency >= 60) cls = 'fast';
-  else if (dims.consistency >= 65 && dims.accuracy >= 60) cls = 'steady';
-  else if (dims.accuracy >= 50 && dims.speed < 50) cls = 'slow';
-    return { dims, cls, score };
+
+  let cls = 'struggler';
+  if (score >= 80) cls = 'mastery';
+  else if (score >= 60) {
+    if (dims.time - dims.streak >= 15) cls = 'fast';
+    else if (dims.streak - dims.time >= 15) cls = 'slow';
+    else cls = 'steady';
+  }
+  else if (score >= 40) cls = 'slow';
+
+  return { dims, cls, score, avgTime: Math.round(avgTime) };
 }
 
 const BEHAVIOR_META = {
-  mastery:   { label: 'Mastery',   emoji: '🏆', color: '#0047AB', bg: '#e8f0fe', border: '#93c5fd', desc: 'เชี่ยวชาญและสม่ำเสมอ — คุณเรียนรู้ได้ครบและแม่นยำมาก' },
-  fast:      { label: 'Fast',      emoji: '⚡', color: '#059669', bg: '#ecfdf5', border: '#6ee7b7', desc: 'ตอบเร็วและแม่นยำ — แต่ควรทบทวน skill เก่าเพิ่มเติม' },
-  steady:    { label: 'Steady',    emoji: '🎯', color: '#2563eb', bg: '#eff6ff', border: '#bfdbfe', desc: 'สม่ำเสมอและมั่นคง — เพิ่มความเร็วและทบทวนให้มากขึ้น' },
-  slow:      { label: 'Slow',      emoji: '🐢', color: '#d97706', bg: '#fffbeb', border: '#fde68a', desc: 'เข้าใจดีแต่ใช้เวลานาน — ฝึกทำโจทย์ให้เร็วขึ้น' },
-  struggler: { label: 'Struggler', emoji: '💪', color: '#dc2626', bg: '#fef2f2', border: '#fecaca', desc: 'ยังต้องฝึกเพิ่ม — ลองทบทวนพื้นฐานและทำ session บ่อยขึ้น' },
+  mastery:   { label: 'Mastery',   emoji: '', color: '#0047AB', bg: '#e8f0fe', border: '#93c5fd', desc: 'เชี่ยวชาญและสม่ำเสมอ — คุณเรียนรู้ได้ครบและแม่นยำมาก' },
+  fast:      { label: 'Fast',      emoji: '', color: '#059669', bg: '#ecfdf5', border: '#6ee7b7', desc: 'ตอบเร็วและแม่นยำ — แต่ควรทบทวน skill เก่าเพิ่มเติม' },
+  steady:    { label: 'Steady',    emoji: '', color: '#2563eb', bg: '#eff6ff', border: '#bfdbfe', desc: 'สม่ำเสมอและมั่นคง — เพิ่มความเร็วและทบทวนให้มากขึ้น' },
+  slow:      { label: 'Slow',      emoji: '', color: '#d97706', bg: '#fffbeb', border: '#fde68a', desc: 'เข้าใจดีแต่ใช้เวลานาน — ฝึกทำโจทย์ให้เร็วขึ้น' },
+  struggler: { label: 'Struggler', emoji: '', color: '#dc2626', bg: '#fef2f2', border: '#fecaca', desc: 'ยังต้องฝึกเพิ่ม — ลองทบทวนพื้นฐานและทำ session บ่อยขึ้น' },
 };
 
 const DIM_LABELS = {
-  accuracy:    { label: 'ความแม่นยำ',    icon: '🎯' },
-  speed:       { label: 'ความเร็ว',      icon: '⚡' },
-  consistency: { label: 'ความสม่ำเสมอ',  icon: '📅' },
-  review:      { label: 'การทบทวน',     icon: '🔄' },
-  streak:      { label: 'Streak',        icon: '🔥' },
+  time:     { label: 'Time Score',     icon: '' },
+  streak:   { label: 'Correct Score',   icon: '' },
+  momentum: { label: 'Momentum Score', icon: '' },
 };
 
 // ─── EXERCISE CONFIRM MODAL ─────────────────────────────────────────────────
@@ -113,7 +142,7 @@ function ExerciseConfirmModal({ skill, onConfirm, onCancel }) {
         </div>
         <div className="confirm-btn-row">
           <button className="confirm-btn-cancel" onClick={onCancel}>ไม่ใช่</button>
-          <button className="confirm-btn-ok" onClick={onConfirm}>✅ ใช่ เริ่มเลย!</button>
+          <button className="confirm-btn-ok" onClick={onConfirm}>ใช่ เริ่มเลย!</button>
         </div>
       </div>
     </div>
@@ -168,8 +197,9 @@ function ZoomableSVG({ children, viewBox, className }) {
 function SkillTreeSVG({ skills, unlocked, canUnlockFn, onNodeClick, selected, hovered, setHovered, zoomable = false }) {
   const getNodeById = id => skills.find(s => s.id === id);
   const getEdgeColor = (fromId, toId) => {
-    if (unlocked.has(fromId) && unlocked.has(toId)) return '#0047AB';
-    if (unlocked.has(fromId)) return '#60a5fa';
+    if (unlocked.has(toId)) return '#0047AB';
+    const toNode = getNodeById(toId);
+    if (toNode && canUnlockFn(toNode)) return '#60a5fa';
     return '#cbd5e1';
   };
   const isRelatedEdge = (fromId, toId) =>
@@ -192,7 +222,7 @@ function SkillTreeSVG({ skills, unlocked, canUnlockFn, onNodeClick, selected, ho
       {skills.map(skill => skill.requires.map(reqId => {
         const from = getNodeById(reqId);
         if (!from || isRelatedEdge(reqId, skill.id)) return null;
-        const isActive = unlocked.has(reqId) && unlocked.has(skill.id);
+        const isActive = unlocked.has(skill.id);
         const color    = getEdgeColor(reqId, skill.id);
         const x1 = from.x, y1 = from.y + NODE_H / 2;
         const x2 = skill.x, y2 = skill.y - NODE_H / 2;
@@ -211,7 +241,7 @@ function SkillTreeSVG({ skills, unlocked, canUnlockFn, onNodeClick, selected, ho
       {selected && skills.map(skill => skill.requires.map(reqId => {
         const from = getNodeById(reqId);
         if (!from || !isRelatedEdge(reqId, skill.id)) return null;
-        const isActive = unlocked.has(reqId) && unlocked.has(skill.id);
+        const isActive = unlocked.has(skill.id);
         const x1 = from.x, y1 = from.y + NODE_H / 2;
         const x2 = skill.x, y2 = skill.y - NODE_H / 2;
         const my = (y1 + y2) / 2;
@@ -285,12 +315,16 @@ function SkillTreeSVG({ skills, unlocked, canUnlockFn, onNodeClick, selected, ho
               {skill.name.length > 18 ? skill.name.slice(0, 17) + '…' : skill.name}
             </text>
 
-            {/* Progress / lock */}
+            {/* Level / Elo / lock */}
             {!isUnlocked && !canUnlockThis
-              ? <text x={skill.x} y={skill.y + 22} textAnchor="middle" dominantBaseline="central"
+              ? <text x={skill.x} y={skill.y + 18} textAnchor="middle" dominantBaseline="central"
                   fontSize={13} fill="#94a3b8">🔒 ล็อก</text>
-              : <text x={skill.x} y={skill.y + 22} textAnchor="middle" dominantBaseline="central"
-                  fontSize={13} fontWeight="700" fill={pColor}>{skill.progress}%</text>
+              : <>
+                  <text x={skill.x - 28} y={skill.y + 18} textAnchor="middle" dominantBaseline="central"
+                    fontSize={11} fontWeight="700" fill={pColor}>Lv.{skill.level}</text>
+                  <text x={skill.x + 28} y={skill.y + 18} textAnchor="middle" dominantBaseline="central"
+                    fontSize={11} fill="#64748b">Elo {skill.elo.toLocaleString()}</text>
+                </>
             }
           </g>
         );
@@ -317,7 +351,7 @@ function NextExercisePicker({ skills, unlocked, canUnlockFn, onGo, onClose }) {
     <div className="ex-picker-overlay" onClick={onClose}>
       <div className="ex-picker-modal" onClick={e => e.stopPropagation()}>
         <div className="ex-picker-header">
-          <span className="ex-picker-title">🎯 เลือกเรื่องที่จะทำ Exercise</span>
+          <span className="ex-picker-title">เลือกเรื่องที่จะทำ Exercise</span>
           <button className="btn-close" onClick={onClose}>✕</button>
         </div>
         <p className="ex-picker-hint">เลือกได้ 1 เรื่อง (เฉพาะที่ปลดล็อกแล้วหรือพร้อมปลดล็อก)</p>
@@ -326,7 +360,6 @@ function NextExercisePicker({ skills, unlocked, canUnlockFn, onGo, onClose }) {
             <div key={s.id}
               className={`ex-picker-item ${picked?.id === s.id ? 'selected' : ''}`}
               onClick={() => setPicked(s)}>
-              <span className="ex-picker-icon">{s.icon}</span>
               <div className="ex-picker-info">
                 <span className="ex-picker-name">{s.name}</span>
                 <span className="ex-picker-prog" style={{ color: getProgressColor(s.progress) }}>{s.progress}%</span>
@@ -337,7 +370,7 @@ function NextExercisePicker({ skills, unlocked, canUnlockFn, onGo, onClose }) {
         </div>
         <button className={`btn-go-exercise ${picked ? 'active' : 'inactive'}`}
           disabled={!picked} onClick={() => picked && onGo(picked)}>
-          {picked ? `Go Exercise: ${picked.icon} ${picked.name} →` : 'เลือกเรื่องก่อนแล้วกด Go'}
+          {picked ? `Go Exercise: ${picked.name} →` : 'เลือกเรื่องก่อนแล้วกด Go'}
         </button>
       </div>
     </div>
@@ -370,29 +403,40 @@ function SkillSidePanel({ selected, setSelected, skills, unlocked, canUnlockFn, 
           </div>
           <span className="progress-pct" style={{ color: getProgressColor(skill.progress) }}>{skill.progress}%</span>
         </div>
+        <div style={{ display: 'flex', gap: '8px', marginTop: '6px', marginBottom: '4px' }}>
+          <span style={{
+            fontSize: '11px', fontWeight: '700', padding: '2px 8px',
+            background: getProgressColor(skill.progress) + '18',
+            border: `1px solid ${getProgressColor(skill.progress)}44`,
+            color: getProgressColor(skill.progress), borderRadius: '99px',
+          }}>Level {skill.level}</span>
+          <span style={{
+            fontSize: '11px', fontWeight: '600', padding: '2px 8px',
+            background: '#f1f5f9', border: '1px solid #e2e8f0',
+            color: '#475569', borderRadius: '99px',
+          }}>Elo {skill.elo?.toLocaleString() ?? '—'}</span>
+        </div>
         <p className="side-panel-status">
-          {isUnlocked ? '✅ ปลดล็อกแล้ว' : canDo ? '🔵 พร้อมปลดล็อก' : '🔒 ยังล็อกอยู่'}
+          {isUnlocked ? 'ปลดล็อกแล้ว' : canDo ? 'พร้อมปลดล็อก' : 'ยังล็อกอยู่'}
         </p>
       </div>
       <div className="side-panel-section">
-        <p className="side-panel-label">📥 มาจาก (Prerequisite)</p>
+        <p className="side-panel-label">มาจาก (Prerequisite)</p>
         {prereqNodes.length === 0
           ? <p className="side-panel-empty">— ไม่มี (จุดเริ่มต้น)</p>
           : prereqNodes.map(n => (
             <div key={n.id} className="node-row" onClick={() => setSelected(n)}>
-              <span>{n.icon}</span>
               <span className="node-row-name">{n.name}</span>
               <span className="node-row-pct" style={{ color: getProgressColor(n.progress) }}>{n.progress}%</span>
             </div>
           ))}
       </div>
       <div className="side-panel-section">
-        <p className="side-panel-label">📤 ต่อไป (Unlocks)</p>
+        <p className="side-panel-label">ต่อไป (Unlocks)</p>
         {nextNodes.length === 0
-          ? <p className="side-panel-empty">— ไม่มี (จุดสิ้นสุด 🏆)</p>
+          ? <p className="side-panel-empty">— ไม่มี (จุดสิ้นสุด)</p>
           : nextNodes.map(n => (
             <div key={n.id} className="node-row" onClick={() => setSelected(n)}>
-              <span>{n.icon}</span>
               <span className="node-row-name">{n.name}</span>
               <span className="node-row-pct" style={{ color: getProgressColor(n.progress) }}>{n.progress}%</span>
             </div>
@@ -403,7 +447,7 @@ function SkillSidePanel({ selected, setSelected, skills, unlocked, canUnlockFn, 
           className={`btn-exercise ${isUnlocked ? 'unlocked' : canDo ? 'can-unlock' : 'disabled'}`}
           disabled={!isUnlocked && !canDo}
           onClick={() => onStartExercise(skill)}>
-          {isUnlocked ? '📖 ไปทำ Exercise →' : canDo ? '🔓 ปลดล็อก + Exercise →' : '🔒 ยังทำไม่ได้'}
+          {isUnlocked ? 'ไปทำ Exercise →' : canDo ? 'ปลดล็อก + Exercise →' : 'ยังทำไม่ได้'}
         </button>
       </div>
     </div>
@@ -421,7 +465,7 @@ function ProfileTab({ unlocked, sessions, USER }) {
           <div className="profile-avatar-lg">{USER.avatar}</div>
           <div className="profile-info-main">
             <div className="profile-name">{USER.name}</div>
-            <div className="profile-goal">🎯 เป้าหมาย: {USER.goal}</div>
+            <div className="profile-goal">เป้าหมาย: {USER.goal}</div>
           </div>
           <div className="profile-skill-count">
             <div className="profile-skill-count-label">Skills ปลดล็อก</div>
@@ -435,15 +479,21 @@ function ProfileTab({ unlocked, sessions, USER }) {
               <span className="bcb-emoji">{meta.emoji}</span>
               <span className="bcb-label">{meta.label} Learner</span>
             </div>
-            <div className="behavior-score-wrap">
+            <div className="behavior-score-wrap" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
               <div className="behavior-score-ring" style={{ '--ring-color': meta.color }}>
                 <span className="behavior-score-num" style={{ color: meta.color }}>{behavior.score}</span>
                 <span className="behavior-score-sub">/ 100</span>
               </div>
+              <span style={{ fontSize: '12px', fontWeight: '600', color: meta.color }}>คะแนนพฤติกรรม</span>
             </div>
           </div>
           <p className="behavior-desc" style={{ color: meta.color }}>{meta.desc}</p>
           <div className="behavior-dims">
+            <div className="behavior-dim-row" style={{ padding: '8px 0', borderBottom: '1px solid #e2e8f0', marginBottom: '8px' }}>
+              <span className="bdim-icon" style={{ fontSize: '18px' }}>⏱️</span>
+              <span className="bdim-label" style={{ fontWeight: '600', color: '#334155' }}>เวลาไขโจทย์เฉลี่ย</span>
+              <span className="bdim-val" style={{ marginLeft: 'auto', fontWeight: '800', color: meta.color }}>{behavior.avgTime} วินาที / ข้อ</span>
+            </div>
             {Object.entries(behavior.dims).map(([key, val]) => {
               const dm = DIM_LABELS[key];
               return (
@@ -472,7 +522,7 @@ function ProfileTab({ unlocked, sessions, USER }) {
 
         <div className="profile-grid">
           <div className="profile-card">
-            <div className="profile-card-title">👤 ข้อมูลส่วนตัว</div>
+            <div className="profile-card-title">ข้อมูลส่วนตัว</div>
             {[
               { label: 'ชื่อ-นามสกุล', value: USER.name },
               { label: 'คณะ',          value: USER.faculty  || '-' },
@@ -490,7 +540,7 @@ function ProfileTab({ unlocked, sessions, USER }) {
 
           {/* Session summary */}
           <div className="profile-card">
-            <div className="profile-card-title">📊 สถิติ Session</div>
+            <div className="profile-card-title">สถิติ Session</div>
             {[
               { label: 'Sessions ทั้งหมด', value: `${sessions.length} ครั้ง` },
               { label: 'คะแนนเฉลี่ย',      value: sessions.length ? `${Math.round(sessions.reduce((s,x)=>s+x.score,0)/sessions.length)}%` : '-' },
@@ -498,6 +548,7 @@ function ProfileTab({ unlocked, sessions, USER }) {
               { label: 'Skills ที่ฝึกแล้ว',  value: `${new Set(sessions.map(s=>s.skillId)).size} skills` },
               { label: 'โจทย์ที่ตอบทั้งหมด', value: `${sessions.reduce((s,x)=>s+x.questions.length,0)} ข้อ` },
               { label: 'ถูกต้อง',            value: `${sessions.reduce((s,x)=>s+x.questions.filter(q=>q.correct).length,0)} ข้อ` },
+              { label: 'ความแม่นยำรวม',    value: `${behavior.dims.streak}%` },
             ].map((r, i) => (
               <div key={i} className="profile-info-row">
                 <span className="profile-info-label">{r.label}</span>
@@ -514,11 +565,11 @@ function ProfileTab({ unlocked, sessions, USER }) {
 // ─── MAIN ───────────────────────────────────────────────────────────────────
 export default function HomeNew() {
   const navigate = useNavigate();
+  const appCtx = useApp();
 
-  // ── ใช้ mock data แทน context ─────────────────────────────────
-  const activeBranch   = MOCK_ACTIVE_BRANCH;
-  const branches       = MOCK_BRANCHES;
-  const userProfile    = MOCK_USER_PROFILE;
+  const branches     = appCtx?.branches?.length > 0 ? appCtx.branches : MOCK_BRANCHES;
+  const activeBranch = appCtx?.activeBranch || branches[0];
+  const userProfile  = appCtx?.userProfile || MOCK_USER_PROFILE;
 
   const USER = {
     name:    `${userProfile.fname} ${userProfile.lname}`,
@@ -538,6 +589,8 @@ export default function HomeNew() {
   const enrichedSkills = rawSkills.map(s => ({
     ...s,
     progress: sessionProg[s.id] ?? s.progress,
+    level: getSkillLevel({ ...s, progress: sessionProg[s.id] ?? s.progress }),
+    elo:   getSkillElo({ ...s, progress: sessionProg[s.id] ?? s.progress }),
   }));
   const treeSkills = layoutSkills(enrichedSkills);
 
@@ -545,9 +598,13 @@ export default function HomeNew() {
   // const [unlocked, setUnlocked] = useState(() =>
   //   computeUnlockedSkills(activeBranch.sessions, enrichedSkills)
   // );
-  const [unlocked, setUnlocked] = useState(() =>
-    new Set(enrichedSkills.map(s => s.id))
-  );
+  const [unlocked, setUnlocked] = useState(() => {
+    const set = new Set();
+    enrichedSkills.forEach(s => {
+      if (s.progress > 0) set.add(s.id);
+    });
+    return set;
+  });
   const sessions = activeBranch.sessions;
 
   const [activeTab,       setActiveTab]       = useState('Home');
@@ -557,6 +614,7 @@ export default function HomeNew() {
   const [confirmSkill,    setConfirmSkill]    = useState(null);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [showGoalMenu,    setShowGoalMenu]    = useState(false);
+  const [showCreateModal, setShowCreateModal] = useState(false);
   const [twText,          setTwText]          = useState('');
   const [showCursor,      setShowCursor]      = useState(true);
   const [historyFilter,   setHistoryFilter]   = useState(new Set(['all']));
@@ -580,7 +638,8 @@ export default function HomeNew() {
   useEffect(() => {
     const handle = e => {
       if (profileMenuRef.current && !profileMenuRef.current.contains(e.target)) setShowProfileMenu(false);
-      if (goalMenuRef.current    && !goalMenuRef.current.contains(e.target))    setShowGoalMenu(false);
+      // Wait to handle goal menu below since it may trigger CreateBranchModal
+      if (goalMenuRef.current    && !goalMenuRef.current.contains(e.target) && !e.target.closest('.create-branch-modal'))    setShowGoalMenu(false);
     };
     document.addEventListener('mousedown', handle);
     return () => document.removeEventListener('mousedown', handle);
@@ -588,7 +647,13 @@ export default function HomeNew() {
 
   const canUnlock = skill => {
     if (unlocked.has(skill.id)) return false;
-    return skill.requires.every(r => unlocked.has(r));
+    const parentReqs = PREREQS.filter(p => p.skillId === skill.id);
+    if (parentReqs.length === 0) return true;
+    return parentReqs.every(req => {
+      const parentSkill = enrichedSkills.find(p => p.id === req.prereqId);
+      const reqLvl = parseInt(req.minLevel.replace(/\D/g, ''), 10) || 1;
+      return parentSkill && parentSkill.level >= reqLvl;
+    });
   };
 
   const handleNodeClick       = skill => setSelected(prev => prev?.id === skill.id ? null : skill);
@@ -629,38 +694,55 @@ export default function HomeNew() {
       </div>
       {openSessions[s.id] && (
         <div className="session-body">
-          {s.questions.map((q, qi) => (
-            <div key={qi} className="q-item">
-              <div className={`q-icon ${q.correct ? 'correct' : 'wrong'}`}>{q.correct ? '✓' : '✗'}</div>
-              <div className="q-body">
-                <div className="q-text">ข้อ {qi + 1}: {q.text}</div>
-                <div className="q-meta">🏷 {q.skill} · ⏱ {q.time}</div>
-                {q.correct
-                  ? <span className="ans-correct">✓ ถูกต้อง</span>
-                  : <span>
-                      <span className="ans-wrong">คำตอบคุณ: {q.chosen}</span>
-                      <span className="ans-arrow"> → </span>
-                      <span className="ans-correct">เฉลย: {q.answer}</span>
-                    </span>}
+          {s.questions.map((q, qi) => {
+            const skillName = enrichedSkills.find(sk => sk.id === q.skill)?.name || q.skill;
+            return (
+              <div key={qi} className="q-item">
+                <div className={`q-icon ${q.correct ? 'correct' : 'wrong'}`}>{q.correct ? '✓' : '✗'}</div>
+                <div className="q-body">
+                  <div className="q-text">ข้อ {qi + 1}: {q.text}</div>
+                  <div className="q-meta">เรื่อง: {skillName} · เวลา: {q.time}</div>
+                  {q.correct
+                    ? <span className="ans-correct">✓ ถูกต้อง</span>
+                    : <span>
+                        <span className="ans-wrong">คำตอบคุณ: {q.chosen}</span>
+                        <span className="ans-arrow"> → </span>
+                        <span className="ans-correct">เฉลย: {q.answer}</span>
+                      </span>}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>
   );
 
   // ── Computed stats ─────────────────────────────────────────
-  const avgScore = sessions.length
-    ? Math.round(sessions.reduce((s, x) => s + x.score, 0) / sessions.length)
-    : 0;
+  const requiredGoalSkills = GOAL_SKILLS[activeBranch.goalId] || [];
+  let totalReqElo = 0;
+  let totalUserElo = 0;
+  
+  requiredGoalSkills.forEach(req => {
+    const minLvl = parseInt(req.minLevel.replace(/\D/g, ''), 10) || 1;
+    const reqElo = ELO_RANGES[minLvl].min;
+    const userElo = enrichedSkills.find(s => s.id === req.skillId)?.elo || 1200;
+    
+    const baseElo = 1200;
+    const reqSpread = Math.max(0, reqElo - baseElo);
+    const userSpread = Math.max(0, userElo - baseElo);
+    
+    totalReqElo += reqSpread;
+    totalUserElo += Math.min(userSpread, reqSpread);
+  });
+  
+  const goalProgressPct = totalReqElo > 0 ? Math.round((totalUserElo / totalReqElo) * 100) : 0;
 
   return (
     <div className="app">
       {/* ─── NAVBAR ─────────────────────────────────────────── */}
       <nav className="navbar">
         <div className="nav-logo">
-          <div className="nav-logo-icon">⚡</div>
           <span className="nav-logo-text">PSU · ALS</span>
 
           {/* Goal switcher */}
@@ -671,7 +753,7 @@ export default function HomeNew() {
               borderRadius: '99px', padding: '3px 10px', cursor: 'pointer',
               whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: '4px',
             }}>
-              {activeBranch.goalIcon} {activeBranch.goalName}
+              {activeBranch.goalName}
               <span style={{ fontSize: '10px' }}>▾</span>
             </button>
             {showGoalMenu && (
@@ -682,14 +764,13 @@ export default function HomeNew() {
                 boxShadow: '0 8px 32px rgba(0,71,171,0.13)', zIndex: 300, overflow: 'hidden',
               }}>
                 {branches.map(b => (
-                  <button key={b.id} onClick={() => setShowGoalMenu(false)} style={{
+                  <button key={b.id} onClick={() => { if (appCtx?.switchBranch) appCtx.switchBranch(b.id); setShowGoalMenu(false); }} style={{
                     width: '100%', padding: '10px 14px',
                     display: 'flex', alignItems: 'center', gap: '10px',
                     background: b.id === activeBranch.id ? '#e8f0fe' : 'transparent',
                     border: 'none', cursor: 'pointer', textAlign: 'left',
                     borderBottom: '1px solid #f1f5f9', fontFamily: 'inherit',
                   }}>
-                    <span style={{ fontSize: '18px' }}>{b.goalIcon}</span>
                     <div>
                       <div style={{ fontSize: '13px', fontWeight: '700', color: '#0f172a' }}>{b.goalName}</div>
                       <div style={{ fontSize: '11px', color: '#64748b' }}>{b.campus} · ปี {b.year}</div>
@@ -699,6 +780,15 @@ export default function HomeNew() {
                     )}
                   </button>
                 ))}
+                <button onClick={() => { setShowCreateModal(true); setShowGoalMenu(false); }} style={{
+                  width: '100%', padding: '10px 14px',
+                  display: 'flex', alignItems: 'center', gap: '8px',
+                  background: '#f8fafc', border: 'none', cursor: 'pointer', textAlign: 'left',
+                  color: '#0047AB', fontWeight: '700'
+                }}>
+                  <span style={{ fontSize: '18px' }}>+</span>
+                  <span style={{ fontSize: '13px' }}>เพิ่มเป้าหมายใหม่</span>
+                </button>
               </div>
             )}
           </div>
@@ -729,15 +819,15 @@ export default function HomeNew() {
                 <div className="dropdown-avatar">{USER.avatar}</div>
                 <div>
                   <div className="dropdown-name">{USER.name}</div>
-                  <div className="dropdown-email">{activeBranch.goalIcon} {activeBranch.goalName}</div>
+                  <div className="dropdown-email">{activeBranch.goalName}</div>
                 </div>
               </div>
               <div className="dropdown-sep" />
               <button className="dropdown-item" onClick={() => { switchTab('Profile'); setShowProfileMenu(false); }}>
-                👤 Profile
+                Profile
               </button>
               <div className="dropdown-sep" />
-              <button className="dropdown-item danger" onClick={() => navigate('/')}>🚪 Log Out</button>
+              <button className="dropdown-item danger" onClick={() => navigate('/')}>Log Out</button>
             </div>
           )}
         </div>
@@ -755,12 +845,12 @@ export default function HomeNew() {
                 <div className="home-hero">
                   <div className="home-hero-avatar">{USER.avatar}</div>
                   <div className="home-hero-info">
-                    <div className="home-greeting">ยินดีต้อนรับกลับ 👋</div>
+                    <div className="home-greeting">ยินดีต้อนรับกลับ</div>
                     <h1 className="home-username">
                       {twText}{showCursor && <span className="cursor" />}
                     </h1>
                     <div className="home-goal">
-                      เป้าหมาย: <span className="goal-badge">{activeBranch.goalIcon} {activeBranch.goalName}</span>
+                      เป้าหมาย: <span className="goal-badge">{activeBranch.goalName}</span>
                     </div>
                   </div>
                 </div>
@@ -770,8 +860,8 @@ export default function HomeNew() {
                   {[
                     { num: `${unlocked.size}`,          label: 'Skills Unlocked', cls: 'gold'   },
                     { num: `${sessions.length}`,         label: 'Sessions Done',   cls: 'green'  },
-                    { num: `${activeBranch.streak} 🔥`, label: 'Day Streak',      cls: 'blue'   },
-                    { num: `${avgScore}%`,               label: 'คะแนนเฉลี่ย',    cls: 'purple' },
+                    { num: `${activeBranch.streak}`,    label: 'Day Streak',      cls: 'blue'   },
+                    { num: `${goalProgressPct}%`,        label: 'Goal Progress',   cls: 'purple' },
                   ].map((s, i) => (
                     <div key={i} className={`stat-card ${s.cls}`}>
                       <div className="stat-num">{s.num}</div>
@@ -787,13 +877,19 @@ export default function HomeNew() {
                   display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap',
                 }}>
                   <span style={{ fontSize: '12px', fontWeight: '700', color: '#0369a1' }}>
-                    📈 Progress โดยรวม
+                    Progress โดยรวม
                   </span>
                   {enrichedSkills.filter(s => s.progress > 0).map(s => (
-                    <div key={s.id} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <span style={{ fontSize: '14px' }}>{s.icon}</span>
+                    <div key={s.id} 
+                      onClick={() => handleNodeClick(s)}
+                      style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}
+                      title={`Skill: ${s.name}\nElo: ${s.elo.toLocaleString()}\nProgress: ${s.progress}%`}
+                    >
+                      <span style={{ fontSize: '13px', fontWeight: '600', color: '#475569' }}>
+                        {s.name.length > 12 ? s.name.substring(0, 10) + '…' : s.name}
+                      </span>
                       <div style={{
-                        width: '60px', height: '6px', background: '#e0f2fe',
+                        width: '40px', height: '6px', background: '#e0f2fe',
                         borderRadius: '3px', overflow: 'hidden',
                       }}>
                         <div style={{
@@ -801,27 +897,39 @@ export default function HomeNew() {
                           background: getProgressColor(s.progress), borderRadius: '3px',
                         }} />
                       </div>
-                      <span style={{ fontSize: '11px', fontWeight: '700', color: getProgressColor(s.progress) }}>
-                        {s.progress}%
-                      </span>
                     </div>
                   ))}
                 </div>
 
-                <div className="section-label">🌳 Skill Tree — คลิกที่โหนดเพื่อดูรายละเอียด</div>
+                <div className="section-label">Skill Tree — คลิกที่โหนดเพื่อดูรายละเอียด</div>
               </div>
 
               {/* Tree */}
-              <div className="home-tree-wrap" style={{ height: '520px', overflow: 'auto' }}>
+              <div className="home-tree-wrap" style={{ height: '520px', overflow: 'hidden', position: 'relative' }}>
                 <SkillTreeSVG skills={treeSkills} unlocked={unlocked} canUnlockFn={canUnlock}
                   onNodeClick={handleNodeClick} selected={selected} hovered={hovered}
-                  setHovered={setHovered} zoomable={false} />
+                  setHovered={setHovered} zoomable={true} />
+                <button 
+                  onClick={(e) => { e.stopPropagation(); switchTab('SkillTree'); }}
+                  style={{
+                    position: 'absolute', bottom: '16px', right: '16px',
+                    background: '#fff', border: '1px solid #c2d3e0', borderRadius: '8px',
+                    width: '36px', height: '36px', display: 'flex', alignItems: 'center',
+                    justifyContent: 'center', cursor: 'pointer', boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                    zIndex: 10
+                  }}
+                  title="ขยายเต็มจอ"
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0047AB" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" />
+                  </svg>
+                </button>
               </div>
 
               {/* Next exercise */}
               <div className="home-next-ex-bar">
                 <button className="btn-next-exercise" onClick={() => setShowPicker(true)}>
-                  ⚡ Next Exercise — เลือกเรื่องที่จะทำ
+                  Next Exercise — เลือกเรื่องที่จะทำ
                 </button>
               </div>
 
