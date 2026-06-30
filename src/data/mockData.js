@@ -227,3 +227,36 @@ export function getGoalSkillIds(goalId) {
 }
 
 export const TIER_ORDER = { T1: 0, T2: 1, T3: 2, T4: 3 };
+
+// ── ELO / LEVEL system ───────────────────────────────────────────
+// Level 1 = 1200–1349 | Level 2 = 1350–1499 | Level 3 = 1500–1649
+// Level 4 = 1650–1799 | Level 5 = 1800–1950
+export const ELO_RANGES = {
+  1: { min: 1200, max: 1349 },
+  2: { min: 1350, max: 1499 },
+  3: { min: 1500, max: 1649 },
+  4: { min: 1650, max: 1799 },
+  5: { min: 1800, max: 1950 },
+};
+
+// Derive level from tier (T1→1, T2→2, T3→3, T4→4, progress=100→5)
+export function getSkillLevel(skill) {
+  if (skill.progress === 100) return 5;
+  const map = { T1: 1, T2: 2, T3: 3, T4: 4 };
+  return map[skill.tier] ?? 1;
+}
+
+// Seeded pseudo-random so elo stays the same per skill across renders
+function seededRand(seed, min, max) {
+  const x = Math.sin(seed) * 10000;
+  const r = x - Math.floor(x);
+  return Math.round(min + r * (max - min));
+}
+
+export function getSkillElo(skill) {
+  const level = getSkillLevel(skill);
+  const { min, max } = ELO_RANGES[level];
+  // Use numeric part of skillId as seed (e.g. SK-003 → 3)
+  const seed = parseInt(skill.id.replace(/\D/g, ''), 10) || 1;
+  return seededRand(seed, min, max);
+}
