@@ -11,6 +11,7 @@ import Home from './component/Home'
 import HomeNew from './component/Home'
 import Exercise from './component/Exercise'
 import AdminHome from './component/Adminhome'
+import SkillTree from './component/SkillTree'
 function App() {
 
   return (
@@ -26,6 +27,7 @@ function App() {
         <Route path='/homenew' element = {<HomeNew/>}></Route> 
         <Route path='/exercise' element = {<Exercise/>}></Route>
         <Route path='/admin/home' element = {<AdminHome/>}></Route>
+        <Route path='/skilltree' element = {<SkillTree/>}></Route>
       </Routes>
     </Router>
   )
