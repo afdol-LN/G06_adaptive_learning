@@ -497,7 +497,12 @@ body {
 .profile-skill-count-num   { font-size: 32px; font-weight: 800; color: var(--accent); }
 .profile-skill-count-sub   { font-size: 11px; color: var(--muted); }
 .profile-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-.profile-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 22px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+.profile-wrap{
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+}
+.profile-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 22px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); width: 100% ; }
 .profile-card-title { font-size: 14px; font-weight: 800; color: var(--text); margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
 .profile-info-row { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--bg); }
 .profile-info-row:last-child { border-bottom: none; }

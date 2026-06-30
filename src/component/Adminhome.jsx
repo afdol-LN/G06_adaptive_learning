@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import './decorate/AdminHome.css';
 import { useNavigate } from 'react-router-dom';
-
+// this is comment from dol naja
 // ─── MOCK DATA ───
 const MOCK_USERS = [
   { id: 1, name: 'Afdol leenud',  email: 'afdol.leenud@psu.ac.th', faculty: 'ICT', year: 2, goal: 'Data Structures', sessions: 12, avgScore: 74, streak: 4,  lastActive: '2026-03-11', status: 'active'   },

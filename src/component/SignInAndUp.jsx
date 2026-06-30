@@ -40,13 +40,13 @@ export default function SignInAndUp() {
       showToast(`Welcome back, ${loginForm.username}! 🎓`, 'success');
       // window.location.href = '/home';
       console.log('login complete')
-      setTimeout(() => navigate('/home'), 900);
+      // setTimeout(() => navigate('/home'), 900);
       console.log('login complete')
       // navigate('/getstart')
       
     }, 1400);
     
-    navigate('/getstart')
+    navigate('/select-branch')
   };
 
   const handleRegSubmit = () => {
@@ -93,14 +93,21 @@ export default function SignInAndUp() {
   };
 
   return (
-    <>
-      <div className="bg-layer"></div>
-      <div className="bg-grid"></div>
-      <div className="orb orb-1"></div>
-      <div className="orb orb-2"></div>
-      <div className="orb orb-3"></div>
+    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
+    <div className="bg-layer"></div>
+    <div className="bg-grid"></div>
+    <div className="orb orb-1"></div>
+    <div className="orb orb-2"></div>
+    <div className="orb orb-3"></div>
 
-      <main className="page">
+   <main className="page" style={{
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  justifyContent: 'center',
+  minHeight: '100vh',
+  width: '100%',
+}}>
         <div className="brand">
           <div className="brand-mark">
             <div className="brand-icon">⚡</div>
@@ -209,8 +216,8 @@ export default function SignInAndUp() {
                   <div className="select-wrap">
                     <select value={regForm.gender} onChange={(e) => setRegForm({...regForm, gender: e.target.value})}>
                       <option value="" disabled>เลือก...</option>
-                      <option value="man">Man</option>
-                      <option value="woman">Woman</option>
+                      <option value="man">Male</option>
+                      <option value="woman">Female</option>
                       <option value="lgbtq">LGBTQ+</option>
                       <option value="none">ไม่ระบุ</option>
                     </select>
@@ -261,6 +268,6 @@ export default function SignInAndUp() {
       <div className={`toast ${toast.type} ${toast.show ? 'show' : ''}`}>
         {toast.message}
       </div>
-    </>
+    </div>
   );
 }
