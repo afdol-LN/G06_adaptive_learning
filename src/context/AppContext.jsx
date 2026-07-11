@@ -6,23 +6,28 @@ export function AppProvider({ children }) {
 
   // ── ข้อมูลส่วนตัว (ใช้ร่วมกันทุก branch) ──────────────────────
   // บันทึกจาก SignInAndUp: { fname, lname, gender, dob, username }
-  const [userProfile, setUserProfile] = useState(
-    JSON.parse(localStorage.getItem('userProfile')) || null
-  )
-
+const [userProfile, setUserProfile] = useState(() => {
+  try {
+    return JSON.parse(localStorage.getItem("userProfile")) || null;
+  } catch {
+    return null;
+  }
+});
   // ── รายการ branch ทั้งหมด ──────────────────────────────────────
   // แต่ละ branch สร้างจากการกรอก InformationForm 1 ครั้ง
   // รูปแบบ: { id, campus, faculty, major, year, goalId, goalName, goalIcon, exp,
   //           xp, level, streak, unlockedSkills[], sessions[], createdAt }
-  const [branches, setBranches] = useState(
-    JSON.parse(localStorage.getItem('branches')) || []
-  )
-
+  const [branches, setBranches] = useState(() => {
+  try {
+    return JSON.parse(localStorage.getItem("branches")) || [];
+  } catch {
+    return [];
+  }
+});
   // ── branch ที่กำลังใช้งานอยู่ ──────────────────────────────────
-  const [activeBranchId, setActiveBranchId] = useState(
-    localStorage.getItem('activeBranchId') || null
-  )
-
+  const [activeBranchId, setActiveBranchId] = useState(() => {
+  return localStorage.getItem("activeBranchId") || null;
+});
   const activeBranch = branches.find(b => b.id === activeBranchId) || null
 
   // ── saveProfile ───────────────────────────────────────────────
@@ -62,13 +67,22 @@ function addBranch(branchData) {
 
   // ── updateBranch ──────────────────────────────────────────────
   // ใช้อัปเดต xp, unlockedSkills, sessions ฯลฯ ภายใน branch
-  function updateBranch(branchId, changes) {
-    const updated = branches.map(b =>
-      b.id === branchId ? { ...b, ...changes } : b
-    )
-    setBranches(updated)
-    localStorage.setItem('branches', JSON.stringify(updated))
-  }
+ function updateBranch(branchId, changes) {
+  setBranches(prev => {
+    const updated = prev.map(branch =>
+      branch.id === branchId
+        ? { ...branch, ...changes }
+        : branch
+    );
+
+    localStorage.setItem(
+      "branches",
+      JSON.stringify(updated)
+    );
+
+    return updated;
+  });
+}
 
   return (
     <AppContext.Provider value={{

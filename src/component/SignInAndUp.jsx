@@ -46,7 +46,7 @@ export default function SignInAndUp() {
       
     }, 1400);
     
-    navigate('/select-branch')
+    navigate('/getstart')
   };
 
   const handleRegSubmit = () => {
