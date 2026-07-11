@@ -34,7 +34,6 @@ const QUESTIONS = [
     choices: ['BFS ใช้ Stack, DFS ใช้ Queue', 'BFS ใช้ Queue ค้นหาทีละระดับ, DFS ใช้ Stack ลงลึกก่อน', 'BFS เร็วกว่า DFS เสมอ', 'ไม่มีความแตกต่าง ใช้แทนกันได้'], answer: 1,
   },
 ];
-
 export default function Pretest() {
   const [currentScreen, setCurrentScreen] = useState('intro');
   const [currentQIndex, setCurrentQIndex] = useState(0);
