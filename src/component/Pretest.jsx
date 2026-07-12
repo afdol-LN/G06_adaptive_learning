@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React from 'react';
 import './decorate/Pretest.css';
-import { useNavigate } from 'react-router-dom';
+import { usePretestViewModel } from '../view-models/usePretestViewModel';
 
 const QUESTIONS = [
   {
@@ -34,84 +34,28 @@ const QUESTIONS = [
     choices: ['BFS ใช้ Stack, DFS ใช้ Queue', 'BFS ใช้ Queue ค้นหาทีละระดับ, DFS ใช้ Stack ลงลึกก่อน', 'BFS เร็วกว่า DFS เสมอ', 'ไม่มีความแตกต่าง ใช้แทนกันได้'], answer: 1,
   },
 ];
+
 export default function Pretest() {
-  const [currentScreen, setCurrentScreen] = useState('intro');
-  const [currentQIndex, setCurrentQIndex] = useState(0);
-  const [answers, setAnswers] = useState(new Array(QUESTIONS.length).fill(null));
-  const [showModal, setShowModal] = useState(false);
-  const [score, setScore] = useState({ correct: 0, total: QUESTIONS.length, pct: 0 });
-  //navvigate
-  const navigate = useNavigate();
-  
-  const currentQ = QUESTIONS[currentQIndex];
-  const answeredCount = answers.filter(a => a !== null).length;
-  const progressPct = Math.round((answeredCount / QUESTIONS.length) * 100);
+  const { state, actions } = usePretestViewModel(QUESTIONS);
+  const {
+    currentScreen,
+    currentQIndex,
+    answers,
+    showModal,
+    score,
+    currentQ,
+    progressPct,
+  } = state;
+  const {
+    startQuiz,
+    selectChoice,
+    handleNext,
+    confirmSkip,
+    goDashboard,
+    setShowModal,
+    highlightCode,
+  } = actions;
 
-  const startQuiz = () => setCurrentScreen('quiz');
-
-  const selectChoice = (choiceIndex) => {
-    const newAnswers = [...answers];
-    newAnswers[currentQIndex] = choiceIndex;
-    setAnswers(newAnswers);
-  };
-
-  const handleNext = () => {
-    if (answers[currentQIndex] === null) { setShowModal(true); return; }
-    advance();
-  };
-
-  const confirmSkip = () => { setShowModal(false); advance(); };
-
-  const advance = () => {
-    if (currentQIndex === QUESTIONS.length - 1) { submitQuiz(); }
-    else { setCurrentQIndex(prev => prev + 1); }
-  };
-
-  const submitQuiz = () => {
-    const correctCount = answers.reduce((sum, ans, i) => sum + (ans === QUESTIONS[i].answer ? 1 : 0), 0);
-    const pct = Math.round((correctCount / QUESTIONS.length) * 100);
-    setScore({ correct: correctCount, total: QUESTIONS.length, pct });
-    setCurrentScreen('done');
-  };
-
-  const goDashboard = () => navigate('/home');
-
-  // ─── FIX: ประมวลผลตามลำดับที่ถูกต้อง ───
-  // 1. escape HTML ก่อน
-  // 2. highlight strings (ก่อน keywords เพื่อไม่ให้ keywords ใน string ถูก wrap ซ้ำ)
-  // 3. highlight keywords
-  // 4. highlight numbers
-  // 5. highlight comments
-  const highlightCode = (line) => {
-    const KWS = ['def','return','if','else','elif','for','in','while','import','from','class','True','False','None','and','or','not','print','range','append','pop','len'];
-    
-    // step 1: escape HTML entities
-    let h = line
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;');
-
-    // step 2: comments first (ทั้งบรรทัดหลัง #)
-    h = h.replace(/(#[^]*)$/, '<span class="code-cm">$1</span>');
-
-    // step 3: strings — ใช้ placeholder เพื่อไม่ให้ regex อื่นมายุ่ง
-    const strPlaceholders = [];
-    h = h.replace(/("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*')/g, (match) => {
-      strPlaceholders.push(match);
-      return `\x00STR${strPlaceholders.length - 1}\x00`;
-    });
-
-    // step 4: keywords
-    h = h.replace(new RegExp(`\\b(${KWS.join('|')})\\b`, 'g'), '<span class="code-kw">$1</span>');
-
-    // step 5: numbers (ไม่ใช่ส่วนของคำ)
-    h = h.replace(/\b(\d+)\b/g, '<span class="code-num">$1</span>');
-
-    // step 6: restore strings
-    h = h.replace(/\x00STR(\d+)\x00/g, (_, i) => `<span class="code-str">${strPlaceholders[parseInt(i)]}</span>`);
-
-    return { __html: h };
-  };
 
   return (
     <>

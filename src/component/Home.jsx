@@ -1,23 +1,9 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import './decorate/Home.css';
 import { useNavigate } from 'react-router-dom';
-import {
-  SKILLS,
-  getSkillTreeForGoal,
-  MOCK_SESSIONS,
-  MOCK_USER_PROFILE,
-  MOCK_ACTIVE_BRANCH,
-  MOCK_BRANCHES,
-  computeSkillProgress,
-  computeUnlockedSkills,
-  getSkillLevel,
-  getSkillElo,
-  ELO_RANGES,
-} from './mockData';
-import { GOAL_SKILLS, PREREQS } from '../data/mockData';
-import { useApp } from '../context/AppContext';
 import CreateBranchModal from './CreateBranchModal';
-import dagre from 'dagre';
+import { useHomeViewModel, computeBehavior } from '../view-models/useHomeViewModel';
+
 
 // ─── LAYOUT ────────────────────────────────────────────────────────────────
 const NODE_W = 220;
@@ -562,120 +548,56 @@ function ProfileTab({ unlocked, sessions, USER }) {
   );
 }
 
-// ─── MAIN ───────────────────────────────────────────────────────────────────
 export default function HomeNew() {
-  const navigate = useNavigate();
-  const appCtx = useApp();
+  const { state, refs, actions } = useHomeViewModel();
+  const {
+    branches,
+    activeBranch,
+    USER,
+    enrichedSkills,
+    treeSkills,
+    unlocked,
+    sessions,
+    activeTab,
+    selected,
+    hovered,
+    showPicker,
+    confirmSkill,
+    showProfileMenu,
+    showGoalMenu,
+    showCreateModal,
+    twText,
+    showCursor,
+    historyFilter,
+    topicFilter,
+    openSessions,
+    allTopics,
+    goalProgressPct,
+  } = state;
 
-  const branches     = appCtx?.branches?.length > 0 ? appCtx.branches : MOCK_BRANCHES;
-  const activeBranch = appCtx?.activeBranch || branches[0];
-  const userProfile  = appCtx?.userProfile || MOCK_USER_PROFILE;
+  const { profileMenuRef, goalMenuRef } = refs;
 
-  const USER = {
-    name:    `${userProfile.fname} ${userProfile.lname}`,
-    goal:    activeBranch.goalName,
-    avatar:  userProfile.fname[0].toUpperCase(),
-    faculty: activeBranch.faculty,
-    major:   activeBranch.major,
-    year:    activeBranch.year,
-    campus:  activeBranch.campus,
-  };
+  const {
+    canUnlock,
+    handleNodeClick,
+    handleStartExercise,
+    handleConfirmExercise,
+    handleCancelExercise,
+    handleGoPicker,
+    toggleSession,
+    switchTab,
+    handleHistoryFilter,
+    setTopicFilter,
+    setShowProfileMenu,
+    setShowGoalMenu,
+    setShowCreateModal,
+    setSelected,
+    setHovered,
+    setShowPicker,
+    switchBranch,
+  } = actions;
 
-  // ── Skills + layout ─────────────────────────────────────────
-  const rawSkills = getSkillTreeForGoal(activeBranch.goalId);
-
-  // คำนวณ progress จาก sessions จริง
-  const sessionProg = computeSkillProgress(activeBranch.sessions);
-  const enrichedSkills = rawSkills.map(s => ({
-    ...s,
-    progress: sessionProg[s.id] ?? s.progress,
-    level: getSkillLevel({ ...s, progress: sessionProg[s.id] ?? s.progress }),
-    elo:   getSkillElo({ ...s, progress: sessionProg[s.id] ?? s.progress }),
-  }));
-  const treeSkills = layoutSkills(enrichedSkills);
-
-  // ── Unlocked skills (คำนวณอัตโนมัติจาก sessions + threshold 60%) ─
-  // const [unlocked, setUnlocked] = useState(() =>
-  //   computeUnlockedSkills(activeBranch.sessions, enrichedSkills)
-  // );
-  const [unlocked, setUnlocked] = useState(() => {
-    const set = new Set();
-    enrichedSkills.forEach(s => {
-      if (s.progress > 0) set.add(s.id);
-    });
-    return set;
-  });
-  const sessions = activeBranch.sessions;
-
-  const [activeTab,       setActiveTab]       = useState('Home');
-  const [selected,        setSelected]        = useState(null);
-  const [hovered,         setHovered]         = useState(null);
-  const [showPicker,      setShowPicker]      = useState(false);
-  const [confirmSkill,    setConfirmSkill]    = useState(null);
-  const [showProfileMenu, setShowProfileMenu] = useState(false);
-  const [showGoalMenu,    setShowGoalMenu]    = useState(false);
-  const [showCreateModal, setShowCreateModal] = useState(false);
-  const [twText,          setTwText]          = useState('');
-  const [showCursor,      setShowCursor]      = useState(true);
-  const [historyFilter,   setHistoryFilter]   = useState(new Set(['all']));
-  const [topicFilter,     setTopicFilter]     = useState('all');
-  const [openSessions,    setOpenSessions]    = useState({});
-
-  const profileMenuRef = useRef(null);
-  const goalMenuRef    = useRef(null);
-
-  // Typewriter effect
-  useEffect(() => {
-    let i = 0; setTwText(''); setShowCursor(true);
-    const timer = setInterval(() => {
-      setTwText(USER.name.substring(0, i + 1)); i++;
-      if (i >= USER.name.length) { clearInterval(timer); setTimeout(() => setShowCursor(false), 1500); }
-    }, 70);
-    return () => clearInterval(timer);
-  }, [USER.name]);
-
-  // Close dropdown on outside click
-  useEffect(() => {
-    const handle = e => {
-      if (profileMenuRef.current && !profileMenuRef.current.contains(e.target)) setShowProfileMenu(false);
-      // Wait to handle goal menu below since it may trigger CreateBranchModal
-      if (goalMenuRef.current    && !goalMenuRef.current.contains(e.target) && !e.target.closest('.create-branch-modal'))    setShowGoalMenu(false);
-    };
-    document.addEventListener('mousedown', handle);
-    return () => document.removeEventListener('mousedown', handle);
-  }, []);
-
-  const canUnlock = skill => {
-    if (unlocked.has(skill.id)) return false;
-    const parentReqs = PREREQS.filter(p => p.skillId === skill.id);
-    if (parentReqs.length === 0) return true;
-    return parentReqs.every(req => {
-      const parentSkill = enrichedSkills.find(p => p.id === req.prereqId);
-      const reqLvl = parseInt(req.minLevel.replace(/\D/g, ''), 10) || 1;
-      return parentSkill && parentSkill.level >= reqLvl;
-    });
-  };
-
-  const handleNodeClick       = skill => setSelected(prev => prev?.id === skill.id ? null : skill);
-  const handleStartExercise   = skill => setConfirmSkill(skill);
-  const handleConfirmExercise = () => { setConfirmSkill(null); navigate('/exercise'); };
-  const handleCancelExercise  = () => setConfirmSkill(null);
-  const handleGoPicker        = skill => { setShowPicker(false); setConfirmSkill(skill); };
-  const toggleSession         = id => setOpenSessions(prev => ({ ...prev, [id]: !prev[id] }));
-  const gradeLabel            = g => g === 'great' ? 'ดีเยี่ยม' : g === 'good' ? 'ดี' : 'ต้องปรับปรุง';
-  const switchTab             = tab => { setActiveTab(tab); setSelected(null); };
-
-  const handleHistoryFilter = filter => {
-    setHistoryFilter(prev => {
-      const next = new Set(prev);
-      if (filter === 'all') return new Set(['all']);
-      next.delete('all');
-      next.has(filter) ? next.delete(filter) : next.add(filter);
-      return next.size === 0 ? new Set(['all']) : next;
-    });
-  };
-
-  const allTopics = ['all', ...Array.from(new Set(sessions.map(s => s.title)))];
+  const gradeLabel = g => (g === 'great' ? 'ดีเยี่ยม' : g === 'good' ? 'ดี' : 'ต้องปรับปรุง');
 
   const renderSessionCard = s => (
     <div key={s.id} className="session-card">
@@ -718,25 +640,6 @@ export default function HomeNew() {
     </div>
   );
 
-  // ── Computed stats ─────────────────────────────────────────
-  const requiredGoalSkills = GOAL_SKILLS[activeBranch.goalId] || [];
-  let totalReqElo = 0;
-  let totalUserElo = 0;
-  
-  requiredGoalSkills.forEach(req => {
-    const minLvl = parseInt(req.minLevel.replace(/\D/g, ''), 10) || 1;
-    const reqElo = ELO_RANGES[minLvl].min;
-    const userElo = enrichedSkills.find(s => s.id === req.skillId)?.elo || 1200;
-    
-    const baseElo = 1200;
-    const reqSpread = Math.max(0, reqElo - baseElo);
-    const userSpread = Math.max(0, userElo - baseElo);
-    
-    totalReqElo += reqSpread;
-    totalUserElo += Math.min(userSpread, reqSpread);
-  });
-  
-  const goalProgressPct = totalReqElo > 0 ? Math.round((totalUserElo / totalReqElo) * 100) : 0;
 
   return (
     <div className="app">
@@ -764,7 +667,8 @@ export default function HomeNew() {
                 boxShadow: '0 8px 32px rgba(0,71,171,0.13)', zIndex: 300, overflow: 'hidden',
               }}>
                 {branches.map(b => (
-                  <button key={b.id} onClick={() => { if (appCtx?.switchBranch) appCtx.switchBranch(b.id); setShowGoalMenu(false); }} style={{
+                  <button key={b.id} onClick={() => { if (switchBranch) switchBranch(b.id); setShowGoalMenu(false); }} style={{
+
                     width: '100%', padding: '10px 14px',
                     display: 'flex', alignItems: 'center', gap: '10px',
                     background: b.id === activeBranch.id ? '#e8f0fe' : 'transparent',

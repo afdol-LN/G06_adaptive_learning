@@ -1,67 +1,76 @@
 import React, { useState } from 'react';
 import './decorate/AdminHome.css';
 import { useNavigate } from 'react-router-dom';
-// this is comment from dol naja
-// ─── MOCK DATA ───
-const MOCK_USERS = [
-  { id: 1, name: 'Afdol leenud',  email: 'afdol.leenud@psu.ac.th', faculty: 'ICT', year: 2, goal: 'Data Structures', sessions: 12, avgScore: 74, streak: 4,  lastActive: '2026-03-11', status: 'active'   },
-  { id: 2, name: 'Sirin Kaewkla', email: 'sirin.kaew@psu.ac.th',   faculty: 'ICT', year: 3, goal: 'Algorithms',      sessions: 8,  avgScore: 88, streak: 7,  lastActive: '2026-03-12', status: 'active'   },
-  { id: 3, name: 'Napat Somboon', email: 'napat.som@psu.ac.th',    faculty: 'ENG', year: 1, goal: 'Python Basics',   sessions: 3,  avgScore: 55, streak: 1,  lastActive: '2026-03-08', status: 'inactive' },
-  { id: 4, name: 'Ploy Rattana',  email: 'ploy.rat@psu.ac.th',     faculty: 'SCI', year: 2, goal: 'Data Structures', sessions: 20, avgScore: 92, streak: 14, lastActive: '2026-03-12', status: 'active'   },
-  { id: 5, name: 'Krit Jaidee',   email: 'krit.jai@psu.ac.th',     faculty: 'ICT', year: 4, goal: 'Graph Theory',    sessions: 5,  avgScore: 61, streak: 2,  lastActive: '2026-03-09', status: 'inactive' },
-];
-
-const MOCK_SKILLS = [
-  { id: 1,  name: 'Python Basics',      icon: '🐍', tier: 'T1', requires: [],         userCount: 48, avgProgress: 88, status: 'active' },
-  { id: 2,  name: 'Variables & Types',  icon: '📦', tier: 'T1', requires: [1],        userCount: 45, avgProgress: 82, status: 'active' },
-  { id: 3,  name: 'Control Flow',       icon: '🔀', tier: 'T1', requires: [1],        userCount: 40, avgProgress: 75, status: 'active' },
-  { id: 4,  name: 'Functions',          icon: '🔧', tier: 'T2', requires: [2],        userCount: 35, avgProgress: 68, status: 'active' },
-  { id: 5,  name: 'List',               icon: '📋', tier: 'T2', requires: [2, 3],     userCount: 32, avgProgress: 60, status: 'active' },
-  { id: 6,  name: 'Tuple & Set',        icon: '🔗', tier: 'T2', requires: [2, 3],     userCount: 28, avgProgress: 52, status: 'active' },
-  { id: 7,  name: 'Dictionary',         icon: '📖', tier: 'T2', requires: [3],        userCount: 26, avgProgress: 48, status: 'active' },
-  { id: 8,  name: 'Recursion',          icon: '🔁', tier: 'T3', requires: [4],        userCount: 20, avgProgress: 38, status: 'active' },
-  { id: 9,  name: 'Stack & Queue',      icon: '🥞', tier: 'T3', requires: [5, 4],     userCount: 18, avgProgress: 30, status: 'active' },
-  { id: 10, name: 'Linked List',        icon: '⛓️', tier: 'T3', requires: [5, 6],     userCount: 14, avgProgress: 22, status: 'active' },
-  { id: 11, name: 'Hash Table',         icon: '🗂️', tier: 'T3', requires: [7],        userCount: 12, avgProgress: 18, status: 'active' },
-  { id: 12, name: 'Tree',               icon: '🌳', tier: 'T4', requires: [8, 9],     userCount: 8,  avgProgress: 10, status: 'active' },
-  { id: 13, name: 'Graph',              icon: '🕸️', tier: 'T4', requires: [10, 11],   userCount: 6,  avgProgress: 8,  status: 'active' },
-  { id: 14, name: 'Sorting Algorithms', icon: '📊', tier: 'T4', requires: [9, 10],    userCount: 7,  avgProgress: 9,  status: 'active' },
-  { id: 15, name: 'Data Structure',     icon: '🏆', tier: 'T5', requires: [12,13,14], userCount: 2,  avgProgress: 3,  status: 'active' },
-];
-
-// โจทย์ mock แต่ละ skill
-const MOCK_QUESTIONS = {
-  1: [
-    { id: 101, text: 'Python คืออะไร?',                  diff: 'Easy',   status: 'active',   choices: ['ภาษาโปรแกรม', 'ระบบปฏิบัติการ', 'Database', 'Framework'], correct: 0 },
-    { id: 102, text: 'เขียน Hello World ใน Python',       diff: 'Easy',   status: 'active',   choices: ['print("Hello World")', 'echo "Hello World"', 'printf("Hello World")', 'console.log("Hello World")'], correct: 0 },
-    { id: 103, text: 'comment ใน Python ใช้สัญลักษณ์ใด?', diff: 'Easy',   status: 'inactive', choices: ['#', '//', '/*', '--'], correct: 0 },
-  ],
-  9: [
-    { id: 901, text: 'Stack ใช้หลักการใด?',               diff: 'Easy',   status: 'active',   choices: ['FIFO', 'LIFO', 'FILO', 'Random'], correct: 1 },
-    { id: 902, text: 'Queue ใช้หลักการใด?',               diff: 'Easy',   status: 'active',   choices: ['LIFO', 'FILO', 'FIFO', 'Random'], correct: 2 },
-    { id: 903, text: 'deque ใน Python คืออะไร?',           diff: 'Medium', status: 'active',   choices: ['Double-ended queue', 'Stack only', 'Priority queue', 'Linked list'], correct: 0 },
-    { id: 904, text: 'is_balanced ตรวจสอบอะไร?',          diff: 'Hard',   status: 'inactive', choices: ['bracket สมดุล', 'ความยาว string', 'เรียงลำดับ', 'นับตัวอักษร'], correct: 0 },
-  ],
-};
-// เติม skill ที่ไม่มีโจทย์ด้วย mock เปล่า
-MOCK_SKILLS.forEach(s => { if (!MOCK_QUESTIONS[s.id]) MOCK_QUESTIONS[s.id] = []; });
-
-// ประวัติการทำโจทย์
-const MOCK_HISTORY = [
-  { id: 1, user: 'Afdol leenud',  skill: 'Stack & Queue',     date: '2026-03-11', score: 75, correct: 3, total: 4, grade: 'good'  },
-  { id: 2, user: 'Sirin Kaewkla', skill: 'Python Basics',      date: '2026-03-12', score: 100,correct: 3, total: 3, grade: 'great' },
-  { id: 3, user: 'Ploy Rattana',  skill: 'Variables & Types',  date: '2026-03-12', score: 92, correct: 4, total: 4, grade: 'great' },
-  { id: 4, user: 'Napat Somboon', skill: 'Control Flow',       date: '2026-03-08', score: 50, correct: 2, total: 4, grade: 'low'   },
-  { id: 5, user: 'Krit Jaidee',   skill: 'Functions',          date: '2026-03-09', score: 67, correct: 2, total: 3, grade: 'good'  },
-  { id: 6, user: 'Afdol leenud',  skill: 'Python Basics',      date: '2026-03-10', score: 90, correct: 3, total: 3, grade: 'great' },
-  { id: 7, user: 'Ploy Rattana',  skill: 'Recursion',          date: '2026-03-11', score: 100,correct: 4, total: 4, grade: 'great' },
-  { id: 8, user: 'Sirin Kaewkla', skill: 'Stack & Queue',      date: '2026-03-10', score: 88, correct: 3, total: 4, grade: 'great' },
-];
-
-const SUMMARY = {
-  totalUsers: 5, activeToday: 3, totalSessions: 142, avgScore: 74,
-  topSkill: 'Python Basics', weekSessions: [8, 14, 11, 20, 16, 9, 18],
-};
+// ============================================================================
+// ─── DATA REQUIREMENTS & SCHEMA DOCUMENTATION (สำหรับเชื่อมต่อ API / Backend) ───
+// ============================================================================
+// ด้านล่างคือรายละเอียดโครงสร้างข้อมูลที่แต่ละส่วนในหน้า Admin Home ต้องการใช้
+// ทีมพัฒนาสามารถเชื่อมต่อ API เพื่อดึงข้อมูลมาแทนที่ State พื้นฐานของแต่ละส่วนได้
+//
+// 1. สถิติภาพรวมระบบ (Summary Overview Data) - ใช้ในแท็บ "สรุปภาพรวม"
+//    โครงสร้าง Object ที่ต้องการ:
+//    {
+//      totalUsers: number,     // จำนวนผู้ใช้งานทั้งหมดในระบบ
+//      activeToday: number,    // จำนวนผู้ใช้ที่เข้าใช้งานวันนี้
+//      totalSessions: number,  // จำนวนการฝึกฝน / เซสชันทั้งหมด
+//      avgScore: number,       // คะแนนเฉลี่ยรวมของผู้เรียน (%)
+//      topSkill: string,       // ชื่อ Skill ที่ได้รับความนิยมสูงสุด
+//      weekSessions: number[]  // จำนวนเซสชัน 7 วันล่าสุด [จันทร์, อังคาร, พุธ, พฤหัส, ศุกร์, เสาร์, อาทิตย์]
+//    }
+//
+// 2. ข้อมูลผู้ใช้งาน (Users Data) - ใช้ในแท็บ "ผู้ใช้งาน" และตารางกิจกรรมล่าสุด
+//    โครงสร้าง Array<User> โดยแต่ละ User Object ประกอบด้วย:
+//    {
+//      id: number | string,    // รหัสผู้ใช้
+//      name: string,           // ชื่อ-นามสกุล
+//      email: string,          // อีเมลผู้ใช้
+//      faculty: string,        // คณะ (เช่น 'ICT', 'ENG', 'SCI')
+//      year: number,           // ชั้นปี
+//      goal: string,           // เป้าหมายการเรียนรู้ปัจจุบัน
+//      sessions: number,       // จำนวนรอบที่เข้าฝึกฝน
+//      avgScore: number,       // คะแนนเฉลี่ยของผู้ใช้ (%)
+//      streak: number,         // จำนวนวันต่อเนื่องที่เข้าใช้งาน
+//      lastActive: string,     // วันที่เข้าใช้งานล่าสุด (YYYY-MM-DD)
+//      status: 'active' | 'inactive' // สถานะบัญชี
+//    }
+//
+// 3. ข้อมูลทักษะ / บทเรียน (Skills Data) - ใช้ในแท็บ "จัดการ Skill" และความคืบหน้า Skill
+//    โครงสร้าง Array<Skill> โดยแต่ละ Skill Object ประกอบด้วย:
+//    {
+//      id: number | string,    // รหัส Skill
+//      name: string,           // ชื่อ Skill
+//      icon: string,           // ไอคอน (Emoji)
+//      tier: string,           // ระดับ Tier ('T1', 'T2', 'T3', 'T4', 'T5')
+//      requires: number[],     // รายการ id ของ Skill ที่เป็น prerequisite
+//      userCount: number,      // จำนวนผู้เรียนที่กำลังฝึก Skill นี้
+//      avgProgress: number,    // ความคืบหน้าเฉลี่ย (%)
+//      status: 'active' | 'inactive' // สถานะการเปิดใช้งาน
+//    }
+//
+// 4. ข้อมูลคลังโจทย์ (Questions Data) - ใช้เมื่อคลิกดู/จัดการโจทย์ในแต่ละ Skill
+//    โครงสร้าง Object Map { [skillId: number]: Array<Question> } โดยแต่ละ Question ประกอบด้วย:
+//    {
+//      id: number | string,    // รหัสคำถาม
+//      text: string,           // ข้อความคำถาม
+//      diff: 'Easy' | 'Easy+' | 'Medium' | 'Hard', // ระดับความยาก
+//      status: 'active' | 'inactive',              // สถานะโจทย์
+//      choices: string[],      // ตัวเลือก 4 ข้อ [A, B, C, D]
+//      correct: number         // index ของข้อที่ถูกต้อง (0=A, 1=B, 2=C, 3=D)
+//    }
+//
+// 5. ประวัติการทำโจทย์ (Attempt History Data) - ใช้ในแท็บ "ประวัติโจทย์"
+//    โครงสร้าง Array<AttemptLog> โดยแต่ละ Object ประกอบด้วย:
+//    {
+//      id: number | string,    // รหัสประวัติ
+//      user: string,           // ชื่อผู้ทำโจทย์
+//      skill: string,          // ชื่อทักษะที่ทำ
+//      date: string,           // วันที่ทำโจทย์ (YYYY-MM-DD)
+//      score: number,          // คะแนนร้อยละ (%)
+//      correct: number,        // จำนวนข้อที่ถูก
+//      total: number,          // จำนวนข้อทั้งหมด
+//      grade: 'great' | 'good' | 'low' // เกณฑ์ประเมิน
+//    }
+// ============================================================================
 
 const TIERS = ['T1', 'T2', 'T3', 'T4', 'T5'];
 const DIFFS = ['Easy', 'Easy+', 'Medium', 'Hard'];
@@ -96,137 +105,137 @@ function ConfirmDialog({ msg, onOk, onCancel }) {
   );
 }
 
-// ─── SKILL MODAL ───
-function SkillModal({ skill, allSkills, onSave, onClose }) {
-  const [form, setForm] = useState({ ...skill });
-  const isNew = !skill.id;
-  const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
-  const toggleReq = (id) => {
-    const reqs = form.requires.includes(id) ? form.requires.filter(r => r !== id) : [...form.requires, id];
-    set('requires', reqs);
-  };
-  const handleSave = () => {
-    if (!form.name.trim()) return alert('กรุณากรอกชื่อ Skill');
-    onSave(form);
-  };
-  return (
-    <div className="ad-overlay" onClick={onClose}>
-      <div className="ad-modal" onClick={e => e.stopPropagation()}>
-        <div className="ad-modal-header">
-          <span className="ad-modal-title">{isNew ? '➕ เพิ่ม Skill ใหม่' : `✏️ แก้ไข: ${skill.name}`}</span>
-          <button className="ad-icon-btn" onClick={onClose}>✕</button>
-        </div>
-        <div className="ad-modal-body">
-          <div className="ad-field-row">
-            <div className="ad-field">
-              <label className="ad-label">Icon</label>
-              <input className="ad-input" value={form.icon} onChange={e => set('icon', e.target.value)} maxLength={4} style={{ width: 72, textAlign: 'center', fontSize: 22 }} />
-            </div>
-            <div className="ad-field" style={{ flex: 1 }}>
-              <label className="ad-label">ชื่อ Skill *</label>
-              <input className="ad-input" value={form.name} onChange={e => set('name', e.target.value)} placeholder="เช่น Binary Search" />
-            </div>
-            <div className="ad-field">
-              <label className="ad-label">Tier</label>
-              <select className="ad-select" value={form.tier} onChange={e => set('tier', e.target.value)}>
-                {TIERS.map(t => <option key={t} value={t}>{t}</option>)}
-              </select>
-            </div>
-            <div className="ad-field">
-              <label className="ad-label">สถานะ</label>
-              <select className="ad-select" value={form.status} onChange={e => set('status', e.target.value)}>
-                <option value="active">Active</option>
-                <option value="inactive">Inactive</option>
-              </select>
-            </div>
-          </div>
-          <div className="ad-field">
-            <label className="ad-label">Prerequisite Skills (requires)</label>
-            <div className="ad-req-grid">
-              {allSkills.filter(s => s.id !== skill.id).map(s => (
-                <div key={s.id} className={`ad-req-chip ${form.requires.includes(s.id) ? 'selected' : ''}`} onClick={() => toggleReq(s.id)}>
-                  {s.icon} {s.name}
-                </div>
-              ))}
-              {allSkills.filter(s => s.id !== skill.id).length === 0 && <span className="ad-muted">ไม่มี Skill อื่น</span>}
-            </div>
-          </div>
-        </div>
-        <div className="ad-modal-footer">
-          <button className="ad-btn-cancel" onClick={onClose}>ยกเลิก</button>
-          <button className="ad-btn-primary" onClick={handleSave}>{isNew ? '➕ เพิ่ม Skill' : '💾 บันทึก'}</button>
-        </div>
-      </div>
-    </div>
-  );
-}
+// // ─── SKILL MODAL ───
+// function SkillModal({ skill, allSkills, onSave, onClose }) {
+//   const [form, setForm] = useState({ ...skill });
+//   const isNew = !skill.id;
+//   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
+//   const toggleReq = (id) => {
+//     const reqs = form.requires.includes(id) ? form.requires.filter(r => r !== id) : [...form.requires, id];
+//     set('requires', reqs);
+//   };
+//   const handleSave = () => {
+//     if (!form.name.trim()) return alert('กรุณากรอกชื่อ Skill');
+//     onSave(form);
+//   };
+//   return (
+//     <div className="ad-overlay" onClick={onClose}>
+//       <div className="ad-modal" onClick={e => e.stopPropagation()}>
+//         <div className="ad-modal-header">
+//           <span className="ad-modal-title">{isNew ? '➕ เพิ่ม Skill ใหม่' : `✏️ แก้ไข: ${skill.name}`}</span>
+//           <button className="ad-icon-btn" onClick={onClose}>✕</button>
+//         </div>
+//         <div className="ad-modal-body">
+//           <div className="ad-field-row">
+//             <div className="ad-field">
+//               <label className="ad-label">Icon</label>
+//               <input className="ad-input" value={form.icon} onChange={e => set('icon', e.target.value)} maxLength={4} style={{ width: 72, textAlign: 'center', fontSize: 22 }} />
+//             </div>
+//             <div className="ad-field" style={{ flex: 1 }}>
+//               <label className="ad-label">ชื่อ Skill *</label>
+//               <input className="ad-input" value={form.name} onChange={e => set('name', e.target.value)} placeholder="เช่น Binary Search" />
+//             </div>
+//             <div className="ad-field">
+//               <label className="ad-label">Tier</label>
+//               <select className="ad-select" value={form.tier} onChange={e => set('tier', e.target.value)}>
+//                 {TIERS.map(t => <option key={t} value={t}>{t}</option>)}
+//               </select>
+//             </div>
+//             <div className="ad-field">
+//               <label className="ad-label">สถานะ</label>
+//               <select className="ad-select" value={form.status} onChange={e => set('status', e.target.value)}>
+//                 <option value="active">Active</option>
+//                 <option value="inactive">Inactive</option>
+//               </select>
+//             </div>
+//           </div>
+//           <div className="ad-field">
+//             <label className="ad-label">Prerequisite Skills (requires)</label>
+//             <div className="ad-req-grid">
+//               {allSkills.filter(s => s.id !== skill.id).map(s => (
+//                 <div key={s.id} className={`ad-req-chip ${form.requires.includes(s.id) ? 'selected' : ''}`} onClick={() => toggleReq(s.id)}>
+//                   {s.icon} {s.name}
+//                 </div>
+//               ))}
+//               {allSkills.filter(s => s.id !== skill.id).length === 0 && <span className="ad-muted">ไม่มี Skill อื่น</span>}
+//             </div>
+//           </div>
+//         </div>
+//         <div className="ad-modal-footer">
+//           <button className="ad-btn-cancel" onClick={onClose}>ยกเลิก</button>
+//           <button className="ad-btn-primary" onClick={handleSave}>{isNew ? '➕ เพิ่ม Skill' : '💾 บันทึก'}</button>
+//         </div>
+//       </div>
+//     </div>
+//   );
+// }
 
-// ─── QUESTION MODAL ───
-function QuestionModal({ question, onSave, onClose }) {
-  const [form, setForm] = useState({ ...question, choices: [...question.choices] });
-  const isNew = !question.id;
-  const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
-  const setChoice = (i, v) => {
-    const choices = [...form.choices];
-    choices[i] = v;
-    setForm(f => ({ ...f, choices }));
-  };
-  const handleSave = () => {
-    if (!form.text.trim()) return alert('กรุณากรอกคำถาม');
-    if (form.choices.some(c => !c.trim())) return alert('กรุณากรอกตัวเลือกให้ครบ');
-    onSave(form);
-  };
-  return (
-    <div className="ad-overlay" onClick={onClose}>
-      <div className="ad-modal" style={{ maxWidth: 600 }} onClick={e => e.stopPropagation()}>
-        <div className="ad-modal-header">
-          <span className="ad-modal-title">{isNew ? '➕ เพิ่มโจทย์ใหม่' : '✏️ แก้ไขโจทย์'}</span>
-          <button className="ad-icon-btn" onClick={onClose}>✕</button>
-        </div>
-        <div className="ad-modal-body">
-          <div className="ad-field">
-            <label className="ad-label">คำถาม *</label>
-            <textarea className="ad-input ad-textarea" value={form.text} onChange={e => set('text', e.target.value)} placeholder="เช่น Stack ใช้หลักการใด?" rows={3} />
-          </div>
-          <div className="ad-field-row">
-            <div className="ad-field" style={{ flex: 1 }}>
-              <label className="ad-label">ระดับความยาก</label>
-              <select className="ad-select" value={form.diff} onChange={e => set('diff', e.target.value)}>
-                {DIFFS.map(d => <option key={d} value={d}>{d}</option>)}
-              </select>
-            </div>
-            <div className="ad-field">
-              <label className="ad-label">สถานะ</label>
-              <select className="ad-select" value={form.status} onChange={e => set('status', e.target.value)}>
-                <option value="active">Active</option>
-                <option value="inactive">Inactive</option>
-              </select>
-            </div>
-          </div>
-          <div className="ad-field">
-            <label className="ad-label">ตัวเลือก (เลือกตัวที่ถูกต้อง)</label>
-            <div className="ad-choices-edit">
-              {form.choices.map((c, i) => (
-                <div key={i} className="ad-choice-row">
-                  <div className={`ad-choice-letter ${form.correct === i ? 'correct' : ''}`} onClick={() => set('correct', i)}>
-                    {['A', 'B', 'C', 'D'][i]}
-                  </div>
-                  <input className="ad-input" style={{ flex: 1 }} value={c} onChange={e => setChoice(i, e.target.value)} placeholder={`ตัวเลือก ${['A','B','C','D'][i]}`} />
-                  {form.correct === i && <span className="ad-correct-mark">✓ ถูก</span>}
-                </div>
-              ))}
-            </div>
-            <p className="ad-hint-text">💡 คลิกที่ตัวอักษร A / B / C / D เพื่อเลือกคำตอบที่ถูกต้อง</p>
-          </div>
-        </div>
-        <div className="ad-modal-footer">
-          <button className="ad-btn-cancel" onClick={onClose}>ยกเลิก</button>
-          <button className="ad-btn-primary" onClick={handleSave}>{isNew ? '➕ เพิ่มโจทย์' : '💾 บันทึก'}</button>
-        </div>
-      </div>
-    </div>
-  );
-}
+// // ─── QUESTION MODAL ───
+// function QuestionModal({ question, onSave, onClose }) {
+//   const [form, setForm] = useState({ ...question, choices: [...question.choices] });
+//   const isNew = !question.id;
+//   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
+//   const setChoice = (i, v) => {
+//     const choices = [...form.choices];
+//     choices[i] = v;
+//     setForm(f => ({ ...f, choices }));
+//   };
+//   const handleSave = () => {
+//     if (!form.text.trim()) return alert('กรุณากรอกคำถาม');
+//     if (form.choices.some(c => !c.trim())) return alert('กรุณากรอกตัวเลือกให้ครบ');
+//     onSave(form);
+//   };
+//   return (
+//     <div className="ad-overlay" onClick={onClose}>
+//       <div className="ad-modal" style={{ maxWidth: 600 }} onClick={e => e.stopPropagation()}>
+//         <div className="ad-modal-header">
+//           <span className="ad-modal-title">{isNew ? '➕ เพิ่มโจทย์ใหม่' : '✏️ แก้ไขโจทย์'}</span>
+//           <button className="ad-icon-btn" onClick={onClose}>✕</button>
+//         </div>
+//         <div className="ad-modal-body">
+//           <div className="ad-field">
+//             <label className="ad-label">คำถาม *</label>
+//             <textarea className="ad-input ad-textarea" value={form.text} onChange={e => set('text', e.target.value)} placeholder="เช่น Stack ใช้หลักการใด?" rows={3} />
+//           </div>
+//           <div className="ad-field-row">
+//             <div className="ad-field" style={{ flex: 1 }}>
+//               <label className="ad-label">ระดับความยาก</label>
+//               <select className="ad-select" value={form.diff} onChange={e => set('diff', e.target.value)}>
+//                 {DIFFS.map(d => <option key={d} value={d}>{d}</option>)}
+//               </select>
+//             </div>
+//             <div className="ad-field">
+//               <label className="ad-label">สถานะ</label>
+//               <select className="ad-select" value={form.status} onChange={e => set('status', e.target.value)}>
+//                 <option value="active">Active</option>
+//                 <option value="inactive">Inactive</option>
+//               </select>
+//             </div>
+//           </div>
+//           <div className="ad-field">
+//             <label className="ad-label">ตัวเลือก (เลือกตัวที่ถูกต้อง)</label>
+//             <div className="ad-choices-edit">
+//               {form.choices.map((c, i) => (
+//                 <div key={i} className="ad-choice-row">
+//                   <div className={`ad-choice-letter ${form.correct === i ? 'correct' : ''}`} onClick={() => set('correct', i)}>
+//                     {['A', 'B', 'C', 'D'][i]}
+//                   </div>
+//                   <input className="ad-input" style={{ flex: 1 }} value={c} onChange={e => setChoice(i, e.target.value)} placeholder={`ตัวเลือก ${['A','B','C','D'][i]}`} />
+//                   {form.correct === i && <span className="ad-correct-mark">✓ ถูก</span>}
+//                 </div>
+//               ))}
+//             </div>
+//             <p className="ad-hint-text">💡 คลิกที่ตัวอักษร A / B / C / D เพื่อเลือกคำตอบที่ถูกต้อง</p>
+//           </div>
+//         </div>
+//         <div className="ad-modal-footer">
+//           <button className="ad-btn-cancel" onClick={onClose}>ยกเลิก</button>
+//           <button className="ad-btn-primary" onClick={handleSave}>{isNew ? '➕ เพิ่มโจทย์' : '💾 บันทึก'}</button>
+//         </div>
+//       </div>
+//     </div>
+//   );
+// }
 
 // ─── USER MODAL ───
 function UserModal({ user, onClose }) {
@@ -234,7 +243,7 @@ function UserModal({ user, onClose }) {
     <div className="ad-overlay" onClick={onClose}>
       <div className="ad-modal" onClick={e => e.stopPropagation()}>
         <div className="ad-modal-header">
-          <span className="ad-modal-title">👤 ข้อมูลผู้ใช้</span>
+          <span className="ad-modal-title">ข้อมูลผู้ใช้</span>
           <button className="ad-icon-btn" onClick={onClose}>✕</button>
         </div>
         <div className="ad-modal-body">
@@ -250,13 +259,15 @@ function UserModal({ user, onClose }) {
           </div>
           <div className="ad-info-grid">
             {[
-              { label: 'คณะ',         value: user.faculty        },
-              { label: 'ชั้นปี',       value: `ปี ${user.year}`   },
-              { label: 'เป้าหมาย',    value: user.goal           },
-              { label: 'Sessions',    value: user.sessions       },
-              { label: 'Avg Score',   value: `${user.avgScore}%` },
-              { label: 'Streak',      value: `${user.streak} วัน`},
-              { label: 'ใช้งานล่าสุด', value: user.lastActive    },
+              { label: 'ชื่อ', value: user.name },
+              { label: 'คณะ', value: user.faculty },
+              { label: 'ชั้นปี', value: `ปี ${user.year}` },
+              // { label: 'เป้าหมาย',    value: user.goal           },
+              // { label: 'Sessions',    value: user.sessions       },
+              // { label: 'Avg Score',   value: `${user.avgScore}%` },
+              // { label: 'Streak',      value: `${user.streak} วัน`},
+              { label: 'ตำแหน่ง', value: user.role },
+              { label: 'ใช้งานล่าสุด', value: user.lastActive },
             ].map((r, i) => (
               <div key={i} className="ad-info-row">
                 <span className="ad-info-label">{r.label}</span>
@@ -340,25 +351,40 @@ export default function AdminHome() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('summary');
 
-  // Users
-  const [users, setUsers] = useState(MOCK_USERS);
+  // ─── 1. สรุปภาพรวม (Summary State) ───
+  // ต้องการข้อมูล Object: { totalUsers, activeToday, totalSessions, avgScore, topSkill, weekSessions: number[] }
+  const [summary, setSummary] = useState({
+    totalUsers: 0,
+    activeToday: 0,
+    totalSessions: 0,
+    avgScore: 0,
+    topSkill: '-',
+    weekSessions: [0, 0, 0, 0, 0, 0, 0],
+  });
+
+  // ─── 2. ผู้ใช้งาน (Users State) ───
+  // ต้องการข้อมูล Array<User>: [{ id, name, email, faculty, year, goal, sessions, avgScore, streak, lastActive, status }]
+  const [users, setUsers] = useState([]);
   const [userSearch, setUserSearch] = useState('');
   const [viewUser, setViewUser] = useState(null);
 
-  // Skills
-  const [skills, setSkills] = useState(MOCK_SKILLS);
+  // ─── 3. ทักษะ/บทเรียน (Skills State) ───
+  // ต้องการข้อมูล Array<Skill>: [{ id, name, icon, tier, requires, userCount, avgProgress, status }]
+  const [skills, setSkills] = useState([]);
   const [skillSearch, setSkillSearch] = useState('');
   const [editSkill, setEditSkill] = useState(null);
   const [deleteSkill, setDeleteSkill] = useState(null);
 
-  // Questions
-  const [questions, setQuestions] = useState(MOCK_QUESTIONS);
+  // ─── 4. คำถาม/โจทย์ (Questions State) ───
+  // ต้องการข้อมูล Object Map: { [skillId]: Array<{ id, text, diff, status, choices, correct }> }
+  const [questions, setQuestions] = useState({});
   const [viewSkillQ, setViewSkillQ] = useState(null);     // skill ที่กำลังดูโจทย์
   const [editQuestion, setEditQuestion] = useState(null); // { skillId, question }
   const [deleteQuestion, setDeleteQuestion] = useState(null); // { skillId, question }
 
-  // History
-  const [history] = useState(MOCK_HISTORY);
+  // ─── 5. ประวัติการทำโจทย์ (History State) ───
+  // ต้องการข้อมูล Array<AttemptLog>: [{ id, user, skill, date, score, correct, total, grade }]
+  const [history] = useState([]);
   const [histSearch, setHistSearch] = useState('');
   const [histGrade, setHistGrade] = useState('all');
 
@@ -429,7 +455,7 @@ export default function AdminHome() {
   });
 
   // ── Bar chart ──
-  const maxBar = Math.max(...SUMMARY.weekSessions);
+  const maxBar = Math.max(...summary.weekSessions, 1);
   const dayLabels = ['จ', 'อ', 'พ', 'พฤ', 'ศ', 'ส', 'อา'];
 
   return (
@@ -464,12 +490,12 @@ export default function AdminHome() {
             </div>
             <div className="ad-kpi-grid">
               {[
-                { label: 'ผู้ใช้ทั้งหมด',    value: SUMMARY.totalUsers,     icon: '👥', color: '#0047AB' },
-                { label: 'Active วันนี้',    value: SUMMARY.activeToday,    icon: '🟢', color: '#10b981' },
-                { label: 'Sessions ทั้งหมด', value: SUMMARY.totalSessions,  icon: '📋', color: '#8b5cf6' },
-                { label: 'คะแนนเฉลี่ย',      value: `${SUMMARY.avgScore}%`, icon: '🎯', color: '#f59e0b' },
+                { label: 'ผู้ใช้ทั้งหมด',    value: summary.totalUsers,     icon: '👥', color: '#0047AB' },
+                { label: 'Active วันนี้',    value: summary.activeToday,    icon: '🟢', color: '#10b981' },
+                { label: 'Sessions ทั้งหมด', value: summary.totalSessions,  icon: '📋', color: '#8b5cf6' },
+                { label: 'คะแนนเฉลี่ย',      value: `${summary.avgScore}%`, icon: '🎯', color: '#f59e0b' },
                 { label: 'Skills ในระบบ',    value: skills.length,          icon: '🌳', color: '#3b82f6' },
-                { label: 'Skill ยอดนิยม',    value: SUMMARY.topSkill,       icon: '🏆', color: '#0047AB' },
+                { label: 'Skill ยอดนิยม',    value: summary.topSkill,       icon: '🏆', color: '#0047AB' },
               ].map((k, i) => (
                 <div key={i} className="ad-kpi-card">
                   <div className="ad-kpi-icon" style={{ background: `${k.color}15`, color: k.color }}>{k.icon}</div>
@@ -484,7 +510,7 @@ export default function AdminHome() {
               <div className="ad-card">
                 <div className="ad-card-title">📅 Sessions รายวัน (สัปดาห์นี้)</div>
                 <div className="ad-bar-chart">
-                  {SUMMARY.weekSessions.map((v, i) => (
+                  {summary.weekSessions.map((v, i) => (
                     <div key={i} className="ad-bar-col">
                       <div className="ad-bar-val">{v}</div>
                       <div className="ad-bar-wrap">
@@ -498,6 +524,11 @@ export default function AdminHome() {
               <div className="ad-card">
                 <div className="ad-card-title">🌳 ความคืบหน้า Skill (Top 6)</div>
                 <div className="ad-skill-progress-list">
+                  {skills.length === 0 && (
+                    <div className="ad-empty-state" style={{ padding: 24, textAlign: 'center', color: 'var(--muted)' }}>
+                      ยังไม่มีข้อมูล Skill ในระบบ
+                    </div>
+                  )}
                   {[...skills].sort((a, b) => b.avgProgress - a.avgProgress).slice(0, 6).map(s => (
                     <div key={s.id} className="ad-sp-row">
                       <span className="ad-sp-icon">{s.icon}</span>
@@ -532,6 +563,13 @@ export default function AdminHome() {
                       <td><span className="ad-status-dot" style={{ background: getStatusColor(u.status) }} /><span className="ad-muted">{u.status}</span></td>
                     </tr>
                   ))}
+                  {users.length === 0 && (
+                    <tr>
+                      <td colSpan={7} style={{ textAlign: 'center', padding: 32, color: 'var(--muted)' }}>
+                        ยังไม่มีข้อมูลกิจกรรมผู้ใช้งานล่าสุด
+                      </td>
+                    </tr>
+                  )}
                 </tbody>
               </table>
             </div>
@@ -583,6 +621,11 @@ export default function AdminHome() {
                   </div>
                 </div>
               ))}
+              {filteredUsers.length === 0 && (
+                <div className="ad-empty-state" style={{ padding: 48, textAlign: 'center', color: 'var(--muted)', gridColumn: '1 / -1' }}>
+                  ไม่พบข้อมูลผู้ใช้งาน
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -654,6 +697,13 @@ export default function AdminHome() {
                       </td>
                     </tr>
                   ))}
+                  {filteredSkills.length === 0 && (
+                    <tr>
+                      <td colSpan={8} style={{ textAlign: 'center', padding: 32, color: 'var(--muted)' }}>
+                        ยังไม่มีข้อมูล Skill ในระบบ กด "➕ เพิ่ม Skill ใหม่" เพื่อสร้างทักษะ
+                      </td>
+                    </tr>
+                  )}
                 </tbody>
               </table>
             </div>

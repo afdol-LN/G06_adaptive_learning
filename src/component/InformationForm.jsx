@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React from 'react';
 import './decorate/InformationForm.css';
-import { useNavigate } from 'react-router-dom';
-import { useApp } from '../context/AppContext';
 import { GOALS } from '../data/mockData';
+import { useInformationViewModel } from '../view-models/useInformationViewModel';
+
 
 // ─── DATA ───
 const STEPS = [
@@ -59,92 +59,39 @@ const GROUP_LABELS = {
 };
 
 export default function InformationForm() {
-  const [step, setStep]           = useState(1);
-  const [isShaking, setIsShaking] = useState(false);
-  const navigate                  = useNavigate();
+  const { state, actions } = useInformationViewModel(STEPS);
+  const {
+    step,
+    isShaking,
+    formData,
+    selectedGoal,
+    exp,
+    toast,
+    showSelectBranch,
+    selectedBranchId,
+    newBranchIds,
+    progressPct,
+    branches,
+  } = state;
 
-  // ── context ──────────────────────────────────────────────────
-  const { addBranch, switchBranch, branches } = useApp();
-  const [showBranchModal, setShowBranchModal] = useState(false);
-  const [showSelectBranch, setShowSelectBranch] = useState(false);
-  const [selectedBranchId, setSelectedBranchId] = useState(null);
-  const [newBranchIds, setNewBranchIds] = useState([]); // ← เพิ่ม
-  // ── Form State ───────────────────────────────────────────────
-  const [formData, setFormData]     = useState({ edu: 'bachelor', year: '', campus: '', faculty: '', major: '' });
-  const [selectedGoal, setSelectedGoal] = useState([]);
-  const [exp, setExp]               = useState(1);
-  const [toast, setToast]           = useState({ show: false, msg: '' });
+  const {
+    updateFormData,
+    toggleGoalSelection,
+    setExp,
+    setSelectedBranchId,
+    handleNext,
+    handlePrev,
+    confirmBranchSelection,
+  } = actions;
 
-  const progressPct    = ((step - 1) / STEPS.length) * 100;
   const currentExpData = EXP_DATA[exp];
 
-  // จัดกลุ่ม GOALS ตาม group
   const goalsByGroup = GOALS.reduce((acc, g) => {
     if (!acc[g.group]) acc[g.group] = [];
     acc[g.group].push(g);
     return acc;
   }, {});
 
-  const triggerShake = () => {
-    setIsShaking(true);
-    setTimeout(() => setIsShaking(false), 400);
-  };
-
-  const showNotice = (msg) => {
-    setToast({ show: true, msg });
-    setTimeout(() => setToast({ show: false, msg: '' }), 3000);
-  };
-
-  const validateStep = () => {
-    if (step === 1) {
-      const { year, campus, faculty, major } = formData;
-      if (!year || !campus || !faculty || !major) {
-        triggerShake();
-        showNotice('กรุณากรอกข้อมูลให้ครบถ้วน');
-        return false;
-      }
-    }
-   if (step === 2 && selectedGoal.length === 0) {
-      triggerShake();
-      showNotice('กรุณาเลือกเนื้อหาที่ต้องการเรียนรู้');
-      return false;
-    }
-    return true;
-  };
-
- const handleNext = () => {
-  if (!validateStep()) return;
-
-  if (step === 2) {
-  const createdIds = [];
-  selectedGoal.forEach(goalId => {
-    const goal = GOALS.find(g => g.id === goalId);
-    const newId = addBranch({
-      campus:   formData.campus,
-      faculty:  formData.faculty,
-      major:    formData.major,
-      year:     formData.year,
-      goalId:   goalId,
-      goalName: goal?.name || '',
-      goalIcon: goal?.icon || '🎯',
-      goalDesc: goal?.desc || '',
-      exp,
-    });
-    createdIds.push(newId);
-  });
-
-  setNewBranchIds(createdIds);
-  setTimeout(() => setShowSelectBranch(true), 50); // ← รอให้ branches update ก่อน
-  return;
-}
-  if (step < STEPS.length) {
-    setStep(step + 1);
-  } else {
-    navigate('/pretest');
-  }
-};
-
-  const handlePrev = () => { if (step > 1) setStep(step - 1); };
 
   return (
     <div style={{ position: 'relative' }}>
@@ -191,7 +138,7 @@ export default function InformationForm() {
               <div className="field">
                 <label>วิทยาเขต</label>
                 <div className="select-wrap">
-                  <select value={formData.campus} onChange={e => setFormData({ ...formData, campus: e.target.value })}>
+                  <select value={formData.campus} onChange={e => updateFormData('campus', e.target.value)}>
                     <option value="" disabled>เลือกวิทยาเขต...</option>
                     <option>หาดใหญ่</option>
                     <option>ปัตตานี</option>
@@ -208,7 +155,7 @@ export default function InformationForm() {
                   <div className="select-wrap">
                     <select
                       value={formData.faculty}
-                      onChange={e => setFormData({ ...formData, faculty: e.target.value, major: '' })}
+                      onChange={e => updateFormData('faculty', e.target.value)}
                       disabled={!formData.campus}
                     >
                       <option value="" disabled>เลือกคณะ...</option>
@@ -221,7 +168,7 @@ export default function InformationForm() {
                   <div className="select-wrap">
                     <select
                       value={formData.major}
-                      onChange={e => setFormData({ ...formData, major: e.target.value })}
+                      onChange={e => updateFormData('major', e.target.value)}
                       disabled={!formData.faculty}
                     >
                       <option value="" disabled>เลือกสาขา...</option>
@@ -237,7 +184,7 @@ export default function InformationForm() {
                   <div className="select-wrap">
                     <select
                       value={formData.year}
-                      onChange={e => setFormData({ ...formData, year: e.target.value })}
+                      onChange={e => updateFormData('year', e.target.value)}
                     >
                       <option value="" disabled>เลือกชั้นปี...</option>
                       {YEAR_BY_EDU['bachelor'].map(y => <option key={y} value={y}>{y}</option>)}
@@ -251,12 +198,10 @@ export default function InformationForm() {
           {/* ═══ STEP 2 — เลือก Goal (จาก mockData) ═══ */}
           {step === 2 && (
             <div className="panel active">
-              {/* แจ้งให้รู้ว่าเพิ่ม branch ได้ */}
               <p style={{ textAlign: 'center', fontSize: '13px', color: 'var(--muted, #94a3b8)', marginBottom: '12px' }}>
                 💡 สามารถเพิ่มสายการเรียนใหม่ได้ภายในแอปภายหลัง
               </p>
 
-              {/* แสดง goals แยกตามกลุ่ม */}
               {Object.entries(goalsByGroup).map(([group, goals]) => (
                 <div key={group} style={{ marginBottom: '16px' }}>
                   <div style={{ fontSize: '12px', fontWeight: '700', color: 'var(--muted, #94a3b8)', marginBottom: '8px', letterSpacing: '0.05em' }}>
@@ -266,12 +211,8 @@ export default function InformationForm() {
                     {goals.map(g => (
                       <div
                         key={g.id}
-                      className={`goal-card ${selectedGoal.includes(g.id) ? 'selected' : ''}`}
-                        onClick={() => setSelectedGoal(prev =>
-                                  prev.includes(g.id)
-                                  ? prev.filter(id => id !== g.id)
-                                  : [...prev, g.id]
-                                )}
+                        className={`goal-card ${selectedGoal.includes(g.id) ? 'selected' : ''}`}
+                        onClick={() => toggleGoalSelection(g.id)}
                       >
                         <div className="goal-check">✓</div>
                         <div className="goal-card-inner">

@@ -1,96 +1,34 @@
-import React, { useState, useEffect } from 'react';
-import './decorate/signInAndUp.css'; // Paste your <style> content into this file
-import close_eye from '../assets/closed-eyes.png';
-import GetStart from './GetStart.jsx'
-import { useNavigate } from 'react-router-dom';
+import React from 'react';
+import './decorate/signInAndUp.css';
+import { useAuthViewModel } from '../view-models/useAuthViewModel';
+
 export default function SignInAndUp() {
-  const [activeTab, setActiveTab] = useState('login');
-  
-  // Form State
-  const [loginForm, setLoginForm] = useState({ username: '', password: '' });
-  const [regForm, setRegForm] = useState({
-    fname: '', lname: '', dob: '', gender: '', username: '', password: '', confirm: ''
-  });
-  //naviagate
-  const navigate = useNavigate();
-  // UI State
-  const [showLoginPw, setShowLoginPw] = useState(false);
-  const [showRegPw, setShowRegPw] = useState(false);
-  const [showRegConfirm, setShowRegConfirm] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [toast, setToast] = useState({ message: '', type: 'success', show: false });
+  const { state, actions } = useAuthViewModel();
+  const {
+    activeTab,
+    loginForm,
+    regForm,
+    showLoginPw,
+    showRegPw,
+    showRegConfirm,
+    isLoading,
+    toast,
+    usernameMsg,
+    confirmMsg,
+  } = state;
+  const {
+    setActiveTab,
+    handleLoginFormChange,
+    handleRegFormChange,
+    setShowLoginPw,
+    setShowRegPw,
+    setShowRegConfirm,
+    checkUsername,
+    checkMatch,
+    handleLoginSubmit,
+    handleRegSubmit,
+  } = actions;
 
-  // Validation State
-  const [usernameMsg, setUsernameMsg] = useState({ text: '', type: '' });
-  const [confirmMsg, setConfirmMsg] = useState({ text: '', type: '' });
-
-  const showToast = (message, type = 'success') => {
-    setToast({ message, type, show: true });
-    setTimeout(() => setToast((prev) => ({ ...prev, show: false })), 3200);
-  };
-
-  const handleLoginSubmit = () => {
-    if (!loginForm.username || !loginForm.password) {
-      showToast('Please fill in all fields', 'error');
-      return;
-    }
-    setIsLoading(true);
-    setTimeout(() => {
-      setIsLoading(false);
-      showToast(`Welcome back, ${loginForm.username}! 🎓`, 'success');
-      // window.location.href = '/home';
-      console.log('login complete')
-      // setTimeout(() => navigate('/home'), 900);
-      console.log('login complete')
-      // navigate('/getstart')
-      
-    }, 1400);
-    
-    navigate('/getstart')
-  };
-
-  const handleRegSubmit = () => {
-    const { fname, lname, dob, gender, username, password, confirm } = regForm;
-    if (!fname || !lname || !dob || !gender || !username || !password || !confirm) {
-      showToast('Please fill in all fields', 'error');
-      return;
-    }
-    if (password !== confirm) {
-      showToast('Passwords do not match', 'error');
-      return;
-    }
-    if (password.length < 8) {
-      showToast('Password must be at least 8 characters', 'error');
-      return;
-    }
-
-    setIsLoading(true);
-    setTimeout(() => {
-      setIsLoading(false);
-      showToast(`Account created! Welcome, ${fname} 🎉`, 'success');
-      navigate('/getstart')
-      // window.location.href = '/getstarted';
-    }, 1600);
-  };
-
-  const checkUsername = (val) => {
-    setRegForm({ ...regForm, username: val });
-    const takenNames = ['admin', 'psu_user', 'hello_myname', 'test'];
-    const cleanVal = val.trim().toLowerCase();
-    
-    if (!cleanVal) return setUsernameMsg({ text: '', type: '' });
-    if (cleanVal.length < 4) return setUsernameMsg({ text: 'At least 4 characters', type: 'err' });
-    if (takenNames.includes(cleanVal)) return setUsernameMsg({ text: '✗ Username already taken', type: 'err' });
-    
-    setUsernameMsg({ text: '✓ Username available', type: 'ok' });
-  };
-
-  const checkMatch = (val) => {
-    setRegForm({ ...regForm, confirm: val });
-    if (!val) return setConfirmMsg({ text: '', type: '' });
-    if (regForm.password === val) return setConfirmMsg({ text: '✓ Passwords match', type: 'ok' });
-    setConfirmMsg({ text: 'Passwords do not match', type: 'err' });
-  };
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
@@ -145,7 +83,7 @@ export default function SignInAndUp() {
                   type="text" 
                   placeholder="your_username" 
                   value={loginForm.username}
-                  onChange={(e) => setLoginForm({...loginForm, username: e.target.value})}
+                  onChange={(e) => handleLoginFormChange('username', e.target.value)}
                 />
               </div>
 
@@ -156,7 +94,7 @@ export default function SignInAndUp() {
                     type={showLoginPw ? 'text' : 'password'} 
                     placeholder="••••••••" 
                     value={loginForm.password}
-                    onChange={(e) => setLoginForm({...loginForm, password: e.target.value})}
+                    onChange={(e) => handleLoginFormChange('password', e.target.value)}
                   />
                   <button className="pw-toggle" onClick={() => setShowLoginPw(!showLoginPw)} tabIndex="-1">
                     {showLoginPw ? '🙈' : '👁'}
@@ -198,23 +136,23 @@ export default function SignInAndUp() {
               <div className="field-row">
                 <div>
                   <label>First Name</label>
-                  <input type="text" placeholder="สมชาย" value={regForm.fname} onChange={(e) => setRegForm({...regForm, fname: e.target.value})} />
+                  <input type="text" placeholder="สมชาย" value={regForm.fname} onChange={(e) => handleRegFormChange('fname', e.target.value)} />
                 </div>
                 <div>
                   <label>Last Name</label>
-                  <input type="text" placeholder="ใจดี" value={regForm.lname} onChange={(e) => setRegForm({...regForm, lname: e.target.value})} />
+                  <input type="text" placeholder="ใจดี" value={regForm.lname} onChange={(e) => handleRegFormChange('lname', e.target.value)} />
                 </div>
               </div>
 
               <div className="field-row">
                 <div>
                   <label>Date of Birth</label>
-                  <input type="date" max="2010-12-31" value={regForm.dob} onChange={(e) => setRegForm({...regForm, dob: e.target.value})} />
+                  <input type="date" max="2010-12-31" value={regForm.dob} onChange={(e) => handleRegFormChange('dob', e.target.value)} />
                 </div>
                 <div>
                   <label>Gender</label>
                   <div className="select-wrap">
-                    <select value={regForm.gender} onChange={(e) => setRegForm({...regForm, gender: e.target.value})}>
+                    <select value={regForm.gender} onChange={(e) => handleRegFormChange('gender', e.target.value)}>
                       <option value="" disabled>เลือก...</option>
                       <option value="man">Male</option>
                       <option value="woman">Female</option>
@@ -234,7 +172,7 @@ export default function SignInAndUp() {
               <div className="field">
                 <label>Password</label>
                 <div className="pw-wrap">
-                  <input type={showRegPw ? 'text' : 'password'} placeholder="••••••••" value={regForm.password} onChange={(e) => setRegForm({...regForm, password: e.target.value})} />
+                  <input type={showRegPw ? 'text' : 'password'} placeholder="••••••••" value={regForm.password} onChange={(e) => handleRegFormChange('password', e.target.value)} />
                   <button className="pw-toggle" onClick={() => setShowRegPw(!showRegPw)} tabIndex="-1">{showRegPw ? '🙈' : '👁'}</button>
                 </div>
               </div>
