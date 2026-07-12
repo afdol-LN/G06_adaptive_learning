@@ -1007,15 +1007,18 @@ export default function HomeNew() {
         )}
       </div>
 
-      {/* ─── MODALS ─────────────────────────────────────────── */}
-      {showPicker && (
-        <NextExercisePicker skills={treeSkills} unlocked={unlocked} canUnlockFn={canUnlock}
-          onGo={handleGoPicker} onClose={() => setShowPicker(false)} />
-      )}
-      {confirmSkill && (
-        <ExerciseConfirmModal skill={confirmSkill}
-          onConfirm={handleConfirmExercise} onCancel={handleCancelExercise} />
-      )}
+     {/* ─── MODALS ─────────────────────────────────────────── */}
+{showPicker && (
+  <NextExercisePicker skills={treeSkills} unlocked={unlocked} canUnlockFn={canUnlock}
+    onGo={handleGoPicker} onClose={() => setShowPicker(false)} />
+)}
+{confirmSkill && (
+  <ExerciseConfirmModal skill={confirmSkill}
+    onConfirm={handleConfirmExercise} onCancel={handleCancelExercise} />
+)}
+{showCreateModal && (
+  <CreateBranchModal onClose={() => setShowCreateModal(false)} />
+)}
     </div>
   );
 }
