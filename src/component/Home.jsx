@@ -757,40 +757,53 @@ export default function HomeNew() {
               <span style={{ fontSize: '10px' }}>▾</span>
             </button>
             {showGoalMenu && (
-              <div style={{
-                position: 'absolute', top: 'calc(100% + 8px)', left: 0,
-                minWidth: '220px', background: '#fff',
-                border: '1px solid #c2d3e0', borderRadius: '14px',
-                boxShadow: '0 8px 32px rgba(0,71,171,0.13)', zIndex: 300, overflow: 'hidden',
-              }}>
-                {branches.map(b => (
-                  <button key={b.id} onClick={() => { if (appCtx?.switchBranch) appCtx.switchBranch(b.id); setShowGoalMenu(false); }} style={{
-                    width: '100%', padding: '10px 14px',
-                    display: 'flex', alignItems: 'center', gap: '10px',
-                    background: b.id === activeBranch.id ? '#e8f0fe' : 'transparent',
-                    border: 'none', cursor: 'pointer', textAlign: 'left',
-                    borderBottom: '1px solid #f1f5f9', fontFamily: 'inherit',
-                  }}>
-                    <div>
-                      <div style={{ fontSize: '13px', fontWeight: '700', color: '#0f172a' }}>{b.goalName}</div>
-                      <div style={{ fontSize: '11px', color: '#64748b' }}>{b.campus} · ปี {b.year}</div>
-                    </div>
-                    {b.id === activeBranch.id && (
-                      <span style={{ marginLeft: 'auto', color: '#0047AB', fontSize: '12px' }}>✓</span>
-                    )}
-                  </button>
-                ))}
-                <button onClick={() => { setShowCreateModal(true); setShowGoalMenu(false); }} style={{
-                  width: '100%', padding: '10px 14px',
-                  display: 'flex', alignItems: 'center', gap: '8px',
-                  background: '#f8fafc', border: 'none', cursor: 'pointer', textAlign: 'left',
-                  color: '#0047AB', fontWeight: '700'
-                }}>
-                  <span style={{ fontSize: '18px' }}>+</span>
-                  <span style={{ fontSize: '13px' }}>เพิ่มเป้าหมายใหม่</span>
-                </button>
-              </div>
-            )}
+  <div style={{
+    position: 'absolute', top: 'calc(100% + 8px)', left: 0,
+    minWidth: '220px', background: '#fff',
+    border: '1px solid #c2d3e0', borderRadius: '14px',
+    boxShadow: '0 8px 32px rgba(0,71,171,0.13)', zIndex: 300,
+    overflow: 'hidden', // ยังคุม border-radius ของกล่องรวมไว้เหมือนเดิม
+    display: 'flex', flexDirection: 'column',
+    maxHeight: '360px', // ← จำกัดความสูงรวมทั้งกล่อง
+  }}>
+    {/* ── รายการ branch: เลื่อนได้ ── */}
+    <div style={{
+      overflowY: 'auto',
+      maxHeight: '300px', // เหลือที่ให้ปุ่มด้านล่างเสมอ
+    }}>
+      {branches.map(b => (
+        <button key={b.id} onClick={() => { if (appCtx?.switchBranch) appCtx.switchBranch(b.id); setShowGoalMenu(false); }} style={{
+          width: '100%', padding: '10px 14px',
+          display: 'flex', alignItems: 'center', gap: '10px',
+          background: b.id === activeBranch.id ? '#e8f0fe' : 'transparent',
+          border: 'none', cursor: 'pointer', textAlign: 'left',
+          borderBottom: '1px solid #f1f5f9', fontFamily: 'inherit',
+        }}>
+          <div>
+            <div style={{ fontSize: '13px', fontWeight: '700', color: '#0f172a' }}>{b.goalName}</div>
+            <div style={{ fontSize: '11px', color: '#64748b' }}>{b.campus} · ปี {b.year}</div>
+          </div>
+          {b.id === activeBranch.id && (
+            <span style={{ marginLeft: 'auto', color: '#0047AB', fontSize: '12px' }}>✓</span>
+          )}
+        </button>
+      ))}
+    </div>
+
+    {/* ── ปุ่มเพิ่มเป้าหมายใหม่: อยู่นอก scroll เห็นเสมอ ── */}
+    <button onClick={() => { setShowCreateModal(true); setShowGoalMenu(false); }} style={{
+      width: '100%', padding: '10px 14px',
+      display: 'flex', alignItems: 'center', gap: '8px',
+      background: '#f8fafc', border: 'none', cursor: 'pointer', textAlign: 'left',
+      color: '#0047AB', fontWeight: '700',
+      borderTop: '1px solid #e2e8f0', // เส้นคั่นให้ดูแยกจากรายการ
+      flexShrink: 0, // ← กันไม่ให้ปุ่มถูกบีบเวลารายการเยอะ
+    }}>
+      <span style={{ fontSize: '18px' }}>+</span>
+      <span style={{ fontSize: '13px' }}>เพิ่มเป้าหมายใหม่</span>
+    </button>
+  </div>
+)}
           </div>
         </div>
 

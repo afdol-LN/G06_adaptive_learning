@@ -10,7 +10,9 @@ const STEPS = [
   { title: 'เลือกเนื้อหาที่ต้องการเรียนรู้',  sub: 'เลือกสิ่งที่คุณต้องการเรียนรู้จากระบบนี้' },
   { title: 'ประสบการณ์', sub: 'บอกระดับประสบการณ์ต่อเนื้อหาที่เลือก' },
 ];
-
+// ← เพิ่มใหม่: label สำหรับแสดงใน stepper (4 จุด รวม Pretest)
+const STEP_LABELS = ['ข้อมูล', 'เป้าหมาย', 'ประสบการณ์', 'Pretest'];
+const TOTAL_STEPS = STEP_LABELS.length; // = 4
 
 const FACULTY_BY_EDU = {
   bachelor: [
@@ -75,7 +77,7 @@ export default function InformationForm() {
   const [exp, setExp]               = useState(1);
   const [toast, setToast]           = useState({ show: false, msg: '' });
 
-  const progressPct    = ((step - 1) / STEPS.length) * 100;
+  const progressPct    = ((step - 1) / (TOTAL_STEPS - 1)) * 100;
   const currentExpData = EXP_DATA[exp];
 
   // จัดกลุ่ม GOALS ตาม group
@@ -116,34 +118,39 @@ export default function InformationForm() {
   if (!validateStep()) return;
 
   if (step === 2) {
-  const createdIds = [];
-  selectedGoal.forEach(goalId => {
-    const goal = GOALS.find(g => g.id === goalId);
-    const newId = addBranch({
-      campus:   formData.campus,
-      faculty:  formData.faculty,
-      major:    formData.major,
-      year:     formData.year,
-      goalId:   goalId,
-      goalName: goal?.name || '',
-      goalIcon: goal?.icon || '🎯',
-      goalDesc: goal?.desc || '',
-      exp,
+    const createdIds = [];
+    selectedGoal.forEach(goalId => {
+      const goal = GOALS.find(g => g.id === goalId);
+      const newId = addBranch({
+        campus:   formData.campus,
+        faculty:  formData.faculty,
+        major:    formData.major,
+        year:     formData.year,
+        goalId:   goalId,
+        goalName: goal?.name || '',
+        goalIcon: goal?.icon || '🎯',
+        goalDesc: goal?.desc || '',
+        exp,
+      });
+      createdIds.push(newId);
     });
-    createdIds.push(newId);
-  });
+    setNewBranchIds(createdIds);
+    setTimeout(() => setShowSelectBranch(true), 50);
+    return;
+  }
 
-  setNewBranchIds(createdIds);
-  setTimeout(() => setShowSelectBranch(true), 50); // ← รอให้ branches update ก่อน
-  return;
-}
-  if (step < STEPS.length) {
+  if (step === 3) {
+    setStep(4); // ← ให้ re-render ก่อน เส้น progress bar จะวิ่งไปเต็ม
+    setTimeout(() => {
+      navigate('/pretest'); // ← ค่อย navigate หลังรอให้ animation เล่นจบ
+    }, 500); // ปรับเวลาได้ตามต้องการ เช่น 400-600ms
+    return;
+  }
+
+  if (step < TOTAL_STEPS) {
     setStep(step + 1);
-  } else {
-    navigate('/pretest');
   }
 };
-
   const handlePrev = () => { if (step > 1) setStep(step - 1); };
 
   return (
@@ -156,19 +163,19 @@ export default function InformationForm() {
       <main className="page">
         {/* Progress Bar */}
         <div className="progress-wrap">
-          <div className="progress-steps">
-            {STEPS.map((s, i) => {
-              const stepNum = i + 1;
-              const isActive = stepNum === step;
-              const isDone   = stepNum < step;
-              return (
-                <div key={i} className={`step-node ${isActive ? 'active' : ''} ${isDone ? 'done' : ''}`}>
-                  <div className="step-dot">{isDone ? '✓' : stepNum}</div>
-                  <div className="step-label">{['ข้อมูล', 'เป้าหมาย', 'ประสบการณ์'][i]}</div>
-                </div>
-              );
-            })}
-          </div>
+         <div className="progress-steps">
+  {STEP_LABELS.map((label, i) => {
+    const stepNum = i + 1;
+    const isActive = stepNum === step;
+    const isDone   = stepNum < step;
+    return (
+      <div key={i} className={`step-node ${isActive ? 'active' : ''} ${isDone ? 'done' : ''}`}>
+        <div className="step-dot">{isDone ? '✓' : stepNum}</div>
+        <div className="step-label">{label}</div>
+      </div>
+    );
+  })}
+</div>
           <div className="progress-bar-track">
             <div className="progress-bar-fill" style={{ width: `${progressPct}%` }}></div>
           </div>
@@ -176,14 +183,18 @@ export default function InformationForm() {
 
         {/* Card */}
         <div className={`card ${isShaking ? 'shake' : ''}`}>
-          <div className="card-header">
-            <div className="step-title">
-              {step === 3
-                ? `ประสบการณ์ด้าน ${branches.find(b => b.id === selectedBranchId)?.goalName || 'Goal ที่เลือก'}`
-                : STEPS[step - 1].title}
-            </div>
-            <div className="step-sub">{STEPS[step - 1].sub}</div>
-          </div>
+         <div className="card-header">
+  <div className="step-title">
+    {step === 4
+      ? 'พร้อมแล้ว!'
+      : step === 3
+        ? `ประสบการณ์ด้าน ${branches.find(b => b.id === selectedBranchId)?.goalName || 'Goal ที่เลือก'}`
+        : STEPS[step - 1].title}
+  </div>
+  <div className="step-sub">
+    {step === 4 ? 'กดปุ่มด้านล่างเมื่อพร้อมเริ่มทำ Pretest' : STEPS[step - 1].sub}
+  </div>
+</div>
 
           {/* ═══ STEP 1 — ข้อมูลทั่วไป ═══ */}
           {step === 1 && (
@@ -324,20 +335,35 @@ export default function InformationForm() {
               </div>
             </div>
           )}
-
+{step === 4 && (
+  <div className="panel active" style={{ textAlign: 'center', padding: '40px 20px' }}>
+    <div style={{ fontSize: '48px', marginBottom: '16px' }}>📝</div>
+    <p style={{ fontSize: '15px', color: '#475569', lineHeight: '1.6' }}>
+      คุณกรอกข้อมูลครบถ้วนแล้ว<br />
+      ระบบพร้อมประเมินความรู้เบื้องต้นของคุณผ่าน Pretest
+    </p>
+  </div>
+)}
           {/* Footer */}
-          <div className="card-footer-btns">
-            <button className="btn-back" onClick={handlePrev} disabled={step === 1}>← Back</button>
-            <span className="step-counter">{step} / {STEPS.length}</span>
-            <button className="btn-next" onClick={handleNext}>
-              <span>{step === STEPS.length ? 'เริ่ม Pretest' : 'Next'}</span>
-              {step !== STEPS.length && (
-                <svg className="btn-next-arrow" width="16" height="16" viewBox="0 0 16 16" fill="none">
-                  <path d="M3 8h10M9 4l4 4-4 4" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              )}
-            </button>
-          </div>
+   <div className="card-footer-btns">
+  <button className="btn-back" onClick={handlePrev} disabled={step === 1}>← Back</button>
+  <span className="step-counter">{step} / {TOTAL_STEPS}</span>
+  {step === 4 ? (
+    <button className="btn-next" onClick={() => navigate('/pretest')}>
+      <span>เริ่ม Pretest</span>
+      <svg className="btn-next-arrow" width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <path d="M3 8h10M9 4l4 4-4 4" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+      </svg>
+    </button>
+  ) : (
+  <button className="btn-next" onClick={handleNext}>
+  <span>{step === 3 ? 'เริ่ม Pretest' : 'Next'}</span>
+  <svg className="btn-next-arrow" width="16" height="16" viewBox="0 0 16 16" fill="none">
+    <path d="M3 8h10M9 4l4 4-4 4" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+</button>
+  )}
+</div>
         </div>
       </main>
 
