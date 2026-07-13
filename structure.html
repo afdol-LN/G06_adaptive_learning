@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>โครงสร้างโปรเจกต์ PSU ALS — G06 Adaptive Learning</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg:       #0f172a;
+      --surface:  #1e293b;
+      --surface2: #263347;
+      --border:   #334155;
+      --text:     #f1f5f9;
+      --muted:    #94a3b8;
+      --blue:     #0047AB;
+      --cyan:     #60a5fa;
+      --green:    #10b981;
+      --yellow:   #f59e0b;
+      --purple:   #7c3aed;
+      --red:      #ef4444;
+      --orange:   #f97316;
+    }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', 'Kanit', sans-serif;
+      line-height: 1.7;
+      padding: 40px 20px 80px;
+    }
+    .container { max-width: 1100px; margin: 0 auto; }
+
+    /* ── HEADER ── */
+    .header {
+      text-align: center;
+      margin-bottom: 48px;
+    }
+    .header-badge {
+      display: inline-block;
+      background: var(--blue);
+      color: #fff;
+      font-size: 13px;
+      font-weight: 700;
+      padding: 4px 16px;
+      border-radius: 99px;
+      margin-bottom: 16px;
+      letter-spacing: 1px;
+    }
+    .header h1 {
+      font-size: 32px;
+      font-weight: 900;
+      background: linear-gradient(135deg, #60a5fa, #a78bfa);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 8px;
+    }
+    .header p { color: var(--muted); font-size: 15px; }
+
+    /* ── PRINCIPLE ── */
+    .principle-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 48px;
+    }
+    .principle-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 18px;
+      transition: transform 0.2s;
+    }
+    .principle-card:hover { transform: translateY(-2px); }
+    .principle-icon { font-size: 28px; margin-bottom: 8px; }
+    .principle-title { font-size: 14px; font-weight: 800; margin-bottom: 4px; }
+    .principle-desc { font-size: 13px; color: var(--muted); line-height: 1.5; }
+
+    /* ── ARCH LAYER ── */
+    .arch-section { margin-bottom: 48px; }
+    .arch-title {
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 2px;
+      color: var(--muted);
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+    .layer-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      margin-bottom: 12px;
+      overflow: hidden;
+      transition: box-shadow 0.2s;
+    }
+    .layer-card:hover { box-shadow: 0 8px 24px rgba(0,0,0,0.3); }
+    .layer-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px 20px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .layer-color-bar {
+      width: 4px;
+      height: 40px;
+      border-radius: 2px;
+      flex-shrink: 0;
+    }
+    .layer-folder { font-size: 16px; font-family: monospace; font-weight: 700; }
+    .layer-label {
+      font-size: 13px;
+      color: var(--muted);
+      flex: 1;
+    }
+    .layer-rule {
+      font-size: 12px;
+      font-weight: 700;
+      padding: 2px 10px;
+      border-radius: 99px;
+      border: 1px solid;
+      flex-shrink: 0;
+    }
+    .layer-body {
+      padding: 0 20px 20px 20px;
+      border-top: 1px solid var(--border);
+    }
+    .layer-desc {
+      font-size: 14px;
+      color: #cbd5e1;
+      margin-top: 14px;
+      margin-bottom: 12px;
+    }
+
+    /* ── FILE TREE ── */
+    .file-tree { font-family: monospace; font-size: 13px; }
+    .file-tree-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      padding: 3px 0;
+      border-radius: 4px;
+    }
+    .file-tree-row:hover { background: var(--surface2); }
+    .tree-indent { color: var(--border); white-space: pre; }
+    .tree-icon { font-size: 14px; flex-shrink: 0; }
+    .tree-name { font-weight: 600; }
+    .tree-ext  { color: var(--muted); }
+    .tree-comment { color: var(--muted); font-style: italic; font-size: 12px; padding-left: 8px; font-family: 'Segoe UI', sans-serif; }
+
+    /* ── FLOW ── */
+    .flow-section { margin-bottom: 48px; }
+    .flow-steps {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      flex-wrap: wrap;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      gap: 8px;
+    }
+    .flow-step {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      min-width: 100px;
+    }
+    .flow-step-box {
+      padding: 10px 16px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 700;
+      text-align: center;
+      border: 2px solid;
+    }
+    .flow-arrow {
+      font-size: 20px;
+      color: var(--muted);
+      padding: 0 4px;
+      align-self: center;
+      margin-top: -16px;
+    }
+    .flow-note { font-size: 11px; color: var(--muted); text-align: center; }
+
+    /* ── DRY TABLE ── */
+    .dry-section { margin-bottom: 48px; }
+    .dry-table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--surface);
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+    .dry-table th {
+      background: var(--surface2);
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      padding: 12px 16px;
+      text-align: left;
+    }
+    .dry-table td {
+      padding: 10px 16px;
+      border-top: 1px solid var(--border);
+      font-size: 13px;
+      vertical-align: top;
+    }
+    .dry-table tr:hover td { background: var(--surface2); }
+    .tag { display: inline-block; padding: 1px 8px; border-radius: 99px; font-size: 11px; font-weight: 700; border: 1px solid; }
+    .tag-old   { color: var(--red);    border-color: var(--red);    background: #ef444418; }
+    .tag-new   { color: var(--green);  border-color: var(--green);  background: #10b98118; }
+    .tag-model { color: var(--purple); border-color: var(--purple); background: #7c3aed18; }
+
+    /* ── FOOTER ── */
+    .footer {
+      text-align: center;
+      margin-top: 64px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-badge">G06 Adaptive Learning System</div>
+    <h1>⚡ โครงสร้างโปรเจกต์</h1>
+    <p>สถาปัตยกรรม MVVM + DRY สำหรับทีม G06 PSU</p>
+  </div>
+
+  <!-- PRINCIPLES -->
+  <div class="arch-title">หลักการสำคัญ</div>
+  <div class="principle-grid" style="margin-bottom:40px">
+    <div class="principle-card">
+      <div class="principle-icon">🧩</div>
+      <div class="principle-title">component/</div>
+      <div class="principle-desc">Shared UI ที่ใช้ร่วมกันหลาย view<br/>ไม่มี business logic</div>
+    </div>
+    <div class="principle-card">
+      <div class="principle-icon">📦</div>
+      <div class="principle-title">models/</div>
+      <div class="principle-desc">Interface ของข้อมูล, constants, mock data<br/>Single source of truth</div>
+    </div>
+    <div class="principle-card">
+      <div class="principle-icon">🌐</div>
+      <div class="principle-title">api/</div>
+      <div class="principle-desc">Service functions ยิง API<br/>อิงข้อมูลจาก model layer</div>
+    </div>
+    <div class="principle-card">
+      <div class="principle-icon">⚙️</div>
+      <div class="principle-title">viewModels/</div>
+      <div class="principle-desc">จัดการ state + business logic<br/>คืน variables พร้อมใช้ให้ view</div>
+    </div>
+    <div class="principle-card">
+      <div class="principle-icon">🖥️</div>
+      <div class="principle-title">views/</div>
+      <div class="principle-desc">UI only — ไม่มี logic<br/>แต่ละ page มี folder ของตัวเอง</div>
+    </div>
+  </div>
+
+  <!-- DATA FLOW -->
+  <div class="flow-section">
+    <div class="arch-title">Data Flow (ทิศทางการไหลของข้อมูล)</div>
+    <div class="flow-steps">
+      <div class="flow-step">
+        <div class="flow-step-box" style="border-color:#6366f1;color:#a78bfa;background:#6366f118">models/</div>
+        <div class="flow-note">constants<br/>interfaces</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">
+        <div class="flow-step-box" style="border-color:#0047AB;color:#60a5fa;background:#0047AB18">api/</div>
+        <div class="flow-note">service<br/>functions</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">
+        <div class="flow-step-box" style="border-color:#10b981;color:#10b981;background:#10b98118">viewModels/</div>
+        <div class="flow-note">state<br/>logic</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">
+        <div class="flow-step-box" style="border-color:#f59e0b;color:#f59e0b;background:#f59e0b18">views/</div>
+        <div class="flow-note">UI render<br/>only</div>
+      </div>
+      <div class="flow-arrow">↕</div>
+      <div class="flow-step">
+        <div class="flow-step-box" style="border-color:#7c3aed;color:#a78bfa;background:#7c3aed18">component/</div>
+        <div class="flow-note">shared<br/>UI pieces</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ARCHITECTURE LAYERS -->
+  <div class="arch-section">
+    <div class="arch-title">โครงสร้างไฟล์ทั้งหมด</div>
+
+    <!-- models -->
+    <div class="layer-card">
+      <div class="layer-header">
+        <div class="layer-color-bar" style="background:#6366f1"></div>
+        <div class="layer-folder" style="color:#a78bfa">📦 src/models/</div>
+        <div class="layer-label">ข้อมูล interfaces, constants, mock data — ไม่มี logic ไม่มี UI</div>
+        <div class="layer-rule" style="color:#6366f1;border-color:#6366f1;background:#6366f118">Single Source of Truth</div>
+      </div>
+      <div class="layer-body">
+        <div class="layer-desc">รวม data ที่เคยซ้ำกันหลายที่ไว้ที่เดียว (DRY) เช่น EXP_DATA, GROUP_LABELS, TIER_META, SKILLS, GOALS</div>
+        <div class="file-tree">
+          <div class="file-tree-row">
+            <span class="tree-indent"></span>
+            <span class="tree-icon">📄</span>
+            <span class="tree-name">skillModel<span class="tree-ext">.js</span></span>
+            <span class="tree-comment">EXP_DATA, GROUP_LABELS, TIER_META, BEHAVIOR_META, DIM_LABELS, helpers</span>
+          </div>
+          <div class="file-tree-row">
+            <span class="tree-indent"></span>
+            <span class="tree-icon">📄</span>
+            <span class="tree-name">branchModel<span class="tree-ext">.js</span></span>
+            <span class="tree-comment">FACULTY_BY_EDU, MAJOR_MAP, YEAR_BY_EDU, CAMPUSES, STEPS, STEP_LABELS</span>
+          </div>
+          <div class="file-tree-row">
+            <span class="tree-indent"></span>
+            <span class="tree-icon">📄</span>
+            <span class="tree-name">mockData<span class="tree-ext">.js</span></span>
+            <span class="tree-comment">GOALS, SKILLS, GOAL_SKILLS, MOCK_SESSIONS, MOCK_BRANCHES, helpers</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- api -->
+    <div class="layer-card">
+      <div class="layer-header">
+        <div class="layer-color-bar" style="background:#0047AB"></div>
+        <div class="layer-folder" style="color:#60a5fa">🌐 src/api/</div>
+        <div class="layer-label">Service functions สำหรับ fetch/send ข้อมูล — อิงจาก model</div>
+        <div class="layer-rule" style="color:#0047AB;border-color:#0047AB;background:#0047AB18">No UI, No State</div>
+      </div>
+      <div class="layer-body">
+        <div class="layer-desc">ห่อหุ้ม HTTP calls หรือ localStorage ไว้ที่เดียว เมื่อย้ายไป backend จริงแก้แค่ที่นี่</div>
+        <div class="file-tree">
+          <div class="file-tree-row">
+            <span class="tree-icon">📄</span>
+            <span class="tree-name">authApi<span class="tree-ext">.js</span></span>
+            <span class="tree-comment">login(), register(), checkUsernameAvailability()</span>
+          </div>
+          <div class="file-tree-row">
+            <span class="tree-icon">📄</span>
+            <span class="tree-name">branchApi<span class="tree-ext">.js</span></span>
+            <span class="tree-comment">getBranches(), createBranch(), updateBranch(), getGoals()</span>
+          </div>
+          <div class="file-tree-row">
+            <span class="tree-icon">📄</span>
+            <span class="tree-name">skillApi<span class="tree-ext">.js</span></span>
+            <span class="tree-comment">getSkillTree(), getSessionHistory(), saveSession(), enrichSkills()</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- viewModels -->
+    <div class="layer-card">
+      <div class="layer-header">
+        <div class="layer-color-bar" style="background:#10b981"></div>
+        <div class="layer-folder" style="color:#10b981">⚙️ src/viewModels/</div>
+        <div class="layer-label">Custom hooks จัดการ state + business logic — คืน variables พร้อมใช้</div>
+        <div class="layer-rule" style="color:#10b981;border-color:#10b981;background:#10b98118">No JSX</div>
+      </div>
+      <div class="layer-body">
+        <div class="layer-desc">แต่ละ ViewModel เป็น custom hook (use prefix) ที่ดึงข้อมูลจาก api/ + model/ แล้วคืน values ให้ view ใช้งานได้ทันที</div>
+        <div class="file-tree">
+          <div class="file-tree-row">
+            <span class="tree-icon">📄</span>
+            <span class="tree-name">useHomeViewModel<span class="tree-ext">.jsx</span></span>
+            <span class="tree-comment">state ทั้งหมดของ Home, behavior, skill tree, handlers</span>
+          </div>
+          <div class="file-tree-row">
+            <span class="tree-icon">📄</span>
+            <span class="tree-name">useInformationViewModel<span class="tree-ext">.jsx</span></span>
+            <span class="tree-comment">form state, step logic, branch creation, validation</span>
+          </div>
+          <div class="file-tree-row">
+            <span class="tree-icon">📄</span>
+            <span class="tree-name">usePretestViewModel<span class="tree-ext">.jsx</span></span>
+            <span class="tree-comment">quiz state, answers, scoring, navigation</span>
+          </div>
+          <div class="file-tree-row">
+            <span class="tree-icon">📄</span>
+            <span class="tree-name">useSignInViewModel<span class="tree-ext">.jsx</span></span>
+            <span class="tree-comment">auth form, validation, login, register</span>
+          </div>
+          <div class="file-tree-row">
+            <span class="tree-icon">📄</span>
+            <span class="tree-name">useAdminViewModel<span class="tree-ext">.jsx</span></span>
+            <span class="tree-comment">CRUD state สำหรับ users, skills, questions, history</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- views -->
+    <div class="layer-card">
+      <div class="layer-header">
+        <div class="layer-color-bar" style="background:#f59e0b"></div>
+        <div class="layer-folder" style="color:#f59e0b">🖥️ src/views/</div>
+        <div class="layer-label">UI only — แต่ละ page มี folder ของตัวเอง ไม่มี logic ไม่มี state</div>
+        <div class="layer-rule" style="color:#f59e0b;border-color:#f59e0b;background:#f59e0b18">UI Only, No Logic</div>
+      </div>
+      <div class="layer-body">
+        <div class="layer-desc">JSX render เท่านั้น รับค่าจาก viewModel hook แสดงผล ไม่มี useState, useEffect ที่เกี่ยวกับ business logic</div>
+        <div class="file-tree">
+          <div class="file-tree-row">
+            <span class="tree-icon">📁</span>
+            <span class="tree-name" style="color:#f59e0b">auth/</span>
+          </div>
+          <div class="file-tree-row">
+            <span class="tree-indent">  </span>
+            <span class="tree-icon">📄</span>
+            <span class="tree-name">GetStartView<span class="tree-ext">.jsx</span></span>
+            <span class="tree-comment">Landing page (เดิม GetStart.jsx)</span>
+          </div>
+          <div class="file-tree-row">
+            <span class="tree-indent">  </span>
+            <span class="tree-icon">📄</span>
+            <span class="tree-name">SignInView<span class="tree-ext">.jsx</span></span>
+            <span class="tree-comment">Login / Register (เดิม SignInAndUp.jsx)</span>
+          </div>
+          <div class="file-tree-row">
+            <span class="tree-icon">📁</span>
+            <span class="tree-name" style="color:#f59e0b">onboarding/</span>
+          </div>
+          <div class="file-tree-row">
+            <span class="tree-indent">  </span>
+            <span class="tree-icon">📄</span>
+            <span class="tree-name">InformationView<span class="tree-ext">.jsx</span></span>
+            <span class="tree-comment">กรอกข้อมูล 4 steps (เดิม InformationForm.jsx)</span>
+          </div>
+          <div class="file-tree-row">
+            <span class="tree-indent">  </span>
+            <span class="tree-icon">📄</span>
+            <span class="tree-name">PretestView<span class="tree-ext">.jsx</span></span>
+            <span class="tree-comment">แบบทดสอบ 5 ข้อ (เดิม Pretest.jsx)</span>
+          </div>
+          <div class="file-tree-row">
+            <span class="tree-icon">📁</span>
+            <span class="tree-name" style="color:#f59e0b">home/</span>
+          </div>
+          <div class="file-tree-row">
+            <span class="tree-indent">  </span>
+            <span class="tree-icon">📄</span>
+            <span class="tree-name">HomeView<span class="tree-ext">.jsx</span></span>
+            <span class="tree-comment">Layout wrapper + side nav + tab routing</span>
+          </div>
+          <div class="file-tree-row">
+            <span class="tree-indent">  </span>
+            <span class="tree-icon">📁</span>
+            <span class="tree-name" style="color:#f59e0b">tabs/</span>
+          </div>
+          <div class="file-tree-row">
+            <span class="tree-indent">    </span>
+            <span class="tree-icon">📄</span>
+            <span class="tree-name">HomeTabView<span class="tree-ext">.jsx</span></span>
+            <span class="tree-comment">Dashboard: hero, stats, skill tree mini, sessions</span>
+          </div>
+          <div class="file-tree-row">
+            <span class="tree-indent">    </span>
+            <span class="tree-icon">📄</span>
+            <span class="tree-name">SkillTreeTabView<span class="tree-ext">.jsx</span></span>
+            <span class="tree-comment">Full screen zoomable skill tree</span>
+          </div>
+          <div class="file-tree-row">
+            <span class="tree-indent">    </span>
+            <span class="tree-icon">📄</span>
+            <span class="tree-name">HistoryTabView<span class="tree-ext">.jsx</span></span>
+            <span class="tree-comment">Session history + filters</span>
+          </div>
+          <div class="file-tree-row">
+            <span class="tree-indent">    </span>
+            <span class="tree-icon">📄</span>
+            <span class="tree-name">ProfileTabView<span class="tree-ext">.jsx</span></span>
+            <span class="tree-comment">User profile + branches</span>
+          </div>
+          <div class="file-tree-row">
+            <span class="tree-icon">📁</span>
+            <span class="tree-name" style="color:#f59e0b">admin/</span>
+          </div>
+          <div class="file-tree-row">
+            <span class="tree-indent">  </span>
+            <span class="tree-icon">📄</span>
+            <span class="tree-name">AdminView<span class="tree-ext">.jsx</span></span>
+            <span class="tree-comment">Admin panel layout + 4 tabs (เดิม Adminhome.jsx)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- component -->
+    <div class="layer-card">
+      <div class="layer-header">
+        <div class="layer-color-bar" style="background:#7c3aed"></div>
+        <div class="layer-folder" style="color:#a78bfa">🧩 src/component/</div>
+        <div class="layer-label">Shared UI components ใช้ร่วมกันหลาย view — ไม่ผูกกับ page ใดหน้าเดียว</div>
+        <div class="layer-rule" style="color:#7c3aed;border-color:#7c3aed;background:#7c3aed18">Reusable, No Page Logic</div>
+      </div>
+      <div class="layer-body">
+        <div class="layer-desc">Components ที่แยกออกมาจาก God Components ให้เป็น reusable pieces ใช้ใน view ต่างๆ ได้</div>
+        <div class="file-tree">
+          <div class="file-tree-row"><span class="tree-icon">📄</span><span class="tree-name">ZoomableSVG<span class="tree-ext">.jsx</span></span><span class="tree-comment">SVG ที่ zoom/pan ได้ — ใช้ใน SkillTree</span></div>
+          <div class="file-tree-row"><span class="tree-icon">📄</span><span class="tree-name">SkillTreeSVG<span class="tree-ext">.jsx</span></span><span class="tree-comment">Render skill tree nodes + edges — ใช้ใน Home tab และ SkillTree tab</span></div>
+          <div class="file-tree-row"><span class="tree-icon">📄</span><span class="tree-name">SkillSidePanel<span class="tree-ext">.jsx</span></span><span class="tree-comment">Panel ข้อมูล skill ที่เลือก — ใช้ใน Home tab และ SkillTree tab</span></div>
+          <div class="file-tree-row"><span class="tree-icon">📄</span><span class="tree-name">ExerciseConfirmModal<span class="tree-ext">.jsx</span></span><span class="tree-comment">Modal ยืนยันก่อน Exercise — ใช้ใน Home tab</span></div>
+          <div class="file-tree-row"><span class="tree-icon">📄</span><span class="tree-name">NextExercisePicker<span class="tree-ext">.jsx</span></span><span class="tree-comment">Picker เลือก skill ทำ Exercise — ใช้ใน Home tab</span></div>
+          <div class="file-tree-row"><span class="tree-icon">📄</span><span class="tree-name">ConfirmDialog<span class="tree-ext">.jsx</span></span><span class="tree-comment">Generic confirm/delete dialog — ใช้ทั่วแอป</span></div>
+          <div class="file-tree-row"><span class="tree-icon">📄</span><span class="tree-name">CreateBranchModal<span class="tree-ext">.jsx</span></span><span class="tree-comment">Modal เพิ่ม branch ใหม่</span></div>
+          <div class="file-tree-row"><span class="tree-icon">📁</span><span class="tree-name" style="color:#a78bfa">admin/</span><span class="tree-comment">Sub-components เฉพาะ admin</span></div>
+          <div class="file-tree-row"><span class="tree-indent">  </span><span class="tree-icon">📄</span><span class="tree-name">SkillModal<span class="tree-ext">.jsx</span></span><span class="tree-comment">Modal เพิ่ม/แก้ไข Skill</span></div>
+          <div class="file-tree-row"><span class="tree-indent">  </span><span class="tree-icon">📄</span><span class="tree-name">QuestionModal<span class="tree-ext">.jsx</span></span><span class="tree-comment">Modal เพิ่ม/แก้ไข โจทย์</span></div>
+          <div class="file-tree-row"><span class="tree-indent">  </span><span class="tree-icon">📄</span><span class="tree-name">UserModal<span class="tree-ext">.jsx</span></span><span class="tree-comment">Modal ดูข้อมูล ผู้ใช้</span></div>
+          <div class="file-tree-row"><span class="tree-indent">  </span><span class="tree-icon">📄</span><span class="tree-name">SkillQuestionsPanel<span class="tree-ext">.jsx</span></span><span class="tree-comment">Panel จัดการโจทย์ของ skill</span></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- DRY IMPROVEMENTS -->
+  <div class="dry-section">
+    <div class="arch-title">การลด Duplication (DRY Improvements)</div>
+    <table class="dry-table">
+      <thead>
+        <tr>
+          <th>ของเดิม (Duplicate)</th>
+          <th>เกิดซ้ำที่ไหน</th>
+          <th>แก้ไขอย่างไร</th>
+          <th>ที่ใหม่</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>EXP_DATA</code></td>
+          <td>InformationForm.jsx + CreateBranchModal.jsx</td>
+          <td>ย้ายไปไว้ที่เดียว</td>
+          <td><span class="tag tag-new">models/skillModel.js</span></td>
+        </tr>
+        <tr>
+          <td><code>GROUP_LABELS</code></td>
+          <td>InformationForm.jsx + CreateBranchModal.jsx</td>
+          <td>ย้ายไปไว้ที่เดียว</td>
+          <td><span class="tag tag-new">models/skillModel.js</span></td>
+        </tr>
+        <tr>
+          <td><code>mockData.js</code></td>
+          <td>src/component/mockData.js + src/data/mockData.js</td>
+          <td>รวมเป็นไฟล์เดียว</td>
+          <td><span class="tag tag-new">models/mockData.js</span></td>
+        </tr>
+        <tr>
+          <td>CSS classes ซ้ำ<br/><code>.bg .orb .page</code></td>
+          <td>ทุก CSS file (6+ files)</td>
+          <td>แนะนำย้ายไป global</td>
+          <td><span class="tag tag-new">index.css</span></td>
+        </tr>
+        <tr>
+          <td>Business logic ใน component</td>
+          <td>Home.jsx (1090 lines), Adminhome.jsx (756 lines)</td>
+          <td>แยกออกเป็น hook</td>
+          <td><span class="tag tag-new">viewModels/</span></td>
+        </tr>
+        <tr>
+          <td>ConfirmDialog component</td>
+          <td>ฝังอยู่ใน Adminhome.jsx</td>
+          <td>แยกออกเป็น shared component</td>
+          <td><span class="tag tag-new">component/ConfirmDialog.jsx</span></td>
+        </tr>
+        <tr>
+          <td>FACULTY_BY_EDU, MAJOR_MAP</td>
+          <td>ฝังอยู่ใน InformationForm.jsx</td>
+          <td>ย้ายออกเป็น model</td>
+          <td><span class="tag tag-new">models/branchModel.js</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- RULES -->
+  <div class="arch-section">
+    <div class="arch-title">กฎที่ต้องจำ</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div style="background:var(--surface);border:1px solid #ef444440;border-radius:12px;padding:16px">
+        <div style="font-size:14px;font-weight:800;color:#ef4444;margin-bottom:8px">❌ ห้ามทำ</div>
+        <ul style="font-size:13px;color:#cbd5e1;padding-left:16px;line-height:2">
+          <li>เขียน state ใน views/ (ยกเว้น UI state เช่น toggle dropdown)</li>
+          <li>เขียน business logic ใน component/</li>
+          <li>ดึง API ตรงใน component หรือ view</li>
+          <li>คัดลอก EXP_DATA, GROUP_LABELS ไปใส่ใน component อื่น</li>
+          <li>สร้าง mockData ใหม่แยก — ให้ import จาก models/mockData.js</li>
+        </ul>
+      </div>
+      <div style="background:var(--surface);border:1px solid #10b98140;border-radius:12px;padding:16px">
+        <div style="font-size:14px;font-weight:800;color:#10b981;margin-bottom:8px">✅ ทำแบบนี้</div>
+        <ul style="font-size:13px;color:#cbd5e1;padding-left:16px;line-height:2">
+          <li>เพิ่ม constants ใหม่ใน models/ ก่อนเสมอ</li>
+          <li>สร้าง hook ใน viewModels/ ถ้ามี state ซับซ้อน</li>
+          <li>ใส่ service function ใน api/ ถ้าต้องดึงข้อมูล</li>
+          <li>แยก shared UI เป็น component/ ถ้าใช้ใน 2+ view</li>
+          <li>สร้าง folder ใน views/ สำหรับแต่ละ page</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    สร้างโดย G06 Team · PSU Adaptive Learning System · อัปเดต 2568
+  </div>
+</div>
+</body>
+</html>

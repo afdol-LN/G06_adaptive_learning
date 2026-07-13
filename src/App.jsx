@@ -2,35 +2,47 @@
 // import reactLogo from './assets/react.svg'
 // import viteLogo from '/vite.svg'
 import './App.css'
-import SignInAndUp from './component/SignInAndUp'
 import { BrowserRouter as Router, Route, Routes} from 'react-router-dom';
-import GetStart from './component/GetStart'
-import Pretest from './component/Pretest'
-import InformationFrom from './component/InformationForm'
-import Home from './component/Home'
-import HomeNew from './component/Home'
-import Exercise from './component/Exercise'
-import AdminHome from './component/Adminhome'
-import SkillTree from './component/SkillTree'
 import { AppProvider } from './context/AppContext'
 
-function App() {
+// ── ใหม่: views ตาม MVVM Architecture ────────────────────────────────────────
+// views/auth
+import GetStartView    from './views/auth/GetStartView'
+// views/onboarding
+import InformationView from './views/onboarding/InformationView'
+import PretestView     from './views/onboarding/PretestView'
+// views/home
+import HomeView        from './views/home/HomeView'
+// views/admin
+import AdminView       from './views/admin/AdminView'
 
+// ── เก่า: component เดิม (ยังคงไว้เพื่อ backward compatibility) ─────────────
+import SignInAndUp     from './component/SignInAndUp'
+import Exercise        from './component/Exercise'
+import SkillTree       from './component/SkillTree'
+import SelectBranch    from './component/SelectBranch'
+
+function App() {
   return (
     <AppProvider>
       <Router>
-        {/* <SignInAndUp/> */}
-        {/* <a href={<GetStart/>}>this is test message</a> */}
         <Routes>
-          <Route path='/' element={<SignInAndUp/>}></Route>
-          <Route path='/getstart' element = {<GetStart/>}></Route> 
-          <Route path='/pretest' element = {<Pretest/>}></Route> 
-          <Route path='/information' element = {<InformationFrom/>}></Route>  
-          <Route path='/home' element = {<Home/>}></Route> 
-          <Route path='/homenew' element = {<HomeNew/>}></Route> 
-          <Route path='/exercise' element = {<Exercise/>}></Route>
-          <Route path='/admin/home' element = {<AdminHome/>}></Route>
-          <Route path='/skilltree' element = {<SkillTree/>}></Route>
+          {/* Auth */}
+          <Route path='/'           element={<SignInAndUp />} />
+          <Route path='/getstart'   element={<GetStartView />} />
+
+          {/* Onboarding */}
+          <Route path='/information' element={<InformationView />} />
+          <Route path='/pretest'     element={<PretestView />} />
+
+          {/* Main App */}
+          <Route path='/home'       element={<HomeView />} />
+          <Route path='/exercise'   element={<Exercise />} />
+          <Route path='/skilltree'  element={<SkillTree />} />
+          <Route path='/branches'   element={<SelectBranch />} />
+
+          {/* Admin */}
+          <Route path='/admin/home' element={<AdminView />} />
         </Routes>
       </Router>
     </AppProvider>
