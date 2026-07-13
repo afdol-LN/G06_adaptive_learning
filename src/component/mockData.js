@@ -19,32 +19,31 @@ export const SKILLS = [
   // T1 — Foundation
   { id: 'SK-001', name: 'Python Fundamentals',       tier: 'T1', icon: '🐍', requires: [],              progress: 100 },
   { id: 'SK-002', name: 'Basic I/O',                 tier: 'T1', icon: '⌨️', requires: ['SK-001'],       progress: 100 },
-  { id: 'SK-003', name: 'Variables & Data Types',    tier: 'T1', icon: '📦', requires: ['SK-001','SK-002'], progress: 100 },
-  { id: 'SK-004', name: 'Operators & Expressions',   tier: 'T1', icon: '➕', requires: ['SK-003'],       progress: 82  },
+  { id: 'SK-003', name: 'Variables & Data Types',    tier: 'T1', icon: '📦', requires: ['SK-001'],       progress: 100 },
+  { id: 'SK-004', name: 'Operators & Expressions',   tier: 'T1', icon: '➕', requires: ['SK-001'],       progress: 82  },
   { id: 'SK-006', name: 'Control Flow — Conditional',tier: 'T1', icon: '🔀', requires: ['SK-004'],       progress: 74  },
   // T2 — Core
-  { id: 'SK-007', name: 'Loops',                     tier: 'T2', icon: '🔁', requires: ['SK-006','SK-004'], progress: 61 },
-  { id: 'SK-008', name: 'List',                      tier: 'T2', icon: '📋', requires: ['SK-006','SK-007'], progress: 45 },
-  { id: 'SK-009', name: 'Tuple',                     tier: 'T2', icon: '🔒', requires: ['SK-008'],       progress: 20  },
-  { id: 'SK-010', name: 'Dictionary',                tier: 'T2', icon: '📖', requires: ['SK-008','SK-009'], progress: 0 },
-  { id: 'SK-012', name: 'Functions — Basic',         tier: 'T2', icon: '🔧', requires: ['SK-007','SK-003'], progress: 30 },
+  { id: 'SK-007', name: 'Loops',                     tier: 'T2', icon: '🔁', requires: ['SK-002'],       progress: 61 },
+  { id: 'SK-008', name: 'List',                      tier: 'T2', icon: '📋', requires: ['SK-003'],       progress: 45 },
+  { id: 'SK-009', name: 'Tuple',                     tier: 'T2', icon: '🔒', requires: ['SK-003'],       progress: 20  },
+  { id: 'SK-010', name: 'Dictionary',                tier: 'T2', icon: '📖', requires: ['SK-003'],       progress: 0 },
+  { id: 'SK-012', name: 'Functions — Basic',         tier: 'T2', icon: '🔧', requires: ['SK-007'],       progress: 30 },
   // T3 — Advanced (G07 goal skills)
-  { id: 'SK-014', name: 'Recursion',                 tier: 'T3', icon: '🌀', requires: ['SK-007','SK-003'], progress: 0 },
-  { id: 'SK-019', name: 'OOP — Class & Object',      tier: 'T3', icon: '🏗️', requires: ['SK-008','SK-006'], progress: 0 },
-  { id: 'SK-021', name: 'OOP — Inheritance',         tier: 'T3', icon: '🧬', requires: ['SK-008','SK-014'], progress: 0 },
-  { id: 'SK-027', name: 'Iterators & Protocols',     tier: 'T3', icon: '🔄', requires: ['SK-010','SK-012'], progress: 0 },
-  { id: 'SK-029', name: 'Sorting Algorithms',        tier: 'T3', icon: '📊', requires: ['SK-012','SK-007'], progress: 0 },
-  { id: 'SK-030', name: 'Searching Algorithms',      tier: 'T3', icon: '🔍', requires: ['SK-012','SK-021'], progress: 0 },
-  { id: 'SK-031', name: 'Complexity (Big-O)',        tier: 'T3', icon: '⏱️', requires: ['SK-021','SK-030'], progress: 0 },
-  { id: 'SK-032', name: 'Stack & Queue',             tier: 'T3', icon: '📚', requires: ['SK-010','SK-031'], progress: 0 },
-  { id: 'SK-033', name: 'Linked List',               tier: 'T3', icon: '🔗', requires: ['SK-032','SK-030'], progress: 0 },
-  { id: 'SK-034', name: 'Tree & BST',                tier: 'T3', icon: '🌲', requires: ['SK-010','SK-027'], progress: 0 },
+  { id: 'SK-014', name: 'Recursion',                 tier: 'T3', icon: '🌀', requires: ['SK-012'],       progress: 0 },
+  { id: 'SK-019', name: 'OOP — Class & Object',      tier: 'T3', icon: '🏗️', requires: ['SK-008'],       progress: 0 },
+  { id: 'SK-021', name: 'OOP — Inheritance',         tier: 'T3', icon: '🧬', requires: ['SK-027'],       progress: 0 },
+  { id: 'SK-027', name: 'Iterators & Protocols',     tier: 'T3', icon: '🔄', requires: ['SK-006'],       progress: 0 },
+  { id: 'SK-029', name: 'Sorting Algorithms',        tier: 'T3', icon: '📊', requires: ['SK-007'],       progress: 0 },
+  { id: 'SK-030', name: 'Searching Algorithms',      tier: 'T3', icon: '🔍', requires: ['SK-012'],       progress: 0 },
+  { id: 'SK-031', name: 'Complexity (Big-O)',        tier: 'T3', icon: '⏱️', requires: ['SK-027'],       progress: 0 },
+  { id: 'SK-032', name: 'Stack & Queue',             tier: 'T3', icon: '📚', requires: ['SK-006'],       progress: 0 },
+  { id: 'SK-033', name: 'Linked List',               tier: 'T3', icon: '🔗', requires: ['SK-006'],       progress: 0 },
+  { id: 'SK-034', name: 'Tree & BST',                tier: 'T3', icon: '🌲', requires: ['SK-006'],       progress: 0 },
 ].map(s => ({
   ...s,
   tierLabel: TIER_META[s.tier].label,
   tierColor: TIER_META[s.tier].color,
 }));
-
 // ── Helper: get skill tree for goal ──────────────────────────────────────────
 export function getSkillTreeForGoal(goalId) {
   // จะ return skills ที่เกี่ยวกับ goal นั้น ๆ
