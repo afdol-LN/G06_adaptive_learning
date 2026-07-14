@@ -1,6 +1,11 @@
 import React, { useState } from 'react';
-import './decorate/AdminHome.css';
+import "../decorate/Adminhome.css";
 import { useNavigate } from 'react-router-dom';
+import SummaryTab from './SummaryTab';
+import UsersTab from './UsersTab';
+import SkillTab from './SkillTab';
+import HistoryTab from './HistoryTab';
+
 // this is comment from dol naja
 // ─── MOCK DATA ───
 const MOCK_USERS = [
@@ -29,10 +34,9 @@ const MOCK_SKILLS = [
   { id: 15, name: 'Data Structure',     icon: '🏆', tier: 'T5', requires: [12,13,14], userCount: 2,  avgProgress: 3,  status: 'active' },
 ];
 
-// โจทย์ mock แต่ละ skill
 const MOCK_QUESTIONS = {
   1: [
-    { id: 101, text: 'Python คืออะไร?',                  diff: 'Easy',   status: 'active',   choices: ['ภาษาโปรแกรม', 'ระบบปฏิบัติการ', 'Database', 'Framework'], correct: 0 },
+    { id: 101, text: 'Python คืออะไร?',                   diff: 'Easy',   status: 'active',   choices: ['ภาษาโปรแกรม', 'ระบบปฏิบัติการ', 'Database', 'Framework'], correct: 0 },
     { id: 102, text: 'เขียน Hello World ใน Python',       diff: 'Easy',   status: 'active',   choices: ['print("Hello World")', 'echo "Hello World"', 'printf("Hello World")', 'console.log("Hello World")'], correct: 0 },
     { id: 103, text: 'comment ใน Python ใช้สัญลักษณ์ใด?', diff: 'Easy',   status: 'inactive', choices: ['#', '//', '/*', '--'], correct: 0 },
   ],
@@ -43,10 +47,8 @@ const MOCK_QUESTIONS = {
     { id: 904, text: 'is_balanced ตรวจสอบอะไร?',          diff: 'Hard',   status: 'inactive', choices: ['bracket สมดุล', 'ความยาว string', 'เรียงลำดับ', 'นับตัวอักษร'], correct: 0 },
   ],
 };
-// เติม skill ที่ไม่มีโจทย์ด้วย mock เปล่า
 MOCK_SKILLS.forEach(s => { if (!MOCK_QUESTIONS[s.id]) MOCK_QUESTIONS[s.id] = []; });
 
-// ประวัติการทำโจทย์
 const MOCK_HISTORY = [
   { id: 1, user: 'Afdol leenud',  skill: 'Stack & Queue',     date: '2026-03-11', score: 75, correct: 3, total: 4, grade: 'good'  },
   { id: 2, user: 'Sirin Kaewkla', skill: 'Python Basics',      date: '2026-03-12', score: 100,correct: 3, total: 3, grade: 'great' },
@@ -457,258 +459,62 @@ export default function AdminHome() {
 
         {/* ══ SUMMARY ══ */}
         {activeTab === 'summary' && (
-          <div className="ad-tab-summary">
-            <div className="ad-page-header">
-              <h1 className="ad-page-title">📊 สรุปภาพรวมระบบ</h1>
-              <span className="ad-page-sub">ข้อมูล ณ วันที่ 12 มี.ค. 2026</span>
-            </div>
-            <div className="ad-kpi-grid">
-              {[
-                { label: 'ผู้ใช้ทั้งหมด',    value: SUMMARY.totalUsers,     icon: '👥', color: '#0047AB' },
-                { label: 'Active วันนี้',    value: SUMMARY.activeToday,    icon: '🟢', color: '#10b981' },
-                { label: 'Sessions ทั้งหมด', value: SUMMARY.totalSessions,  icon: '📋', color: '#8b5cf6' },
-                { label: 'คะแนนเฉลี่ย',      value: `${SUMMARY.avgScore}%`, icon: '🎯', color: '#f59e0b' },
-                { label: 'Skills ในระบบ',    value: skills.length,          icon: '🌳', color: '#3b82f6' },
-                { label: 'Skill ยอดนิยม',    value: SUMMARY.topSkill,       icon: '🏆', color: '#0047AB' },
-              ].map((k, i) => (
-                <div key={i} className="ad-kpi-card">
-                  <div className="ad-kpi-icon" style={{ background: `${k.color}15`, color: k.color }}>{k.icon}</div>
-                  <div className="ad-kpi-info">
-                    <div className="ad-kpi-value" style={{ color: k.color }}>{k.value}</div>
-                    <div className="ad-kpi-label">{k.label}</div>
-                  </div>
-                </div>
-              ))}
-            </div>
-            <div className="ad-chart-row">
-              <div className="ad-card">
-                <div className="ad-card-title">📅 Sessions รายวัน (สัปดาห์นี้)</div>
-                <div className="ad-bar-chart">
-                  {SUMMARY.weekSessions.map((v, i) => (
-                    <div key={i} className="ad-bar-col">
-                      <div className="ad-bar-val">{v}</div>
-                      <div className="ad-bar-wrap">
-                        <div className="ad-bar-fill" style={{ height: `${(v / maxBar) * 100}%` }} />
-                      </div>
-                      <div className="ad-bar-lbl">{dayLabels[i]}</div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-              <div className="ad-card">
-                <div className="ad-card-title">🌳 ความคืบหน้า Skill (Top 6)</div>
-                <div className="ad-skill-progress-list">
-                  {[...skills].sort((a, b) => b.avgProgress - a.avgProgress).slice(0, 6).map(s => (
-                    <div key={s.id} className="ad-sp-row">
-                      <span className="ad-sp-icon">{s.icon}</span>
-                      <span className="ad-sp-name">{s.name}</span>
-                      <div className="ad-sp-bar-wrap">
-                        <div className="ad-sp-bar" style={{ width: `${s.avgProgress}%`, background: getTierColor(s.tier) }} />
-                      </div>
-                      <span className="ad-sp-pct" style={{ color: getTierColor(s.tier) }}>{s.avgProgress}%</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-            <div className="ad-card">
-              <div className="ad-card-title">👥 กิจกรรมผู้ใช้ล่าสุด</div>
-              <table className="ad-table">
-                <thead><tr><th>ผู้ใช้</th><th>คณะ</th><th>Sessions</th><th>Avg Score</th><th>Streak</th><th>ใช้งานล่าสุด</th><th>สถานะ</th></tr></thead>
-                <tbody>
-                  {users.map(u => (
-                    <tr key={u.id}>
-                      <td>
-                        <div className="ad-user-cell">
-                          <div className="ad-avatar-sm">{u.name[0]}</div>
-                          <div><div className="ad-user-name-sm">{u.name}</div><div className="ad-user-email-sm">{u.email}</div></div>
-                        </div>
-                      </td>
-                      <td><span className="ad-faculty-tag">{u.faculty}</span></td>
-                      <td><span className="ad-mono">{u.sessions}</span></td>
-                      <td><span className="ad-score" style={{ color: getScoreColor(u.avgScore) }}>{u.avgScore}%</span></td>
-                      <td><span className="ad-mono">🔥 {u.streak}</span></td>
-                      <td><span className="ad-muted">{u.lastActive}</span></td>
-                      <td><span className="ad-status-dot" style={{ background: getStatusColor(u.status) }} /><span className="ad-muted">{u.status}</span></td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
+          <SummaryTab 
+            SUMMARY={SUMMARY}
+            skills={skills}
+            users={users}
+            getTierColor={getTierColor}
+            getScoreColor={getScoreColor}
+            getStatusColor={getStatusColor}
+            maxBar={maxBar}
+            dayLabels={dayLabels}
+          />
         )}
-
+        
         {/* ══ USERS ══ */}
         {activeTab === 'users' && (
-          <div className="ad-tab-users">
-            <div className="ad-page-header">
-              <h1 className="ad-page-title">👥 จัดการผู้ใช้งาน</h1>
-              <span className="ad-page-sub">ผู้ใช้ทั้งหมด {users.length} คน</span>
-            </div>
-            <div className="ad-toolbar">
-              <div className="ad-search-wrap">
-                <span className="ad-search-icon">🔍</span>
-                <input className="ad-search" placeholder="ค้นหาชื่อ, อีเมล, คณะ..." value={userSearch} onChange={e => setUserSearch(e.target.value)} />
-              </div>
-              <div className="ad-toolbar-info">พบ <strong>{filteredUsers.length}</strong> รายการ</div>
-            </div>
-            <div className="ad-user-grid">
-              {filteredUsers.map(u => (
-                <div key={u.id} className="ad-user-card">
-                  <div className="ad-user-card-top">
-                    <div className="ad-avatar-md">{u.name[0]}</div>
-                    <div className="ad-user-card-info">
-                      <div className="ad-user-card-name">{u.name}</div>
-                      <div className="ad-user-card-email">{u.email}</div>
-                      <span className="ad-status-badge" style={{ background: u.status === 'active' ? '#ecfdf5' : '#f1f5f9', color: getStatusColor(u.status), border: `1px solid ${getStatusColor(u.status)}40` }}>
-                        {u.status === 'active' ? '🟢 Active' : '⚫ Inactive'}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="ad-user-card-stats">
-                    <div className="ad-stat-mini"><div className="ad-stat-mini-val">{u.sessions}</div><div className="ad-stat-mini-lbl">Sessions</div></div>
-                    <div className="ad-stat-mini"><div className="ad-stat-mini-val" style={{ color: getScoreColor(u.avgScore) }}>{u.avgScore}%</div><div className="ad-stat-mini-lbl">Avg Score</div></div>
-                    <div className="ad-stat-mini"><div className="ad-stat-mini-val">🔥{u.streak}</div><div className="ad-stat-mini-lbl">Streak</div></div>
-                  </div>
-                  <div className="ad-user-card-meta">
-                    <span>🏫 {u.faculty} ปี {u.year}</span>
-                    <span>🎯 {u.goal}</span>
-                  </div>
-                  <div className="ad-user-card-actions">
-                    <button className="ad-btn-sm ad-btn-view" onClick={() => setViewUser(u)}>👁 ดูข้อมูล</button>
-                    <button className="ad-btn-sm ad-btn-toggle" onClick={() => toggleUserStatus(u.id)}>
-                      {u.status === 'active' ? '🔴 ระงับ' : '🟢 เปิดใช้'}
-                    </button>
-                    <button className="ad-btn-sm ad-btn-del" onClick={() => { if (window.confirm(`ลบผู้ใช้ "${u.name}"?`)) deleteUser(u.id); }}>🗑 ลบ</button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
+          <UsersTab 
+            users={users}
+            userSearch={userSearch}
+            setUserSearch={setUserSearch}
+            filteredUsers={filteredUsers}
+            getScoreColor={getScoreColor}
+            getStatusColor={getStatusColor}
+            setViewUser={setViewUser}
+            toggleUserStatus={toggleUserStatus}
+            deleteUser={deleteUser}
+          />
         )}
-
+        
         {/* ══ SKILLS ══ */}
         {activeTab === 'skills' && (
-          <div className="ad-tab-skills">
-            <div className="ad-page-header">
-              <h1 className="ad-page-title">🌳 จัดการ Skill</h1>
-              <span className="ad-page-sub">Skill ทั้งหมด {skills.length} รายการ</span>
-            </div>
-            <div className="ad-toolbar">
-              <div className="ad-search-wrap">
-                <span className="ad-search-icon">🔍</span>
-                <input className="ad-search" placeholder="ค้นหาชื่อ Skill, Tier..." value={skillSearch} onChange={e => setSkillSearch(e.target.value)} />
-              </div>
-              <button className="ad-btn-primary ad-btn-add" onClick={() => setEditSkill({ ...EMPTY_SKILL })}>➕ เพิ่ม Skill ใหม่</button>
-            </div>
-            <div className="ad-card">
-              <table className="ad-table">
-                <thead>
-                  <tr><th>Skill</th><th>Tier</th><th>สถานะ</th><th>Requires</th><th>ผู้ใช้</th><th>Avg Progress</th><th>โจทย์</th><th>Actions</th></tr>
-                </thead>
-                <tbody>
-                  {filteredSkills.map(s => (
-                    <tr key={s.id}>
-                      <td>
-                        <div className="ad-skill-cell">
-                          <span className="ad-skill-icon">{s.icon}</span>
-                          <span className="ad-skill-name">{s.name}</span>
-                        </div>
-                      </td>
-                      <td>
-                        <span className="ad-tier-badge" style={{ background: `${getTierColor(s.tier)}18`, color: getTierColor(s.tier), border: `1px solid ${getTierColor(s.tier)}40` }}>{s.tier}</span>
-                      </td>
-                      <td>
-                        <span className="ad-status-dot" style={{ background: getStatusColor(s.status) }} />
-                        <span className="ad-muted">{s.status}</span>
-                      </td>
-                      <td>
-                        <div className="ad-req-tags">
-                          {s.requires.length === 0
-                            ? <span className="ad-muted">—</span>
-                            : s.requires.map(rid => { const rs = skills.find(x => x.id === rid); return rs ? <span key={rid} className="ad-req-tag">{rs.icon} {rs.name}</span> : null; })
-                          }
-                        </div>
-                      </td>
-                      <td><span className="ad-mono">{s.userCount}</span></td>
-                      <td>
-                        <div className="ad-prog-cell">
-                          <div className="ad-prog-track"><div className="ad-prog-fill" style={{ width: `${s.avgProgress}%`, background: getTierColor(s.tier) }} /></div>
-                          <span className="ad-prog-pct" style={{ color: getTierColor(s.tier) }}>{s.avgProgress}%</span>
-                        </div>
-                      </td>
-                      <td>
-                        <button className="ad-btn-sm" style={{ borderColor: 'rgba(139,92,246,0.3)', color: '#8b5cf6' }}
-                          onClick={() => setViewSkillQ(s)}>
-                          📝 {getSkillQuestions(s.id).length} ข้อ
-                        </button>
-                      </td>
-                      <td>
-                        <div className="ad-action-btns">
-                          <button className="ad-btn-sm ad-btn-view" onClick={() => setEditSkill({ ...s })}>✏️ แก้ไข</button>
-                          <button className="ad-btn-sm ad-btn-toggle" onClick={() => toggleSkillStatus(s.id)}>
-                            {s.status === 'active' ? '🔴 ระงับ' : '🟢 เปิด'}
-                          </button>
-                          <button className="ad-btn-sm ad-btn-del" onClick={() => setDeleteSkill(s)}>🗑 ลบ</button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
+          <SkillTab 
+            skills={skills}
+            skillSearch={skillSearch}
+            setSkillSearch={setSkillSearch}
+            setEditSkill={setEditSkill}
+            EMPTY_SKILL={EMPTY_SKILL}
+            filteredSkills={filteredSkills}
+            getTierColor={getTierColor}
+            getStatusColor={getStatusColor}
+            getSkillQuestions={getSkillQuestions}
+            setViewSkillQ={setViewSkillQ}
+            toggleSkillStatus={toggleSkillStatus}
+            setDeleteSkill={setDeleteSkill}
+          />
         )}
 
         {/* ══ HISTORY ══ */}
         {activeTab === 'history' && (
-          <div className="ad-tab-history">
-            <div className="ad-page-header">
-              <h1 className="ad-page-title">📋 ประวัติการทำโจทย์ทั้งหมด</h1>
-              <span className="ad-page-sub">พบ {filteredHistory.length} รายการ</span>
-            </div>
-            <div className="ad-toolbar">
-              <div className="ad-search-wrap">
-                <span className="ad-search-icon">🔍</span>
-                <input className="ad-search" placeholder="ค้นหาชื่อผู้ใช้, ชื่อ Skill..." value={histSearch} onChange={e => setHistSearch(e.target.value)} />
-              </div>
-              {['all', 'great', 'good', 'low'].map(g => (
-                <button key={g} className={`ad-filter-btn ${histGrade === g ? 'active' : ''}`} onClick={() => setHistGrade(g)}>
-                  {g === 'all' ? 'ทั้งหมด' : gradeLabel(g)}
-                </button>
-              ))}
-            </div>
-            <div className="ad-card">
-              <table className="ad-table">
-                <thead>
-                  <tr><th>#</th><th>ผู้ใช้</th><th>Skill</th><th>วันที่</th><th>ถูก/ทั้งหมด</th><th>Score</th><th>ผลลัพธ์</th></tr>
-                </thead>
-                <tbody>
-                  {filteredHistory.map((h, i) => (
-                    <tr key={h.id}>
-                      <td><span className="ad-mono ad-muted">{i + 1}</span></td>
-                      <td>
-                        <div className="ad-user-cell">
-                          <div className="ad-avatar-sm">{h.user[0]}</div>
-                          <span className="ad-user-name-sm">{h.user}</span>
-                        </div>
-                      </td>
-                      <td><span className="ad-skill-name">{h.skill}</span></td>
-                      <td><span className="ad-muted">{h.date}</span></td>
-                      <td><span className="ad-mono">{h.correct} / {h.total}</span></td>
-                      <td><span className="ad-score" style={{ color: getScoreColor(h.score) }}>{h.score}%</span></td>
-                      <td>
-                        <span className={`ad-grade-badge grade-${h.grade}`}>{gradeLabel(h.grade)}</span>
-                      </td>
-                    </tr>
-                  ))}
-                  {filteredHistory.length === 0 && (
-                    <tr><td colSpan={7} style={{ textAlign: 'center', padding: 32, color: 'var(--muted)' }}>ไม่พบข้อมูล</td></tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
+          <HistoryTab 
+            filteredHistory={filteredHistory}
+            histSearch={histSearch}
+            setHistSearch={setHistSearch}
+            histGrade={histGrade}
+            setHistGrade={setHistGrade}
+            gradeLabel={gradeLabel}
+            getScoreColor={getScoreColor}
+          />
         )}
       </main>
 

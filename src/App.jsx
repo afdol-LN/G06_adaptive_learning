@@ -10,7 +10,7 @@ import InformationFrom from './component/InformationForm'
 import Home from './component/Home'
 import HomeNew from './component/Home'
 import Exercise from './component/Exercise'
-import AdminHome from './component/Adminhome'
+import AdminHome from "./component/adminHome/Adminhome";
 import SkillTree from './component/SkillTree'
 import { AppProvider } from './context/AppContext'
 
