@@ -1,8 +1,14 @@
-import { createContext, useContext, useState } from 'react'
+import { createContext, useContext, useState, useEffect } from 'react'
+import { AppClient } from '../API/appRestApi'
 
-const AppContext = createContext(null)
+const AppContext = createContext<any>(null)
 
-export function AppProvider({ children }) {
+export function AppProvider({ children  }) {
+  const [isLoading, setIsLoading] = useState<boolean>(false)
+
+  useEffect(() => {
+    AppClient.setGlobalLoaderCallback(setIsLoading)
+  }, [])
 
   // ── ข้อมูลส่วนตัว (ใช้ร่วมกันทุก branch) ──────────────────────
   // บันทึกจาก SignInAndUp: { fname, lname, gender, dob, username }
@@ -89,6 +95,7 @@ function addBranch(branchData) {
       userProfile,    saveProfile,
       branches,       addBranch,    updateBranch,
       activeBranchId, activeBranch, switchBranch,
+      isLoading,      setIsLoading,
     }}>
       {children}
     </AppContext.Provider>

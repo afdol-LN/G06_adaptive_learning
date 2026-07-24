@@ -1,0 +1,258 @@
+src/component/Home.tsx(41,23): error TS7006: Parameter 'skills' implicitly has an 'any' type.
+src/component/Home.tsx(42,46): error TS7006: Parameter 's' implicitly has an 'any' type.
+src/component/Home.tsx(45,21): error TS7006: Parameter 'id' implicitly has an 'any' type.
+src/component/Home.tsx(46,9): error TS7053: Element implicitly has an 'any' type because expression of type 'any' can't be used to index type '{}'.
+src/component/Home.tsx(46,41): error TS7053: Element implicitly has an 'any' type because expression of type 'any' can't be used to index type '{}'.
+src/component/Home.tsx(48,54): error TS7053: Element implicitly has an 'any' type because expression of type 'any' can't be used to index type '{}'.
+src/component/Home.tsx(49,5): error TS7053: Element implicitly has an 'any' type because expression of type 'any' can't be used to index type '{}'.
+src/component/Home.tsx(49,51): error TS7006: Parameter 'r' implicitly has an 'any' type.
+src/component/Home.tsx(50,12): error TS7053: Element implicitly has an 'any' type because expression of type 'any' can't be used to index type '{}'.
+src/component/Home.tsx(52,18): error TS7006: Parameter 's' implicitly has an 'any' type.
+src/component/Home.tsx(55,18): error TS7006: Parameter 's' implicitly has an 'any' type.
+src/component/Home.tsx(56,15): error TS7053: Element implicitly has an 'any' type because expression of type 'any' can't be used to index type '{}'.
+src/component/Home.tsx(57,6): error TS7053: Element implicitly has an 'any' type because expression of type 'any' can't be used to index type '{}'.
+src/component/Home.tsx(57,18): error TS7053: Element implicitly has an 'any' type because expression of type 'any' can't be used to index type '{}'.
+src/component/Home.tsx(64,17): error TS7053: Element implicitly has an 'any' type because expression of type 'number' can't be used to index type '{}'.
+  No index signature with a parameter of type 'number' was found on type '{}'.
+src/component/Home.tsx(66,17): error TS7006: Parameter 'a' implicitly has an 'any' type.
+src/component/Home.tsx(66,20): error TS7006: Parameter 'b' implicitly has an 'any' type.
+src/component/Home.tsx(67,22): error TS7006: Parameter 'id' implicitly has an 'any' type.
+src/component/Home.tsx(68,61): error TS7006: Parameter 'r' implicitly has an 'any' type.
+src/component/Home.tsx(68,66): error TS7053: Element implicitly has an 'any' type because expression of type 'any' can't be used to index type '{}'.
+src/component/Home.tsx(70,34): error TS7006: Parameter 's' implicitly has an 'any' type.
+src/component/Home.tsx(70,37): error TS7006: Parameter 'r' implicitly has an 'any' type.
+src/component/Home.tsx(70,47): error TS7053: Element implicitly has an 'any' type because expression of type 'any' can't be used to index type '{}'.
+src/component/Home.tsx(77,18): error TS7006: Parameter 'id' implicitly has an 'any' type.
+src/component/Home.tsx(77,22): error TS7006: Parameter 'i' implicitly has an 'any' type.
+src/component/Home.tsx(78,7): error TS7053: Element implicitly has an 'any' type because expression of type 'any' can't be used to index type '{}'.
+src/component/Home.tsx(85,21): error TS7006: Parameter 's' implicitly has an 'any' type.
+src/component/Home.tsx(85,38): error TS7053: Element implicitly has an 'any' type because expression of type 'any' can't be used to index type '{}'.
+src/component/Home.tsx(85,60): error TS7053: Element implicitly has an 'any' type because expression of type 'any' can't be used to index type '{}'.
+src/component/Home.tsx(88,27): error TS7006: Parameter 'p' implicitly has an 'any' type.
+src/component/Home.tsx(96,24): error TS7006: Parameter 'isUnlocked' implicitly has an 'any' type.
+src/component/Home.tsx(96,36): error TS7006: Parameter 'canUnlockThis' implicitly has an 'any' type.
+src/component/Home.tsx(96,51): error TS7006: Parameter 'progress' implicitly has an 'any' type.
+src/component/Home.tsx(104,26): error TS7006: Parameter 'sessions' implicitly has an 'any' type.
+src/component/Home.tsx(104,36): error TS7006: Parameter 'unlockedSkills' implicitly has an 'any' type.
+src/component/Home.tsx(115,20): error TS7006: Parameter 's' implicitly has an 'any' type.
+src/component/Home.tsx(117,25): error TS7006: Parameter 'q' implicitly has an 'any' type.
+src/component/Home.tsx(174,33): error TS7031: Binding element 'skill' implicitly has an 'any' type.
+src/component/Home.tsx(174,40): error TS7031: Binding element 'onConfirm' implicitly has an 'any' type.
+src/component/Home.tsx(174,51): error TS7031: Binding element 'onCancel' implicitly has an 'any' type.
+src/component/Home.tsx(199,24): error TS7031: Binding element 'children' implicitly has an 'any' type.
+src/component/Home.tsx(199,34): error TS7031: Binding element 'viewBox' implicitly has an 'any' type.
+src/component/Home.tsx(199,43): error TS7031: Binding element 'className' implicitly has an 'any' type.
+src/component/Home.tsx(205,31): error TS7006: Parameter 'e' implicitly has an 'any' type.
+src/component/Home.tsx(210,35): error TS7006: Parameter 'e' implicitly has an 'any' type.
+src/component/Home.tsx(215,35): error TS7006: Parameter 'e' implicitly has an 'any' type.
+src/component/Home.tsx(226,8): error TS2339: Property 'addEventListener' does not exist on type 'never'.
+src/component/Home.tsx(227,21): error TS2339: Property 'removeEventListener' does not exist on type 'never'.
+src/component/Home.tsx(243,25): error TS7031: Binding element 'skills' implicitly has an 'any' type.
+src/component/Home.tsx(243,33): error TS7031: Binding element 'unlocked' implicitly has an 'any' type.
+src/component/Home.tsx(243,43): error TS7031: Binding element 'canUnlockFn' implicitly has an 'any' type.
+src/component/Home.tsx(243,56): error TS7031: Binding element 'onNodeClick' implicitly has an 'any' type.
+src/component/Home.tsx(243,69): error TS7031: Binding element 'selected' implicitly has an 'any' type.
+src/component/Home.tsx(243,79): error TS7031: Binding element 'hovered' implicitly has an 'any' type.
+src/component/Home.tsx(243,88): error TS7031: Binding element 'setHovered' implicitly has an 'any' type.
+src/component/Home.tsx(244,23): error TS7006: Parameter 'id' implicitly has an 'any' type.
+src/component/Home.tsx(244,41): error TS7006: Parameter 's' implicitly has an 'any' type.
+src/component/Home.tsx(245,25): error TS7006: Parameter 'fromId' implicitly has an 'any' type.
+src/component/Home.tsx(245,33): error TS7006: Parameter 'toId' implicitly has an 'any' type.
+src/component/Home.tsx(251,26): error TS7006: Parameter 'fromId' implicitly has an 'any' type.
+src/component/Home.tsx(251,34): error TS7006: Parameter 'toId' implicitly has an 'any' type.
+src/component/Home.tsx(254,39): error TS7006: Parameter 's' implicitly has an 'any' type.
+src/component/Home.tsx(255,39): error TS7006: Parameter 's' implicitly has an 'any' type.
+src/component/Home.tsx(256,39): error TS7006: Parameter 's' implicitly has an 'any' type.
+src/component/Home.tsx(257,39): error TS7006: Parameter 's' implicitly has an 'any' type.
+src/component/Home.tsx(272,19): error TS7006: Parameter 'skill' implicitly has an 'any' type.
+src/component/Home.tsx(272,47): error TS7006: Parameter 'reqId' implicitly has an 'any' type.
+src/component/Home.tsx(292,31): error TS7006: Parameter 'skill' implicitly has an 'any' type.
+src/component/Home.tsx(292,59): error TS7006: Parameter 'reqId' implicitly has an 'any' type.
+src/component/Home.tsx(314,19): error TS7006: Parameter 'skill' implicitly has an 'any' type.
+src/component/Home.tsx(321,26): error TS7006: Parameter 's' implicitly has an 'any' type.
+src/component/Home.tsx(400,31): error TS7031: Binding element 'skills' implicitly has an 'any' type.
+src/component/Home.tsx(400,39): error TS7031: Binding element 'unlocked' implicitly has an 'any' type.
+src/component/Home.tsx(400,49): error TS7031: Binding element 'canUnlockFn' implicitly has an 'any' type.
+src/component/Home.tsx(400,62): error TS7031: Binding element 'onGo' implicitly has an 'any' type.
+src/component/Home.tsx(400,68): error TS7031: Binding element 'onClose' implicitly has an 'any' type.
+src/component/Home.tsx(402,35): error TS7006: Parameter 's' implicitly has an 'any' type.
+src/component/Home.tsx(412,26): error TS7006: Parameter 's' implicitly has an 'any' type.
+src/component/Home.tsx(414,52): error TS2339: Property 'id' does not exist on type 'never'.
+src/component/Home.tsx(420,24): error TS2339: Property 'id' does not exist on type 'never'.
+src/component/Home.tsx(426,44): error TS2339: Property 'name' does not exist on type 'never'.
+src/component/Home.tsx(434,27): error TS7031: Binding element 'selected' implicitly has an 'any' type.
+src/component/Home.tsx(434,37): error TS7031: Binding element 'setSelected' implicitly has an 'any' type.
+src/component/Home.tsx(434,50): error TS7031: Binding element 'skills' implicitly has an 'any' type.
+src/component/Home.tsx(434,58): error TS7031: Binding element 'unlocked' implicitly has an 'any' type.
+src/component/Home.tsx(434,68): error TS7031: Binding element 'canUnlockFn' implicitly has an 'any' type.
+src/component/Home.tsx(434,81): error TS7031: Binding element 'onStartExercise' implicitly has an 'any' type.
+src/component/Home.tsx(436,29): error TS7006: Parameter 's' implicitly has an 'any' type.
+src/component/Home.tsx(438,42): error TS7006: Parameter 'id' implicitly has an 'any' type.
+src/component/Home.tsx(438,60): error TS7006: Parameter 's' implicitly has an 'any' type.
+src/component/Home.tsx(439,35): error TS7006: Parameter 's' implicitly has an 'any' type.
+src/component/Home.tsx(480,29): error TS7006: Parameter 'n' implicitly has an 'any' type.
+src/component/Home.tsx(491,27): error TS7006: Parameter 'n' implicitly has an 'any' type.
+src/component/Home.tsx(511,23): error TS7031: Binding element 'unlocked' implicitly has an 'any' type.
+src/component/Home.tsx(511,33): error TS7031: Binding element 'sessions' implicitly has an 'any' type.
+src/component/Home.tsx(511,43): error TS7031: Binding element 'USER' implicitly has an 'any' type.
+src/component/Home.tsx(513,16): error TS7053: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type '{ mastery: { label: string; emoji: string; color: string; bg: string; border: string; desc: string; }; fast: { label: string; emoji: string; color: string; bg: string; border: string; desc: string; }; steady: { ...; }; slow: { ...; }; struggler: { ...; }; }'.
+  No index signature with a parameter of type 'string' was found on type '{ mastery: { label: string; emoji: string; color: string; bg: string; border: string; desc: string; }; fast: { label: string; emoji: string; color: string; bg: string; border: string; desc: string; }; steady: { ...; }; slow: { ...; }; struggler: { ...; }; }'.
+src/component/Home.tsx(536,61): error TS2353: Object literal may only specify known properties, and ''--ring-color'' does not exist in type 'Properties<string | number, string & {}>'.
+src/component/Home.tsx(551,26): error TS7053: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type '{ time: { label: string; icon: string; }; streak: { label: string; icon: string; }; momentum: { label: string; icon: string; }; }'.
+  No index signature with a parameter of type 'string' was found on type '{ time: { label: string; icon: string; }; streak: { label: string; icon: string; }; momentum: { label: string; icon: string; }; }'.
+src/component/Home.tsx(599,95): error TS7006: Parameter 's' implicitly has an 'any' type.
+src/component/Home.tsx(599,98): error TS7006: Parameter 'x' implicitly has an 'any' type.
+src/component/Home.tsx(600,70): error TS7006: Parameter 's' implicitly has an 'any' type.
+src/component/Home.tsx(601,76): error TS7006: Parameter 's' implicitly has an 'any' type.
+src/component/Home.tsx(602,73): error TS7006: Parameter 's' implicitly has an 'any' type.
+src/component/Home.tsx(602,76): error TS7006: Parameter 'x' implicitly has an 'any' type.
+src/component/Home.tsx(603,62): error TS7006: Parameter 's' implicitly has an 'any' type.
+src/component/Home.tsx(603,65): error TS7006: Parameter 'x' implicitly has an 'any' type.
+src/component/Home.tsx(603,94): error TS7006: Parameter 'q' implicitly has an 'any' type.
+src/component/Home.tsx(630,13): error TS18048: 'userProfile.fname' is possibly 'undefined'.
+src/component/Home.tsx(644,15): error TS7053: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type '{}'.
+  No index signature with a parameter of type 'string' was found on type '{}'.
+src/component/Home.tsx(645,44): error TS7053: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type '{}'.
+  No index signature with a parameter of type 'string' was found on type '{}'.
+src/component/Home.tsx(646,40): error TS7053: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type '{}'.
+  No index signature with a parameter of type 'string' was found on type '{}'.
+src/component/Home.tsx(692,20): error TS7006: Parameter 'e' implicitly has an 'any' type.
+src/component/Home.tsx(693,61): error TS2339: Property 'contains' does not exist on type 'never'.
+src/component/Home.tsx(695,55): error TS2339: Property 'contains' does not exist on type 'never'.
+src/component/Home.tsx(701,21): error TS7006: Parameter 'skill' implicitly has an 'any' type.
+src/component/Home.tsx(712,27): error TS7006: Parameter 'skill' implicitly has an 'any' type.
+src/component/Home.tsx(712,62): error TS2339: Property 'id' does not exist on type 'never'.
+src/component/Home.tsx(713,31): error TS7006: Parameter 'skill' implicitly has an 'any' type.
+src/component/Home.tsx(716,26): error TS7006: Parameter 'skill' implicitly has an 'any' type.
+src/component/Home.tsx(717,25): error TS7006: Parameter 'id' implicitly has an 'any' type.
+src/component/Home.tsx(717,74): error TS7053: Element implicitly has an 'any' type because expression of type 'any' can't be used to index type '{}'.
+src/component/Home.tsx(718,22): error TS7006: Parameter 'g' implicitly has an 'any' type.
+src/component/Home.tsx(719,21): error TS7006: Parameter 'tab' implicitly has an 'any' type.
+src/component/Home.tsx(721,31): error TS7006: Parameter 'filter' implicitly has an 'any' type.
+src/component/Home.tsx(731,51): error TS18048: 'sessions' is possibly 'undefined'.
+src/component/Home.tsx(733,29): error TS7006: Parameter 's' implicitly has an 'any' type.
+src/component/Home.tsx(745,39): error TS7053: Element implicitly has an 'any' type because expression of type 'any' can't be used to index type '{}'.
+src/component/Home.tsx(748,8): error TS7053: Element implicitly has an 'any' type because expression of type 'any' can't be used to index type '{}'.
+src/component/Home.tsx(750,29): error TS7006: Parameter 'q' implicitly has an 'any' type.
+src/component/Home.tsx(750,32): error TS7006: Parameter 'qi' implicitly has an 'any' type.
+src/component/Home.tsx(775,42): error TS2538: Type 'undefined' cannot be used as an index type.
+src/component/Home.tsx(779,30): error TS7006: Parameter 'req' implicitly has an 'any' type.
+src/component/Home.tsx(781,20): error TS7053: Element implicitly has an 'any' type because expression of type 'number' can't be used to index type '{ 1: { min: number; max: number; }; 2: { min: number; max: number; }; 3: { min: number; max: number; }; 4: { min: number; max: number; }; 5: { min: number; max: number; }; }'.
+  No index signature with a parameter of type 'number' was found on type '{ 1: { min: number; max: number; }; 2: { min: number; max: number; }; 3: { min: number; max: number; }; 4: { min: number; max: number; }; 5: { min: number; max: number; }; }'.
+src/component/Home.tsx(928,31): error TS18048: 'sessions' is possibly 'undefined'.
+src/component/Home.tsx(1005,18): error TS18048: 'sessions' is possibly 'undefined'.
+src/component/Home.tsx(1010,26): error TS2488: Type 'any[] | { id: number; title: string; date: string; score: number; grade: string; skillId: string; questions: { text: string; skill: string; time: string; correct: boolean; chosen: string; answer: string; }[]; }[] | undefined' must have a '[Symbol.iterator]()' method that returns an iterator.
+src/component/Home.tsx(1040,63): error TS18048: 'sessions' is possibly 'undefined'.
+src/component/Home.tsx(1058,16): error TS18048: 'sessions' is possibly 'undefined'.
+src/component/SkillTree.tsx(87,10): error TS7053: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type '{}'.
+  No index signature with a parameter of type 'string' was found on type '{}'.
+src/component/SkillTree.tsx(87,19): error TS7053: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type '{}'.
+  No index signature with a parameter of type 'string' was found on type '{}'.
+src/component/SkillTree.tsx(88,5): error TS7053: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type '{}'.
+  No index signature with a parameter of type 'string' was found on type '{}'.
+src/component/SkillTree.tsx(95,10): error TS7053: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type '{}'.
+  No index signature with a parameter of type 'string' was found on type '{}'.
+src/component/SkillTree.tsx(95,21): error TS7053: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type '{}'.
+  No index signature with a parameter of type 'string' was found on type '{}'.
+src/component/SkillTree.tsx(96,5): error TS7053: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type '{}'.
+  No index signature with a parameter of type 'string' was found on type '{}'.
+src/component/SkillTree.tsx(100,24): error TS7006: Parameter 'prereqMap' implicitly has an 'any' type.
+src/component/SkillTree.tsx(102,18): error TS7006: Parameter 'id' implicitly has an 'any' type.
+src/component/SkillTree.tsx(103,28): error TS7053: Element implicitly has an 'any' type because expression of type 'any' can't be used to index type '{}'.
+src/component/SkillTree.tsx(105,5): error TS7053: Element implicitly has an 'any' type because expression of type 'any' can't be used to index type '{}'.
+src/component/SkillTree.tsx(105,63): error TS7006: Parameter 'p' implicitly has an 'any' type.
+src/component/SkillTree.tsx(106,12): error TS7053: Element implicitly has an 'any' type because expression of type 'any' can't be used to index type '{}'.
+src/component/SkillTree.tsx(111,22): error TS7006: Parameter 'depths' implicitly has an 'any' type.
+src/component/SkillTree.tsx(111,30): error TS7006: Parameter 'prereqMap' implicitly has an 'any' type.
+src/component/SkillTree.tsx(115,10): error TS7053: Element implicitly has an 'any' type because expression of type 'any' can't be used to index type '{}'.
+src/component/SkillTree.tsx(115,21): error TS7053: Element implicitly has an 'any' type because expression of type 'any' can't be used to index type '{}'.
+src/component/SkillTree.tsx(116,5): error TS7053: Element implicitly has an 'any' type because expression of type 'any' can't be used to index type '{}'.
+src/component/SkillTree.tsx(123,7): error TS18046: 'ids' is of type 'unknown'.
+src/component/SkillTree.tsx(123,17): error TS7006: Parameter 'a' implicitly has an 'any' type.
+src/component/SkillTree.tsx(123,20): error TS7006: Parameter 'b' implicitly has an 'any' type.
+src/component/SkillTree.tsx(124,21): error TS7006: Parameter 'id' implicitly has an 'any' type.
+src/component/SkillTree.tsx(125,48): error TS7006: Parameter 'p' implicitly has an 'any' type.
+src/component/SkillTree.tsx(125,70): error TS7006: Parameter 'p' implicitly has an 'any' type.
+src/component/SkillTree.tsx(125,75): error TS7053: Element implicitly has an 'any' type because expression of type 'any' can't be used to index type '{}'.
+src/component/SkillTree.tsx(127,29): error TS7006: Parameter 's' implicitly has an 'any' type.
+src/component/SkillTree.tsx(127,32): error TS7006: Parameter 'p' implicitly has an 'any' type.
+src/component/SkillTree.tsx(127,42): error TS7053: Element implicitly has an 'any' type because expression of type 'any' can't be used to index type '{}'.
+src/component/SkillTree.tsx(132,19): error TS18046: 'ids' is of type 'unknown'.
+src/component/SkillTree.tsx(132,42): error TS18046: 'ids' is of type 'unknown'.
+src/component/SkillTree.tsx(134,5): error TS18046: 'ids' is of type 'unknown'.
+src/component/SkillTree.tsx(134,18): error TS7006: Parameter 'id' implicitly has an 'any' type.
+src/component/SkillTree.tsx(134,22): error TS7006: Parameter 'i' implicitly has an 'any' type.
+src/component/SkillTree.tsx(135,7): error TS7053: Element implicitly has an 'any' type because expression of type 'any' can't be used to index type '{}'.
+src/component/SkillTree.tsx(142,26): error TS7031: Binding element 'children' implicitly has an 'any' type.
+src/component/SkillTree.tsx(142,36): error TS7031: Binding element 'viewBox' implicitly has an 'any' type.
+src/component/SkillTree.tsx(148,31): error TS7006: Parameter 'e' implicitly has an 'any' type.
+src/component/SkillTree.tsx(153,30): error TS7006: Parameter 'e' implicitly has an 'any' type.
+src/component/SkillTree.tsx(158,30): error TS7006: Parameter 'e' implicitly has an 'any' type.
+src/component/SkillTree.tsx(169,8): error TS2339: Property 'addEventListener' does not exist on type 'never'.
+src/component/SkillTree.tsx(170,21): error TS2339: Property 'removeEventListener' does not exist on type 'never'.
+src/component/SkillTree.tsx(192,22): error TS7031: Binding element 'id' implicitly has an 'any' type.
+src/component/SkillTree.tsx(192,26): error TS7031: Binding element 'x' implicitly has an 'any' type.
+src/component/SkillTree.tsx(192,29): error TS7031: Binding element 'y' implicitly has an 'any' type.
+src/component/SkillTree.tsx(192,32): error TS7031: Binding element 'selected' implicitly has an 'any' type.
+src/component/SkillTree.tsx(192,42): error TS7031: Binding element 'dimmed' implicitly has an 'any' type.
+src/component/SkillTree.tsx(192,50): error TS7031: Binding element 'matched' implicitly has an 'any' type.
+src/component/SkillTree.tsx(192,59): error TS7031: Binding element 'onClick' implicitly has an 'any' type.
+src/component/SkillTree.tsx(193,14): error TS7053: Element implicitly has an 'any' type because expression of type 'any' can't be used to index type '{ "SK-001": { name: string; tier: string; minReq: null; }; "SK-002": { name: string; tier: string; minReq: null; }; "SK-003": { name: string; tier: string; minReq: null; }; "SK-004": { name: string; tier: string; minReq: null; }; ... 15 more ...; "SK-034": { ...; }; }'.
+src/component/SkillTree.tsx(211,60): error TS7053: Element implicitly has an 'any' type because expression of type 'any' can't be used to index type '{ T1: { label: string; icon: string; }; T2: { label: string; icon: string; }; T3: { label: string; icon: string; }; }'.
+src/component/SkillTree.tsx(218,67): error TS7053: Element implicitly has an 'any' type because expression of type 'any' can't be used to index type '{ T1: { label: string; icon: string; }; T2: { label: string; icon: string; }; T3: { label: string; icon: string; }; }'.
+src/component/SkillTree.tsx(236,22): error TS7031: Binding element 'x1' implicitly has an 'any' type.
+src/component/SkillTree.tsx(236,26): error TS7031: Binding element 'y1' implicitly has an 'any' type.
+src/component/SkillTree.tsx(236,30): error TS7031: Binding element 'x2' implicitly has an 'any' type.
+src/component/SkillTree.tsx(236,34): error TS7031: Binding element 'y2' implicitly has an 'any' type.
+src/component/SkillTree.tsx(236,38): error TS7031: Binding element 'highlighted' implicitly has an 'any' type.
+src/component/SkillTree.tsx(236,51): error TS7031: Binding element 'dimmed' implicitly has an 'any' type.
+src/component/SkillTree.tsx(261,42): error TS2538: Type 'undefined' cannot be used as an index type.
+src/component/SkillTree.tsx(262,20): error TS2345: Argument of type 'any' is not assignable to parameter of type 'never'.
+src/component/SkillTree.tsx(262,37): error TS2345: Argument of type 'any' is not assignable to parameter of type 'never'.
+src/component/SkillTree.tsx(262,53): error TS2345: Argument of type 'any' is not assignable to parameter of type 'never'.
+src/component/SkillTree.tsx(265,29): error TS2488: Type 'never' must have a '[Symbol.iterator]()' method that returns an iterator.
+src/component/SkillTree.tsx(265,61): error TS2345: Argument of type 'any' is not assignable to parameter of type 'never'.
+src/component/SkillTree.tsx(285,9): error TS7053: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type '{ "SK-001": { name: string; tier: string; minReq: null; }; "SK-002": { name: string; tier: string; minReq: null; }; "SK-003": { name: string; tier: string; minReq: null; }; "SK-004": { name: string; tier: string; minReq: null; }; ... 15 more ...; "SK-034": { ...; }; }'.
+  No index signature with a parameter of type 'string' was found on type '{ "SK-001": { name: string; tier: string; minReq: null; }; "SK-002": { name: string; tier: string; minReq: null; }; "SK-003": { name: string; tier: string; minReq: null; }; "SK-004": { name: string; tier: string; minReq: null; }; ... 15 more ...; "SK-034": { ...; }; }'.
+src/component/SkillTree.tsx(292,39): error TS7053: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type '{}'.
+  No index signature with a parameter of type 'string' was found on type '{}'.
+src/component/SkillTree.tsx(293,39): error TS7053: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type '{}'.
+  No index signature with a parameter of type 'string' was found on type '{}'.
+src/component/SkillTree.tsx(301,24): error TS7006: Parameter 'id' implicitly has an 'any' type.
+src/component/SkillTree.tsx(306,59): error TS2339: Property 'filter' does not exist on type 'never'.
+src/component/SkillTree.tsx(306,66): error TS7006: Parameter 'p' implicitly has an 'any' type.
+src/component/SkillTree.tsx(307,59): error TS2339: Property 'filter' does not exist on type 'never'.
+src/component/SkillTree.tsx(307,66): error TS7006: Parameter 'c' implicitly has an 'any' type.
+src/component/SkillTree.tsx(367,24): error TS7053: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type '{}'.
+  No index signature with a parameter of type 'string' was found on type '{}'.
+src/component/SkillTree.tsx(367,46): error TS7053: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type '{}'.
+  No index signature with a parameter of type 'string' was found on type '{}'.
+src/component/SkillTree.tsx(381,23): error TS7053: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type '{}'.
+  No index signature with a parameter of type 'string' was found on type '{}'.
+src/component/SkillTree.tsx(404,55): error TS7053: Element implicitly has an 'any' type because expression of type 'any' can't be used to index type '{ T1: { label: string; icon: string; }; T2: { label: string; icon: string; }; T3: { label: string; icon: string; }; }'.
+src/component/SkillTree.tsx(404,73): error TS2339: Property 'tier' does not exist on type 'never'.
+src/component/SkillTree.tsx(407,59): error TS2339: Property 'name' does not exist on type 'never'.
+src/component/SkillTree.tsx(412,70): error TS2339: Property 'tier' does not exist on type 'never'.
+src/component/SkillTree.tsx(413,26): error TS2339: Property 'tier' does not exist on type 'never'.
+src/component/SkillTree.tsx(413,35): error TS7053: Element implicitly has an 'any' type because expression of type 'any' can't be used to index type '{ T1: { label: string; icon: string; }; T2: { label: string; icon: string; }; T3: { label: string; icon: string; }; }'.
+src/component/SkillTree.tsx(413,53): error TS2339: Property 'tier' does not exist on type 'never'.
+src/component/SkillTree.tsx(416,24): error TS2339: Property 'minReq' does not exist on type 'never'.
+src/component/SkillTree.tsx(416,86): error TS2339: Property 'minReq' does not exist on type 'never'.
+src/component/SkillTree.tsx(422,32): error TS7031: Binding element 'prereq' implicitly has an 'any' type.
+src/component/SkillTree.tsx(422,40): error TS7031: Binding element 'minLevel' implicitly has an 'any' type.
+src/component/SkillTree.tsx(424,60): error TS7053: Element implicitly has an 'any' type because expression of type 'any' can't be used to index type '{ "SK-001": { name: string; tier: string; minReq: null; }; "SK-002": { name: string; tier: string; minReq: null; }; "SK-003": { name: string; tier: string; minReq: null; }; "SK-004": { name: string; tier: string; minReq: null; }; ... 15 more ...; "SK-034": { ...; }; }'.
+src/component/SkillTree.tsx(436,34): error TS7031: Binding element 'child' implicitly has an 'any' type.
+src/component/SkillTree.tsx(436,41): error TS7031: Binding element 'minLevel' implicitly has an 'any' type.
+src/component/SkillTree.tsx(438,60): error TS7053: Element implicitly has an 'any' type because expression of type 'any' can't be used to index type '{ "SK-001": { name: string; tier: string; minReq: null; }; "SK-002": { name: string; tier: string; minReq: null; }; "SK-003": { name: string; tier: string; minReq: null; }; "SK-004": { name: string; tier: string; minReq: null; }; ... 15 more ...; "SK-034": { ...; }; }'.
+src/component/adminHome/Adminhome.tsx(549,13): error TS2322: Type '(id: number) => void' is not assignable to type '(id: string) => void'.
+  Types of parameters 'id' and 'id' are incompatible.
+    Type 'string' is not assignable to type 'number'.
+src/component/adminHome/Adminhome.tsx(550,13): error TS2322: Type '(id: number) => void' is not assignable to type '(id: string) => void'.
+  Types of parameters 'id' and 'id' are incompatible.
+    Type 'string' is not assignable to type 'number'.
+src/component/adminHome/Adminhome.tsx(565,13): error TS2322: Type '(skillId: number) => QuestionItem[]' is not assignable to type '(id: string) => any[]'.
+  Types of parameters 'skillId' and 'id' are incompatible.
+    Type 'string' is not assignable to type 'number'.
+src/component/adminHome/Adminhome.tsx(567,13): error TS2322: Type '(id: number) => void' is not assignable to type '(id: string) => void'.
+  Types of parameters 'id' and 'id' are incompatible.
+    Type 'string' is not assignable to type 'number'.
