@@ -177,6 +177,7 @@ export class userViewModel {
     const data = username + "&" + formatDateTime();
     console.log("this is data before hashe", data);
     const authenRequest = await sha256Hash(data);
+    console.log('authen request : ', authenRequest)
 
     const result = await AppClient.post<AuthenResponse>("/authen/authen_request", {
       authenRequest: authenRequest,

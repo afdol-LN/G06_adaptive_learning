@@ -22,17 +22,17 @@ export default function RegisterPanel({ onSubmit, isLoading, onSwitchTab }: Regi
   const [usernameMsg, setUsernameMsg] = useState({ text: "", type: "" });
   const [confirmMsg, setConfirmMsg] = useState({ text: "", type: "" });
 
-  const checkUsername = (val: string) => {
-    setUsername(val);
-    const takenNames = ["admin", "psu_user", "hello_myname", "test"];
-    const cleanVal = val.trim().toLowerCase();
+  // const checkUsername = (val: string) => {
+  //   setUsername(val);
+  //   const takenNames = ["admin", "psu_user", "hello_myname", "test"];
+  //   const cleanVal = val.trim().toLowerCase();
 
-    if (!cleanVal) return setUsernameMsg({ text: "", type: "" });
-    if (cleanVal.length < 4) return setUsernameMsg({ text: "At least 4 characters", type: "err" });
-    if (takenNames.includes(cleanVal)) return setUsernameMsg({ text: "✗ Username already taken", type: "err" });
+  //   if (!cleanVal) return setUsernameMsg({ text: "", type: "" });
+  //   if (cleanVal.length < 4) return setUsernameMsg({ text: "At least 4 characters", type: "err" });
+  //   if (takenNames.includes(cleanVal)) return setUsernameMsg({ text: "✗ Username already taken", type: "err" });
 
-    setUsernameMsg({ text: "✓ Username available", type: "ok" });
-  };
+  //   setUsernameMsg({ text: "✓ Username available", type: "ok" });
+  // };
 
   const checkMatch = (val: string) => {
     setConfirm(val);
@@ -126,7 +126,7 @@ export default function RegisterPanel({ onSubmit, isLoading, onSwitchTab }: Regi
           type="text"
           placeholder="your_username"
           value={username}
-          onChange={(e) => checkUsername(e.target.value)}
+          onChange={(e) => setUsernameMsg({ text: "✓ Username available", type: "ok" })}
           className={
             usernameMsg.type === "err"
               ? "error"
