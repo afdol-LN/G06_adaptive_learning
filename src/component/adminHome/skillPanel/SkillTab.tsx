@@ -1,4 +1,16 @@
+import {
+  FaTree,
+  FaMagnifyingGlass,
+  FaPlus,
+  FaPenToSquare,
+  FaEye,
+  FaPen,
+  FaToggleOff,
+  FaToggleOn,
+  FaTriangleExclamation,
+} from "react-icons/fa6";
 import SkillFormModal from "./component/SkillFormModal";
+import SkillViewModal from "./component/SkillViewModal";
 import { skillController } from "./skill.controller";
 
 interface SkillTabProps {
@@ -26,6 +38,10 @@ export default function SkillTab({ getSkillQuestions, setViewSkillQ }: SkillTabP
     closeForm,
     saveSkill,
 
+    viewingSkill,
+    openView,
+    closeView,
+
     toggleSkillStatus,
 
     deleteTarget,
@@ -38,13 +54,13 @@ export default function SkillTab({ getSkillQuestions, setViewSkillQ }: SkillTabP
   return (
     <div className="ad-tab-skills">
       <div className="ad-page-header">
-        <h1 className="ad-page-title">🌳 จัดการ Skill</h1>
+        <h1 className="ad-page-title"><FaTree /> จัดการ Skill</h1>
         <span className="ad-page-sub">Skill ทั้งหมด {skills.length} รายการ</span>
       </div>
 
       <div className="ad-toolbar">
         <div className="ad-search-wrap">
-          <span className="ad-search-icon">🔍</span>
+          <span className="ad-search-icon"><FaMagnifyingGlass /></span>
           <input
             className="ad-search"
             placeholder="ค้นหาชื่อ Skill, Tier..."
@@ -53,7 +69,7 @@ export default function SkillTab({ getSkillQuestions, setViewSkillQ }: SkillTabP
           />
         </div>
         <button className="ad-btn-primary ad-btn-add" onClick={openCreateForm}>
-          ➕ เพิ่ม Skill ใหม่
+          <FaPlus /> เพิ่ม Skill ใหม่
         </button>
       </div>
 
@@ -132,20 +148,31 @@ export default function SkillTab({ getSkillQuestions, setViewSkillQ }: SkillTabP
                         style={{ borderColor: "rgba(139,92,246,0.3)", color: "#8b5cf6" }}
                         onClick={() => setViewSkillQ(s)}
                       >
-                        📝 {getSkillQuestions(s.skillId).length} ข้อ
+<FaPenToSquare /> {getSkillQuestions(s.skillId).length} ข้อ
                       </button>
                     </td>
                   )}
                   <td>
                     <div className="ad-action-btns">
+                      <button className="ad-btn-sm ad-btn-view" onClick={() => openView(s)}>
+                        <FaEye /> ดู
+                      </button>
                       <button className="ad-btn-sm ad-btn-view" onClick={() => openEditForm(s)}>
-                        ✏️ แก้ไข
+                        <FaPen /> แก้ไข
                       </button>
                       <button className="ad-btn-sm ad-btn-toggle" onClick={() => toggleSkillStatus(s)}>
-                        {s.status === "active" ? "🔴 ระงับ" : "🟢 เปิด"}
+                        {s.status === "active" ? (
+                          <>
+                            <FaToggleOff /> ระงับ
+                          </>
+                        ) : (
+                          <>
+                            <FaToggleOn /> เปิด
+                          </>
+                        )}
                       </button>
                       {/* <button className="ad-btn-sm ad-btn-del" onClick={() => requestDelete(s)}>
-                        🗑 ลบ
+                        <FaTrash /> ลบ
                       </button> */}
                     </div>
                   </td>
@@ -166,10 +193,19 @@ export default function SkillTab({ getSkillQuestions, setViewSkillQ }: SkillTabP
         onClose={closeForm}
       />
 
+      <SkillViewModal
+        skill={viewingSkill}
+        onClose={closeView}
+        onEdit={(s) => {
+          closeView();
+          openEditForm(s);
+        }}
+      />
+
       {deleteTarget && (
         <div className="ad-overlay" onClick={cancelDelete}>
           <div className="ad-confirm" onClick={(e) => e.stopPropagation()}>
-            <div className="ad-confirm-icon">⚠️</div>
+            <div className="ad-confirm-icon"><FaTriangleExclamation /></div>
             <div className="ad-confirm-msg">
               ต้องการลบ Skill "{deleteTarget.skillsName}" ออกจากระบบใช่ไหม?
             </div>

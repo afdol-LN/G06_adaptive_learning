@@ -14,6 +14,7 @@ export interface SkillPrerequisiteEntry {
 
 export interface Skill {
   skillId: number;
+  skillCode: string;
   skillsName: string;
   tier: string | null;
   status: string;
@@ -21,7 +22,7 @@ export interface Skill {
 }
 
 export interface CreateSkillRequest {
-  skillId: number;
+  skillCode: string;
   skillsName: string;
   tier?: string;
   status?: string;

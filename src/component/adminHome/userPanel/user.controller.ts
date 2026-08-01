@@ -6,6 +6,7 @@ import {
   RoleOption,
   CreateUserByAdminRequest,
 } from "../../../models/userModel";
+import { getStatusColor, getScoreColor } from "../../../utils/adminUi";
 
 export function userController() {
   const [users, setUsers] = useState<UserResponseAdmin[]>([]);
@@ -74,24 +75,6 @@ export function userController() {
     }
   }, [userSearch, users]);
 
-  const getStatusColor = (status: string) => {
-    switch ((status || "").toLowerCase()) {
-      case "active":
-        return "#10b981";
-      case "pending":
-        return "#f59e0b";
-      case "inactive":
-        return "#ef4444";
-      default:
-        return "#9ca3af";
-    }
-  };
-
-  const getScoreColor = (score?: number) => {
-    const s = score || 0;
-    return s >= 80 ? "#10b981" : s >= 60 ? "#3b82f6" : "#f59e0b";
-  };
-
   const toggleUserStatus = async (targetUser: UserResponseAdmin) => {
     if (!targetUser.id) {
       alert("ไม่พบรหัสผู้ใช้ (ID) สำหรับทำรายการ");
@@ -104,12 +87,10 @@ export function userController() {
       alert(`อัปเดตสถานะไม่สำเร็จ: ${result.errorMessage || "เกิดข้อผิดพลาด"}`);
     } else {
       const updatedUsers = users.map((u) =>
-        u.id === targetUser.id || u.fullName === targetUser.fullName
-          ? { ...u, status: newStatus }
-          : u
+        u.id === targetUser.id ? { ...u, status: newStatus } : u
       );
       setUsers(updatedUsers);
-      if (viewUser && (viewUser.id === targetUser.id || viewUser.fullName === targetUser.fullName)) {
+      if (viewUser && viewUser.id === targetUser.id) {
         setViewUser({ ...viewUser, status: newStatus });
       }
     }

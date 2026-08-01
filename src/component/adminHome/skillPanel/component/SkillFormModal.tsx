@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { FaPen, FaPlus, FaCheck } from "react-icons/fa6";
 import { Skill, SkillPrerequisiteInput } from "../../../../models/skillModel";
 import { SkillFormValues, EMPTY_SKILL_FORM } from "../skill.controller";
 
@@ -23,7 +24,7 @@ export default function SkillFormModal({
   onSave,
   onClose,
 }: SkillFormModalProps) {
-  const [skillId, setSkillId] = useState<string>("");
+  const [skillCode, setSkillCode] = useState<string>("");
   const [skillsName, setSkillsName] = useState<string>("");
   const [tier, setTier] = useState<string>(EMPTY_SKILL_FORM.tier);
   const [status, setStatus] = useState<string>(EMPTY_SKILL_FORM.status);
@@ -32,7 +33,7 @@ export default function SkillFormModal({
   useEffect(() => {
     if (!isOpen) return;
     if (editingSkill) {
-      setSkillId(String(editingSkill.skillId));
+      setSkillCode(String(editingSkill.skillCode));
       setSkillsName(editingSkill.skillsName);
       setTier(editingSkill.tier || EMPTY_SKILL_FORM.tier);
       setStatus(editingSkill.status);
@@ -40,7 +41,7 @@ export default function SkillFormModal({
         (editingSkill.skillPrequisite || []).map((p) => p.prerequisiteSkillId),
       );
     } else {
-      setSkillId("");
+      setSkillCode("");
       setSkillsName("");
       setTier(EMPTY_SKILL_FORM.tier);
       setStatus(EMPTY_SKILL_FORM.status);
@@ -65,7 +66,7 @@ export default function SkillFormModal({
     }));
 
     await onSave({
-      skillId: Number(skillId),
+      skillCode: skillCode.trim(),
       skillsName: skillsName.trim(),
       tier,
       status,
@@ -80,7 +81,15 @@ export default function SkillFormModal({
       <div className="ad-modal" onClick={(e) => e.stopPropagation()}>
         <div className="ad-modal-header">
           <span className="ad-modal-title">
-            {isEdit ? `✏️ แก้ไข Skill` : `➕ เพิ่ม Skill ใหม่`}
+            {isEdit ? (
+              <>
+                <FaPen /> แก้ไข Skill
+              </>
+            ) : (
+              <>
+                <FaPlus /> เพิ่ม Skill ใหม่
+              </>
+            )}
           </span>
         </div>
 
@@ -103,12 +112,12 @@ export default function SkillFormModal({
             )}
 
             <div className="ad-field">
-              <label className="ad-label">Skill ID</label>
+              <label className="ad-label">Skill code</label>
               <input
-                type="number"
+                type="text"
                 className="ad-input"
-                value={skillId}
-                onChange={(e) => setSkillId(e.target.value)}
+                value={skillCode}
+                onChange={(e) => setSkillCode(e.target.value)}
                 disabled={isEdit}
                 required
               />
@@ -163,7 +172,13 @@ export default function SkillFormModal({
                             : { cursor: "pointer" }
                         }
                       >
-                        {selected ? "✓ " : ""}
+                        {selected ? (
+                          <>
+                            <FaCheck />{" "}
+                          </>
+                        ) : (
+                          ""
+                        )}
                         {s.skillsName}
                       </button>
                     );

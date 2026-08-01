@@ -1,3 +1,5 @@
+import { FaMagnifyingGlass } from "react-icons/fa6";
+
 interface SearchBarProps {
   userSearch: string;
   error?: string | null;
@@ -12,7 +14,7 @@ export default function SearchBar({
     return(
         <div className="ad-toolbar">
         <div className="ad-search-wrap">
-          <span className="ad-search-icon">🔍</span>
+          <span className="ad-search-icon"><FaMagnifyingGlass /></span>
           <input
             className="ad-search"
             placeholder="ค้นหาชื่อ, คณะ, คณะ, สาขา ..."

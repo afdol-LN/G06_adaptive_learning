@@ -14,15 +14,14 @@ export function usePretestController() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [questions, setQuestions] = useState<PretestQuestion[]>([]);
   const [currentScreen, setCurrentScreen] = useState<"intro" | "quiz" | "done">("intro");
-  const [currentQIndex, setCurrentQIndex] = useState<number>(0);
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState<number>(0);
   const [answers, setAnswers] = useState<PretestAnswer[]>([]);
   const [fillInBlankInput, setFillInBlankInput] = useState<string>("");
-  const [showModal, setShowModal] = useState<boolean>(false);
+  const [showUnansweredModal, setShowUnansweredModal] = useState<boolean>(false);
 
-  // One-by-one evaluation tracking (`isCorrect` array stored as requested)
   const [isCorrectList, setIsCorrectList] = useState<boolean[]>([]);
-  const [results, setResults] = useState<PretestResultItem[]>([]);
-  const [score, setScore] = useState<PretestScoreSummary>({
+  const [resultsList, setResultsList] = useState<PretestResultItem[]>([]);
+  const [scoreSummary, setScoreSummary] = useState<PretestScoreSummary>({
     correct: 0,
     total: 5,
     pct: 0,
@@ -32,28 +31,36 @@ export function usePretestController() {
 
   // Load questions from backend on mount
   useEffect(() => {
-    async function loadQuestions() {
+    async function loadPretestQuestions() {
       setIsLoading(true);
-      const goalId =
+      const activeGoalId =
         localStorage.getItem("activeBranchId") ||
         localStorage.getItem("goalId") ||
         localStorage.getItem("branchId") ||
         "G06";
-      const userId = localStorage.getItem("user_id") || "1";
+      const currentUserId = localStorage.getItem("user_id");
 
-      const fetched = await PretestService.fetchPretestQuestions(goalId, userId, 1);
-      const qList = fetched && fetched.length > 0 ? fetched : PretestService.getFallbackQuestions();
+      const fetchedQuestions = await PretestService.fetchPretestQuestions(
+        activeGoalId,
+        currentUserId!,
+        1
+      );
+      const questionList =
+        fetchedQuestions && fetchedQuestions.length > 0
+          ? fetchedQuestions
+          : PretestService.getFallbackQuestions();
 
-      setQuestions(qList);
-      setAnswers(new Array(qList.length).fill(null));
+      setQuestions(questionList);
+      setAnswers(new Array(questionList.length).fill(null));
       setIsCorrectList([]);
-      setResults([]);
+      setResultsList([]);
       setIsLoading(false);
     }
-    loadQuestions();
+
+    loadPretestQuestions();
   }, []);
 
-  const currentQ: PretestQuestion = questions[currentQIndex] || {
+  const currentQuestion: PretestQuestion = questions[currentQuestionIndex] || {
     id: 0,
     skillId: 1,
     skillName: "General",
@@ -65,216 +72,125 @@ export function usePretestController() {
     diff: 1,
   };
 
-  const answeredCount = answers.filter((a) => a !== null && a !== "").length;
-  const progressPct = questions.length > 0 ? Math.round((answeredCount / questions.length) * 100) : 0;
+  const answeredCount = answers.filter(
+    (answer) => answer !== null && answer !== "" && answer !== undefined
+  ).length;
+  const progressPercentage =
+    questions.length > 0 ? Math.round((answeredCount / questions.length) * 100) : 0;
 
   // Sync fillInBlankInput when question index changes or when an answer is selected
   useEffect(() => {
-    if (questions.length > 0 && currentQ.type === "FILL_IN_BLANK") {
-      const existing = answers[currentQIndex];
-      if (typeof existing === "string") {
-        setFillInBlankInput(existing);
+    if (questions.length > 0 && currentQuestion.type === "FILL_IN_BLANK") {
+      const existingAnswer = answers[currentQuestionIndex];
+      if (typeof existingAnswer === "string") {
+        setFillInBlankInput(existingAnswer);
       } else {
         setFillInBlankInput("");
       }
     } else {
       setFillInBlankInput("");
     }
-  }, [currentQIndex, questions, currentQ.type]);
+  }, [currentQuestionIndex, questions, currentQuestion.type]);
 
   const startQuiz = useCallback(() => {
     setCurrentScreen("quiz");
   }, []);
 
-  const selectChoice = useCallback(
+  const selectChoiceAnswer = useCallback(
     (choiceIndex: number) => {
-      const newAnswers = [...answers];
-      newAnswers[currentQIndex] = choiceIndex;
-      setAnswers(newAnswers);
+      const updatedAnswers = [...answers];
+      updatedAnswers[currentQuestionIndex] = choiceIndex;
+      setAnswers(updatedAnswers);
     },
-    [answers, currentQIndex]
+    [answers, currentQuestionIndex]
   );
 
-  const handleFillInBlankChange = useCallback(
-    (value: string) => {
-      setFillInBlankInput(value);
-      const newAnswers = [...answers];
-      newAnswers[currentQIndex] = value;
-      setAnswers(newAnswers);
+  const handleFillInBlankInputChange = useCallback(
+    (inputValue: string) => {
+      setFillInBlankInput(inputValue);
+      const updatedAnswers = [...answers];
+      updatedAnswers[currentQuestionIndex] = inputValue;
+      setAnswers(updatedAnswers);
     },
-    [answers, currentQIndex]
+    [answers, currentQuestionIndex]
   );
 
-  // Evaluate the answer for question at index right away (One-by-one evaluation)
-  const evaluateQuestionAtIndex = useCallback(
-    (idx: number, userAnswer: PretestAnswer): { isCorrect: boolean; resultItem: PretestResultItem } => {
-      const q = questions[idx];
-      let isCorrect = false;
+  const advanceToNextQuestion = useCallback(
+    (isSkippingQuestion: boolean = false) => {
+      const currentAnswer = isSkippingQuestion ? null : answers[currentQuestionIndex];
+      const { isCorrect, resultItem } = PretestService.evaluateQuestionAtIndex(
+        currentQuestionIndex,
+        questions[currentQuestionIndex],
+        currentAnswer
+      );
 
-      if (q.type === "FILL_IN_BLANK") {
-        const userStr = typeof userAnswer === "string" ? userAnswer.trim() : "";
-        const targetStr = typeof q.answer === "string" ? q.answer.trim() : typeof q.fillInBlank === "string" ? q.fillInBlank.trim() : "";
-        if (q.isCasesensitive === "YES") {
-          isCorrect = userStr === targetStr && targetStr !== "";
-        } else {
-          isCorrect = userStr.toLowerCase() === targetStr.toLowerCase() && targetStr !== "";
-        }
-      } else {
-        // CHOICE type
-        isCorrect =
-          userAnswer !== null &&
-          userAnswer !== undefined &&
-          q.answer !== null &&
-          q.answer !== undefined &&
-          userAnswer.toString() === q.answer.toString();
-      }
-
-      const resultItem: PretestResultItem = {
-        questionIndex: idx,
-        questionId: q.id,
-        skillId: q.skillId,
-        skillName: q.skillName,
-        type: q.type,
-        userAnswer: userAnswer,
-        correctAnswer: q.answer,
-        isCorrect: isCorrect,
-      };
-
-      return { isCorrect, resultItem };
-    },
-    [questions]
-  );
-
-  const advance = useCallback(
-    (isSkipping: boolean = false) => {
-      const currentAnswer = isSkipping ? null : answers[currentQIndex];
-      const { isCorrect, resultItem } = evaluateQuestionAtIndex(currentQIndex, currentAnswer);
-
-      // Store exercise result one by one (`isCorrect: boolean` inside our array state)
       const nextIsCorrectList = [...isCorrectList];
-      nextIsCorrectList[currentQIndex] = isCorrect;
+      nextIsCorrectList[currentQuestionIndex] = isCorrect;
       setIsCorrectList(nextIsCorrectList);
 
-      const nextResults = [...results];
-      nextResults[currentQIndex] = resultItem;
-      setResults(nextResults);
+      const nextResultsList = [...resultsList];
+      nextResultsList[currentQuestionIndex] = resultItem;
+      setResultsList(nextResultsList);
 
-      if (currentQIndex === questions.length - 1) {
-        // Final question completed -> calculate summary score and move to done screen
-        const correctCount = nextIsCorrectList.filter((c) => c === true).length;
-        const pct = Math.round((correctCount / questions.length) * 100);
-        const finalSummary: PretestScoreSummary = {
-          correct: correctCount,
-          total: questions.length,
-          pct,
-          results: nextResults,
-          isCorrectList: nextIsCorrectList,
-        };
-        setScore(finalSummary);
+      if (currentQuestionIndex === questions.length - 1) {
+        const finalSummary = PretestService.calculateScoreSummary(
+          questions.length,
+          nextIsCorrectList,
+          nextResultsList
+        );
+        setScoreSummary(finalSummary);
         setCurrentScreen("done");
       } else {
-        setCurrentQIndex((prev) => prev + 1);
+        setCurrentQuestionIndex((previousIndex) => previousIndex + 1);
       }
     },
-    [answers, currentQIndex, evaluateQuestionAtIndex, isCorrectList, questions.length, results]
+    [answers, currentQuestionIndex, isCorrectList, questions, resultsList]
   );
 
-  const handleNext = useCallback(() => {
-    const currentAnswer = answers[currentQIndex];
+  const handleNextQuestion = useCallback(() => {
+    const currentAnswer = answers[currentQuestionIndex];
     if (currentAnswer === null || currentAnswer === "" || currentAnswer === undefined) {
-      setShowModal(true);
+      setShowUnansweredModal(true);
       return;
     }
-    advance(false);
-  }, [advance, answers, currentQIndex]);
+    advanceToNextQuestion(false);
+  }, [advanceToNextQuestion, answers, currentQuestionIndex]);
 
-  const confirmSkip = useCallback(() => {
-    setShowModal(false);
-    advance(true);
-  }, [advance]);
+  const confirmSkipQuestion = useCallback(() => {
+    setShowUnansweredModal(false);
+    advanceToNextQuestion(true);
+  }, [advanceToNextQuestion]);
 
-  const goDashboard = useCallback(() => {
+  const navigateToDashboard = useCallback(() => {
     navigate("/home");
   }, [navigate]);
 
-  const highlightCode = useCallback((line: string) => {
-    if (!line) return { __html: "" };
-    const KWS = [
-      "def",
-      "return",
-      "if",
-      "else",
-      "elif",
-      "for",
-      "in",
-      "while",
-      "import",
-      "from",
-      "class",
-      "True",
-      "False",
-      "None",
-      "and",
-      "or",
-      "not",
-      "print",
-      "range",
-      "append",
-      "pop",
-      "len",
-      "const",
-      "let",
-      "var",
-      "function",
-    ];
-
-    let h = line
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;");
-
-    h = h.replace(/(#[^]*)$/, '<span class="code-cm">$1</span>');
-    h = h.replace(/(\/\/[^]*)$/, '<span class="code-cm">$1</span>');
-
-    const strPlaceholders: string[] = [];
-    h = h.replace(/("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*')/g, (match) => {
-      strPlaceholders.push(match);
-      return `\x00STR${strPlaceholders.length - 1}\x00`;
-    });
-
-    h = h.replace(
-      new RegExp(`\\b(${KWS.join("|")})\\b`, "g"),
-      '<span class="code-kw">$1</span>'
-    );
-    h = h.replace(/\b(\d+)\b/g, '<span class="code-num">$1</span>');
-    h = h.replace(
-      /\x00STR(\d+)\x00/g,
-      (_, i) => `<span class="code-str">${strPlaceholders[parseInt(i)]}</span>`
-    );
-
-    return { __html: h };
+  const highlightCodeLine = useCallback((codeLine: string) => {
+    return PretestService.highlightCodeLine(codeLine);
   }, []);
 
   return {
     isLoading,
     questions,
     currentScreen,
-    currentQIndex,
-    currentQ,
+    currentQuestionIndex,
+    currentQuestion,
     answers,
     fillInBlankInput,
-    showModal,
+    showUnansweredModal,
     isCorrectList,
-    results,
-    score,
-    progressPct,
+    resultsList,
+    scoreSummary,
+    progressPercentage,
     startQuiz,
-    selectChoice,
-    handleFillInBlankChange,
-    handleNext,
-    confirmSkip,
-    goDashboard,
-    setShowModal,
-    highlightCode,
+    selectChoiceAnswer,
+    handleFillInBlankInputChange,
+    handleNextQuestion,
+    confirmSkipQuestion,
+    navigateToDashboard,
+    setShowUnansweredModal,
+    highlightCodeLine,
   };
 }
+
+export type PretestControllerType = ReturnType<typeof usePretestController>;

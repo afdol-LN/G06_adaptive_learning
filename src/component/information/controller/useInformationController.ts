@@ -1,14 +1,17 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useApp } from "../../../context/AppContext";
-import { GOALS } from "../../../data/mockData";
 import { InformationService } from "../../../services/informationService";
-import { InformationFormData } from "../../../models/informationModel";
+import { InformationFormData, GoalItem } from "../../../models/informationModel";
 
 export function useInformationController() {
   const [step, setStep] = useState<number>(1);
   const [isShaking, setIsShaking] = useState<boolean>(false);
   const navigate = useNavigate();
+
+  // Goals from backend state
+  const [goals, setGoals] = useState<GoalItem[]>([]);
+  const [isLoadingGoals, setIsLoadingGoals] = useState<boolean>(true);
 
   // Context access
   const { addBranch, switchBranch, branches } = useApp();
@@ -31,12 +34,23 @@ export function useInformationController() {
     msg: "",
   });
 
+  // Fetch Goals from Backend API on mount
+  useEffect(() => {
+    async function loadGoals() {
+      setIsLoadingGoals(true);
+      const fetchedGoals = await InformationService.fetchGoals();
+      setGoals(fetchedGoals);
+      setIsLoadingGoals(false);
+    }
+    loadGoals();
+  }, []);
+
   const totalSteps = InformationService.getTotalSteps();
   const steps = InformationService.getSteps();
   const stepLabels = InformationService.getStepLabels();
   const progressPct = ((step - 1) / (totalSteps - 1)) * 100;
   const currentExpData = InformationService.getExperienceData(exp);
-  const goalsByGroup = InformationService.groupGoalsByGroup(GOALS);
+  const goalsByGroup = InformationService.groupGoalsByGroup(goals);
 
   const triggerShake = () => {
     setIsShaking(true);
@@ -86,7 +100,7 @@ export function useInformationController() {
       const createdIds = InformationService.createBranchesForSelectedGoals(
         formData,
         selectedGoal,
-        GOALS,
+        goals,
         exp,
         addBranch
       );
@@ -140,6 +154,8 @@ export function useInformationController() {
     selectedBranchId,
     newBranchIds,
     branches,
+    goals,
+    isLoadingGoals,
     // Derived
     progressPct,
     currentExpData,

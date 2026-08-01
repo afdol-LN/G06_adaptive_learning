@@ -1,4 +1,5 @@
 import React from 'react';
+import { FaClipboardList, FaMagnifyingGlass } from 'react-icons/fa6';
 
 export default function HistoryTab({
   filteredHistory,
@@ -12,12 +13,12 @@ export default function HistoryTab({
   return (
     <div className="ad-tab-history">
       <div className="ad-page-header">
-        <h1 className="ad-page-title">📋 ประวัติการทำโจทย์ทั้งหมด</h1>
+        <h1 className="ad-page-title"><FaClipboardList /> ประวัติการทำโจทย์ทั้งหมด</h1>
         <span className="ad-page-sub">พบ {filteredHistory.length} รายการ</span>
       </div>
       <div className="ad-toolbar">
         <div className="ad-search-wrap">
-          <span className="ad-search-icon">🔍</span>
+          <span className="ad-search-icon"><FaMagnifyingGlass /></span>
           <input className="ad-search" placeholder="ค้นหาชื่อผู้ใช้, ชื่อ Skill..." value={histSearch} onChange={e => setHistSearch(e.target.value)} />
         </div>
         {['all', 'great', 'good', 'low'].map(g => (

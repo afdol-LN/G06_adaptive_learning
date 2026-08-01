@@ -56,6 +56,7 @@ export default function InformationForm() {
             <StepSelectGoal
               goalsByGroup={ctrl.goalsByGroup}
               selectedGoal={ctrl.selectedGoal}
+              isLoadingGoals={ctrl.isLoadingGoals}
               toggleGoal={ctrl.toggleGoal}
             />
           )}

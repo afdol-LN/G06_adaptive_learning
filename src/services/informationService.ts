@@ -78,6 +78,7 @@ const GROUP_LABELS: Record<string, string> = {
   Academic: "Academic",
   Competitive: "Competitive",
   Specialized: "Specialized",
+  General: "General",
 };
 
 export class InformationService {
@@ -91,6 +92,41 @@ export class InformationService {
 
   static getTotalSteps(): number {
     return TOTAL_STEPS;
+  }
+
+  static async fetchGoals(): Promise<GoalItem[]> {
+    try {
+      const response = await AppClient.get("goal");
+      let rawGoalsList: any[] = [];
+
+      if (Array.isArray(response)) {
+        rawGoalsList = response;
+      } else if (response && Array.isArray(response.data)) {
+        rawGoalsList = response.data;
+      }
+
+      const formattedGoalsList: GoalItem[] = rawGoalsList.map((rawGoal: any) => {
+        const goalId = rawGoal.id ? String(rawGoal.id) : String(rawGoal.goalId || "");
+        const goalName = rawGoal.goalName || rawGoal.name || rawGoal.goal || `Goal ${goalId}`;
+        const goalDesc = rawGoal.goal || rawGoal.desc || rawGoal.description || goalName;
+        const goalGroup = rawGoal.group || rawGoal.category || "General";
+        const goalIcon = rawGoal.icon || "🎯";
+
+        return {
+          id: goalId,
+          name: goalName,
+          desc: goalDesc,
+          group: goalGroup,
+          icon: goalIcon,
+          skillCount: rawGoal.skillCount,
+        };
+      });
+
+      return formattedGoalsList;
+    } catch (error) {
+      console.error("Failed to fetch goals from backend API:", error);
+      return [];
+    }
   }
 
   static async getCampuses(): Promise<CampusDTO[]> {
@@ -149,9 +185,10 @@ export class InformationService {
   }
 
   static groupGoalsByGroup(goals: GoalItem[]): GoalGroupMap {
-    return goals.reduce((acc: GoalGroupMap, g: GoalItem) => {
-      if (!acc[g.group]) acc[g.group] = [];
-      acc[g.group].push(g);
+    return goals.reduce((acc: GoalGroupMap, goalItem: GoalItem) => {
+      const groupKey = goalItem.group;
+      if (!acc[groupKey]) acc[groupKey] = [];
+      acc[groupKey].push(goalItem);
       return acc;
     }, {});
   }

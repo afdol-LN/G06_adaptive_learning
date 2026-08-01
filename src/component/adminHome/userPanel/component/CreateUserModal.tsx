@@ -197,12 +197,7 @@ export default function CreateUserModal({
                     </option>
                   ))
                 ) : (
-                  <>
-                    <option value={1}>Male</option>
-                    <option value={2}>Female</option>
-                    <option value={3}>LGBTQ+</option>
-                    <option value={4}>ไม่ระบุ</option>
-                  </>
+                  ''
                 )}
               </select>
             </div>

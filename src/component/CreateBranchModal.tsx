@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
-import { GOALS } from '../data/mockData';
+import { InformationService } from '../services/informationService';
+import { GoalItem } from '../models/informationModel';
 
 // Reusing EXP_DATA from InformationForm
-const EXP_DATA = {
+const EXP_DATA: Record<number, { level: string; title: string; desc: string; badges: string[]; color: string }> = {
   1: { level: 'Level 1 — Novice',       title: 'มือใหม่หัดเขียนโค้ด',      desc: 'เพิ่งเริ่มต้นศึกษา อาจเคยเห็นโค้ดบ้างแต่ยังไม่มีประสบการณ์', badges: ['ยังไม่มีประสบการณ์', 'เรียนครั้งแรก'], color: '#e05c5c' },
   2: { level: 'Level 2 — Beginner',     title: 'เริ่มต้นเขียนโปรแกรม',     desc: 'รู้จัก variable, loop, if-else แต่ยังไม่มั่นใจ', badges: ['Variables', 'Loops', 'Conditions'], color: '#e8a03c' },
   3: { level: 'Level 3 — Intermediate', title: 'เขียนโปรแกรมได้บ้าง',      desc: 'เข้าใจ OOP, function และเคยทำโปรเจกต์ขนาดเล็ก', badges: ['OOP', 'Functions', 'Data Structures'], color: '#0047AB' },
@@ -12,35 +13,46 @@ const EXP_DATA = {
   5: { level: 'Level 5 — Expert',       title: 'เชี่ยวชาญการเขียนโปรแกรม', desc: 'เขียน Python ขั้นสูงได้อย่างคล่องแคล่ว มีประสบการณ์จริง', badges: ['Advanced Python', 'Real-world', 'Professional'], color: '#38b874' },
 };
 
-const GROUP_LABELS = {
+const GROUP_LABELS: Record<string, string> = {
   Career:      'Career',
   Academic:    'Academic',
   Competitive: 'Competitive',
   Specialized: 'Specialized',
+  General:     'General',
 };
 
-export default function CreateBranchModal({ onClose }) {
-  const [step, setStep] = useState(1);
-  const [selectedGoal, setSelectedGoal] = useState(null);
-  const [exp, setExp] = useState(1);
+interface CreateBranchModalProps {
+  onClose: () => void;
+}
+
+export default function CreateBranchModal({ onClose }: CreateBranchModalProps) {
+  const [step, setStep] = useState<number>(1);
+  const [selectedGoal, setSelectedGoal] = useState<string | null>(null);
+  const [exp, setExp] = useState<number>(1);
+  const [goals, setGoals] = useState<GoalItem[]>([]);
+  const [isLoadingGoals, setIsLoadingGoals] = useState<boolean>(true);
+
   const { addBranch, switchBranch, activeBranch, branches } = useApp();
   const navigate = useNavigate();
 
-  const goalsByGroup = GOALS.reduce((acc, g) => {
-    if (!acc[g.group]) acc[g.group] = [];
-    acc[g.group].push(g);
-    return acc;
-  }, {});
+  useEffect(() => {
+    async function loadGoalsFromBackend() {
+      setIsLoadingGoals(true);
+      const fetchedGoals = await InformationService.fetchGoals();
+      setGoals(fetchedGoals);
+      setIsLoadingGoals(false);
+    }
+    loadGoalsFromBackend();
+  }, []);
 
-  // For reusing initial data
+  const goalsByGroup = InformationService.groupGoalsByGroup(goals);
   const baseBranch = activeBranch || branches?.[0];
 
   const handleNext = () => {
     if (step === 1 && selectedGoal) {
       setStep(2);
-    } else if (step === 2) {
-      // Form Submit
-      const goal = GOALS.find(g => g.id === selectedGoal);
+    } else if (step === 2 && selectedGoal) {
+      const goal = goals.find((g) => g.id === selectedGoal);
       const newId = addBranch({
         campus:   baseBranch?.campus || 'หาดใหญ่',
         faculty:  baseBranch?.faculty || 'วิทยาศาสตร์',
@@ -59,11 +71,11 @@ export default function CreateBranchModal({ onClose }) {
     }
   };
 
-  const currentExpData = EXP_DATA[exp];
+  const currentExpData = EXP_DATA[exp] || EXP_DATA[1];
 
   return (
     <div className="ex-picker-overlay" onClick={onClose} style={{ zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <div className="ex-picker-modal create-branch-modal" onClick={e => e.stopPropagation()} style={{ width: '600px', maxWidth: '90%', maxHeight: '90vh', overflowY: 'auto', padding: '24px' }}>
+      <div className="ex-picker-modal create-branch-modal" onClick={(e) => e.stopPropagation()} style={{ width: '600px', maxWidth: '90%', maxHeight: '90vh', overflowY: 'auto', padding: '24px' }}>
         
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #e2e8f0', paddingBottom: '16px', marginBottom: '20px' }}>
           <h2 style={{ fontSize: '20px', fontWeight: '700', color: '#0f172a', margin: 0 }}>
@@ -74,37 +86,49 @@ export default function CreateBranchModal({ onClose }) {
 
         {step === 1 && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-            {Object.entries(GROUP_LABELS).map(([groupKey, groupTitle]) => {
-              const groupGoals = goalsByGroup[groupKey] || [];
-              if (groupGoals.length === 0) return null;
-              return (
-                <div key={groupKey}>
-                  <div style={{ fontSize: '13px', fontWeight: '700', color: '#64748b', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '12px' }}>
-                    {groupTitle}
-                  </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '12px' }}>
-                    {groupGoals.map(g => {
-                      const isSel = selectedGoal === g.id;
-                      return (
-                        <div key={g.id} onClick={() => setSelectedGoal(g.id)}
-                          style={{
-                            padding: '16px', border: `2px solid ${isSel ? '#0047AB' : '#e2e8f0'}`,
-                            borderRadius: '12px', background: isSel ? '#f0f4ff' : '#fff',
-                            cursor: 'pointer', transition: 'all 0.2s'
-                          }}
-                        >
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
-                            <span style={{ fontSize: '24px', background: '#fff', border: '1px solid #e2e8f0', borderRadius: '8px', width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}>{g.icon}</span>
-                            <span style={{ fontSize: '15px', fontWeight: '700', color: isSel ? '#0047AB' : '#0f172a' }}>{g.name}</span>
+            {isLoadingGoals ? (
+              <div style={{ textAlign: 'center', padding: '32px', color: '#64748b' }}>
+                กำลังโหลดข้อมูลเป้าหมายการเรียนรู้...
+              </div>
+            ) : goals.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '40px 16px', color: '#f87171' }}>
+                <p style={{ fontSize: '15px', fontWeight: '600', margin: 0 }}>
+                  ไม่พบข้อมูลเป้าหมายการเรียนรู้ในระบบ (ไม่มี goal ให้เลือก)
+                </p>
+              </div>
+            ) : (
+              Object.entries(GROUP_LABELS).map(([groupKey, groupTitle]) => {
+                const groupGoals = goalsByGroup[groupKey] || [];
+                if (groupGoals.length === 0) return null;
+                return (
+                  <div key={groupKey}>
+                    <div style={{ fontSize: '13px', fontWeight: '700', color: '#64748b', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '12px' }}>
+                      {groupTitle}
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '12px' }}>
+                      {groupGoals.map((g) => {
+                        const isSel = selectedGoal === g.id;
+                        return (
+                          <div key={g.id} onClick={() => setSelectedGoal(g.id)}
+                            style={{
+                              padding: '16px', border: `2px solid ${isSel ? '#0047AB' : '#e2e8f0'}`,
+                              borderRadius: '12px', background: isSel ? '#f0f4ff' : '#fff',
+                              cursor: 'pointer', transition: 'all 0.2s'
+                            }}
+                          >
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
+                              <span style={{ fontSize: '24px', background: '#fff', border: '1px solid #e2e8f0', borderRadius: '8px', width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}>{g.icon || '🎯'}</span>
+                              <span style={{ fontSize: '15px', fontWeight: '700', color: isSel ? '#0047AB' : '#0f172a' }}>{g.name}</span>
+                            </div>
+                            <p style={{ margin: 0, fontSize: '13px', color: '#64748b', lineHeight: '1.4' }}>{g.desc}</p>
                           </div>
-                          <p style={{ margin: 0, fontSize: '13px', color: '#64748b', lineHeight: '1.4' }}>{g.desc}</p>
-                        </div>
-                      )
-                    })}
+                        );
+                      })}
+                    </div>
                   </div>
-                </div>
-              );
-            })}
+                );
+              })
+            )}
           </div>
         )}
 
@@ -119,7 +143,7 @@ export default function CreateBranchModal({ onClose }) {
                 <div style={{ height: '100%', background: currentExpData.color, borderRadius: '2px', width: `${((exp - 1) / 4) * 100}%`, transition: 'all 0.3s' }}></div>
               </div>
               <div style={{ position: 'relative', zIndex: 2, display: 'flex', justifyContent: 'space-between' }}>
-                {[1, 2, 3, 4, 5].map(lvl => (
+                {[1, 2, 3, 4, 5].map((lvl) => (
                   <div key={lvl} onClick={() => setExp(lvl)}
                     style={{
                       width: '24px', height: '24px', borderRadius: '50%',
@@ -142,8 +166,8 @@ export default function CreateBranchModal({ onClose }) {
               <div style={{ fontSize: '20px', fontWeight: '700', color: '#0f172a', marginBottom: '12px' }}>{currentExpData.title}</div>
               <p style={{ margin: 0, fontSize: '15px', color: '#475569', lineHeight: '1.5', marginBottom: '16px' }}>{currentExpData.desc}</p>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-                {currentExpData.badges.map(b => (
-                  <span key={b} style={{ fontSize: '12px', padding: '4px 10px', background: `${currentExpData.color}15`, color: currentExpData.color, borderRadius: '99px', fontWeight: '600' }}>{b}</span>
+                {currentExpData.badges.map((badge) => (
+                  <span key={badge} style={{ fontSize: '12px', padding: '4px 10px', background: `${currentExpData.color}15`, color: currentExpData.color, borderRadius: '99px', fontWeight: '600' }}>{badge}</span>
                 ))}
               </div>
             </div>
@@ -157,12 +181,12 @@ export default function CreateBranchModal({ onClose }) {
             </button>
           ) : <div></div>}
           <button 
-            disabled={step === 1 && !selectedGoal}
+            disabled={(step === 1 && !selectedGoal) || goals.length === 0}
             onClick={handleNext} 
             style={{ 
               padding: '10px 24px', fontSize: '15px', fontWeight: '700', color: '#fff', 
-              background: (step === 1 && !selectedGoal) ? '#cbd5e1' : '#0047AB', 
-              border: 'none', borderRadius: '8px', cursor: (step === 1 && !selectedGoal) ? 'not-allowed' : 'pointer',
+              background: ((step === 1 && !selectedGoal) || goals.length === 0) ? '#cbd5e1' : '#0047AB', 
+              border: 'none', borderRadius: '8px', cursor: ((step === 1 && !selectedGoal) || goals.length === 0) ? 'not-allowed' : 'pointer',
               transition: 'background 0.2s'
             }}
           >

@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { skillService } from "./skill.service";
 import { Skill, SkillPrerequisiteInput } from "../../../models/skillModel";
+import { getTierColor, getStatusColor } from "../../../utils/adminUi";
 
 export interface SkillFormValues {
-  skillId: number;
+  skillCode: string;
   skillsName: string;
   tier: string;
   status: string;
@@ -11,7 +12,7 @@ export interface SkillFormValues {
 }
 
 export const EMPTY_SKILL_FORM: SkillFormValues = {
-  skillId: 0,
+  skillCode: "",
   skillsName: "",
   tier: "T1",
   status: "active",
@@ -28,6 +29,8 @@ export function skillController() {
   const [editingSkill, setEditingSkill] = useState<Skill | null>(null);
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [formError, setFormError] = useState<string | null>(null);
+
+  const [viewingSkill, setViewingSkill] = useState<Skill | null>(null);
 
   const [deleteTarget, setDeleteTarget] = useState<Skill | null>(null);
   const [isDeleting, setIsDeleting] = useState<boolean>(false);
@@ -59,22 +62,6 @@ export function skillController() {
     );
   }, [skills, skillSearch]);
 
-  const getTierColor = (tier?: string | null) => {
-    return (
-      {
-        T1: "#10b981",
-        T2: "#3b82f6",
-        T3: "#8b5cf6",
-        T4: "#f59e0b",
-        T5: "#0047AB",
-      }[tier || ""] || "#94a3b8"
-    );
-  };
-
-  const getStatusColor = (status: string) => {
-    return status === "active" ? "#10b981" : "#94a3b8";
-  };
-
   const openCreateForm = () => {
     setFormError(null);
     setEditingSkill(null);
@@ -92,6 +79,9 @@ export function skillController() {
     setEditingSkill(null);
     setFormError(null);
   };
+
+  const openView = (skill: Skill) => setViewingSkill(skill);
+  const closeView = () => setViewingSkill(null);
 
   // A skill row is created/updated in one of two shapes:
   //  - "skill only": no prerequisite is attached, prior prerequisites (if any) are left untouched
@@ -114,18 +104,18 @@ export function skillController() {
 
       const result = isEdit
         ? touchesPrerequisites
-          ? await skillService.updateSkillWithPrerequisite(form.skillId, {
+          ? await skillService.updateSkillWithPrerequisite(editingSkill!.skillId, {
               ...skillPayload,
               prerequisites: form.prerequisites,
             })
-          : await skillService.updateSkill(form.skillId, skillPayload)
+          : await skillService.updateSkill(editingSkill!.skillId, skillPayload)
         : touchesPrerequisites
           ? await skillService.createSkillWithPrerequisite({
-              skillId: form.skillId,
+              skillCode: form.skillCode,
               ...skillPayload,
               prerequisites: form.prerequisites,
             })
-          : await skillService.createSkill({ skillId: form.skillId, ...skillPayload });
+          : await skillService.createSkill({ skillCode: form.skillCode, ...skillPayload });
 
       if (result.isError) {
         setFormError(result.errorMessage);
@@ -193,6 +183,10 @@ export function skillController() {
     openEditForm,
     closeForm,
     saveSkill,
+
+    viewingSkill,
+    openView,
+    closeView,
 
     toggleSkillStatus,
 

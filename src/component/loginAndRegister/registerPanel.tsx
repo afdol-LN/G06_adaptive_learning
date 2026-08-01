@@ -12,7 +12,8 @@ export default function RegisterPanel({ onSubmit, isLoading, onSwitchTab }: Regi
   const [fname, setFname] = useState("");
   const [lname, setLname] = useState("");
   const [dob, setDob] = useState("");
-  const [gender, setGender] = useState(4);
+  // 0 = ยังไม่ได้เลือก (placeholder). ค่าจริงต้องตรงกับ id ในตาราง gender (1-3)
+  const [gender, setGender] = useState(0);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
@@ -47,12 +48,12 @@ export default function RegisterPanel({ onSubmit, isLoading, onSwitchTab }: Regi
       setConfirmMsg({ text: "Please fill in all fields", type: "err" });
       return;
     }
-    if (password !== confirm) {
-      setConfirmMsg({ text: "Passwords do not match", type: "err" });
+    if (!gender) {
+      setConfirmMsg({ text: "Please select a gender", type: "err" });
       return;
     }
-    if (password.length < 8) {
-      setConfirmMsg({ text: "Password must be at least 8 characters", type: "err" });
+    if (password !== confirm) {
+      setConfirmMsg({ text: "Passwords do not match", type: "err" });
       return;
     }
 
@@ -78,7 +79,7 @@ export default function RegisterPanel({ onSubmit, isLoading, onSwitchTab }: Regi
           <label>First Name</label>
           <input
             type="text"
-            placeholder="สมชาย"
+            placeholder="Enter your firstname"
             value={fname}
             onChange={(e) => setFname(e.target.value)}
           />
@@ -87,7 +88,7 @@ export default function RegisterPanel({ onSubmit, isLoading, onSwitchTab }: Regi
           <label>Last Name</label>
           <input
             type="text"
-            placeholder="ใจดี"
+            placeholder="Enter your lastname"
             value={lname}
             onChange={(e) => setLname(e.target.value)}
           />
@@ -108,13 +109,12 @@ export default function RegisterPanel({ onSubmit, isLoading, onSwitchTab }: Regi
           <label>Gender</label>
           <div className="select-wrap">
             <select value={gender} onChange={(e) => setGender(Number(e.target.value))}>
-              <option value={4} disabled>
+              <option value={0} disabled>
                 เลือก...
               </option>
               <option value={1}>Male</option>
               <option value={2}>Female</option>
               <option value={3}>LGBTQ+</option>
-              <option value={4}>ไม่ระบุ</option>
             </select>
           </div>
         </div>
@@ -124,9 +124,15 @@ export default function RegisterPanel({ onSubmit, isLoading, onSwitchTab }: Regi
         <label>Username</label>
         <input
           type="text"
-          placeholder="your_username"
+          placeholder="Username"
           value={username}
-          onChange={(e) => setUsernameMsg({ text: "✓ Username available", type: "ok" })}
+          onChange={(e) => {
+            const val = e.target.value;
+            setUsername(val);
+            setUsernameMsg(
+              val.trim() ? { text: "✓ Username available", type: "ok" } : { text: "", type: "" },
+            );
+          }}
           className={
             usernameMsg.type === "err"
               ? "error"
