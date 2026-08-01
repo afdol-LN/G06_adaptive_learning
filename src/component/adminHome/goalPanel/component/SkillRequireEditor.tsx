@@ -82,22 +82,24 @@ export default function SkillRequireEditor({
         </button>
       </div>
 
-      <div className="ad-req-tags">
+      <div className="ad-choices-edit">
         {value.length === 0 ? (
           <span className="ad-muted">— ยังไม่ได้เลือก Skill —</span>
         ) : (
           value.map((v) => (
-            <span key={v.skillId} className="ad-req-tag">
-              {skillName(v.skillId)}
-              {v.levelRequire != null ? ` (level ${v.levelRequire})` : ""}
+            <div key={v.skillId} className="ad-choice-row">
+              <span style={{ flex: 1 }}>{skillName(v.skillId)}</span>
+              <span className="ad-muted">
+                {v.levelRequire != null ? `level ${v.levelRequire}` : "ไม่ระบุ level"}
+              </span>
               <button
                 type="button"
+                className="ad-btn-sm ad-btn-del"
                 onClick={() => handleRemove(v.skillId)}
-                style={{ marginLeft: 6, border: "none", background: "transparent", cursor: "pointer" }}
               >
                 <FaTrash />
               </button>
-            </span>
+            </div>
           ))
         )}
       </div>
