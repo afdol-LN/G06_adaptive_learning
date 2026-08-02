@@ -7,6 +7,7 @@ import {
   ExerciseType,
   IsCaseSensitive,
 } from "../../../models/exerciseModel";
+import { TimeUnit, toSeconds } from "../../../utils/timeUnit";
 
 export interface ExerciseFormValues {
   description: string;
@@ -18,6 +19,8 @@ export interface ExerciseFormValues {
   correctChoiceIndex: number;
   fillInBlank: string;
   isCasesensitive: IsCaseSensitive;
+  expectTimeValue: number;
+  expectTimeUnit: TimeUnit;
 }
 
 export const EMPTY_EXERCISE_FORM: ExerciseFormValues = {
@@ -30,6 +33,8 @@ export const EMPTY_EXERCISE_FORM: ExerciseFormValues = {
   correctChoiceIndex: 0,
   fillInBlank: "",
   isCasesensitive: "NO",
+  expectTimeValue: 10,
+  expectTimeUnit: "second",
 };
 
 export function exerciseController() {
@@ -134,6 +139,7 @@ export function exerciseController() {
         skillLevel: form.level,
         type: form.type,
         status: form.status,
+        expectTime: toSeconds(form.expectTimeValue, form.expectTimeUnit),
       };
 
       const payload =
