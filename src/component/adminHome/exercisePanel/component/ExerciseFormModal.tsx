@@ -3,6 +3,7 @@ import { FaPen, FaPlus } from "react-icons/fa6";
 import { Skill } from "../../../../models/skillModel";
 import { Exercise, ExerciseType, IsCaseSensitive } from "../../../../models/exerciseModel";
 import { ExerciseFormValues, EMPTY_EXERCISE_FORM } from "../exercise.controller";
+import { TimeUnit, fromSeconds } from "../../../../utils/timeUnit";
 
 interface ExerciseFormModalProps {
   isOpen: boolean;
@@ -32,6 +33,8 @@ export default function ExerciseFormModal({
   const [correctChoiceIndex, setCorrectChoiceIndex] = useState<number>(0);
   const [fillInBlank, setFillInBlank] = useState<string>("");
   const [isCasesensitive, setIsCasesensitive] = useState<IsCaseSensitive>("NO");
+  const [expectTimeValue, setExpectTimeValue] = useState<number>(EMPTY_EXERCISE_FORM.expectTimeValue);
+  const [expectTimeUnit, setExpectTimeUnit] = useState<TimeUnit>(EMPTY_EXERCISE_FORM.expectTimeUnit);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -54,6 +57,9 @@ export default function ExerciseFormModal({
 
       setFillInBlank(editingExercise.fillInBlank || "");
       setIsCasesensitive(editingExercise.isCasesensitive || "NO");
+      const { value: etValue, unit: etUnit } = fromSeconds(editingExercise.expectTime ?? EMPTY_EXERCISE_FORM.expectTimeValue);
+      setExpectTimeValue(etValue);
+      setExpectTimeUnit(etUnit);
     } else {
       setDescription("");
       setLevel(EMPTY_EXERCISE_FORM.level);
@@ -64,6 +70,8 @@ export default function ExerciseFormModal({
       setCorrectChoiceIndex(0);
       setFillInBlank("");
       setIsCasesensitive("NO");
+      setExpectTimeValue(EMPTY_EXERCISE_FORM.expectTimeValue);
+      setExpectTimeUnit(EMPTY_EXERCISE_FORM.expectTimeUnit);
     }
   }, [isOpen, editingExercise, activeSkills]);
 
@@ -91,6 +99,8 @@ export default function ExerciseFormModal({
       correctChoiceIndex,
       fillInBlank,
       isCasesensitive,
+      expectTimeValue,
+      expectTimeUnit,
     });
   };
 
@@ -168,6 +178,33 @@ export default function ExerciseFormModal({
                       {s.skillsName}
                     </option>
                   ))}
+                </select>
+              </div>
+            </div>
+
+            <div className="ad-field-row">
+              <div className="ad-field">
+                <label className="ad-label">เวลาที่คาดหวัง (Expected time)</label>
+                <input
+                  type="number"
+                  min={1}
+                  step={1}
+                  className="ad-input"
+                  value={expectTimeValue}
+                  onChange={(e) => setExpectTimeValue(Number(e.target.value))}
+                  required
+                />
+              </div>
+              <div className="ad-field">
+                <label className="ad-label">หน่วย (Unit)</label>
+                <select
+                  className="ad-select"
+                  value={expectTimeUnit}
+                  onChange={(e) => setExpectTimeUnit(e.target.value as TimeUnit)}
+                >
+                  <option value="second">วินาที (second)</option>
+                  <option value="minute">นาที (minute)</option>
+                  <option value="hour">ชั่วโมง (hour)</option>
                 </select>
               </div>
             </div>
