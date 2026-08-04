@@ -15,14 +15,18 @@ export const StepGeneralInfo: React.FC<StepGeneralInfoProps> = ({
   const [campuses, setCampuses] = useState<CampusDTO[]>([]);
   const [faculties, setFaculties] = useState<FacultyDTO[]>([]);
   const [majors, setMajors] = useState<MajorDTO[]>([]);
+  const [loadError, setLoadError] = useState<string>("");
 
   const years = InformationService.getYearsByEdu(formData.edu);
 
   // 1. Fetch campuses from backend
   useEffect(() => {
-    InformationService.getCampuses().then((data) => {
-      setCampuses(data);
-    });
+    InformationService.getCampuses()
+      .then((data) => setCampuses(data))
+      .catch((e) => {
+        console.error("Error fetching campuses from backend:", e);
+        setLoadError("โหลดข้อมูลวิทยาเขตไม่สำเร็จ กรุณาลองใหม่อีกครั้ง");
+      });
   }, []);
 
   // 2. Fetch faculties from backend when campus changes
@@ -35,9 +39,12 @@ export const StepGeneralInfo: React.FC<StepGeneralInfoProps> = ({
           String(c.campusId) === String(formData.campus)
       );
       if (selectedCampus) {
-        InformationService.getFacultiesByCampus(selectedCampus.id).then((data) => {
-          setFaculties(data);
-        });
+        InformationService.getFacultiesByCampus(selectedCampus.id)
+          .then((data) => setFaculties(data))
+          .catch((e) => {
+            console.error("Error fetching faculties from backend:", e);
+            setLoadError("โหลดข้อมูลคณะไม่สำเร็จ กรุณาลองใหม่อีกครั้ง");
+          });
       } else {
         setFaculties([]);
       }
@@ -58,9 +65,12 @@ export const StepGeneralInfo: React.FC<StepGeneralInfoProps> = ({
       );
       if (selectedFaculty) {
         const idToQuery = Number(selectedFaculty.facultyId ?? selectedFaculty.id);
-        InformationService.getMajorsByFacultyId(idToQuery).then((data) => {
-          setMajors(data);
-        });
+        InformationService.getMajorsByFacultyId(idToQuery)
+          .then((data) => setMajors(data))
+          .catch((e) => {
+            console.error("Error fetching majors from backend:", e);
+            setLoadError("โหลดข้อมูลสาขาวิชาไม่สำเร็จ กรุณาลองใหม่อีกครั้ง");
+          });
       } else {
         setMajors([]);
       }
@@ -71,12 +81,22 @@ export const StepGeneralInfo: React.FC<StepGeneralInfoProps> = ({
 
   return (
     <div className="panel active">
+      {loadError && (
+        <p style={{ color: "#f87171", fontSize: "13px", textAlign: "center", marginBottom: "12px" }}>
+          {loadError}
+        </p>
+      )}
       <div className="field">
         <label>วิทยาเขต</label>
         <div className="select-wrap">
           <select
             value={formData.campus}
-            onChange={(e) => setFormDataField("campus", e.target.value)}
+            onChange={(e) => {
+              const val = e.target.value;
+              setFormDataField("campus", val);
+              const selected = campuses.find((c) => c.campus === val);
+              setFormDataField("campusId", selected ? String(selected.id) : "");
+            }}
           >
             <option value="" disabled>
               เลือกวิทยาเขต...
@@ -96,7 +116,15 @@ export const StepGeneralInfo: React.FC<StepGeneralInfoProps> = ({
           <div className="select-wrap">
             <select
               value={formData.faculty}
-              onChange={(e) => setFormDataField("faculty", e.target.value)}
+              onChange={(e) => {
+                const val = e.target.value;
+                setFormDataField("faculty", val);
+                const selected = faculties.find(
+                  (f) => (f.facultyName ?? f.faculty) === val
+                );
+                const fId = selected ? (selected.facultyId ?? selected.id) : "";
+                setFormDataField("facultyId", fId !== "" ? String(fId) : "");
+              }}
               disabled={!formData.campus}
             >
               <option value="" disabled>
@@ -119,7 +147,15 @@ export const StepGeneralInfo: React.FC<StepGeneralInfoProps> = ({
           <div className="select-wrap">
             <select
               value={formData.major}
-              onChange={(e) => setFormDataField("major", e.target.value)}
+              onChange={(e) => {
+                const val = e.target.value;
+                setFormDataField("major", val);
+                const selected = majors.find(
+                  (m) => (m.majorName ?? m.major) === val
+                );
+                const mId = selected ? (selected.majorId ?? selected.id) : "";
+                setFormDataField("majorId", mId !== "" ? String(mId) : "");
+              }}
               disabled={!formData.faculty}
             >
               <option value="" disabled>

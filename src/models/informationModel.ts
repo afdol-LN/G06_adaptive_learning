@@ -4,6 +4,11 @@ export interface InformationFormData {
   campus: string;
   faculty: string;
   major: string;
+  // Numeric ids (kept as strings for setFormDataField) resolved alongside the
+  // display names above — the backend persists ids, not names.
+  campusId?: string;
+  facultyId?: string;
+  majorId?: string;
 }
 
 export interface StepDefinition {

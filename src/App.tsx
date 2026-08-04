@@ -6,9 +6,9 @@ import SignInAndUp from "./component/SignInAndUp";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import GetStart from "./component/GetStart";
 import Pretest from "./component/Pretest";
-import InformationFrom from "./component/information/InformationForm";
-import Home from "./component/Home";
-import HomeNew from "./component/Home";
+import InformationForm from "./component/information/InformationForm";
+import SelectBranch from "./component/SelectBranch";
+import HomeShell from "./component/home/HomeShell";
 import Exercise from "./component/Exercise";
 import AdminHome from "./component/adminHome/Adminhome";
 import SkillTree from "./component/SkillTree";
@@ -26,9 +26,10 @@ function AppContent() {
           <Route path="/" element={<SignInAndUp />}></Route>
           <Route path="/getstart" element={<GetStart />}></Route>
           <Route path="/pretest" element={<Pretest />}></Route>
-          <Route path="/information" element={<InformationFrom />}></Route>
-          <Route path="/home" element={<Home />}></Route>
-          <Route path="/homenew" element={<HomeNew />}></Route>
+          <Route path="/information" element={<InformationForm />}></Route>
+          <Route path="/selectbranch" element={<SelectBranch />}></Route>
+          <Route path="/home" element={<HomeShell />}></Route>
+          <Route path="/homenew" element={<HomeShell />}></Route>
           <Route path="/exercise" element={<Exercise />}></Route>
           <Route path="/admin/home" element={<AdminHome />}></Route>
           <Route path="/skilltree" element={<SkillTree />}></Route>

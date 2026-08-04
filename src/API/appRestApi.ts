@@ -76,6 +76,10 @@ export class AppClient {
     return instance.put(endpoint, data);
   }
 
+  static patch<T = any>(endpoint: string, data: Record<string, any> = {}): Promise<T> {
+    return instance.patch(endpoint, data);
+  }
+
   static delete<T = any>(endpoint: string, params: Record<string, any> = {}): Promise<T> {
     return instance.delete(endpoint, { params });
   }

@@ -36,15 +36,39 @@ export class PretestService {
     return PretestService.getFallbackQuestions();
   }
 
+  static async submitPretest(branchId: number, resultsList: PretestResultItem[]): Promise<void> {
+    try {
+      const answers = resultsList.map((res) => ({
+        exerciseId: res.questionId,
+        isCorrect: res.isCorrect,
+        startTime: res.startTime || new Date().toISOString(),
+        endTime: res.endTime || new Date().toISOString(),
+        chosenAnswer: res.chosenAnswerText || null,
+      }));
+
+      await AppClient.post("/exercise/pretest/submit", {
+        branchId,
+        answers,
+      });
+    } catch (error) {
+      console.error("Failed to submit pretest:", error);
+      throw error;
+    }
+  }
+
   static evaluateQuestionAtIndex(
     questionIndex: number,
     question: PretestQuestion,
-    userAnswer: PretestAnswer
+    userAnswer: PretestAnswer,
+    startTime: string,
+    endTime: string
   ): { isCorrect: boolean; resultItem: PretestResultItem } {
     let isCorrect = false;
+    let chosenAnswerText: string | null = null;
 
     if (question.type === "FILL_IN_BLANK") {
       const userString = typeof userAnswer === "string" ? userAnswer.trim() : "";
+      chosenAnswerText = typeof userAnswer === "string" ? userAnswer : "";
       const targetString =
         typeof question.answer === "string"
           ? question.answer.trim()
@@ -65,6 +89,15 @@ export class PretestService {
         question.answer !== null &&
         question.answer !== undefined &&
         userAnswer.toString() === question.answer.toString();
+
+      if (userAnswer !== null && userAnswer !== undefined) {
+        const choiceIdx = Number(userAnswer);
+        if (question.exerciseChoices && question.exerciseChoices[choiceIdx]) {
+          chosenAnswerText = question.exerciseChoices[choiceIdx].script;
+        } else if (question.choices && question.choices[choiceIdx]) {
+          chosenAnswerText = question.choices[choiceIdx];
+        }
+      }
     }
 
     const resultItem: PretestResultItem = {
@@ -76,6 +109,9 @@ export class PretestService {
       userAnswer: userAnswer,
       correctAnswer: question.answer,
       isCorrect: isCorrect,
+      startTime: startTime,
+      endTime: endTime,
+      chosenAnswerText: chosenAnswerText,
     };
 
     return { isCorrect, resultItem };

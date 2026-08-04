@@ -67,10 +67,6 @@ export default function CreateUserModal({
       setFormError("Please fill in all required fields.");
       return;
     }
-    if (password.length < 8) {
-      setFormError("Password must be at least 8 characters.");
-      return;
-    }
     if (usernameMsg.type === "err") {
       setFormError("Please choose a valid username.");
       return;

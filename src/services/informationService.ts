@@ -1,7 +1,6 @@
 import {
   InformationFormData,
   StepDefinition,
-  FacultyOption,
   ExperienceData,
   GoalItem,
   GoalGroupMap,
@@ -94,82 +93,45 @@ export class InformationService {
     return TOTAL_STEPS;
   }
 
+  // Throws on failure so the caller can surface a real error to the user
+  // instead of silently rendering an empty goal list.
   static async fetchGoals(): Promise<GoalItem[]> {
-    try {
-      const response = await AppClient.get("goal");
-      let rawGoalsList: any[] = [];
+    const response = await AppClient.get("goal");
+    const rawGoalsList: any[] = Array.isArray(response)
+      ? response
+      : Array.isArray(response?.data)
+        ? response.data
+        : [];
 
-      if (Array.isArray(response)) {
-        rawGoalsList = response;
-      } else if (response && Array.isArray(response.data)) {
-        rawGoalsList = response.data;
-      }
-
-      const formattedGoalsList: GoalItem[] = rawGoalsList.map((rawGoal: any) => {
-        const goalId = rawGoal.id ? String(rawGoal.id) : String(rawGoal.goalId || "");
-        const goalName = rawGoal.goalName || rawGoal.name || rawGoal.goal || `Goal ${goalId}`;
-        const goalDesc = rawGoal.goal || rawGoal.desc || rawGoal.description || goalName;
-        const goalGroup = rawGoal.group || rawGoal.category || "General";
-        const goalIcon = rawGoal.icon || "🎯";
-
-        return {
-          id: goalId,
-          name: goalName,
-          desc: goalDesc,
-          group: goalGroup,
-          icon: goalIcon,
-          skillCount: rawGoal.skillCount,
-        };
-      });
-
-      return formattedGoalsList;
-    } catch (error) {
-      console.error("Failed to fetch goals from backend API:", error);
-      return [];
-    }
+    // Goal entity only has: id, goal (name), goalDescription, status —
+    // no group/icon columns, so those stay fixed defaults.
+    return rawGoalsList.map((rawGoal: any) => ({
+      id: String(rawGoal.id),
+      name: rawGoal.goal,
+      desc: rawGoal.goalDescription,
+      group: "General",
+      icon: "🎯",
+    }));
   }
 
+  // These throw on failure so the caller can show a real error instead of a
+  // silently empty dropdown.
   static async getCampuses(): Promise<CampusDTO[]> {
-    try {
-      const res = await AppClient.get<CampusResponse>("campus");
-      if (Array.isArray(res)) {
-        return res;
-      }
-      return res?.data || [];
-    } catch (e) {
-      console.error("Error fetching campuses from backend:", e);
-      return [];
+    const res = await AppClient.get<CampusResponse>("campus");
+    if (Array.isArray(res)) {
+      return res;
     }
+    return res?.data || [];
   }
 
   static async getFacultiesByCampus(campusId: number): Promise<FacultyDTO[]> {
-    try {
-      const res = await AppClient.get<FacultyResponse>(`faculty/Bycampus/${campusId}`);
-      return res?.isError === false && Array.isArray(res?.data) ? res.data : [];
-    } catch (e) {
-      console.error("Error fetching faculties from backend:", e);
-      return [];
-    }
+    const res = await AppClient.get<FacultyResponse>(`faculty/Bycampus/${campusId}`);
+    return res?.isError === false && Array.isArray(res?.data) ? res.data : [];
   }
 
   static async getMajorsByFacultyId(facultyId: number): Promise<MajorDTO[]> {
-    try {
-      const res = await AppClient.get<MajorResponse>(`major/facultyId/${facultyId}`);
-      return res?.isError === false && Array.isArray(res?.data) ? res.data : [];
-    } catch (e) {
-      console.error("Error fetching majors from backend:", e);
-      return [];
-    }
-  }
-
-  static getFacultiesByEdu(edu: string): FacultyOption[] {
-    console.warn("getFacultiesByEdu is deprecated. Using backend API instead.");
-    return [];
-  }
-
-  static getMajorsByFaculty(faculty: string): string[] {
-    console.warn("getMajorsByFaculty is deprecated. Using backend API instead.");
-    return [];
+    const res = await AppClient.get<MajorResponse>(`major/facultyId/${facultyId}`);
+    return res?.isError === false && Array.isArray(res?.data) ? res.data : [];
   }
 
   static getYearsByEdu(edu: string): string[] {
@@ -191,6 +153,25 @@ export class InformationService {
       acc[groupKey].push(goalItem);
       return acc;
     }, {});
+  }
+
+  // Persists Step 1 (campus/faculty/major/year) against the logged-in user.
+  static async submitGeneralInfo(formData: InformationFormData): Promise<void> {
+    const yearNumber = parseInt(formData.year.replace(/\D/g, ""), 10) || undefined;
+    await AppClient.patch("userprofile/me", {
+      campusId: formData.campusId ? Number(formData.campusId) : undefined,
+      facultyId: formData.facultyId ? Number(formData.facultyId) : undefined,
+      majorId: formData.majorId ? Number(formData.majorId) : undefined,
+      year: yearNumber,
+    });
+  }
+
+  // Persists a Branch (user + selected goal + experience level) to the backend.
+  static async createBranchOnServer(goalId: string, exp: number): Promise<void> {
+    await AppClient.post("branch/mine", {
+      goalId: Number(goalId),
+      expForGoal: exp,
+    });
   }
 
   static createBranchesForSelectedGoals(

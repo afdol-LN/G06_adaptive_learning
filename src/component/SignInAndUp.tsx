@@ -7,6 +7,7 @@ import LoginPanel from "./loginAndRegister/loginPanel";
 import RegisterPanel from "./loginAndRegister/registerPanel";
 import { userViewModel } from "../modelViews/userModelView";
 import { RegisterCredentials } from "../models/userModel";
+import { useApp } from "../context/AppContext";
 export default function SignInAndUp() {
   //views Model user
   const userVm = new userViewModel();
@@ -26,15 +27,16 @@ export default function SignInAndUp() {
     setToast({ message, type, show: true });
     setTimeout(() => setToast((prev) => ({ ...prev, show: false })), 3200);
   };
-  const handleNavigation = () => {
+  const { fetchMyBranches } = useApp();
+  const handleNavigation = async () => {
     const accessToken = localStorage.getItem("accessToken") || localStorage.getItem("access_token");
     if (accessToken && accessToken !== "") {
       const userRole = localStorage.getItem("userRole") || localStorage.getItem("user_role");
       if (userRole === "admin") {
         navigate("/admin/home");
       } else {
-        const branchId = localStorage.getItem("branchId") ?? localStorage.getItem("branch_id");
-        if (branchId === null || branchId === "null" || branchId === "" || branchId === "[]") {
+        const fetchedBranches = await fetchMyBranches();
+        if (!fetchedBranches || fetchedBranches.length === 0) {
           navigate("/getstart");
         } else {
           navigate("/selectbranch");

@@ -1,111 +1,88 @@
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
+import '../component/decorate/SelectBranch.css';
 
 export default function SelectBranch() {
-  const { branches, activeBranchId, switchBranch } = useApp();
+  const { branches, activeBranchId, switchBranch, fetchMyBranches } = useApp();
   const navigate = useNavigate();
+  const [hasLoaded, setHasLoaded] = useState(false);
+  const fullname = localStorage.getItem('fullname') || '';
 
-  function handleSelect(branchId) {
+  useEffect(() => {
+    fetchMyBranches().finally(() => setHasLoaded(true));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  function handleSelect(branchId: string | number) {
     switchBranch(branchId);
-    navigate('/home');
+    const branch = branches.find((b) => String(b.id) === String(branchId));
+    if (branch?.isAlreadyPretest) {
+      navigate('/home');
+    } else {
+      navigate('/pretest');
+    }
   }
 
   return (
-    <>
-      {/* ใช้ bg style เดียวกับหน้าอื่น */}
-      <div className="bg-layer" style={{ position: 'fixed', inset: 0, background: 'var(--bg, #0a0f1e)', zIndex: 0 }} />
+    <div style={{ position: 'relative' }}>
+      <div className="bg"></div>
+      <div className="bg-grid"></div>
+      <div className="orb orb-1"></div>
+      <div className="orb orb-2"></div>
 
-      <main style={{ position: 'relative', zIndex: 1, maxWidth: '560px', margin: '0 auto', padding: '48px 24px' }}>
-        {/* Header */}
-        <div style={{ textAlign: 'center', marginBottom: '32px' }}>
-          <div style={{ fontSize: '32px', marginBottom: '8px' }}>⚡</div>
-          <h1 style={{ fontSize: '22px', fontWeight: '800', color: '#f1f5f9', margin: 0 }}>เลือกสายการเรียน</h1>
-          <p style={{ fontSize: '13px', color: '#64748b', marginTop: '8px' }}>
-            💡 สามารถเพิ่มสายการเรียนใหม่ได้ภายในแอปนี้
-          </p>
+      <main className="page">
+        <div className="sb-header">
+          <div className="sb-icon">⚡</div>
+          <h1 className="sb-title">เลือกสายการเรียน</h1>
+          {fullname && <p className="sb-fullname">{fullname}</p>}
+          <p className="sb-hint">💡 สามารถเพิ่มสายการเรียนใหม่ได้ภายในแอปนี้</p>
         </div>
 
-        {/* Branch list */}
-        {branches.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '48px 24px', color: '#64748b' }}>
-            <div style={{ fontSize: '40px', marginBottom: '12px' }}>📭</div>
+        {!hasLoaded ? (
+          <div className="sb-empty">
+            <p>กำลังโหลดสายการเรียน...</p>
+          </div>
+        ) : branches.length === 0 ? (
+          <div className="sb-empty">
+            <div className="sb-empty-icon">📭</div>
             <p>ยังไม่มีสายการเรียน</p>
-            <p style={{ fontSize: '13px' }}>กด "เพิ่มสายการเรียน" เพื่อเริ่มต้น</p>
+            <p className="sb-empty-sub">กด "เพิ่มสายการเรียนใหม่" เพื่อเริ่มต้น</p>
           </div>
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '24px' }}>
-            {branches.map(branch => {
+          <div className="branch-list">
+            {branches.map((branch) => {
               const isActive = branch.id === activeBranchId;
               return (
                 <div
                   key={branch.id}
+                  className={`branch-card${isActive ? ' active' : ''}`}
                   onClick={() => handleSelect(branch.id)}
-                  style={{
-                    border: `2px solid ${isActive ? '#0047AB' : '#1e293b'}`,
-                    borderRadius: '14px',
-                    padding: '16px 20px',
-                    cursor: 'pointer',
-                    background: isActive ? 'rgba(0,71,171,0.12)' : 'rgba(255,255,255,0.04)',
-                    transition: 'all 0.2s',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '16px',
-                  }}
                 >
-                  {/* Goal icon */}
-                  <div style={{
-                    fontSize: '28px', width: '48px', height: '48px',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    background: 'rgba(255,255,255,0.06)', borderRadius: '10px', flexShrink: 0,
-                  }}>
-                    {branch.goalIcon}
+                  <div className="branch-card-inner">
+                    <div className="branch-name">{branch.goalName || 'ไม่ทราบชื่อเป้าหมาย'}</div>
+                    {branch.goalDesc && <div className="branch-desc">{branch.goalDesc}</div>}
+                    <span
+                      className={`branch-status-badge${branch.isAlreadyPretest ? ' done' : ''}`}
+                    >
+                      {branch.isAlreadyPretest ? '✅ ทำ Pretest แล้ว' : '📝 ยังไม่ทำ Pretest'}
+                    </span>
                   </div>
-
-                  {/* Info */}
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontWeight: '700', color: '#080808', fontSize: '15px' }}>
-                      {branch.goalName}
-                    </div>
-                    <div style={{ fontSize: '12px', color: '#64748b', marginTop: '2px' }}>
-                      {branch.campus} · {branch.major} · {branch.year}
-                    </div>
-                    <div style={{ fontSize: '12px', color: '#94a3b8', marginTop: '4px' }}>
-                      ⭐ Level {branch.level} · ✨ {branch.xp} XP
-                    </div>
-                  </div>
-
-                  {/* Active badge */}
-                  {isActive && (
-                    <div style={{
-                      fontSize: '11px', fontWeight: '700', color: '#0047AB',
-                      background: 'rgba(0,71,171,0.15)', padding: '4px 10px',
-                      borderRadius: '99px', flexShrink: 0,
-                    }}>
-                      ✅ ใช้งานอยู่
-                    </div>
-                  )}
+                  {isActive && <div className="branch-active-badge">ใช้งานอยู่</div>}
                 </div>
               );
             })}
           </div>
         )}
 
-        {/* ปุ่มเพิ่ม branch ใหม่ */}
         <button
-          onClick={() => navigate('/information')}
-          style={{
-            width: '100%', padding: '14px',
-            border: '2px dashed #334155', borderRadius: '14px',
-            background: 'transparent', color: '#64748b',
-            fontSize: '14px', fontWeight: '600', cursor: 'pointer',
-            transition: 'all 0.2s',
-          }}
-          onMouseEnter={e => { e.target.style.borderColor = '#0047AB'; e.target.style.color = '#60a5fa'; }}
-          onMouseLeave={e => { e.target.style.borderColor = '#334155'; e.target.style.color = '#64748b'; }}
+          type="button"
+          className="branch-add-btn"
+          onClick={() => navigate('/information', { state: { skipGeneralInfo: true } })}
         >
           + เพิ่มสายการเรียนใหม่
         </button>
       </main>
-    </>
+    </div>
   );
 }

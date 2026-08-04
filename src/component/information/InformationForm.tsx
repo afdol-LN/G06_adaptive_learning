@@ -6,7 +6,6 @@ import { StepGeneralInfo } from "./component/StepGeneralInfo";
 import { StepSelectGoal } from "./component/StepSelectGoal";
 import { StepExperience } from "./component/StepExperience";
 import { StepReady } from "./component/StepReady";
-import { SelectBranchModal } from "./component/SelectBranchModal";
 import { ToastNotice } from "./component/ToastNotice";
 
 export default function InformationForm() {
@@ -104,8 +103,18 @@ export default function InformationForm() {
                 </svg>
               </button>
             ) : (
-              <button className="btn-next" onClick={ctrl.handleNext}>
-                <span>{ctrl.step === 3 ? "เริ่ม Pretest" : "Next"}</span>
+              <button
+                className="btn-next"
+                onClick={ctrl.handleNext}
+                disabled={ctrl.isSubmitting}
+              >
+                <span>
+                  {ctrl.isSubmitting
+                    ? "กำลังบันทึก..."
+                    : ctrl.step === 3
+                      ? "เริ่ม Pretest"
+                      : "Next"}
+                </span>
                 <svg
                   className="btn-next-arrow"
                   width="16"
@@ -130,16 +139,7 @@ export default function InformationForm() {
       {/* Toast Notice */}
       <ToastNotice toast={ctrl.toast} />
 
-      {/* Select Branch Modal */}
-      {ctrl.showSelectBranch && (
-        <SelectBranchModal
-          branches={ctrl.branches}
-          newBranchIds={ctrl.newBranchIds}
-          selectedBranchId={ctrl.selectedBranchId}
-          setSelectedBranchId={ctrl.setSelectedBranchId}
-          handleConfirmBranch={ctrl.handleConfirmBranch}
-        />
-      )}
+
     </div>
   );
 }

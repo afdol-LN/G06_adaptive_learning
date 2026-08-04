@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect } from 'react'
 import { AppClient } from '../API/appRestApi'
+import { BranchService } from '../services/branchService'
 
 const AppContext = createContext<any>(null)
 
@@ -73,27 +74,71 @@ function addBranch(branchData) {
 
   // ── updateBranch ──────────────────────────────────────────────
   // ใช้อัปเดต xp, unlockedSkills, sessions ฯลฯ ภายใน branch
- function updateBranch(branchId, changes) {
-  setBranches(prev => {
-    const updated = prev.map(branch =>
-      branch.id === branchId
-        ? { ...branch, ...changes }
-        : branch
-    );
+  function updateBranch(branchId, changes) {
+    setBranches(prev => {
+      const updated = prev.map(branch =>
+        String(branch.id) === String(branchId)
+          ? { ...branch, ...changes }
+          : branch
+      );
 
-    localStorage.setItem(
-      "branches",
-      JSON.stringify(updated)
-    );
+      localStorage.setItem(
+        "branches",
+        JSON.stringify(updated)
+      );
 
-    return updated;
-  });
-}
+      return updated;
+    });
+  }
 
+  async function fetchMyBranches() {
+    try {
+      const serverBranches = await BranchService.getMyBranches();
+      
+      const prev = (() => {
+        try {
+          return JSON.parse(localStorage.getItem("branches")) || [];
+        } catch {
+          return branches || [];
+        }
+      })();
+
+      const updated = [];
+      serverBranches.forEach((sb) => {
+        const existingBranch = prev.find((b) => String(b.id) === String(sb.id));
+        const newBranchData = {
+          id: String(sb.id),
+          goalId: String(sb.goalId),
+          goalName: sb.goal?.goal || "",
+          goalDesc: sb.goal?.goalDescription || "",
+          isAlreadyPretest: sb.isAlreadyPretest,
+          exp: sb.expForGoal,
+        };
+        if (existingBranch) {
+          updated.push({ ...existingBranch, ...newBranchData });
+        } else {
+          updated.push({
+            ...newBranchData,
+            xp: 0,
+            level: 1,
+            streak: 0,
+            unlockedSkills: [],
+            sessions: [],
+          });
+        }
+      });
+      localStorage.setItem("branches", JSON.stringify(updated));
+      setBranches(updated);
+      return updated;
+    } catch (e) {
+      console.error("Failed to fetch branches", e);
+      return [];
+    }
+  }
   return (
     <AppContext.Provider value={{
       userProfile,    saveProfile,
-      branches,       addBranch,    updateBranch,
+      branches,       addBranch,    updateBranch, fetchMyBranches,
       activeBranchId, activeBranch, switchBranch,
       isLoading,      setIsLoading,
     }}>

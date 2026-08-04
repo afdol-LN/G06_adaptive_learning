@@ -7,17 +7,25 @@ import {
   PretestScoreSummary,
 } from "../../../models/pretestModel";
 import { PretestService } from "../../../services/pretestService";
+import { useApp } from "../../../context/AppContext";
 
 export function usePretestController() {
   const navigate = useNavigate();
+  const { updateBranch, activeBranch } = useApp();
 
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [questions, setQuestions] = useState<PretestQuestion[]>([]);
-  const [currentScreen, setCurrentScreen] = useState<"intro" | "quiz" | "done">("intro");
+  const [currentScreen, setCurrentScreen] = useState<"intro" | "quiz" | "done">(
+    "intro",
+  );
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState<number>(0);
   const [answers, setAnswers] = useState<PretestAnswer[]>([]);
   const [fillInBlankInput, setFillInBlankInput] = useState<string>("");
-  const [showUnansweredModal, setShowUnansweredModal] = useState<boolean>(false);
+  const [showUnansweredModal, setShowUnansweredModal] =
+    useState<boolean>(false);
+  const [questionStartTime, setQuestionStartTime] = useState<string>(
+    new Date().toISOString(),
+  );
 
   const [isCorrectList, setIsCorrectList] = useState<boolean[]>([]);
   const [resultsList, setResultsList] = useState<PretestResultItem[]>([]);
@@ -33,17 +41,17 @@ export function usePretestController() {
   useEffect(() => {
     async function loadPretestQuestions() {
       setIsLoading(true);
+      // ดึง goalId จาก activeBranch ใน context ก่อน แล้วค่อย fallback ไป localStorage
       const activeGoalId =
-        localStorage.getItem("activeBranchId") ||
+        activeBranch?.goalId ||
         localStorage.getItem("goalId") ||
-        localStorage.getItem("branchId") ||
-        "G06";
-      const currentUserId = localStorage.getItem("user_id");
+        localStorage.getItem("branchId");
+      const currentUserId = Number(localStorage.getItem("user_id"));
 
       const fetchedQuestions = await PretestService.fetchPretestQuestions(
-        activeGoalId,
+        activeGoalId!,
         currentUserId!,
-        1
+        1,
       );
       const questionList =
         fetchedQuestions && fetchedQuestions.length > 0
@@ -58,7 +66,7 @@ export function usePretestController() {
     }
 
     loadPretestQuestions();
-  }, []);
+  }, [activeBranch]);
 
   const currentQuestion: PretestQuestion = questions[currentQuestionIndex] || {
     id: 0,
@@ -73,13 +81,16 @@ export function usePretestController() {
   };
 
   const answeredCount = answers.filter(
-    (answer) => answer !== null && answer !== "" && answer !== undefined
+    (answer) => answer !== null && answer !== "" && answer !== undefined,
   ).length;
   const progressPercentage =
-    questions.length > 0 ? Math.round((answeredCount / questions.length) * 100) : 0;
+    questions.length > 0
+      ? Math.round((answeredCount / questions.length) * 100)
+      : 0;
 
   // Sync fillInBlankInput when question index changes or when an answer is selected
   useEffect(() => {
+    setQuestionStartTime(new Date().toISOString());
     if (questions.length > 0 && currentQuestion.type === "FILL_IN_BLANK") {
       const existingAnswer = answers[currentQuestionIndex];
       if (typeof existingAnswer === "string") {
@@ -102,7 +113,7 @@ export function usePretestController() {
       updatedAnswers[currentQuestionIndex] = choiceIndex;
       setAnswers(updatedAnswers);
     },
-    [answers, currentQuestionIndex]
+    [answers, currentQuestionIndex],
   );
 
   const handleFillInBlankInputChange = useCallback(
@@ -112,16 +123,21 @@ export function usePretestController() {
       updatedAnswers[currentQuestionIndex] = inputValue;
       setAnswers(updatedAnswers);
     },
-    [answers, currentQuestionIndex]
+    [answers, currentQuestionIndex],
   );
 
   const advanceToNextQuestion = useCallback(
     (isSkippingQuestion: boolean = false) => {
-      const currentAnswer = isSkippingQuestion ? null : answers[currentQuestionIndex];
+      const currentAnswer = isSkippingQuestion
+        ? null
+        : answers[currentQuestionIndex];
+      const endTime = new Date().toISOString();
       const { isCorrect, resultItem } = PretestService.evaluateQuestionAtIndex(
         currentQuestionIndex,
         questions[currentQuestionIndex],
-        currentAnswer
+        currentAnswer,
+        questionStartTime,
+        endTime,
       );
 
       const nextIsCorrectList = [...isCorrectList];
@@ -136,7 +152,7 @@ export function usePretestController() {
         const finalSummary = PretestService.calculateScoreSummary(
           questions.length,
           nextIsCorrectList,
-          nextResultsList
+          nextResultsList,
         );
         setScoreSummary(finalSummary);
         setCurrentScreen("done");
@@ -144,12 +160,23 @@ export function usePretestController() {
         setCurrentQuestionIndex((previousIndex) => previousIndex + 1);
       }
     },
-    [answers, currentQuestionIndex, isCorrectList, questions, resultsList]
+    [
+      answers,
+      currentQuestionIndex,
+      isCorrectList,
+      questions,
+      resultsList,
+      questionStartTime,
+    ],
   );
 
   const handleNextQuestion = useCallback(() => {
     const currentAnswer = answers[currentQuestionIndex];
-    if (currentAnswer === null || currentAnswer === "" || currentAnswer === undefined) {
+    if (
+      currentAnswer === null ||
+      currentAnswer === "" ||
+      currentAnswer === undefined
+    ) {
       setShowUnansweredModal(true);
       return;
     }
@@ -161,9 +188,21 @@ export function usePretestController() {
     advanceToNextQuestion(true);
   }, [advanceToNextQuestion]);
 
-  const navigateToDashboard = useCallback(() => {
+  const navigateToDashboard = useCallback(async () => {
+    try {
+      const branchId = Number(
+        localStorage.getItem("activeBranchId") ||
+          localStorage.getItem("branchId") ||
+          0,
+      );
+      await PretestService.submitPretest(branchId, resultsList);
+      updateBranch(String(branchId), { isAlreadyPretest: true });
+    } catch (e) {
+      console.error(e);
+      // error toast can be added
+    }
     navigate("/home");
-  }, [navigate]);
+  }, [navigate, resultsList, updateBranch]);
 
   const highlightCodeLine = useCallback((codeLine: string) => {
     return PretestService.highlightCodeLine(codeLine);

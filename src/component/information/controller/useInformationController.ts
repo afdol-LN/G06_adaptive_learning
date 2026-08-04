@@ -1,13 +1,16 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useApp } from "../../../context/AppContext";
 import { InformationService } from "../../../services/informationService";
 import { InformationFormData, GoalItem } from "../../../models/informationModel";
 
 export function useInformationController() {
-  const [step, setStep] = useState<number>(1);
-  const [isShaking, setIsShaking] = useState<boolean>(false);
   const navigate = useNavigate();
+  const location = useLocation();
+  const skipGeneralInfo = Boolean((location.state as any)?.skipGeneralInfo);
+
+  const [step, setStep] = useState<number>(skipGeneralInfo ? 2 : 1);
+  const [isShaking, setIsShaking] = useState<boolean>(false);
 
   // Goals from backend state
   const [goals, setGoals] = useState<GoalItem[]>([]);
@@ -15,9 +18,6 @@ export function useInformationController() {
 
   // Context access
   const { addBranch, switchBranch, branches } = useApp();
-  const [showSelectBranch, setShowSelectBranch] = useState<boolean>(false);
-  const [selectedBranchId, setSelectedBranchId] = useState<string | null>(null);
-  const [newBranchIds, setNewBranchIds] = useState<string[]>([]);
 
   // Form State
   const [formData, setFormData] = useState<InformationFormData>({
@@ -33,16 +33,24 @@ export function useInformationController() {
     show: false,
     msg: "",
   });
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
   // Fetch Goals from Backend API on mount
   useEffect(() => {
     async function loadGoals() {
       setIsLoadingGoals(true);
-      const fetchedGoals = await InformationService.fetchGoals();
-      setGoals(fetchedGoals);
-      setIsLoadingGoals(false);
+      try {
+        const fetchedGoals = await InformationService.fetchGoals();
+        setGoals(fetchedGoals);
+      } catch (error) {
+        console.error("Failed to fetch goals from backend API:", error);
+        showNotice("โหลดข้อมูลเป้าหมายการเรียนรู้ไม่สำเร็จ กรุณาลองใหม่อีกครั้ง");
+      } finally {
+        setIsLoadingGoals(false);
+      }
     }
     loadGoals();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const totalSteps = InformationService.getTotalSteps();
@@ -64,7 +72,7 @@ export function useInformationController() {
 
   const setFormDataField = (field: keyof InformationFormData, value: string) => {
     if (field === "faculty") {
-      setFormData((prev) => ({ ...prev, faculty: value, major: "" }));
+      setFormData((prev) => ({ ...prev, faculty: value, major: "", majorId: "" }));
     } else {
       setFormData((prev) => ({ ...prev, [field]: value }));
     }
@@ -93,10 +101,28 @@ export function useInformationController() {
     return true;
   };
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (!validateStep()) return;
 
     if (step === 2) {
+      setIsSubmitting(true);
+      try {
+        if (!skipGeneralInfo) {
+          await InformationService.submitGeneralInfo(formData);
+        }
+        await Promise.all(
+          selectedGoal.map((goalId) =>
+            InformationService.createBranchOnServer(goalId, exp)
+          )
+        );
+      } catch (error) {
+        console.error("Failed to save onboarding info to backend:", error);
+        showNotice("บันทึกข้อมูลไปยังเซิร์ฟเวอร์ไม่สำเร็จ กรุณาลองใหม่อีกครั้ง");
+        setIsSubmitting(false);
+        return;
+      }
+      setIsSubmitting(false);
+
       const createdIds = InformationService.createBranchesForSelectedGoals(
         formData,
         selectedGoal,
@@ -104,8 +130,10 @@ export function useInformationController() {
         exp,
         addBranch
       );
-      setNewBranchIds(createdIds);
-      setTimeout(() => setShowSelectBranch(true), 50);
+      if (createdIds.length > 0) {
+        switchBranch(createdIds[createdIds.length - 1]);
+      }
+      setStep(3);
       return;
     }
 
@@ -123,15 +151,14 @@ export function useInformationController() {
   };
 
   const handlePrev = () => {
+    if (skipGeneralInfo && step === 2) {
+      navigate('/selectbranch');
+      return;
+    }
     if (step > 1) setStep(step - 1);
   };
 
-  const handleConfirmBranch = () => {
-    if (!selectedBranchId) return;
-    switchBranch(selectedBranchId);
-    setShowSelectBranch(false);
-    setStep(3);
-  };
+
 
   const handleStartPretestDirect = () => {
     navigate("/pretest");
@@ -139,7 +166,7 @@ export function useInformationController() {
 
   const selectedGoalBranchName =
     branches.find(
-      (b: any) => b.id === (selectedBranchId || branches[branches.length - 1]?.id)
+      (b: any) => b.id === branches[branches.length - 1]?.id
     )?.goalName || "ที่เลือก";
 
   return {
@@ -150,12 +177,10 @@ export function useInformationController() {
     selectedGoal,
     exp,
     toast,
-    showSelectBranch,
-    selectedBranchId,
-    newBranchIds,
     branches,
     goals,
     isLoadingGoals,
+    isSubmitting,
     // Derived
     progressPct,
     currentExpData,
@@ -168,10 +193,8 @@ export function useInformationController() {
     setFormDataField,
     toggleGoal,
     setExp,
-    setSelectedBranchId,
     handleNext,
     handlePrev,
-    handleConfirmBranch,
     handleStartPretestDirect,
   };
 }

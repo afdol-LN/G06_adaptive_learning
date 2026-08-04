@@ -35,6 +35,9 @@ export interface PretestResultItem {
   userAnswer: PretestAnswer;
   correctAnswer: number | string | undefined;
   isCorrect: boolean;
+  startTime?: string;
+  endTime?: string;
+  chosenAnswerText?: string | null;
 }
 
 export interface PretestScoreSummary {
