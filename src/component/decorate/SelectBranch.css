@@ -1,0 +1,108 @@
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  /* Cobalt Sky Light Mode Palette (matches InformationForm.css / GetStart.css) */
+  --navy:    #f2f7fa;
+  --navy2:   #ffffff;
+  --navy3:   #e9f0f5;
+  --border:  #c2d3e0;
+  --border2: #6D8196;
+  --gold:    #0047AB;
+  --gold2:   #82C8E5;
+  --gold3:   #000080;
+  --text:    #000080;
+  --muted:   #6D8196;
+  --muted2:  #8fa3b5;
+  --danger:  #e05c5c;
+  --success: #38b874;
+}
+
+html, body {
+  min-height: 100%;
+  background: var(--navy);
+  font-family: 'DM Sans', sans-serif;
+  color: var(--text);
+}
+
+.bg {
+  position: fixed; inset: 0; z-index: 0;
+  background:
+    radial-gradient(ellipse 70% 60% at 15% 10%, rgba(130, 200, 229, 0.3) 0%, transparent 55%),
+    radial-gradient(ellipse 50% 70% at 88% 88%, rgba(0, 71, 171, 0.08) 0%, transparent 55%),
+    var(--navy);
+}
+
+.bg-grid {
+  position: fixed; inset: 0; z-index: 0; opacity: 0.3;
+  background-image: linear-gradient(var(--border) 1px, transparent 1px), linear-gradient(90deg, var(--border) 1px, transparent 1px);
+  background-size: 52px 52px;
+}
+
+.orb { position: fixed; border-radius: 50%; filter: blur(90px); z-index: 0; pointer-events: none; animation: drift ease-in-out infinite alternate; }
+.orb-1 { width:550px;height:550px;background:rgba(0, 71, 171, 0.08);top:-140px;left:-120px;animation-duration:24s; }
+.orb-2 { width:400px;height:400px;background:rgba(0, 0, 128, 0.05);bottom:-90px;right:-70px;animation-duration:18s;animation-delay:-9s; }
+@keyframes drift { to { transform: translate(24px,16px) scale(1.06); } }
+
+.page {
+  position: relative; z-index: 1; min-height: 100vh;
+  display: flex; flex-direction: column; align-items: center;
+  padding: 48px 20px 60px;
+}
+
+.sb-header { text-align: center; margin-bottom: 32px; max-width: 560px; }
+.sb-icon { font-size: 32px; margin-bottom: 8px; }
+.sb-title { font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+.sb-fullname { font-size: 14px; font-weight: 600; color: var(--gold); margin-bottom: 8px; }
+.sb-hint { font-size: 13px; color: var(--muted); }
+
+.sb-empty { text-align: center; padding: 48px 24px; color: var(--muted); }
+.sb-empty-icon { font-size: 40px; margin-bottom: 12px; }
+.sb-empty-sub { font-size: 13px; margin-top: 4px; }
+
+.branch-list {
+  width: 100%; max-width: 560px;
+  display: flex; flex-direction: column; gap: 12px;
+  margin-bottom: 24px;
+}
+
+.branch-card {
+  padding: 16px 20px; border-radius: 14px;
+  border: 1.5px solid var(--border);
+  background: var(--navy2);
+  cursor: pointer; transition: all .2s;
+  position: relative; overflow: hidden;
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+}
+.branch-card:hover { border-color: var(--border2); box-shadow: 0 4px 15px rgba(0, 71, 171, 0.1); }
+.branch-card.active { border-color: var(--gold); background: #ffffff; box-shadow: 0 4px 15px rgba(0, 71, 171, 0.15); }
+
+.branch-card-inner { flex: 1; min-width: 0; }
+.branch-name { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+.branch-desc { font-size: 12px; color: var(--muted); line-height: 1.4; margin-bottom: 8px; }
+
+.branch-status-badge {
+  display: inline-block; font-size: 11px; font-weight: 700;
+  padding: 3px 10px; border-radius: 99px;
+  background: #f4f8fb; color: var(--muted);
+  border: 1px solid var(--border);
+}
+.branch-status-badge.done { background: rgba(56, 184, 116, 0.12); color: var(--success); border-color: rgba(56, 184, 116, 0.3); }
+
+.branch-active-badge {
+  font-size: 11px; font-weight: 700; color: var(--gold);
+  background: rgba(0, 71, 171, 0.12);
+  padding: 4px 10px; border-radius: 99px; flex-shrink: 0;
+}
+
+.branch-add-btn {
+  width: 100%; max-width: 560px; padding: 14px;
+  border: 2px dashed var(--border2); border-radius: 14px;
+  background: transparent; color: var(--muted);
+  font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 600;
+  cursor: pointer; transition: all .2s;
+}
+.branch-add-btn:hover { border-color: var(--gold); color: var(--gold); background: rgba(0, 71, 171, 0.04); }
+
+@media (max-width: 520px) {
+  .branch-card { flex-direction: column; align-items: flex-start; }
+}

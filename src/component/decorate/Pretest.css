@@ -618,6 +618,89 @@ html, body {
 @keyframes fadeUp  { from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:none;} }
 @keyframes qSlideIn { from{opacity:0;transform:translateX(28px);}to{opacity:1;transform:none;} }
 
+/* ── Fill-In-The-Blank UI ── */
+.fill-blank-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 12px;
+  width: 100%;
+}
+.fill-blank-label {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--gold);
+  letter-spacing: 0.02em;
+}
+.fill-blank-input {
+  width: 100%;
+  padding: 18px 22px;
+  background: rgba(11, 17, 32, 0.75);
+  border: 2px solid var(--border2);
+  border-radius: 14px;
+  color: #ffffff;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 18px;
+  outline: none;
+  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.4);
+}
+.fill-blank-input:focus {
+  border-color: var(--gold);
+  background: rgba(11, 17, 32, 0.95);
+  box-shadow: 0 0 20px rgba(130, 200, 229, 0.35), inset 0 2px 6px rgba(0, 0, 0, 0.5);
+}
+.fill-blank-input::placeholder {
+  color: rgba(255, 255, 255, 0.3);
+  font-size: 16px;
+}
+
+/* ── One-by-One Results Array Display (Screen Done) ── */
+.results-list {
+  width: 100%;
+  max-width: 520px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 20px auto 28px;
+  text-align: left;
+}
+.result-item-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 18px;
+  background: rgba(11, 17, 32, 0.6);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  font-size: 14px;
+}
+.result-item-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #ffffff;
+  font-weight: 500;
+}
+.result-badge {
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.result-badge.correct {
+  background: rgba(56, 184, 116, 0.2);
+  color: #38b874;
+  border: 1px solid rgba(56, 184, 116, 0.4);
+}
+.result-badge.incorrect {
+  background: rgba(224, 92, 92, 0.2);
+  color: #e05c5c;
+  border: 1px solid rgba(224, 92, 92, 0.4);
+}
+
 @media(max-width:520px){
   .q-card { height: 580px; }
   .q-header,.q-body,.q-footer { padding-left:20px; padding-right:20px; }
