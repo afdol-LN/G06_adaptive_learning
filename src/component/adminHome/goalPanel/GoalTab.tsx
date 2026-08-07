@@ -1,17 +1,18 @@
 import {
-  FaBullseye,
   FaMagnifyingGlass,
   FaPlus,
-  FaEye,
-  FaPen,
-  FaToggleOff,
-  FaToggleOn,
 } from "react-icons/fa6";
 import GoalFormModal from "./component/GoalFormModal";
 import GoalViewModal from "./component/GoalViewModal";
 import { goalController } from "./goal.controller";
+import { ActionButtons } from "../../common/ActionButtons";
+import { StatusSwitch } from "../../common/StatusSwitch";
 
-export default function GoalTab() {
+interface GoalTabProps {
+  icon?: React.ReactNode;
+}
+
+export default function GoalTab({ icon }: GoalTabProps) {
   const {
     goals,
     isLoading,
@@ -41,7 +42,7 @@ export default function GoalTab() {
   return (
     <div className="ad-tab-goals">
       <div className="ad-page-header">
-        <h1 className="ad-page-title"><FaBullseye /> จัดการ Goal</h1>
+        <h1 className="ad-page-title">{icon} จัดการ Goal</h1>
         <span className="ad-page-sub">Goal ทั้งหมด {goals.length} รายการ</span>
       </div>
 
@@ -71,9 +72,9 @@ export default function GoalTab() {
           <thead>
             <tr>
               <th>Goal</th>
-              <th>สถานะ</th>
               <th>Skill Require</th>
               <th>Actions</th>
+              <th>สถานะ</th>
             </tr>
           </thead>
           <tbody>
@@ -90,51 +91,35 @@ export default function GoalTab() {
                 </td>
               </tr>
             ) : (
-              filteredGoals.map((g) => (
-                <tr key={g.id}>
-                  <td>
-                    <span className="ad-skill-name">{g.goal}</span>
-                  </td>
-                  <td>
-                    <span className="ad-status-dot" style={{ background: getStatusColor(g.status) }} />
-                    <span className="ad-muted">{g.status}</span>
-                  </td>
-                  <td>
-                    <div className="ad-req-tags">
-                      {!g.goalSkillRequire || g.goalSkillRequire.length === 0 ? (
-                        <span className="ad-muted">—</span>
-                      ) : (
-                        g.goalSkillRequire.map((r) => (
-                          <span key={r.skillId} className="ad-req-tag">
-                            {r.skill?.skillsName || `#${r.skillId}`}
-                          </span>
-                        ))
-                      )}
-                    </div>
-                  </td>
-                  <td>
-                    <div className="ad-action-btns">
-                      <button className="ad-btn-sm ad-btn-view" onClick={() => openView(g)}>
-                        <FaEye /> ดู
-                      </button>
-                      <button className="ad-btn-sm ad-btn-view" onClick={() => openEditForm(g)}>
-                        <FaPen /> แก้ไข
-                      </button>
-                      <button className="ad-btn-sm ad-btn-toggle" onClick={() => toggleGoalStatus(g)}>
-                        {g.status === "active" ? (
-                          <>
-                            <FaToggleOff /> ระงับ
-                          </>
+              filteredGoals.map((g) => {
+                const fadeClass = g.status === "inactive" ? "ad-fade-cell" : "";
+                return (
+                  <tr key={g.id}>
+                    <td className={fadeClass}>
+                      <span className="ad-skill-name">{g.goal}</span>
+                    </td>
+                    <td className={fadeClass}>
+                      <div className="ad-req-tags">
+                        {!g.goalSkillRequire || g.goalSkillRequire.length === 0 ? (
+                          <span className="ad-muted">—</span>
                         ) : (
-                          <>
-                            <FaToggleOn /> เปิด
-                          </>
+                          g.goalSkillRequire.map((r) => (
+                            <span key={r.skillId} className="ad-req-tag">
+                              {r.skill?.skillsName || `#${r.skillId}`}
+                            </span>
+                          ))
                         )}
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))
+                      </div>
+                    </td>
+                    <td>
+                      <ActionButtons onView={() => openView(g)} onEdit={() => openEditForm(g)} />
+                    </td>
+                    <td>
+                      <StatusSwitch status={g.status} onToggle={() => toggleGoalStatus(g)} />
+                    </td>
+                  </tr>
+                );
+              })
             )}
           </tbody>
         </table>

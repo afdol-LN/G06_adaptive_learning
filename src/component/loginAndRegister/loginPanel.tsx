@@ -51,7 +51,7 @@ export default function LoginPanel({ onSubmit, isLoading, onSwitchTab }:LoginPan
         </div>
       </div>
 
-      <label className="remember">
+      {/* <label className="remember">
         <input type="checkbox" id="rememberMe" />
         <div className="check-box">
           <svg className="tick" viewBox="0 0 10 10">
@@ -59,11 +59,12 @@ export default function LoginPanel({ onSubmit, isLoading, onSwitchTab }:LoginPan
           </svg>
         </div>
         <span>Remember me</span>
-      </label>
+      </label> */}
 
       <button
         className={`btn-primary ${isLoading ? "loading" : ""}`}
         onClick={handleSubmit}
+        onKeyDown={(e) => e.key === 'Enter'}
       >
         <span>Sign In</span>
       </button>

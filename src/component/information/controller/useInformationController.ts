@@ -1,12 +1,14 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useApp } from "../../../context/AppContext";
+import { useToast } from "../../../context/ToastContext";
 import { InformationService } from "../../../services/informationService";
 import { InformationFormData, GoalItem } from "../../../models/informationModel";
 
 export function useInformationController() {
   const navigate = useNavigate();
   const location = useLocation();
+  const toast = useToast();
   const skipGeneralInfo = Boolean((location.state as any)?.skipGeneralInfo);
 
   const [step, setStep] = useState<number>(skipGeneralInfo ? 2 : 1);
@@ -29,10 +31,6 @@ export function useInformationController() {
   });
   const [selectedGoal, setSelectedGoal] = useState<string[]>([]);
   const [exp, setExp] = useState<number>(1);
-  const [toast, setToast] = useState<{ show: boolean; msg: string }>({
-    show: false,
-    msg: "",
-  });
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
   // Fetch Goals from Backend API on mount
@@ -44,7 +42,7 @@ export function useInformationController() {
         setGoals(fetchedGoals);
       } catch (error) {
         console.error("Failed to fetch goals from backend API:", error);
-        showNotice("โหลดข้อมูลเป้าหมายการเรียนรู้ไม่สำเร็จ กรุณาลองใหม่อีกครั้ง");
+        toast.error("โหลดข้อมูลเป้าหมายการเรียนรู้ไม่สำเร็จ", "กรุณาลองใหม่อีกครั้ง");
       } finally {
         setIsLoadingGoals(false);
       }
@@ -63,11 +61,6 @@ export function useInformationController() {
   const triggerShake = () => {
     setIsShaking(true);
     setTimeout(() => setIsShaking(false), 400);
-  };
-
-  const showNotice = (msg: string) => {
-    setToast({ show: true, msg });
-    setTimeout(() => setToast({ show: false, msg: "" }), 3000);
   };
 
   const setFormDataField = (field: keyof InformationFormData, value: string) => {
@@ -89,13 +82,13 @@ export function useInformationController() {
       const { year, campus, faculty, major } = formData;
       if (!year || !campus || !faculty || !major) {
         triggerShake();
-        showNotice("กรุณากรอกข้อมูลให้ครบถ้วน");
+        toast.warning("กรุณากรอกข้อมูลให้ครบถ้วน");
         return false;
       }
     }
     if (step === 2 && selectedGoal.length === 0) {
       triggerShake();
-      showNotice("กรุณาเลือกเนื้อหาที่ต้องการเรียนรู้");
+      toast.warning("กรุณาเลือกเนื้อหาที่ต้องการเรียนรู้");
       return false;
     }
     return true;
@@ -117,7 +110,7 @@ export function useInformationController() {
         );
       } catch (error) {
         console.error("Failed to save onboarding info to backend:", error);
-        showNotice("บันทึกข้อมูลไปยังเซิร์ฟเวอร์ไม่สำเร็จ กรุณาลองใหม่อีกครั้ง");
+        toast.error("บันทึกข้อมูลไปยังเซิร์ฟเวอร์ไม่สำเร็จ", "กรุณาลองใหม่อีกครั้ง");
         setIsSubmitting(false);
         return;
       }
@@ -176,7 +169,6 @@ export function useInformationController() {
     formData,
     selectedGoal,
     exp,
-    toast,
     branches,
     goals,
     isLoadingGoals,

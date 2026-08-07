@@ -54,12 +54,14 @@ export function skillController() {
 
   const filteredSkills = useMemo(() => {
     const term = skillSearch.trim().toLowerCase();
-    if (!term) return skills;
-    return skills.filter(
-      (s) =>
-        s.skillsName.toLowerCase().includes(term) ||
-        (s.tier || "").toLowerCase().includes(term),
-    );
+    const list = term
+      ? skills.filter(
+          (s) =>
+            s.skillsName.toLowerCase().includes(term) ||
+            (s.tier || "").toLowerCase().includes(term),
+        )
+      : [...skills];
+    return list.sort((a, b) => a.skillsName.localeCompare(b.skillsName));
   }, [skills, skillSearch]);
 
   const openCreateForm = () => {

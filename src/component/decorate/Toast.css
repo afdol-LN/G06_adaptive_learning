@@ -1,0 +1,143 @@
+.toastsys-stack {
+  position: fixed;
+  right: 22px;
+  bottom: 22px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: flex-end;
+  pointer-events: none;
+  max-width: min(400px, calc(100vw - 44px));
+  font-family: 'DM Sans', sans-serif;
+}
+
+.toastsys-item {
+  pointer-events: auto;
+  position: relative;
+  overflow: hidden;
+  width: min(380px, calc(100vw - 44px));
+  display: flex;
+  align-items: flex-start;
+  gap: 13px;
+  padding: 15px 16px 17px;
+  border-radius: 20px;
+  backdrop-filter: blur(26px) saturate(1.7);
+  -webkit-backdrop-filter: blur(26px) saturate(1.7);
+  border: 1px solid;
+  box-shadow: 0 18px 44px rgba(6, 42, 82, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  animation: toastsysIn 0.36s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.25s;
+}
+
+.toastsys-item:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 24px 54px rgba(6, 42, 82, 0.24), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+
+.toastsys-item.closing {
+  animation: toastsysOut 0.26s ease forwards;
+}
+
+.toastsys-icon {
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: 700;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+.toastsys-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.toastsys-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #062a52;
+  line-height: 1.3;
+}
+
+.toastsys-body {
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: #3f6a91;
+  margin-top: 2px;
+}
+
+.toastsys-close {
+  flex-shrink: 0;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 1px solid rgba(6, 42, 82, 0.12);
+  background: rgba(255, 255, 255, 0.55);
+  color: #3f6a91;
+  font-size: 13px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.2s, color 0.2s;
+}
+
+.toastsys-close:hover {
+  transform: rotate(90deg) scale(1.1);
+  background: rgba(6, 42, 82, 0.1);
+  color: #062a52;
+}
+
+.toastsys-close:active {
+  transform: scale(0.9);
+}
+
+.toastsys-track {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 3px;
+  background: rgba(6, 42, 82, 0.08);
+}
+
+.toastsys-bar {
+  height: 100%;
+  border-radius: 0 3px 3px 0;
+  transition: width 0.1s linear;
+}
+
+@keyframes toastsysIn {
+  from {
+    opacity: 0;
+    transform: translateX(56px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes toastsysOut {
+  from {
+    opacity: 1;
+    transform: none;
+  }
+  to {
+    opacity: 0;
+    transform: translateX(56px) scale(0.94);
+  }
+}
+
+@media (max-width: 480px) {
+  .toastsys-stack {
+    right: 12px;
+    bottom: 12px;
+  }
+}

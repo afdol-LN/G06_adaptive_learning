@@ -29,9 +29,15 @@ export default function SkillFormModal({
   const [tier, setTier] = useState<string>(EMPTY_SKILL_FORM.tier);
   const [status, setStatus] = useState<string>(EMPTY_SKILL_FORM.status);
   const [prerequisiteIds, setPrerequisiteIds] = useState<number[]>([]);
+  const [prereqSearch, setPrereqSearch] = useState<string>("");
+  const [isTierOpen, setIsTierOpen] = useState<boolean>(false);
+  const [isStatusOpen, setIsStatusOpen] = useState<boolean>(false);
 
   useEffect(() => {
     if (!isOpen) return;
+    setPrereqSearch("");
+    setIsTierOpen(false);
+    setIsStatusOpen(false);
     if (editingSkill) {
       setSkillCode(String(editingSkill.skillCode));
       setSkillsName(editingSkill.skillsName);
@@ -48,6 +54,22 @@ export default function SkillFormModal({
       setPrerequisiteIds([]);
     }
   }, [isOpen, editingSkill]);
+
+  useEffect(() => {
+    const handleOutsideClick = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (!target.closest(".ad-field")) {
+        setIsTierOpen(false);
+        setIsStatusOpen(false);
+      }
+    };
+    if (isTierOpen || isStatusOpen) {
+      document.addEventListener("click", handleOutsideClick);
+    }
+    return () => {
+      document.removeEventListener("click", handleOutsideClick);
+    };
+  }, [isTierOpen, isStatusOpen]);
 
   if (!isOpen) return null;
 
@@ -74,7 +96,15 @@ export default function SkillFormModal({
     });
   };
 
-  const candidateSkills = allSkills.filter((s) => s.skillId !== editingSkill?.skillId);
+  const candidateSkills = allSkills
+    .filter((s) => s.skillId !== editingSkill?.skillId)
+    .sort((a, b) => a.skillsName.localeCompare(b.skillsName));
+
+  const filteredCandidates = candidateSkills.filter(
+    (s) =>
+      s.skillsName.toLowerCase().includes(prereqSearch.toLowerCase()) ||
+      (s.skillCode || "").toLowerCase().includes(prereqSearch.toLowerCase())
+  );
 
   return (
     <div className="ad-overlay" onClick={onClose}>
@@ -135,30 +165,102 @@ export default function SkillFormModal({
             </div>
 
             <div className="ad-field-row">
-              <div className="ad-field">
+              <div className="ad-field" style={{ flex: 1, minWidth: "120px", position: "relative" }}>
                 <label className="ad-label">Tier</label>
-                <select className="ad-select" value={tier} onChange={(e) => setTier(e.target.value)}>
-                  {TIERS.map((t) => (
-                    <option key={t} value={t}>{t}</option>
-                  ))}
-                </select>
+                <button
+                  type="button"
+                  className="ad-select"
+                  onClick={() => {
+                    setIsTierOpen(!isTierOpen);
+                    setIsStatusOpen(false);
+                  }}
+                  style={{
+                    width: "100%",
+                    textAlign: "left",
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                  }}
+                >
+                  <span>{tier}</span>
+                </button>
+                {isTierOpen && (
+                  <div className="ad-select-options-list">
+                    {TIERS.map((t) => (
+                      <div
+                        key={t}
+                        className={`ad-select-option-item ${tier === t ? "active" : ""}`}
+                        onClick={() => {
+                          setTier(t);
+                          setIsTierOpen(false);
+                        }}
+                      >
+                        {t}
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
-              <div className="ad-field">
+              <div className="ad-field" style={{ flex: 1, minWidth: "120px", position: "relative" }}>
                 <label className="ad-label">สถานะ</label>
-                <select className="ad-select" value={status} onChange={(e) => setStatus(e.target.value)}>
-                  <option value="active">active</option>
-                  <option value="inactive">inactive</option>
-                </select>
+                <button
+                  type="button"
+                  className="ad-select"
+                  onClick={() => {
+                    setIsStatusOpen(!isStatusOpen);
+                    setIsTierOpen(false);
+                  }}
+                  style={{
+                    width: "100%",
+                    textAlign: "left",
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                  }}
+                >
+                  <span>{status}</span>
+                </button>
+                {isStatusOpen && (
+                  <div className="ad-select-options-list">
+                    {[
+                      { value: "active", label: "active" },
+                      { value: "inactive", label: "inactive" },
+                    ].map((opt) => (
+                      <div
+                        key={opt.value}
+                        className={`ad-select-option-item ${status === opt.value ? "active" : ""}`}
+                        onClick={() => {
+                          setStatus(opt.value);
+                          setIsStatusOpen(false);
+                        }}
+                      >
+                        {opt.label}
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
 
             <div className="ad-field">
               <label className="ad-label">Prerequisite (เลือกได้หลายรายการ)</label>
+              <input
+                type="text"
+                className="ad-input"
+                placeholder="ค้นหา Prerequisite..."
+                value={prereqSearch}
+                onChange={(e) => setPrereqSearch(e.target.value)}
+                style={{ marginBottom: "8px" }}
+              />
               <div className="ad-req-tags">
-                {candidateSkills.length === 0 ? (
-                  <span className="ad-muted">— ไม่มี Skill อื่นให้เลือก —</span>
+                {filteredCandidates.length === 0 ? (
+                  <span className="ad-muted">
+                    {candidateSkills.length === 0
+                      ? "— ไม่มี Skill อื่นให้เลือก —"
+                      : "— ไม่พบ Skill ที่ค้นหา —"}
+                  </span>
                 ) : (
-                  candidateSkills.map((s) => {
+                  filteredCandidates.map((s) => {
                     const selected = prerequisiteIds.includes(s.skillId);
                     return (
                       <button

@@ -13,7 +13,9 @@ import Exercise from "./component/Exercise";
 import AdminHome from "./component/adminHome/Adminhome";
 import SkillTree from "./component/SkillTree";
 import { AppProvider, useApp } from "./context/AppContext";
+import { ToastProvider } from "./context/ToastContext";
 import GlobalLoader from "./component/common/GlobalLoader";
+import ToastContainer from "./component/common/ToastContainer";
 
 function AppContent() {
   const { isLoading } = useApp();
@@ -21,6 +23,7 @@ function AppContent() {
   return (
     <>
       <GlobalLoader isLoading={isLoading} />
+      <ToastContainer />
       <Router>
         <Routes>
           <Route path="/" element={<SignInAndUp />}></Route>
@@ -41,9 +44,11 @@ function AppContent() {
 
 function App() {
   return (
-    <AppProvider>
-      <AppContent />
-    </AppProvider>
+    <ToastProvider>
+      <AppProvider>
+        <AppContent />
+      </AppProvider>
+    </ToastProvider>
   );
 }
 

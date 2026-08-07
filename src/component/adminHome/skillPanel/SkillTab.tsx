@@ -1,24 +1,22 @@
 import {
-  FaTree,
   FaMagnifyingGlass,
   FaPlus,
   FaPenToSquare,
-  FaEye,
-  FaPen,
-  FaToggleOff,
-  FaToggleOn,
   FaTriangleExclamation,
 } from "react-icons/fa6";
 import SkillFormModal from "./component/SkillFormModal";
 import SkillViewModal from "./component/SkillViewModal";
 import { skillController } from "./skill.controller";
+import { ActionButtons } from "../../common/ActionButtons";
+import { StatusSwitch } from "../../common/StatusSwitch";
 
 interface SkillTabProps {
+  icon?: React.ReactNode;
   getSkillQuestions?: (skillId: number) => any[];
   setViewSkillQ?: (skill: any) => void;
 }
 
-export default function SkillTab({ getSkillQuestions, setViewSkillQ }: SkillTabProps) {
+export default function SkillTab({ icon, getSkillQuestions, setViewSkillQ }: SkillTabProps) {
   const {
     skills,
     isLoading,
@@ -54,7 +52,7 @@ export default function SkillTab({ getSkillQuestions, setViewSkillQ }: SkillTabP
   return (
     <div className="ad-tab-skills">
       <div className="ad-page-header">
-        <h1 className="ad-page-title"><FaTree /> จัดการ Skill</h1>
+        <h1 className="ad-page-title">{icon} จัดการ Skill</h1>
         <span className="ad-page-sub">Skill ทั้งหมด {skills.length} รายการ</span>
       </div>
 
@@ -83,101 +81,88 @@ export default function SkillTab({ getSkillQuestions, setViewSkillQ }: SkillTabP
         <table className="ad-table">
           <thead>
             <tr>
+              <th>Skill code</th>
               <th>Skill</th>
               <th>Tier</th>
-              <th>สถานะ</th>
               <th>Prerequisite</th>
               {getSkillQuestions && <th>โจทย์</th>}
               <th>Actions</th>
+              <th>สถานะ</th>
             </tr>
           </thead>
           <tbody>
             {isLoading ? (
               <tr>
-                <td colSpan={6} style={{ textAlign: "center", padding: 24 }}>
+                <td colSpan={8} style={{ textAlign: "center", padding: 24 }}>
                   กำลังโหลด...
                 </td>
               </tr>
             ) : filteredSkills.length === 0 ? (
               <tr>
-                <td colSpan={6} style={{ textAlign: "center", padding: 24 }}>
+                <td colSpan={8} style={{ textAlign: "center", padding: 24 }}>
                   ไม่พบ Skill ที่ตรงกับเงื่อนไข
                 </td>
               </tr>
             ) : (
-              filteredSkills.map((s) => (
-                <tr key={s.skillId}>
-                  <td>
-                    <div className="ad-skill-cell">
-                      <span className="ad-skill-name">{s.skillsName}</span>
-                    </div>
-                  </td>
-                  <td>
-                    <span
-                      className="ad-tier-badge"
-                      style={{
-                        background: `${getTierColor(s.tier)}18`,
-                        color: getTierColor(s.tier),
-                        border: `1px solid ${getTierColor(s.tier)}40`,
-                      }}
-                    >
-                      {s.tier}
-                    </span>
-                  </td>
-                  <td>
-                    <span className="ad-status-dot" style={{ background: getStatusColor(s.status) }} />
-                    <span className="ad-muted">{s.status}</span>
-                  </td>
-                  <td>
-                    <div className="ad-req-tags">
-                      {!s.skillPrequisite || s.skillPrequisite.length === 0 ? (
-                        <span className="ad-muted">—</span>
-                      ) : (
-                        s.skillPrequisite.map((p) => (
-                          <span key={p.prerequisiteSkillId} className="ad-req-tag">
-                            {p.prerequisiteSkill?.skillsName || `#${p.prerequisiteSkillId}`}
-                          </span>
-                        ))
-                      )}
-                    </div>
-                  </td>
-                  {getSkillQuestions && setViewSkillQ && (
-                    <td>
-                      <button
-                        className="ad-btn-sm"
-                        style={{ borderColor: "rgba(139,92,246,0.3)", color: "#8b5cf6" }}
-                        onClick={() => setViewSkillQ(s)}
-                      >
-<FaPenToSquare /> {getSkillQuestions(s.skillId).length} ข้อ
-                      </button>
+              filteredSkills.map((s) => {
+                const fadeClass = s.status === "inactive" ? "ad-fade-cell" : "";
+                return (
+                  <tr key={s.skillId}>
+                    <td className={fadeClass}>
+                      <div className="ad-skill-cell">
+                        <span className="ad-skill-name">{s.skillCode}</span>
+                      </div>
                     </td>
-                  )}
-                  <td>
-                    <div className="ad-action-btns">
-                      <button className="ad-btn-sm ad-btn-view" onClick={() => openView(s)}>
-                        <FaEye /> ดู
-                      </button>
-                      <button className="ad-btn-sm ad-btn-view" onClick={() => openEditForm(s)}>
-                        <FaPen /> แก้ไข
-                      </button>
-                      <button className="ad-btn-sm ad-btn-toggle" onClick={() => toggleSkillStatus(s)}>
-                        {s.status === "active" ? (
-                          <>
-                            <FaToggleOff /> ระงับ
-                          </>
+                    <td className={fadeClass}>
+                      <div className="ad-skill-cell">
+                        <span className="ad-skill-name">{s.skillsName}</span>
+                      </div>
+                    </td>
+                    <td className={fadeClass}>
+                      <span
+                        className="ad-tier-badge"
+                        style={{
+                          background: `${getTierColor(s.tier)}18`,
+                          color: getTierColor(s.tier),
+                          border: `1px solid ${getTierColor(s.tier)}40`,
+                        }}
+                      >
+                        {s.tier}
+                      </span>
+                    </td>
+                    <td className={fadeClass}>
+                      <div className="ad-req-tags">
+                        {!s.skillPrequisite || s.skillPrequisite.length === 0 ? (
+                          <span className="ad-muted">—</span>
                         ) : (
-                          <>
-                            <FaToggleOn /> เปิด
-                          </>
+                          s.skillPrequisite.map((p) => (
+                            <span key={p.prerequisiteSkillId} className="ad-req-tag">
+                              {p.prerequisiteSkill?.skillsName || `#${p.prerequisiteSkillId}`}
+                            </span>
+                          ))
                         )}
-                      </button>
-                      {/* <button className="ad-btn-sm ad-btn-del" onClick={() => requestDelete(s)}>
-                        <FaTrash /> ลบ
-                      </button> */}
-                    </div>
-                  </td>
-                </tr>
-              ))
+                      </div>
+                    </td>
+                    {getSkillQuestions && setViewSkillQ && (
+                      <td className={fadeClass}>
+                        <button
+                          className="ad-btn-sm"
+                          style={{ borderColor: "rgba(139,92,246,0.3)", color: "#8b5cf6" }}
+                          onClick={() => setViewSkillQ(s)}
+                        >
+                          <FaPenToSquare /> {getSkillQuestions(s.skillId).length} ข้อ
+                        </button>
+                      </td>
+                    )}
+                    <td>
+                      <ActionButtons onView={() => openView(s)} onEdit={() => openEditForm(s)} />
+                    </td>
+                    <td>
+                      <StatusSwitch status={s.status} onToggle={() => toggleSkillStatus(s)} />
+                    </td>
+                  </tr>
+                );
+              })
             )}
           </tbody>
         </table>

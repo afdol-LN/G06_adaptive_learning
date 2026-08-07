@@ -3,12 +3,6 @@ import "../decorate/Adminhome.css";
 import { useNavigate } from "react-router-dom";
 import {
   FaBolt,
-  FaChartPie,
-  FaUsers,
-  FaTree,
-  FaBullseye,
-  FaPenToSquare,
-  FaClipboardList,
   FaArrowRightFromBracket,
   FaChevronLeft,
   FaChevronRight,
@@ -21,16 +15,8 @@ import ExerciseTab from "./exercisePanel/ExerciseTab";
 import HistoryTab from "./HistoryTab";
 import { summaryController } from "./summaryPanel/summary.controller";
 import { historyController } from "./historyPanel/history.controller";
-import { getTierColor, getScoreColor, getStatusColor, gradeLabel } from "../../utils/adminUi";
+import { getTierColor, getScoreColor, getStatusColor, gradeLabel, TABS } from "../../utils/adminUi";
 
-const TABS = [
-  { key: "summary", icon: <FaChartPie />, label: "สรุปภาพรวม" },
-  { key: "users", icon: <FaUsers />, label: "ผู้ใช้งาน" },
-  { key: "skills", icon: <FaTree />, label: "จัดการ Skill" },
-  { key: "goals", icon: <FaBullseye />, label: "จัดการ Goal" },
-  { key: "exercises", icon: <FaPenToSquare />, label: "จัดการ Exercise" },
-  { key: "history", icon: <FaClipboardList />, label: "ประวัติโจทย์" },
-];
 
 export default function AdminHome() {
   const navigate = useNavigate();
@@ -102,6 +88,7 @@ export default function AdminHome() {
         {visitedTabs.has("summary") && (
           <div style={{ display: activeTab === "summary" ? undefined : "none" }}>
             <SummaryTab
+              icon={TABS.find((t) => t.key === "summary")?.icon}
               SUMMARY={summary}
               skills={skillProgress}
               users={userActivity}
@@ -117,28 +104,28 @@ export default function AdminHome() {
         {/* ══ USERS ══ */}
         {visitedTabs.has("users") && (
           <div style={{ display: activeTab === "users" ? undefined : "none" }}>
-            <UsersTab />
+            <UsersTab icon={TABS.find((t) => t.key === "users")?.icon} />
           </div>
         )}
 
         {/* ══ SKILLS ══ */}
         {visitedTabs.has("skills") && (
           <div style={{ display: activeTab === "skills" ? undefined : "none" }}>
-            <SkillTab />
+            <SkillTab icon={TABS.find((t) => t.key === "skills")?.icon} />
           </div>
         )}
 
         {/* ══ GOALS ══ */}
         {visitedTabs.has("goals") && (
           <div style={{ display: activeTab === "goals" ? undefined : "none" }}>
-            <GoalTab />
+            <GoalTab icon={TABS.find((t) => t.key === "goals")?.icon} />
           </div>
         )}
 
         {/* ══ EXERCISES ══ */}
         {visitedTabs.has("exercises") && (
           <div style={{ display: activeTab === "exercises" ? undefined : "none" }}>
-            <ExerciseTab />
+            <ExerciseTab icon={TABS.find((t) => t.key === "exercises")?.icon} />
           </div>
         )}
 
@@ -146,6 +133,7 @@ export default function AdminHome() {
         {visitedTabs.has("history") && (
           <div style={{ display: activeTab === "history" ? undefined : "none" }}>
             <HistoryTab
+              icon={TABS.find((t) => t.key === "history")?.icon}
               filteredHistory={filteredHistory}
               histSearch={histSearch}
               setHistSearch={setHistSearch}

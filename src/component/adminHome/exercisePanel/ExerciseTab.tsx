@@ -1,18 +1,18 @@
 import {
-  FaPenToSquare,
   FaMagnifyingGlass,
   FaPlus,
-  FaEye,
-  FaPen,
-  FaToggleOff,
-  FaToggleOn,
 } from "react-icons/fa6";
 import ExerciseFormModal from "./component/ExerciseFormModal";
 import ExerciseViewModal from "./component/ExerciseViewModal";
 import { exerciseController } from "./exercise.controller";
-import { getStatusColor } from "../../../utils/adminUi";
+import { ActionButtons } from "../../common/ActionButtons";
+import { StatusSwitch } from "../../common/StatusSwitch";
 
-export default function ExerciseTab() {
+interface ExerciseTabProps {
+  icon?: React.ReactNode;
+}
+
+export default function ExerciseTab({ icon }: ExerciseTabProps) {
   const {
     exercises,
     activeSkills,
@@ -49,7 +49,7 @@ export default function ExerciseTab() {
   return (
     <div className="ad-tab-skills">
       <div className="ad-page-header">
-        <h1 className="ad-page-title"><FaPenToSquare /> จัดการ Exercise</h1>
+        <h1 className="ad-page-title">{icon} จัดการ Exercise</h1>
         <span className="ad-page-sub">Exercise ทั้งหมด {exercises.length} รายการ</span>
       </div>
 
@@ -116,8 +116,8 @@ export default function ExerciseTab() {
               <th>Skill</th>
               <th>Level</th>
               <th>ประเภท</th>
-              <th>สถานะ</th>
               <th>Actions</th>
+              <th>สถานะ</th>
             </tr>
           </thead>
           <tbody>
@@ -134,51 +134,35 @@ export default function ExerciseTab() {
                 </td>
               </tr>
             ) : (
-              filteredExercises.map((ex) => (
-                <tr key={ex.id}>
-                  <td>
-                    <div className="ad-skill-cell">
-                      <span className="ad-skill-name">
-                        {ex.description.length > 60
-                          ? `${ex.description.slice(0, 60)}...`
-                          : ex.description}
-                      </span>
-                    </div>
-                  </td>
-                  <td>{ex.skill?.skillsName || `#${ex.skillId}`}</td>
-                  <td>{ex.level}</td>
-                  <td>{ex.type}</td>
-                  <td>
-                    <span className="ad-status-dot" style={{ background: getStatusColor(ex.status) }} />
-                    <span className="ad-muted">{ex.status}</span>
-                  </td>
-                  <td>
-                    <div className="ad-action-btns">
-                      <button className="ad-btn-sm ad-btn-view" onClick={() => openView(ex)}>
-                        <FaEye /> ดู
-                      </button>
-                      <button className="ad-btn-sm ad-btn-view" onClick={() => openEditForm(ex)}>
-                        <FaPen /> แก้ไข
-                      </button>
-                      <button
-                        className="ad-btn-sm ad-btn-toggle"
+              filteredExercises.map((ex) => {
+                const fadeClass = ex.status === "inactive" ? "ad-fade-cell" : "";
+                return (
+                  <tr key={ex.id}>
+                    <td className={fadeClass}>
+                      <div className="ad-skill-cell">
+                        <span className="ad-skill-name">
+                          {ex.description.length > 60
+                            ? `${ex.description.slice(0, 60)}...`
+                            : ex.description}
+                        </span>
+                      </div>
+                    </td>
+                    <td className={fadeClass}>{ex.skill?.skillsName || `#${ex.skillId}`}</td>
+                    <td className={fadeClass}>{ex.level}</td>
+                    <td className={fadeClass}>{ex.type}</td>
+                    <td>
+                      <ActionButtons onView={() => openView(ex)} onEdit={() => openEditForm(ex)} />
+                    </td>
+                    <td>
+                      <StatusSwitch
+                        status={ex.status}
+                        onToggle={() => toggleExerciseStatus(ex)}
                         disabled={togglingId === ex.id}
-                        onClick={() => toggleExerciseStatus(ex)}
-                      >
-                        {ex.status === "active" ? (
-                          <>
-                            <FaToggleOff /> ระงับ
-                          </>
-                        ) : (
-                          <>
-                            <FaToggleOn /> เปิด
-                          </>
-                        )}
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))
+                      />
+                    </td>
+                  </tr>
+                );
+              })
             )}
           </tbody>
         </table>

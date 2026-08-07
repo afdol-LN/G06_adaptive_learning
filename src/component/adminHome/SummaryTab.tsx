@@ -1,6 +1,5 @@
 import React from 'react';
 import {
-  FaChartPie,
   FaUsers,
   FaCircleCheck,
   FaClipboardList,
@@ -12,6 +11,7 @@ import {
 } from 'react-icons/fa6';
 
 export default function SummaryTab({ 
+  icon,
   SUMMARY, 
   skills, 
   users, 
@@ -24,7 +24,7 @@ export default function SummaryTab({
   return (
     <div className="ad-tab-summary">
       <div className="ad-page-header">
-        <h1 className="ad-page-title"><FaChartPie /> สรุปภาพรวมระบบ</h1>
+        <h1 className="ad-page-title">{icon} สรุปภาพรวมระบบ</h1>
         <span className="ad-page-sub">ข้อมูล ณ วันที่ 12 มี.ค. 2026</span>
       </div>
       <div className="ad-kpi-grid">

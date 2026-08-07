@@ -1,3 +1,12 @@
+import {
+  FaChartPie,
+  FaUsers,
+  FaBook,
+  FaBullseye,
+  FaPenToSquare,
+  FaClipboardList,
+} from "react-icons/fa6";
+
 export function getTierColor(tier?: string | null): string {
   return (
     {
@@ -33,3 +42,13 @@ export function getStatusColor(status?: string): string {
 export function gradeLabel(grade: string): string {
   return grade === "great" ? "ดีเยี่ยม" : grade === "good" ? "ดี" : "ต้องปรับปรุง";
 }
+
+export const TABS = [
+  { key: "summary", icon: <FaChartPie />, label: "สรุปภาพรวม" },
+  { key: "users", icon: <FaUsers />, label: "ผู้ใช้งาน" },
+  { key: "skills", icon: <FaBook />, label: "จัดการ Skill" },
+  { key: "goals", icon: <FaBullseye />, label: "จัดการ Goal" },
+  { key: "exercises", icon: <FaPenToSquare />, label: "จัดการ Exercise" },
+  { key: "history", icon: <FaClipboardList />, label: "ประวัติโจทย์" },
+];
+

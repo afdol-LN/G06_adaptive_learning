@@ -8,10 +8,12 @@ import {
 } from "../../../models/pretestModel";
 import { PretestService } from "../../../services/pretestService";
 import { useApp } from "../../../context/AppContext";
+import { useToast } from "../../../context/ToastContext";
 
 export function usePretestController() {
   const navigate = useNavigate();
   const { updateBranch, activeBranch } = useApp();
+  const toast = useToast();
 
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [questions, setQuestions] = useState<PretestQuestion[]>([]);
@@ -199,10 +201,10 @@ export function usePretestController() {
       updateBranch(String(branchId), { isAlreadyPretest: true });
     } catch (e) {
       console.error(e);
-      // error toast can be added
+      toast.error("บันทึกผล Pretest ไม่สำเร็จ", "กรุณาลองใหม่อีกครั้ง");
     }
     navigate("/home");
-  }, [navigate, resultsList, updateBranch]);
+  }, [navigate, resultsList, updateBranch, toast]);
 
   const highlightCodeLine = useCallback((codeLine: string) => {
     return PretestService.highlightCodeLine(codeLine);

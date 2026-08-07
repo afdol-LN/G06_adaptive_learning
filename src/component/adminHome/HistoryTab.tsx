@@ -1,7 +1,8 @@
 import React from 'react';
-import { FaClipboardList, FaMagnifyingGlass } from 'react-icons/fa6';
+import { FaMagnifyingGlass } from 'react-icons/fa6';
 
 export default function HistoryTab({
+  icon,
   filteredHistory,
   histSearch,
   setHistSearch,
@@ -13,7 +14,7 @@ export default function HistoryTab({
   return (
     <div className="ad-tab-history">
       <div className="ad-page-header">
-        <h1 className="ad-page-title"><FaClipboardList /> ประวัติการทำโจทย์ทั้งหมด</h1>
+        <h1 className="ad-page-title">{icon} ประวัติการทำโจทย์ทั้งหมด</h1>
         <span className="ad-page-sub">พบ {filteredHistory.length} รายการ</span>
       </div>
       <div className="ad-toolbar">

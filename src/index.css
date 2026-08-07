@@ -1,5 +1,32 @@
+@import "tailwindcss";
+
+svg {
+  display: inline-block;
+}
+
 *, *::before, *::after {
   font-family: 'DM Sans', sans-serif;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(100, 116, 139, 0.35) transparent;
+}
+
+/* Webkit (Chrome, Safari, Edge) scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: rgba(100, 116, 139, 0.35);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(100, 116, 139, 0.55);
 }
 
 :root {

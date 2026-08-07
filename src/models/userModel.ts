@@ -60,6 +60,11 @@ export interface UserResponseAdmin {
     sessionCount?: number;
     dayStreak?: number;
     correctPercent?: number;
+    birthDate?: string;
+    genderId?: number;
+    genderName?: string;
+    username?: string;
+    role?: string;
 }
 
 export type getUsersResponseAdmin = ApiResponse<UserResponseAdmin[]>
@@ -70,6 +75,15 @@ export interface CreateUserByAdminRequest {
   genderId: number;
   username: string;
   password: string;
+  role: string;
+}
+
+export interface UpdateUserByAdminRequest {
+  fullName: string;
+  birthDate: string;
+  genderId: number;
+  username: string;
+  password?: string;
   role: string;
 }
 

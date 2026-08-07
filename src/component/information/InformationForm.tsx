@@ -6,7 +6,6 @@ import { StepGeneralInfo } from "./component/StepGeneralInfo";
 import { StepSelectGoal } from "./component/StepSelectGoal";
 import { StepExperience } from "./component/StepExperience";
 import { StepReady } from "./component/StepReady";
-import { ToastNotice } from "./component/ToastNotice";
 
 export default function InformationForm() {
   const ctrl = useInformationController();
@@ -135,11 +134,6 @@ export default function InformationForm() {
           </div>
         </div>
       </main>
-
-      {/* Toast Notice */}
-      <ToastNotice toast={ctrl.toast} />
-
-
     </div>
   );
 }
