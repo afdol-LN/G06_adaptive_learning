@@ -25,6 +25,7 @@ export default function SkillTab({ icon, getSkillQuestions, setViewSkillQ }: Ski
     setSkillSearch,
     filteredSkills,
     getTierColor,
+    getTierLabel,
     getStatusColor,
 
     isFormOpen,
@@ -127,7 +128,7 @@ export default function SkillTab({ icon, getSkillQuestions, setViewSkillQ }: Ski
                           border: `1px solid ${getTierColor(s.tier)}40`,
                         }}
                       >
-                        {s.tier}
+                        {getTierLabel(s.tier)}
                       </span>
                     </td>
                     <td className={fadeClass}>

@@ -1,6 +1,6 @@
 import { FaMagnifyingGlass, FaPen } from "react-icons/fa6";
 import { Skill } from "../../../../models/skillModel";
-import { getTierColor, getStatusColor } from "../../../../utils/adminUi";
+import { getTierColor, getTierLabel, getStatusColor } from "../../../../utils/adminUi";
 
 interface SkillViewModalProps {
   skill: Skill | null;
@@ -43,7 +43,7 @@ export default function SkillViewModal({ skill, onClose, onEdit }: SkillViewModa
                     border: `1px solid ${getTierColor(skill.tier)}40`,
                   }}
                 >
-                  {skill.tier || "-"}
+                  {skill.tier ? getTierLabel(skill.tier) : "-"}
                 </span>
               </div>
             </div>

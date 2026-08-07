@@ -111,7 +111,8 @@ export default function SelectBranch() {
     rail.scrollBy({ left: dir * Math.max(280, rail.clientWidth * 0.55), behavior: 'smooth' });
   }
 
-  const fullname = [userProfile?.fname, userProfile?.lname].filter(Boolean).join(' ');
+  const profileFullname = [userProfile?.fname, userProfile?.lname].filter(Boolean).join(' ');
+  const fullname = profileFullname || localStorage.getItem('fullname') || '';
   const username = userProfile?.username || '';
   const initial = (userProfile?.fname || fullname || '?').charAt(0).toUpperCase();
 

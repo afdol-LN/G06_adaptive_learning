@@ -7,16 +7,30 @@ import {
   FaClipboardList,
 } from "react-icons/fa6";
 
+export interface TierInfo {
+  code: string;
+  label: string;
+  color: string;
+}
+
+export const TIERS: TierInfo[] = [
+  { code: "T1", label: "Basic", color: "#10b981" },
+  { code: "T2", label: "Novice", color: "#3b82f6" },
+  { code: "T3", label: "Intermediate", color: "#8b5cf6" },
+  { code: "T4", label: "Advance", color: "#f59e0b" },
+  { code: "T5", label: "Specialist", color: "#0047AB" },
+];
+
+export function getTierInfo(tier?: string | null): TierInfo | undefined {
+  return TIERS.find((t) => t.code === tier);
+}
+
 export function getTierColor(tier?: string | null): string {
-  return (
-    {
-      T1: "#10b981",
-      T2: "#3b82f6",
-      T3: "#8b5cf6",
-      T4: "#f59e0b",
-      T5: "#0047AB",
-    }[tier || ""] || "#94a3b8"
-  );
+  return getTierInfo(tier)?.color || "#94a3b8";
+}
+
+export function getTierLabel(tier?: string | null): string {
+  return getTierInfo(tier)?.label || tier || "-";
 }
 
 export function getScoreColor(score?: number): string {

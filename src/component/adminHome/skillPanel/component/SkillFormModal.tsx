@@ -2,8 +2,7 @@ import React, { useEffect, useState } from "react";
 import { FaPen, FaPlus, FaCheck } from "react-icons/fa6";
 import { Skill, SkillPrerequisiteInput } from "../../../../models/skillModel";
 import { SkillFormValues, EMPTY_SKILL_FORM } from "../skill.controller";
-
-const TIERS = ["T1", "T2", "T3", "T4", "T5"];
+import { TIERS, getTierLabel } from "../../../../utils/adminUi";
 
 interface SkillFormModalProps {
   isOpen: boolean;
@@ -182,20 +181,20 @@ export default function SkillFormModal({
                     alignItems: "center",
                   }}
                 >
-                  <span>{tier}</span>
+                  <span>{getTierLabel(tier)}</span>
                 </button>
                 {isTierOpen && (
                   <div className="ad-select-options-list">
                     {TIERS.map((t) => (
                       <div
-                        key={t}
-                        className={`ad-select-option-item ${tier === t ? "active" : ""}`}
+                        key={t.code}
+                        className={`ad-select-option-item ${tier === t.code ? "active" : ""}`}
                         onClick={() => {
-                          setTier(t);
+                          setTier(t.code);
                           setIsTierOpen(false);
                         }}
                       >
-                        {t}
+                        {t.label}
                       </div>
                     ))}
                   </div>

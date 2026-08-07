@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { skillService } from "./skill.service";
 import { Skill, SkillPrerequisiteInput } from "../../../models/skillModel";
-import { getTierColor, getStatusColor } from "../../../utils/adminUi";
+import { getTierColor, getTierLabel, getStatusColor } from "../../../utils/adminUi";
 
 export interface SkillFormValues {
   skillCode: string;
@@ -175,6 +175,7 @@ export function skillController() {
     setSkillSearch,
     filteredSkills,
     getTierColor,
+    getTierLabel,
     getStatusColor,
 
     isFormOpen,
