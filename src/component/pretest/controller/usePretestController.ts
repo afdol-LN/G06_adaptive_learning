@@ -53,7 +53,7 @@ export function usePretestController() {
       const fetchedQuestions = await PretestService.fetchPretestQuestions(
         activeGoalId!,
         currentUserId!,
-        1,
+        activeBranch?.exp ?? 1,
       );
       const questionList =
         fetchedQuestions && fetchedQuestions.length > 0
