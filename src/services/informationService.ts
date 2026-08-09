@@ -38,35 +38,35 @@ const EXP_DATA: Record<number, ExperienceData> = {
   1: {
     level: "Level 1 — Novice",
     title: "มือใหม่หัดเขียนโค้ด",
-    desc: "เพิ่งเริ่มต้นศึกษาการเขียนโปรแกรม อาจเคยเห็นโค้ดบ้างแต่ยังไม่มีประสบการณ์จริง",
+    desc: "ไม่มีพื้นฐานการเขียนโปรแกรม",
     badges: ["ยังไม่มีประสบการณ์", "เรียนครั้งแรก"],
     color: "#e05c5c",
   },
   2: {
     level: "Level 2 — Beginner",
     title: "เริ่มต้นเขียนโปรแกรม",
-    desc: "เคยเรียน Python เบื้องต้นมาบ้าง รู้จัก variable, loop, if-else แต่ยังไม่มั่นใจในการเขียนฟังก์ชัน",
+    desc: "รู้พื้นฐาน Variable, Loop, If-else",
     badges: ["Variables", "Loops", "Conditions"],
     color: "#e8a03c",
   },
   3: {
     level: "Level 3 — Intermediate",
     title: "เขียนโปรแกรมได้บ้าง",
-    desc: "เขียน Python ได้คล่องพอสมควร เข้าใจ OOP, function, list/dict และเคยทำโปรเจกต์ขนาดเล็กมาแล้ว",
+    desc: "เข้าใจ OOP, Function, List/Dict",
     badges: ["OOP", "Functions", "Data Structures"],
     color: "#0047AB",
   },
   4: {
     level: "Level 4 — Advanced",
     title: "เขียนโปรแกรมได้ดี",
-    desc: "มีประสบการณ์การเขียน Python อย่างจริงจัง เข้าใจ algorithms, complexity และทำงานกับ library ต่างๆ ได้",
+    desc: "เข้าใจ Algorithm และใช้ Library ได้",
     badges: ["Algorithms", "Libraries", "Complexity"],
     color: "#82C8E5",
   },
   5: {
     level: "Level 5 — Expert",
     title: "เชี่ยวชาญการเขียนโปรแกรม",
-    desc: "เขียน Python ขั้นสูงได้อย่างคล่องแคล่ว มีประสบการณ์ real-world, open source หรือทำงานมาแล้ว",
+    desc: "เชี่ยวชาญ Python ระดับมืออาชีพ",
     badges: ["Advanced Python", "Real-world", "Professional"],
     color: "#38b874",
   },
@@ -166,25 +166,31 @@ export class InformationService {
     });
   }
 
-  // Persists a Branch (user + selected goal + experience level) to the backend.
-  static async createBranchOnServer(goalId: string, exp: number): Promise<void> {
-    await AppClient.post("branch/mine", {
+  // Persists a Branch (user + selected goal + experience level) to the backend
+  // and returns its real (numeric) id — callers must use this id, not a
+  // client-generated one, since later calls (e.g. pretest submit) look the
+  // branch up by id server-side.
+  static async createBranchOnServer(goalId: string, exp: number): Promise<string> {
+    const created = await AppClient.post<{ id: number }>("branch/mine", {
       goalId: Number(goalId),
       expForGoal: exp,
     });
+    return String(created.id);
   }
 
   static createBranchesForSelectedGoals(
     formData: InformationFormData,
     selectedGoalIds: string[],
+    serverBranchIds: string[],
     allGoals: GoalItem[],
     exp: number,
     addBranchFn: (branchData: BranchCreationData) => string
   ): string[] {
     const createdIds: string[] = [];
-    selectedGoalIds.forEach((goalId) => {
+    selectedGoalIds.forEach((goalId, index) => {
       const goal = allGoals.find((g) => g.id === goalId);
       const newId = addBranchFn({
+        id: serverBranchIds[index],
         campus: formData.campus,
         faculty: formData.faculty,
         major: formData.major,
