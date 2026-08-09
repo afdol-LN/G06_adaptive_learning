@@ -71,10 +71,10 @@ export function useInformationController() {
     }
   };
 
+  // Only one goal can be selected at a time — clicking the selected goal
+  // again deselects it, clicking a different goal replaces the selection.
   const toggleGoal = (goalId: string) => {
-    setSelectedGoal((prev) =>
-      prev.includes(goalId) ? prev.filter((id) => id !== goalId) : [...prev, goalId]
-    );
+    setSelectedGoal((prev) => (prev.includes(goalId) ? [] : [goalId]));
   };
 
   const validateStep = (): boolean => {
@@ -103,13 +103,32 @@ export function useInformationController() {
         if (!skipGeneralInfo) {
           await InformationService.submitGeneralInfo(formData);
         }
-        await Promise.all(
+      } catch (error) {
+        console.error("Failed to save onboarding info to backend:", error);
+        toast.error("บันทึกข้อมูลไปยังเซิร์ฟเวอร์ไม่สำเร็จ", "กรุณาลองใหม่อีกครั้ง");
+        setIsSubmitting(false);
+        return;
+      }
+      setIsSubmitting(false);
+      setStep(3);
+      return;
+    }
+
+    // Branch is created here — after the user has picked both the goal
+    // (step 2) and the experience level (step 3) — so it's saved with the
+    // exp the user actually chose, not whatever `exp` defaulted to before
+    // they reached the slider.
+    if (step === 3) {
+      setIsSubmitting(true);
+      let serverBranchIds: string[] = [];
+      try {
+        serverBranchIds = await Promise.all(
           selectedGoal.map((goalId) =>
             InformationService.createBranchOnServer(goalId, exp)
           )
         );
       } catch (error) {
-        console.error("Failed to save onboarding info to backend:", error);
+        console.error("Failed to save branch to backend:", error);
         toast.error("บันทึกข้อมูลไปยังเซิร์ฟเวอร์ไม่สำเร็จ", "กรุณาลองใหม่อีกครั้ง");
         setIsSubmitting(false);
         return;
@@ -119,6 +138,7 @@ export function useInformationController() {
       const createdIds = InformationService.createBranchesForSelectedGoals(
         formData,
         selectedGoal,
+        serverBranchIds,
         goals,
         exp,
         addBranch
@@ -126,11 +146,7 @@ export function useInformationController() {
       if (createdIds.length > 0) {
         switchBranch(createdIds[createdIds.length - 1]);
       }
-      setStep(3);
-      return;
-    }
 
-    if (step === 3) {
       setStep(4);
       setTimeout(() => {
         navigate("/pretest");
