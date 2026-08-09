@@ -326,38 +326,38 @@ html, body {
   --danger:  #e05c5c;
 }
 
-html, body { 
-  min-height: 100%; 
-  background: var(--navy); 
-  font-family: 'DM Sans', sans-serif; 
-  color: var(--text); 
-  overflow-x: hidden; 
+html, body {
+  min-height: 100%;
+  background: var(--navy);
+  font-family: 'DM Sans', sans-serif;
+  color: var(--text);
+  overflow-x: hidden;
 }
 
 .bg { position: fixed; inset: 0; z-index: 0; }
-.bg-grid { 
+.bg-grid {
   position: fixed; inset: 0; z-index: 0; opacity: 0.028;
   background-image: linear-gradient(var(--gold) 1px, transparent 1px), linear-gradient(90deg, var(--gold) 1px, transparent 1px);
-  background-size: 52px 52px; 
+  background-size: 52px 52px;
 }
 .orb { position: fixed; border-radius: 50%; filter: blur(90px); z-index: 0; pointer-events: none; animation: drift ease-in-out infinite alternate; }
 .orb-1 { width:500px;height:500px;background:#1e3a6a22;top:-120px;left:-100px;animation-duration:24s; }
 .orb-2 { width:380px;height:380px;background:#3a1e6a1a;bottom:-80px;right:-60px;animation-duration:18s;animation-delay:-9s; }
 @keyframes drift { to { transform: translate(22px,14px) scale(1.05); } }
 
-.page { 
-  position: relative; z-index: 1; min-height: 100vh; 
-  display: flex; flex-direction: column; align-items: center; padding: 32px 20px 60px; 
+.page {
+  position: relative; z-index: 1; min-height: 100vh;
+  display: flex; flex-direction: column; align-items: center; padding: 32px 20px 60px;
 }
 
-.brand { 
-  display:flex; align-items:center; gap:10px; margin-bottom:36px; 
-  align-self:flex-start; width:100%; max-width:660px; 
-  opacity:0; animation:fadeIn .5s ease .1s forwards; 
+.brand {
+  display:flex; align-items:center; gap:10px; margin-bottom:36px;
+  align-self:flex-start; width:100%; max-width:660px;
+  opacity:0; animation:fadeIn .5s ease .1s forwards;
 }
-.brand-icon { 
-  width:32px; height:32px; border:1.5px solid var(--gold); border-radius:7px; 
-  display:flex; align-items:center; justify-content:center; font-size:14px; 
+.brand-icon {
+  width:32px; height:32px; border:1.5px solid var(--gold); border-radius:7px;
+  display:flex; align-items:center; justify-content:center; font-size:14px;
   background:#ffffff; color: var(--gold3);
   box-shadow: 0 0 10px rgba(0, 71, 171, 0.15);
 }
@@ -371,7 +371,7 @@ html, body {
 #screenIntro {
   width:100%; max-width:560px;
   display:flex; flex-direction:column; align-items:center; text-align:center;
-  opacity:0; 
+  opacity:0;
 }
 .intro-icon-ring {
   width:80px; height:80px; border-radius:50%;
@@ -437,7 +437,7 @@ html, body {
 .q-card {
   /* กำหนด height คงที่ทำให้ทุกข้อมีขนาดเท่ากัน */
   height: 620px;
-   width: 100%; min-width:520px;
+  width: 100%;
   display: flex;
   flex-direction: column;
 
@@ -458,16 +458,16 @@ html, body {
 .q-num strong { color:var(--gold); }
 .q-skill-tag {
   font-size:10px; padding:3px 10px;
-  background:#1a2540; border:1px solid var(--border2);
-  border-radius:20px; color:var(--muted2); letter-spacing:.05em;
+  background:#ffffff; border:1px solid var(--border); border-radius:20px;
+  color:var(--gold3); letter-spacing:.05em;
 }
 .q-diff-tag { font-size:10px; padding:3px 10px; border-radius:20px; letter-spacing:.05em; }
 
-.q-body { 
+.q-body {
   /* body: กินพื้นที่ที่เหลือทั้งหมด และ scroll ได้ถ้าเนื้อหาล้น */
   flex: 1;
   overflow-y: auto;
-  padding:28px 32px 24px; 
+  padding:28px 32px 24px;
   background-color: #f2f7fa;
 }
 .q-body::-webkit-scrollbar { width: 6px; }
@@ -475,11 +475,16 @@ html, body {
 .q-body::-webkit-scrollbar-thumb { background-color: var(--border); border-radius: 10px; }
 .q-body::-webkit-scrollbar-thumb:hover { background-color: var(--border2); }
 
-.q-text { font-size:16px; line-height:1.7; color:var(--text); margin-bottom:24px; font-weight:400; }
-.q-text code {
-  font-family:'DM Sans',sans-serif; font-size:14px; background:var(--navy3);
+.q-card .q-text {
+  font-size:20px; line-height:1.6; color:var(--text); font-weight:600;
+  background:#ffffff; border:1.5px solid var(--border); border-radius:14px;
+  padding:20px 22px; margin-bottom:24px;
+  box-shadow:0 2px 10px rgba(0,71,171,0.06);
+}
+.q-card .q-text code {
+  font-family:'DM Sans',sans-serif; font-size:16px; background:var(--navy3);
   padding:2px 7px; border-radius:5px; color:var(--gold3); border:1px solid var(--border);
-}       
+}
 .code-block {
   background:#f0f4f8; border:1px solid var(--border); border-radius:10px;
   padding:14px 18px; margin-bottom:18px;
@@ -632,26 +637,26 @@ html, body {
   color: var(--gold);
   letter-spacing: 0.02em;
 }
-.fill-blank-input {
+.fill-blank-container .fill-blank-input {
   width: 100%;
   padding: 18px 22px;
-  background: rgba(11, 17, 32, 0.75);
-  border: 2px solid var(--border2);
+  background: #ffffff;
+  border: 2px solid var(--border);
   border-radius: 14px;
-  color: #ffffff;
+  color: var(--text);
   font-family: 'DM Sans', sans-serif;
   font-size: 18px;
   outline: none;
   transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
-  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.4);
+  box-shadow: inset 0 2px 4px rgba(0, 71, 171, 0.06);
 }
-.fill-blank-input:focus {
+.fill-blank-container .fill-blank-input:focus {
   border-color: var(--gold);
-  background: rgba(11, 17, 32, 0.95);
-  box-shadow: 0 0 20px rgba(130, 200, 229, 0.35), inset 0 2px 6px rgba(0, 0, 0, 0.5);
+  background: #ffffff;
+  box-shadow: 0 0 0 4px rgba(0, 71, 171, 0.12);
 }
 .fill-blank-input::placeholder {
-  color: rgba(255, 255, 255, 0.3);
+  color: var(--muted);
   font-size: 16px;
 }
 
@@ -670,7 +675,7 @@ html, body {
   justify-content: space-between;
   align-items: center;
   padding: 12px 18px;
-  background: rgba(11, 17, 32, 0.6);
+  background: #ffffff;
   border: 1px solid var(--border);
   border-radius: 10px;
   font-size: 14px;
@@ -679,7 +684,7 @@ html, body {
   display: flex;
   align-items: center;
   gap: 12px;
-  color: #ffffff;
+  color: var(--text);
   font-weight: 500;
 }
 .result-badge {
@@ -691,13 +696,13 @@ html, body {
   text-transform: uppercase;
 }
 .result-badge.correct {
-  background: rgba(56, 184, 116, 0.2);
-  color: #38b874;
+  background: rgba(56, 184, 116, 0.12);
+  color: #2f9d63;
   border: 1px solid rgba(56, 184, 116, 0.4);
 }
 .result-badge.incorrect {
-  background: rgba(224, 92, 92, 0.2);
-  color: #e05c5c;
+  background: rgba(224, 92, 92, 0.12);
+  color: #c94747;
   border: 1px solid rgba(224, 92, 92, 0.4);
 }
 
