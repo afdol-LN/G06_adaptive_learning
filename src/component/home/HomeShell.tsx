@@ -240,6 +240,31 @@ export const HomeShell: React.FC = () => {
                   <span style={{ fontSize: "18px" }}>+</span>
                   <span style={{ fontSize: "13px" }}>เพิ่มเป้าหมายใหม่</span>
                 </button>
+
+                <button
+                  onClick={() => {
+                    setShowGoalMenu(false);
+                    navigate("/selectbranch");
+                  }}
+                  style={{
+                    width: "100%",
+                    padding: "10px 14px",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "8px",
+                    background: "#f8fafc",
+                    border: "none",
+                    cursor: "pointer",
+                    textAlign: "left",
+                    color: "#64748b",
+                    fontWeight: "700",
+                    borderTop: "1px solid #e2e8f0",
+                    flexShrink: 0,
+                  }}
+                >
+                  <span style={{ fontSize: "16px" }}>↩</span>
+                  <span style={{ fontSize: "13px" }}>ไปหน้าเลือกเป้าหมาย</span>
+                </button>
               </div>
             )}
           </div>
