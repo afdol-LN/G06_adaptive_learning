@@ -31,6 +31,7 @@ export default function CreateBranchModal({ onClose }: CreateBranchModalProps) {
   const [exp, setExp] = useState<number>(1);
   const [goals, setGoals] = useState<GoalItem[]>([]);
   const [isLoadingGoals, setIsLoadingGoals] = useState<boolean>(true);
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
   const { addBranch, switchBranch, activeBranch, branches } = useApp();
   const navigate = useNavigate();
@@ -48,12 +49,24 @@ export default function CreateBranchModal({ onClose }: CreateBranchModalProps) {
   const goalsByGroup = InformationService.groupGoalsByGroup(goals);
   const baseBranch = activeBranch || branches?.[0];
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (step === 1 && selectedGoal) {
       setStep(2);
-    } else if (step === 2 && selectedGoal) {
+    } else if (step === 2 && selectedGoal && !isSubmitting) {
+      setIsSubmitting(true);
+      let serverBranchId: string;
+      try {
+        serverBranchId = await InformationService.createBranchOnServer(selectedGoal, exp);
+      } catch (error) {
+        console.error('Failed to save new branch to backend:', error);
+        setIsSubmitting(false);
+        return;
+      }
+      setIsSubmitting(false);
+
       const goal = goals.find((g) => g.id === selectedGoal);
       const newId = addBranch({
+        id: serverBranchId,
         campus:   baseBranch?.campus || 'หาดใหญ่',
         faculty:  baseBranch?.faculty || 'วิทยาศาสตร์',
         major:    baseBranch?.major || 'ICT',
@@ -180,17 +193,17 @@ export default function CreateBranchModal({ onClose }: CreateBranchModalProps) {
               กลับ
             </button>
           ) : <div></div>}
-          <button 
-            disabled={(step === 1 && !selectedGoal) || goals.length === 0}
-            onClick={handleNext} 
-            style={{ 
-              padding: '10px 24px', fontSize: '15px', fontWeight: '700', color: '#fff', 
-              background: ((step === 1 && !selectedGoal) || goals.length === 0) ? '#cbd5e1' : '#0047AB', 
-              border: 'none', borderRadius: '8px', cursor: ((step === 1 && !selectedGoal) || goals.length === 0) ? 'not-allowed' : 'pointer',
+          <button
+            disabled={(step === 1 && !selectedGoal) || goals.length === 0 || isSubmitting}
+            onClick={handleNext}
+            style={{
+              padding: '10px 24px', fontSize: '15px', fontWeight: '700', color: '#fff',
+              background: ((step === 1 && !selectedGoal) || goals.length === 0 || isSubmitting) ? '#cbd5e1' : '#0047AB',
+              border: 'none', borderRadius: '8px', cursor: ((step === 1 && !selectedGoal) || goals.length === 0 || isSubmitting) ? 'not-allowed' : 'pointer',
               transition: 'background 0.2s'
             }}
           >
-            {step === 1 ? 'ถัดไป →' : 'ยืนยันและทำ Pretest'}
+            {step === 1 ? 'ถัดไป →' : isSubmitting ? 'กำลังบันทึก...' : 'ยืนยันและทำ Pretest'}
           </button>
         </div>
 

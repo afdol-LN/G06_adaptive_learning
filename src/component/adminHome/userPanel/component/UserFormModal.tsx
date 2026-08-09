@@ -72,7 +72,7 @@ export default function UserFormModal({
   const checkUsername = (val: string) => {
     setUsername(val);
     setFormError("");
-    const takenNames = ["admin", "psu_user", "test"];
+    // const takenNames = ["admin", "psu_user", "test"];
     const cleanVal = val.trim().toLowerCase();
 
     if (!cleanVal || cleanVal === (editingUser?.username || "").toLowerCase()) {
@@ -83,10 +83,10 @@ export default function UserFormModal({
       setUsernameMsg({ text: "At least 4 characters required", type: "err" });
       return;
     }
-    if (takenNames.includes(cleanVal)) {
-      setUsernameMsg({ text: "Username already taken", type: "err" });
-      return;
-    }
+    // if (takenNames.includes(cleanVal)) {
+    //   setUsernameMsg({ text: "Username already taken", type: "err" });
+    //   return;
+    // }
 
     setUsernameMsg({ text: "Username available", type: "ok" });
   };
