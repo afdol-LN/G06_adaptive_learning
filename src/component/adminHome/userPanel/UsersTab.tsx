@@ -18,6 +18,8 @@ export default function UsersTab({ icon }: UsersTabProps) {
     erros,
     userSearch,
     setUserSearch,
+    statusFilter,
+    setStatusFilter,
     userFiltered,
     toggleUserStatus,
     isFormModalOpen,
@@ -62,6 +64,8 @@ export default function UsersTab({ icon }: UsersTabProps) {
       <SearchBar
         userSearch={userSearch}
         onChange={setUserSearch}
+        statusFilter={statusFilter}
+        onStatusFilterChange={setStatusFilter}
         totalCount={userFiltered.length}
         isLoading={isLoading}
         error={erros}

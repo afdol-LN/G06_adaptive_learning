@@ -24,6 +24,7 @@ export function skillController() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [skillSearch, setSkillSearch] = useState<string>("");
+  const [statusFilter, setStatusFilter] = useState<"all" | "active" | "inactive">("all");
 
   const [isFormOpen, setIsFormOpen] = useState<boolean>(false);
   const [editingSkill, setEditingSkill] = useState<Skill | null>(null);
@@ -54,15 +55,18 @@ export function skillController() {
 
   const filteredSkills = useMemo(() => {
     const term = skillSearch.trim().toLowerCase();
-    const list = term
-      ? skills.filter(
-          (s) =>
-            s.skillsName.toLowerCase().includes(term) ||
-            (s.tier || "").toLowerCase().includes(term),
-        )
-      : [...skills];
+    const list = skills.filter((s) => {
+      if (term) {
+        const matches =
+          s.skillsName.toLowerCase().includes(term) ||
+          (s.tier || "").toLowerCase().includes(term);
+        if (!matches) return false;
+      }
+      if (statusFilter !== "all" && s.status !== statusFilter) return false;
+      return true;
+    });
     return list.sort((a, b) => a.skillsName.localeCompare(b.skillsName));
-  }, [skills, skillSearch]);
+  }, [skills, skillSearch, statusFilter]);
 
   const openCreateForm = () => {
     setFormError(null);
@@ -173,6 +177,8 @@ export function skillController() {
     error,
     skillSearch,
     setSkillSearch,
+    statusFilter,
+    setStatusFilter,
     filteredSkills,
     getTierColor,
     getTierLabel,

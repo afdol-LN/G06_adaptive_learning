@@ -22,6 +22,7 @@ export function goalController() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [goalSearch, setGoalSearch] = useState<string>("");
+  const [statusFilter, setStatusFilter] = useState<"all" | "active" | "inactive">("all");
 
   const [activeSkills, setActiveSkills] = useState<Skill[]>([]);
 
@@ -59,9 +60,12 @@ export function goalController() {
 
   const filteredGoals = useMemo(() => {
     const term = goalSearch.trim().toLowerCase();
-    if (!term) return goals;
-    return goals.filter((g) => g.goal.toLowerCase().includes(term));
-  }, [goals, goalSearch]);
+    return goals.filter((g) => {
+      if (term && !g.goal.toLowerCase().includes(term)) return false;
+      if (statusFilter !== "all" && g.status !== statusFilter) return false;
+      return true;
+    });
+  }, [goals, goalSearch, statusFilter]);
 
   const openCreateForm = () => {
     setFormError(null);
@@ -131,6 +135,8 @@ export function goalController() {
     error,
     goalSearch,
     setGoalSearch,
+    statusFilter,
+    setStatusFilter,
     filteredGoals,
     activeSkills,
     getStatusColor,

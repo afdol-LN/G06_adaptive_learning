@@ -16,6 +16,7 @@ export function userController() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [erros, setErrors] = useState<string | null>(null);
   const [userSearch, setUserSearch] = useState<string>("");
+  const [statusFilter, setStatusFilter] = useState<"all" | "active" | "inactive">("all");
   const [userFiltered, setUserFiltered] = useState<UserResponseAdmin[]>([]);
 
   const [isFormModalOpen, setIsFormModalOpen] = useState<boolean>(false);
@@ -65,21 +66,22 @@ export function userController() {
   }, []);
 
   useEffect(() => {
-    if (!userSearch.trim()) {
-      setUserFiltered(users);
-    } else {
-      const term = userSearch.toLowerCase();
-      const filtered = users.filter((user) =>
-        (user.fullName || "").toLowerCase().includes(term) ||
-        (user.facultyName || "").toLowerCase().includes(term) ||
-        (user.campusName || "").toLowerCase().includes(term) ||
-        (user.majorName || "").toLowerCase().includes(term) ||
-        (Array.isArray(user.goals) ? user.goals.join(" ") : user.goals || "").toLowerCase().includes(term) ||
-        (user.status || "").toLowerCase().includes(term)
-      );
-      setUserFiltered(filtered);
-    }
-  }, [userSearch, users]);
+    const term = userSearch.trim().toLowerCase();
+    const filtered = users.filter((user) => {
+      if (term) {
+        const matches =
+          (user.fullName || "").toLowerCase().includes(term) ||
+          (user.facultyName || "").toLowerCase().includes(term) ||
+          (user.campusName || "").toLowerCase().includes(term) ||
+          (user.majorName || "").toLowerCase().includes(term) ||
+          (Array.isArray(user.goals) ? user.goals.join(" ") : user.goals || "").toLowerCase().includes(term);
+        if (!matches) return false;
+      }
+      if (statusFilter !== "all" && user.status !== statusFilter) return false;
+      return true;
+    });
+    setUserFiltered(filtered);
+  }, [userSearch, statusFilter, users]);
 
   const toggleUserStatus = async (targetUser: UserResponseAdmin) => {
     if (!targetUser.id) {
@@ -158,6 +160,8 @@ export function userController() {
     erros,
     userSearch,
     setUserSearch,
+    statusFilter,
+    setStatusFilter,
     userFiltered,
     getStatusColor,
     getScoreColor,

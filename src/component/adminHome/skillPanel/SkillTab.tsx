@@ -23,6 +23,8 @@ export default function SkillTab({ icon, getSkillQuestions, setViewSkillQ }: Ski
     error,
     skillSearch,
     setSkillSearch,
+    statusFilter,
+    setStatusFilter,
     filteredSkills,
     getTierColor,
     getTierLabel,
@@ -67,6 +69,17 @@ export default function SkillTab({ icon, getSkillQuestions, setViewSkillQ }: Ski
             onChange={(e) => setSkillSearch(e.target.value)}
           />
         </div>
+
+        <select
+          className="ad-select"
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value as any)}
+        >
+          <option value="all">ทุกสถานะ</option>
+          <option value="active">active</option>
+          <option value="inactive">inactive</option>
+        </select>
+
         <button className="ad-btn-primary ad-btn-add" onClick={openCreateForm}>
           <FaPlus /> เพิ่ม Skill ใหม่
         </button>
