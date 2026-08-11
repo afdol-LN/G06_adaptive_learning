@@ -85,6 +85,7 @@ export default function CreateBranchModal({ onClose }: CreateBranchModalProps) {
   };
 
   const currentExpData = EXP_DATA[exp] || EXP_DATA[1];
+  const selectedGoalData = goals.find((g) => g.id === selectedGoal);
 
   return (
     <div className="ex-picker-overlay" onClick={onClose} style={{ zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -147,6 +148,12 @@ export default function CreateBranchModal({ onClose }: CreateBranchModalProps) {
 
         {step === 2 && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+            {selectedGoalData && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <span style={{ fontSize: '22px', background: '#fff', border: '1px solid #e2e8f0', borderRadius: '8px', width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}>{selectedGoalData.icon || '🎯'}</span>
+                <span style={{ fontSize: '16px', fontWeight: '700', color: '#0047AB' }}>{selectedGoalData.name}</span>
+              </div>
+            )}
             <p style={{ margin: 0, color: '#475569', fontSize: '15px' }}>
               เลือกระดับประสบการณ์สำหรับเป้าหมายนี้ เพื่อให้ระบบปรับความยากในการประเมินได้เหมาะสม
             </p>

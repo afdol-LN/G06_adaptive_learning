@@ -9,6 +9,7 @@ import { useApp } from "../context/AppContext";
 import { useToast } from "../context/ToastContext";
 import authIllustration from "../assets/18.svg";
 import SpatterBackground from "./SpatterBackground";
+import BrandMark from "./common/BrandMark";
 
 const LIGHT_INK = "#0047ab";
 const DARK_INK = "#6ea8ff";
@@ -130,89 +131,81 @@ export default function SignInAndUp() {
   }, []);
 
   return (
-      <div className="auth-page" data-theme={dark ? "dark" : undefined} ref={pageRef}>
-        <div className="auth-bg-fixed">
-          <SpatterBackground className="spatter-canvas" color={dark ? DARK_INK : LIGHT_INK} seed={7} />
-        </div>
-        <div className="auth-glow" ref={glowRef}></div>
-
-        <button
-          type="button"
-          className="theme-toggle"
-          onClick={() => setDark((d) => !d)}
-        >
-          {dark ? "Light ☀" : "Dark ☾"}
-        </button>
-
-        <main
-          className="page"
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            minHeight: "100vh",
-            width: "100%",
-          }}
-        >
-          <div className="brand">
-            <div className="brand-mark">
-              <div className="brand-icon">⚡</div>
-              <span className="brand-name">G16 · AER</span>
-            </div>
-            <div className="brand-sub">
-              Adaptive Exercise Recommendation based on User Profiles
-            </div>
-          </div>
-
-          <div className="card" id="mainCard" ref={cardRef}>
-            <div className="auth-sheen" ref={sheenRef}></div>
-
-            <div className="tabs">
-              <button
-                className={`tab-btn ${activeTab === "login" ? "active" : ""}`}
-                onClick={() => setActiveTab("login")}
-              >
-                Login
-              </button>
-              <button
-                className={`tab-btn ${activeTab === "register" ? "active" : ""}`}
-                onClick={() => setActiveTab("register")}
-              >
-                Register
-              </button>
-            </div>
-
-            {/* LOGIN PANEL */}
-            {activeTab === "login" && (
-              <LoginPanel
-                onSubmit={(credentials) => {
-                  handleLoginSubmit(credentials);
-                }}
-                isLoading={isLoading}
-                onSwitchTab={() => setActiveTab("register")}
-              />
-            )}
-
-            {/* REGISTER PANEL */}
-            {activeTab === "register" && (
-              <RegisterPanel
-                onSubmit={(credentials) => {
-                  handleRegisterSubmit(credentials);
-                }}
-                isLoading={isLoading}
-                onSwitchTab={() => setActiveTab("login")}
-              />
-            )}
-          </div>
-        </main>
-
-        <img
-          src={authIllustration}
-          alt=""
-          aria-hidden="true"
-          className="auth-illustration"
-        />
+    <div className="auth-page" data-theme={dark ? "dark" : undefined} ref={pageRef}>
+      <div className="auth-bg-fixed">
+        <SpatterBackground className="spatter-canvas" color={dark ? DARK_INK : LIGHT_INK} seed={7} />
       </div>
-    );
+      <div className="auth-glow" ref={glowRef}></div>
+
+      <button
+        type="button"
+        className="theme-toggle"
+        onClick={() => setDark((d) => !d)}
+      >
+        {dark ? "Light ☀" : "Dark ☾"}
+      </button>
+
+      <main
+        className="page"
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          minHeight: "100vh",
+          width: "100%",
+        }}
+      >
+        <BrandMark />
+
+        <div className="card" id="mainCard" ref={cardRef}>
+          <div className="auth-sheen" ref={sheenRef}></div>
+
+          <div className="tabs">
+            <button
+              className={`tab-btn ${activeTab === "login" ? "active" : ""}`}
+              onClick={() => setActiveTab("login")}
+            >
+              Login
+            </button>
+            <button
+              className={`tab-btn ${activeTab === "register" ? "active" : ""}`}
+              onClick={() => setActiveTab("register")}
+            >
+              Register
+            </button>
+          </div>
+
+          {/* LOGIN PANEL */}
+          {activeTab === "login" && (
+            <LoginPanel
+              onSubmit={(credentials) => {
+                handleLoginSubmit(credentials);
+              }}
+              isLoading={isLoading}
+              onSwitchTab={() => setActiveTab("register")}
+            />
+          )}
+
+          {/* REGISTER PANEL */}
+          {activeTab === "register" && (
+            <RegisterPanel
+              onSubmit={(credentials) => {
+                handleRegisterSubmit(credentials);
+              }}
+              isLoading={isLoading}
+              onSwitchTab={() => setActiveTab("login")}
+            />
+          )}
+        </div>
+      </main>
+
+      <img
+        src={authIllustration}
+        alt=""
+        aria-hidden="true"
+        className="auth-illustration"
+      />
+    </div>
+  );
 }

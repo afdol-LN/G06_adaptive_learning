@@ -174,9 +174,7 @@ export function useInformationController() {
   };
 
   const selectedGoalBranchName =
-    branches.find(
-      (b: any) => b.id === branches[branches.length - 1]?.id
-    )?.goalName || "ที่เลือก";
+    goals.find((g) => g.id === selectedGoal[0])?.name || "ที่เลือก";
 
   return {
     // States
