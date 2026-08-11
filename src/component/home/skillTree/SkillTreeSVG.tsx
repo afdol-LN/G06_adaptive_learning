@@ -7,6 +7,8 @@ import {
   LayoutSkill,
   getNodeColors,
   getProgressColor,
+  displayProgressPercent,
+  formatProgressLabel,
 } from "../utils/skillTree";
 
 
@@ -31,6 +33,10 @@ export const SkillTreeSVG: React.FC<SkillTreeSVGProps> = ({
   setHovered,
   zoomable = false,
 }) => {
+  if (skills.length === 0) {
+    return <p className="side-panel-empty">— ยังไม่มี Skill ในเส้นทางนี้ —</p>;
+  }
+
   const getNodeById = (id: number) => skills.find((s) => s.skillId === id);
 
   const getEdgeColor = (fromId: number, toId: number) => {
@@ -145,10 +151,10 @@ export const SkillTreeSVG: React.FC<SkillTreeSVGProps> = ({
           (skill.skillPrequisite || []).some((r) => r.prerequisiteSkillId === selected.skillId) ||
           (selected.skillPrequisite || []).some((r) => r.prerequisiteSkillId === skill.skillId);
 
-        const { bg, border, text, bar } = getNodeColors(isUnlocked, canUnlockThis, skill.progressPercent);
+        const { bg, border, text, bar } = getNodeColors(isUnlocked, canUnlockThis, displayProgressPercent(skill));
         const nx = skill.x - NODE_W / 2;
         const ny = skill.y - NODE_H / 2;
-        const pColor = getProgressColor(skill.progressPercent);
+        const pColor = getProgressColor(displayProgressPercent(skill));
 
         return (
           <g
@@ -223,7 +229,7 @@ export const SkillTreeSVG: React.FC<SkillTreeSVGProps> = ({
             <rect
               x={nx + 2}
               y={ny + NODE_H - 10}
-              width={Math.max(0, ((NODE_W - 4) * skill.progressPercent) / 100)}
+              width={Math.max(0, ((NODE_W - 4) * displayProgressPercent(skill)) / 100)}
               height={7}
               rx={3.5}
               fill={pColor}
@@ -258,7 +264,7 @@ export const SkillTreeSVG: React.FC<SkillTreeSVGProps> = ({
                 fill={pColor}
                 fontWeight="600"
               >
-                {skill.progressPercent}%
+                {formatProgressLabel(skill)}
               </text>
             )}
           </g>

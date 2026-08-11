@@ -1,5 +1,5 @@
 import React from "react";
-import { LayoutSkill, getProgressColor } from "../utils/skillTree";
+import { LayoutSkill, getProgressColor, displayProgressPercent, formatProgressLabel } from "../utils/skillTree";
 import { FaBookOpen } from "react-icons/fa6";
 
 interface SkillSidePanelProps {
@@ -51,13 +51,13 @@ export const SkillSidePanel: React.FC<SkillSidePanelProps> = ({
             <div
               className="progress-fill"
               style={{
-                width: `${skill.progressPercent}%`,
-                background: getProgressColor(skill.progressPercent),
+                width: `${displayProgressPercent(skill)}%`,
+                background: getProgressColor(displayProgressPercent(skill)),
               }}
             />
           </div>
-          <span className="progress-pct" style={{ color: getProgressColor(skill.progressPercent) }}>
-            {skill.progressPercent}%
+          <span className="progress-pct" style={{ color: getProgressColor(displayProgressPercent(skill)) }}>
+            {formatProgressLabel(skill)}
           </span>
         </div>
         <p className="side-panel-status">
@@ -73,8 +73,8 @@ export const SkillSidePanel: React.FC<SkillSidePanelProps> = ({
           prereqNodes.map((n) => (
             <div key={n.skillId} className="node-row" onClick={() => setSelected(n)}>
               <span className="node-row-name">{n.skillsName}</span>
-              <span className="node-row-pct" style={{ color: getProgressColor(n.progressPercent) }}>
-                {n.progressPercent}%
+              <span className="node-row-pct" style={{ color: getProgressColor(displayProgressPercent(n)) }}>
+                {formatProgressLabel(n)}
               </span>
             </div>
           ))
@@ -89,8 +89,8 @@ export const SkillSidePanel: React.FC<SkillSidePanelProps> = ({
           nextNodes.map((n) => (
             <div key={n.skillId} className="node-row" onClick={() => setSelected(n)}>
               <span className="node-row-name">{n.skillsName}</span>
-              <span className="node-row-pct" style={{ color: getProgressColor(n.progressPercent) }}>
-                {n.progressPercent}%
+              <span className="node-row-pct" style={{ color: getProgressColor(displayProgressPercent(n)) }}>
+                {formatProgressLabel(n)}
               </span>
             </div>
           ))

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { LayoutSkill, getProgressColor } from "../utils/skillTree";
+import { LayoutSkill, getProgressColor, displayProgressPercent, formatProgressLabel } from "../utils/skillTree";
 
 interface NextExercisePickerProps {
   skills: LayoutSkill[];
@@ -38,8 +38,8 @@ export const NextExercisePicker: React.FC<NextExercisePickerProps> = ({
             >
               <div className="ex-picker-info">
                 <span className="ex-picker-name">{s.skillsName}</span>
-                <span className="ex-picker-prog" style={{ color: getProgressColor(s.progressPercent) }}>
-                  {s.progressPercent}%
+                <span className="ex-picker-prog" style={{ color: getProgressColor(displayProgressPercent(s)) }}>
+                  {formatProgressLabel(s)}
                 </span>
               </div>
               {picked?.skillId === s.skillId && <span className="ex-picker-check">✓</span>}

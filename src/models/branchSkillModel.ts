@@ -11,5 +11,6 @@ export interface BranchSkill {
   tier: string;
   status: string;
   progressPercent: number;
+  attemptCount: number;
   skillPrequisite: SkillPrerequisite[];
 }

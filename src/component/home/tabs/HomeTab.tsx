@@ -4,7 +4,7 @@ import { BranchStats } from "../../../models/branchStatsModel";
 import { SessionHistoryItem } from "../../../models/sessionHistoryModel";
 import { SkillTreeSVG } from "../skillTree/SkillTreeSVG";
 import { SkillSidePanel } from "../skillTree/SkillSidePanel";
-import { LayoutSkill, getProgressColor } from "../utils/skillTree";
+import { LayoutSkill, getProgressColor, displayProgressPercent } from "../utils/skillTree";
 import { SessionCard } from "../../common/SessionCard";
 
 interface HomeTabProps {
@@ -131,7 +131,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
               Progress โดยรวม
             </span>
             {skills
-              .filter((s) => s.progressPercent > 0)
+              .filter((s) => s.attemptCount > 0)
               .map((s) => {
                 const positionedSkill = treeSkills.find((ts) => ts.skillId === s.skillId);
                 return (
@@ -139,7 +139,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
                     key={s.skillId}
                     onClick={() => positionedSkill && handleNodeClick(positionedSkill)}
                     style={{ display: "flex", alignItems: "center", gap: "6px", cursor: "pointer" }}
-                    title={`Skill: ${s.skillsName}\nProgress: ${s.progressPercent}%`}
+                    title={`Skill: ${s.skillsName}\nProgress: ${displayProgressPercent(s)}%`}
                   >
                     <span style={{ fontSize: "13px", fontWeight: "600", color: "#475569" }}>
                       {s.skillsName.length > 12 ? s.skillsName.substring(0, 10) + "…" : s.skillsName}
@@ -155,9 +155,9 @@ export const HomeTab: React.FC<HomeTabProps> = ({
                     >
                       <div
                         style={{
-                          width: `${s.progressPercent}%`,
+                          width: `${displayProgressPercent(s)}%`,
                           height: "100%",
-                          background: getProgressColor(s.progressPercent),
+                          background: getProgressColor(displayProgressPercent(s)),
                           borderRadius: "3px",
                         }}
                       />

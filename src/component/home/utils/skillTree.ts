@@ -12,14 +12,18 @@ export function layoutSkills(skills: BranchSkill[]): LayoutSkill[] {
   const byId = Object.fromEntries(skills.map(s => [s.skillId, s]));
 
   const depth: Record<number, number> = {};
+  const visiting = new Set<number>();
   function getDepth(id: number): number {
     if (depth[id] !== undefined) return depth[id];
+    if (visiting.has(id)) return 0;
+    visiting.add(id);
     const node = byId[id];
-    if (!node) return depth[id] = 0;
+    if (!node) { visiting.delete(id); return depth[id] = 0; }
     const reqs = node.skillPrequisite || [];
-    if (reqs.length === 0) return depth[id] = 0;
-    depth[id] = 1 + Math.max(...reqs.map(r => byId[r.prerequisiteSkillId] ? getDepth(r.prerequisiteSkillId) : 0));
-    return depth[id];
+    if (reqs.length === 0) { visiting.delete(id); return depth[id] = 0; }
+    const d = 1 + Math.max(...reqs.map(r => byId[r.prerequisiteSkillId] ? getDepth(r.prerequisiteSkillId) : 0));
+    visiting.delete(id);
+    return depth[id] = d;
   }
   skills.forEach(s => getDepth(s.skillId));
 
@@ -111,4 +115,12 @@ export function getNodeColors(isUnlocked: boolean, canUnlockThis: boolean, progr
   if (isUnlocked) return { bg: '#ffffff', border: '#0047AB', text: '#0047AB', bar: '#f0f4ff' };
   if (canUnlockThis) return { bg: '#f0f9ff', border: '#60a5fa', text: '#1d4ed8', bar: '#e0f2fe' };
   return { bg: '#f8fafc', border: '#cbd5e1', text: '#94a3b8', bar: '#f1f5f9' };
+}
+
+export function displayProgressPercent(skill: BranchSkill): number {
+  return skill.attemptCount > 0 ? skill.progressPercent : 0;
+}
+
+export function formatProgressLabel(skill: BranchSkill): string {
+  return skill.attemptCount > 0 ? `${skill.progressPercent}%` : 'ยังไม่เริ่ม';
 }
