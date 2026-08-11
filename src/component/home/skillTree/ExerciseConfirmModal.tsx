@@ -1,5 +1,5 @@
 import React from "react";
-import { LayoutSkill, getProgressColor } from "../utils/skillTree";
+import { LayoutSkill, getProgressColor, displayProgressPercent, formatProgressLabel } from "../utils/skillTree";
 import { FaBookOpen } from "react-icons/fa6";
 
 interface ExerciseConfirmModalProps {
@@ -32,13 +32,13 @@ export const ExerciseConfirmModal: React.FC<ExerciseConfirmModalProps> = ({
             <div
               className="confirm-progress-fill"
               style={{
-                width: `${skill.progressPercent}%`,
-                background: getProgressColor(skill.progressPercent),
+                width: `${displayProgressPercent(skill)}%`,
+                background: getProgressColor(displayProgressPercent(skill)),
               }}
             />
           </div>
-          <span className="confirm-progress-pct" style={{ color: getProgressColor(skill.progressPercent) }}>
-            {skill.progressPercent}%
+          <span className="confirm-progress-pct" style={{ color: getProgressColor(displayProgressPercent(skill)) }}>
+            {formatProgressLabel(skill)}
           </span>
         </div>
         <div className="confirm-btn-row">
