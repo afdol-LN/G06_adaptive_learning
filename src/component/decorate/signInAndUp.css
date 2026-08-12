@@ -101,15 +101,37 @@
    instead of stopping wherever .auth-page's content box happened to end
    when the canvas last measured it. Sits below the illustration/glow/card. */
 .auth-page .auth-bg-fixed {
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
+  background: linear-gradient(180deg, #f5f8ff 0%, #ffffff 55%);
+}
+
+.auth-page .auth-bg-fixed::before,
+.auth-page .auth-bg-fixed::after {
+  content: "";
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(100px);
+  opacity: 0.5;
+}
+
+.auth-page .auth-bg-fixed::before {
+  width: 520px;
+  height: 520px;
+  background: var(--gold2);
+  top: -140px;
+  left: -120px;
+}
+
+.auth-page .auth-bg-fixed::after {
+  width: 560px;
+  height: 560px;
+  background: var(--gold);
+  bottom: -160px;
+  right: -140px;
 }
 
 .auth-page .spatter-canvas {
   z-index: -1;
-  opacity: 0.55;
+  opacity: 0;
 }
 
 .auth-page .auth-glow {
@@ -710,7 +732,7 @@
   width: 1200px;
   max-width: 92vw;
   height: auto;
-  display: block;
+  display: none;
   z-index: 0;
   pointer-events: none;
   user-select: none;
