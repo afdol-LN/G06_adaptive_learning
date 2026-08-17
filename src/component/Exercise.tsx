@@ -41,6 +41,10 @@ export default function Exercise() {
             <span className="prog-pct">{pct}%</span>
           </div>
           <div className="prog-track"><div className="prog-fill" style={{ width: `${pct}%` }}></div></div>
+          <div className="prog-meta">
+            <span className="prog-exid">Exercise ID: {controller.question.exerciseId}</span>
+            <span className="prog-skill">Skill: {controller.skillsName}</span>
+          </div>
         </div>
 
         <div className="stage">

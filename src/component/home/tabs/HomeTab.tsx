@@ -55,9 +55,8 @@ export const HomeTab: React.FC<HomeTabProps> = ({
   const [twText, setTwText] = useState("");
   const [showCursor, setShowCursor] = useState(true);
 
-  const fullName = userProfile
-    ? `${userProfile.fname || ""} ${userProfile.lname || ""}`.trim()
-    : "นักเรียน ALS";
+  const profileFullName = [userProfile?.fname, userProfile?.lname].filter(Boolean).join(" ");
+  const fullName = profileFullName || localStorage.getItem("fullname") || "นักเรียน ALS";
   const avatar = userProfile?.gender === "FEMALE" ? "👩‍🎓" : "👨‍🎓";
 
   // Typewriter effect
@@ -104,7 +103,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
           </div>
 
           {/* Stats grid */}
-          <div className="stats-grid">
+          <div className="stats-grid" data-tour="tour-stats">
             {statsList.map((s, i) => (
               <div key={i} className={`stat-card ${s.cls}`}>
                 <div className="stat-num">{s.num}</div>
@@ -171,7 +170,11 @@ export const HomeTab: React.FC<HomeTabProps> = ({
         </div>
 
         {/* Tree */}
-        <div className="home-tree-wrap" style={{ height: "640px", overflow: "hidden", position: "relative" }}>
+        <div
+          className="home-tree-wrap"
+          data-tour="tour-skill-tree"
+          style={{ height: "640px", overflow: "hidden", position: "relative" }}
+        >
           <SkillTreeSVG
             skills={treeSkills}
             unlocked={unlocked}
@@ -228,7 +231,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
         </div>
 
         {/* Recent sessions (last 5) */}
-        <div className="home-sessions">
+        <div className="home-sessions" data-tour="tour-sessions">
           <div className="section-label">📋 Session ล่าสุด</div>
           {sessions.length === 0 ? (
             <p style={{ color: "#94a3b8", textAlign: "center", padding: "24px" }}>

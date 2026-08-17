@@ -1,0 +1,87 @@
+/* ══════════════════════════════════════
+   Tour.css — Home page onboarding tour (driver.js theme + trigger button)
+══════════════════════════════════════ */
+
+.nav-help-btn {
+  width: 30px; height: 30px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  border: 1px solid var(--border); background: none; cursor: pointer;
+  font-size: 13px; font-weight: 700; color: var(--muted);
+  transition: all 0.18s; flex-shrink: 0; margin: 0 6px;
+}
+.nav-help-btn:hover { color: var(--accent); border-color: var(--accent); background: var(--bg); }
+
+/* driver.js popover theme override */
+.driver-popover {
+  min-width: 360px;
+  max-width: 400px;
+  padding: 24px;
+  border-radius: 16px;
+  box-shadow: 0 12px 40px rgba(0, 71, 171, 0.22);
+  font-family: 'DM Sans', inherit;
+}
+.driver-popover-title {
+  color: var(--text);
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.4;
+  padding-right: 28px;
+}
+.driver-popover-description {
+  color: black;
+  font-size: 16px;
+  line-height: 1.65;
+  margin-top: 10px;
+}
+.driver-popover-close-btn {
+  top: 18px;
+  right: 18px;
+  width: 32px;
+  height: 32px;
+  font-size: 18px;
+  line-height: 32px;
+  border-radius: 50%;
+  color: var(--muted);
+  transition: all 0.18s;
+}
+.driver-popover-close-btn:hover {
+  color: var(--accent);
+  background: var(--bg);
+}
+.driver-popover-footer {
+  margin-top: 22px;
+  padding-top: 18px;
+  border-top: 1px solid var(--border);
+  align-items: center;
+}
+.driver-popover-progress-text {
+  color: black;
+  font-size: 14px;
+  font-weight: 600;
+}
+.driver-popover-navigation-btns button + button {
+  margin-left: 10px;
+}
+.driver-popover-footer button {
+  font-family: inherit;
+  border-radius: 10px;
+  text-shadow: none;
+  font-size: 14px;
+  font-weight: 700;
+  color: black;
+  padding: 9px 20px;
+}
+.driver-popover-footer .driver-popover-next-btn,
+.driver-popover-footer .driver-popover-done-btn {
+  background: var(--accent);
+  color: #fff;
+  border: 1px solid var(--accent);
+}
+.driver-popover-footer .driver-popover-prev-btn {
+  background: #fff;
+  color: var(--accent);
+  border: 1px solid var(--border);
+}
+.driver-active-element {
+  border-radius: 10px;
+}

@@ -103,6 +103,7 @@ export function useExerciseController() {
 
   return {
     isLoading,
+    skillsName: state?.skillsName ?? "",
     question,
     questionIndex,
     pL,

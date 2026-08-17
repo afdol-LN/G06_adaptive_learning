@@ -73,12 +73,15 @@ body::before{
 /* PROGRESS */
 .prog-area{padding:20px 32px 14px;flex-shrink:0}
 .prog-row{display:flex;align-items:center;gap:16px;margin-bottom:8px}
-.prog-label{font-size:11px;font-weight:700;text-transform:uppercase;color:var(--dim)}
-.prog-frac{font-family:'DM Mono',monospace;font-size:12px;font-weight:600;color:var(--sub);margin-left:5px}
+.prog-label{font-size:15px;font-weight:700;text-transform:uppercase;color:var(--dim)}
+.prog-frac{font-family:'DM Mono',monospace;font-size:16px;font-weight:600;color:var(--sub);margin-left:5px}
 .prog-spacer{flex:1}
-.prog-pct{font-family:'DM Mono',monospace;font-size:14px;font-weight:700;color:var(--gold)}
+.prog-pct{font-family:'DM Mono',monospace;font-size:20px;font-weight:700;color:var(--gold)}
 .prog-track{height:6px;background:var(--bdr);border-radius:3px;overflow:hidden}
 .prog-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--gold2),var(--gold));transition:width .7s cubic-bezier(.4,0,.2,1)}
+.prog-meta{display:flex;justify-content:space-between;align-items:center;margin-top:6px}
+.prog-exid{font-size:20px;font-weight:600;color:black}
+.prog-skill{font-size:20px;font-weight:600;color:black}
 .dot-row{display:flex;gap:8px;align-items:center;margin-top:12px}
 .sdot{width:8px;height:8px;border-radius:50%;background:var(--s2);border:1.5px solid var(--bdr2);transition:all .3s}
 .sdot.current{width:24px;border-radius:4px;background:var(--gold);border-color:var(--gold);box-shadow:0 0 10px rgba(0,71,171,.3)}

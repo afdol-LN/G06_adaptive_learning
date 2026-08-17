@@ -81,16 +81,16 @@ html, body {
 .intro-info-label { font-size:11px; color:#060e1c; letter-spacing:.06em; text-transform:uppercase; }
 .intro-notice {
   width:100%; padding:14px 18px;
-  background:linear-gradient(90deg,rgba(43,109,224,1) 0%,rgba(0,0,128,1) 80%);
+  background:linear-gradient(90deg,rgb(244, 9, 20) 0%,rgb(51, 51, 173) 80%);
   border:1px solid var(--border2); border-left:3px solid var(--gold); border-radius:10px;
-  font-size:13px; color:var(--navy2); line-height:1.6; text-align:left; margin-bottom:36px;
+  font-size:15px; color:var(--navy2); line-height:1.6; text-align:left; margin-bottom:36px;
   box-shadow:0 0 15px rgba(130,200,229,0.3);
 }
 .intro-notice strong { color:#ffffff; }
 .btn-go {
   display:inline-flex; align-items:center; gap:14px; padding:18px 52px;
   background:linear-gradient(135deg,var(--gold),var(--gold2)); border:none; border-radius:50px;
-  color:#ffffff; font-family:'DM Sans',sans-serif; font-size:16px; font-weight:700;
+  color:#ffffff; font-family:'DM Sans',sans-serif; font-size:18px; font-weight:700;
   letter-spacing:.08em; text-transform:uppercase; cursor:pointer; position:relative; overflow:hidden;
   transition:transform .2s cubic-bezier(.34,1.56,.64,1), box-shadow .2s;
 }
@@ -394,14 +394,14 @@ html, body {
   width:100%; padding:14px 18px;
   background:linear-gradient(90deg,rgba(43,109,224,1) 0%,rgba(0,0,128,1) 80%);
   border:1px solid var(--border2); border-left:3px solid var(--gold); border-radius:10px;
-  font-size:13px; color:var(--navy2); line-height:1.6; text-align:left; margin-bottom:36px;
+  font-size:15px; color:var(--navy2); line-height:1.6; text-align:left; margin-bottom:36px;
   box-shadow:0 0 15px rgba(130,200,229,0.3);
 }
 .intro-notice strong { color:#ffffff; }
 .btn-go {
   display:inline-flex; align-items:center; gap:14px; padding:18px 52px;
   background:linear-gradient(135deg,var(--gold),var(--gold2)); border:none; border-radius:50px;
-  color:#ffffff; font-family:'DM Sans',sans-serif; font-size:16px; font-weight:700;
+  color:#ffffff; font-family:'DM Sans',sans-serif; font-size:18px; font-weight:700;
   letter-spacing:.08em; text-transform:uppercase; cursor:pointer; position:relative; overflow:hidden;
   transition:transform .2s cubic-bezier(.34,1.56,.64,1), box-shadow .2s;
 }

@@ -4,6 +4,7 @@ import { useApp } from "../../context/AppContext";
 import { useBranchSkillController } from "./controller/branchSkill.controller";
 import { useBranchStatsController } from "./controller/branchStats.controller";
 import { useSessionHistoryController } from "./controller/sessionHistory.controller";
+import { useHomeTourController } from "./controller/homeTour.controller";
 import { HomeTab } from "./tabs/HomeTab";
 import { SkillTreeTab } from "./tabs/SkillTreeTab";
 import { HistoryTab } from "./tabs/HistoryTab";
@@ -13,6 +14,7 @@ import { ExerciseConfirmModal } from "./skillTree/ExerciseConfirmModal";
 import CreateBranchModal from "../CreateBranchModal";
 import { LayoutSkill } from "./utils/skillTree";
 import "../decorate/Home.css";
+import "../decorate/Tour.css";
 
 export const HomeShell: React.FC = () => {
   const {
@@ -32,6 +34,8 @@ export const HomeShell: React.FC = () => {
   const skillTreeController = useBranchSkillController(branchId);
   const statsController = useBranchStatsController(branchId);
   const historyController = useSessionHistoryController(branchId);
+  const homeTour = useHomeTourController();
+  const pendingForceTourRef = useRef(false);
 
   // Tab State
   const [activeTab, setActiveTab] = useState<"Home" | "SkillTree" | "History" | "Profile">("Home");
@@ -71,6 +75,32 @@ export const HomeShell: React.FC = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  // Auto-start the onboarding tour the first time the user lands on the Home tab
+  useEffect(() => {
+    if (!activeBranch || activeTab !== "Home" || homeTour.hasSeenTour !== false) return;
+    homeTour.startTour();
+    return () => homeTour.cancelTour();
+  }, [activeBranch, activeTab, homeTour.hasSeenTour]);
+
+  // Replay requested via the Help button while on another tab — wait for Home to mount
+  useEffect(() => {
+    if (pendingForceTourRef.current && activeTab === "Home") {
+      pendingForceTourRef.current = false;
+      homeTour.startTour({ force: true });
+    }
+  }, [activeTab]);
+
+  const handleHelpClick = () => {
+    setShowGoalMenu(false);
+    setShowProfileMenu(false);
+    if (activeTab !== "Home") {
+      pendingForceTourRef.current = true;
+      switchTab("Home");
+    } else {
+      homeTour.startTour({ force: true });
+    }
+  };
+
   const switchTab = (tab: "Home" | "SkillTree" | "History" | "Profile") => {
     setActiveTab(tab);
     skillTreeController.setSelectedSkill(null);
@@ -108,9 +138,8 @@ export const HomeShell: React.FC = () => {
   };
 
   const avatar = userProfile?.gender === "FEMALE" ? "👩‍🎓" : "👨‍🎓";
-  const fullName = userProfile
-    ? `${userProfile.fname || ""} ${userProfile.lname || ""}`.trim()
-    : "นักเรียน ALS";
+  const profileFullName = [userProfile?.fname, userProfile?.lname].filter(Boolean).join(" ");
+  const fullName = profileFullName || localStorage.getItem("fullname") || "นักเรียน ALS";
 
   // If no branch is selected or active, prompt user
   if (!activeBranch) {
@@ -135,14 +164,14 @@ export const HomeShell: React.FC = () => {
   }
 
   return (
-    <div className="app">
+    <div className="app" data-tour="tour-page">
       {/* Navbar */}
       <nav className="navbar">
-        <div className="nav-logo">
-          <span className="nav-logo-text">PSU · ALS</span>
+        <div className="nav-logo" data-tour="tour-logo">
+          <span className="nav-logo-text">{fullName}</span>
 
           {/* Goal switcher dropdown */}
-          <div ref={goalMenuRef} style={{ position: "relative", marginLeft: "8px" }}>
+          <div ref={goalMenuRef} style={{ position: "relative", marginLeft: "8px" }} data-tour="tour-goal-switcher">
             <button
               onClick={() => setShowGoalMenu(!showGoalMenu)}
               style={{
@@ -271,7 +300,7 @@ export const HomeShell: React.FC = () => {
         </div>
 
         {/* Navigation Tabs */}
-        <div className="nav-tabs">
+        <div className="nav-tabs" data-tour="tour-nav-tabs">
           {[
             { key: "Home", label: "Home" },
             { key: "SkillTree", label: "Skill Tree" },
@@ -288,8 +317,16 @@ export const HomeShell: React.FC = () => {
           ))}
         </div>
 
+        <button
+          className="nav-help-btn"
+          onClick={handleHelpClick}
+          title="ดูวิธีใช้งานหน้านี้อีกครั้ง"
+        >
+          ?
+        </button>
+
         {/* User profile dropdown */}
-        <div className="nav-user-wrapper" ref={profileMenuRef}>
+        <div className="nav-user-wrapper" ref={profileMenuRef} data-tour="tour-profile-menu">
           <button className="nav-user" onClick={() => setShowProfileMenu(!showProfileMenu)}>
             <div className="nav-user-avatar">{avatar}</div>
             <span className="nav-user-name">{fullName}</span>

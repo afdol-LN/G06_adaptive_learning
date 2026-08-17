@@ -37,9 +37,8 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({
   const behavior = computeBehavior(sessions);
   const meta = BEHAVIOR_META[behavior.cls];
 
-  const fullName = userProfile
-    ? `${userProfile.fname || ""} ${userProfile.lname || ""}`.trim()
-    : "นักเรียน ALS";
+  const profileFullName = [userProfile?.fname, userProfile?.lname].filter(Boolean).join(" ");
+  const fullName = profileFullName || localStorage.getItem("fullname") || "นักเรียน ALS";
   const avatar = userProfile?.gender === "FEMALE" ? "👩‍🎓" : "👨‍🎓";
 
   return (
