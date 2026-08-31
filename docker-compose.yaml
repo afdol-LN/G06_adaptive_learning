@@ -1,0 +1,17 @@
+services:
+
+  app:
+    image: registry.in.psu.ac.th:443/6610210454/adt-frontend
+
+    container_name: client-adaptive-learning
+
+    ports:
+      - "5173:4000"
+
+    environment:
+      NODE_ENV: development
+
+    target :
+        
+
+
