@@ -1638,3 +1638,161 @@
     display: none;
   }
 }
+/* ══════════════════ AI ผู้ช่วย (aiPanel) ══════════════════ */
+
+.ad-ai-form-card {
+  margin-bottom: 20px;
+}
+
+.ad-ai-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 16px;
+}
+
+.ad-ai-toolbar {
+  margin-top: 4px;
+}
+
+.ad-ai-alert-error {
+  padding: 10px 14px;
+  border-radius: 8px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: var(--red);
+  font-size: 13px;
+  font-weight: 600;
+  margin-top: 14px;
+}
+
+.ad-ai-alert-warn {
+  padding: 10px 14px;
+  border-radius: 8px;
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  color: #92400e;
+  font-size: 13px;
+  margin-top: 14px;
+}
+
+.ad-ai-reason-list {
+  margin: 6px 0 0;
+  padding-left: 18px;
+}
+
+.ad-ai-reason-list li {
+  margin-bottom: 2px;
+}
+
+.ad-ai-empty {
+  text-align: center;
+  padding: 40px 22px;
+}
+
+.ad-ai-draft-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 16px;
+}
+
+.ad-ai-draft-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ad-ai-draft-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ad-ai-draft-id {
+  margin-left: auto;
+  font-size: 12px;
+}
+
+.ad-ai-entity-badge {
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  background: rgba(0, 71, 171, 0.1);
+  color: var(--accent);
+  border: 1px solid rgba(0, 71, 171, 0.25);
+}
+
+.ad-ai-status-badge {
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.ad-ai-draft-body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ad-ai-draft-title {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.5;
+}
+
+.ad-ai-draft-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.ad-ai-draft-answer {
+  font-size: 13px;
+  color: var(--text);
+}
+
+.ad-ai-choice-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.ad-ai-choice {
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  font-size: 13px;
+  color: var(--text);
+}
+
+.ad-ai-choice.is-answer {
+  border-color: rgba(16, 185, 129, 0.45);
+  background: rgba(16, 185, 129, 0.08);
+  color: #047857;
+  font-weight: 600;
+}
+
+.ad-ai-draft-actions {
+  margin-top: auto;
+  padding-top: 4px;
+  flex-wrap: wrap;
+}
+
+/* ปุ่ม "สร้างใหม่" — ใช้สีส้มที่ยังไม่ถูกใช้เป็นปุ่ม เพื่อแยกจาก ดู/แก้/ลบ */
+.ad-btn-regen {
+  border-color: rgba(245, 158, 11, 0.35);
+  color: var(--orange);
+}
+
+.ad-btn-regen:hover:not(:disabled) {
+  background: rgba(245, 158, 11, 0.1);
+}

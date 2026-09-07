@@ -13,6 +13,7 @@ import SkillTab from "./skillPanel/SkillTab";
 import GoalTab from "./goalPanel/GoalTab";
 import ExerciseTab from "./exercisePanel/ExerciseTab";
 import HistoryTab from "./HistoryTab";
+import AiTab from "./aiPanel/AiTab";
 import { summaryController } from "./summaryPanel/summary.controller";
 import { historyController } from "./historyPanel/history.controller";
 import { getTierColor, getScoreColor, getStatusColor, gradeLabel, TABS } from "../../utils/adminUi";
@@ -142,6 +143,13 @@ export default function AdminHome() {
               gradeLabel={gradeLabel}
               getScoreColor={getScoreColor}
             />
+          </div>
+        )}
+
+        {/* ══ AI ผู้ช่วย ══ */}
+        {visitedTabs.has("ai") && (
+          <div style={{ display: activeTab === "ai" ? undefined : "none" }}>
+            <AiTab icon={TABS.find((t) => t.key === "ai")?.icon} />
           </div>
         )}
       </main>

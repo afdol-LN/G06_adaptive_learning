@@ -13,6 +13,10 @@ interface GoalFormModalProps {
   formError: string | null;
   onSave: (form: GoalFormValues) => Promise<boolean>;
   onClose: () => void;
+  /** ทับหัวข้อ modal — ใช้ตอน reuse ฟอร์มนี้กับร่างจาก AI ผู้ช่วย */
+  title?: string;
+  /** ทับข้อความปุ่มบันทึก */
+  submitLabel?: string;
 }
 
 export default function GoalFormModal({
@@ -23,6 +27,8 @@ export default function GoalFormModal({
   formError,
   onSave,
   onClose,
+  title,
+  submitLabel,
 }: GoalFormModalProps) {
   const [goal, setGoal] = useState<string>("");
   const [goalDescription, setGoalDescription] = useState<string>("");
@@ -66,11 +72,11 @@ export default function GoalFormModal({
           <span className="ad-modal-title">
             {isEdit ? (
               <>
-                <FaPen /> แก้ไข Goal
+                <FaPen /> {title ?? "แก้ไข Goal"}
               </>
             ) : (
               <>
-                <FaPlus /> เพิ่ม Goal ใหม่
+                <FaPlus /> {title ?? "เพิ่ม Goal ใหม่"}
               </>
             )}
           </span>
@@ -127,7 +133,7 @@ export default function GoalFormModal({
               ยกเลิก
             </button>
             <button type="submit" className="ad-btn-primary" disabled={isSaving}>
-              {isSaving ? "กำลังบันทึก..." : "บันทึก"}
+              {isSaving ? "กำลังบันทึก..." : (submitLabel ?? "บันทึก")}
             </button>
           </div>
         </form>

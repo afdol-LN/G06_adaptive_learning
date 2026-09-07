@@ -12,6 +12,10 @@ interface SkillFormModalProps {
   formError: string | null;
   onSave: (form: SkillFormValues) => Promise<boolean>;
   onClose: () => void;
+  /** ทับหัวข้อ modal — ใช้ตอน reuse ฟอร์มนี้กับร่างจาก AI ผู้ช่วย */
+  title?: string;
+  /** ทับข้อความปุ่มบันทึก */
+  submitLabel?: string;
 }
 
 export default function SkillFormModal({
@@ -22,6 +26,8 @@ export default function SkillFormModal({
   formError,
   onSave,
   onClose,
+  title,
+  submitLabel,
 }: SkillFormModalProps) {
   const [skillCode, setSkillCode] = useState<string>("");
   const [skillsName, setSkillsName] = useState<string>("");
@@ -112,11 +118,11 @@ export default function SkillFormModal({
           <span className="ad-modal-title">
             {isEdit ? (
               <>
-                <FaPen /> แก้ไข Skill
+                <FaPen /> {title ?? "แก้ไข Skill"}
               </>
             ) : (
               <>
-                <FaPlus /> เพิ่ม Skill ใหม่
+                <FaPlus /> {title ?? "เพิ่ม Skill ใหม่"}
               </>
             )}
           </span>
@@ -294,7 +300,7 @@ export default function SkillFormModal({
               ยกเลิก
             </button>
             <button type="submit" className="ad-btn-primary" disabled={isSaving}>
-              {isSaving ? "กำลังบันทึก..." : "บันทึก"}
+              {isSaving ? "กำลังบันทึก..." : (submitLabel ?? "บันทึก")}
             </button>
           </div>
         </form>

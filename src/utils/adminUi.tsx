@@ -5,6 +5,7 @@ import {
   FaBullseye,
   FaPenToSquare,
   FaClipboardList,
+  FaWandMagicSparkles,
 } from "react-icons/fa6";
 
 export interface TierInfo {
@@ -64,5 +65,6 @@ export const TABS = [
   { key: "goals", icon: <FaBullseye />, label: "จัดการ Goal" },
   { key: "exercises", icon: <FaPenToSquare />, label: "จัดการ Exercise" },
   { key: "history", icon: <FaClipboardList />, label: "ประวัติโจทย์" },
+  { key: "ai", icon: <FaWandMagicSparkles />, label: "AI ผู้ช่วย" },
 ];
 

@@ -13,6 +13,10 @@ interface ExerciseFormModalProps {
   formError: string | null;
   onSave: (form: ExerciseFormValues) => Promise<boolean>;
   onClose: () => void;
+  /** ทับหัวข้อ modal — ใช้ตอน reuse ฟอร์มนี้กับร่างจาก AI ผู้ช่วย */
+  title?: string;
+  /** ทับข้อความปุ่มบันทึก */
+  submitLabel?: string;
 }
 
 export default function ExerciseFormModal({
@@ -23,6 +27,8 @@ export default function ExerciseFormModal({
   formError,
   onSave,
   onClose,
+  title,
+  submitLabel,
 }: ExerciseFormModalProps) {
   const [description, setDescription] = useState<string>("");
   const [level, setLevel] = useState<number>(EMPTY_EXERCISE_FORM.level);
@@ -111,11 +117,11 @@ export default function ExerciseFormModal({
           <span className="ad-modal-title">
             {isEdit ? (
               <>
-                <FaPen /> แก้ไข Exercise
+                <FaPen /> {title ?? "แก้ไข Exercise"}
               </>
             ) : (
               <>
-                <FaPlus /> เพิ่ม Exercise ใหม่
+                <FaPlus /> {title ?? "เพิ่ม Exercise ใหม่"}
               </>
             )}
           </span>
@@ -293,7 +299,7 @@ export default function ExerciseFormModal({
               ยกเลิก
             </button>
             <button type="submit" className="ad-btn-primary" disabled={isSaving}>
-              {isSaving ? "กำลังบันทึก..." : "บันทึก"}
+              {isSaving ? "กำลังบันทึก..." : (submitLabel ?? "บันทึก")}
             </button>
           </div>
         </form>
