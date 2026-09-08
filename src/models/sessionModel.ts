@@ -10,6 +10,8 @@ export interface NextQuestion {
   description: string;
   type: ExerciseQuestionType;
   expectTime: number | null;
+  code?: string | null;
+  language?: string | null;
   choices?: QuestionChoice[];
 }
 

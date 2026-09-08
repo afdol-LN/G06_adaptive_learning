@@ -258,6 +258,8 @@ export function aiController() {
       skillId: p.skillId,
       skillLevel: p.skillLevel,
       type: p.type,
+      code: p.code ?? null,
+      language: p.language ?? null,
       fillInBlank: p.fillInBlank ?? null,
       isCasesensitive: p.isCasesensitive ?? "NO",
       exerciseChoices: choices.map((c, index) => ({
@@ -337,6 +339,9 @@ export function aiController() {
       skillLevel: values.level,
       type: values.type,
       expectTime: toSeconds(values.expectTimeValue, values.expectTimeUnit),
+      ...(values.code.trim() !== ""
+        ? { code: values.code, language: values.language }
+        : {}),
     };
     const payload: ExerciseDraftPayload =
       values.type === "CHOICE"

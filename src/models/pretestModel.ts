@@ -12,7 +12,8 @@ export interface PretestQuestion {
   level: number;
   description: string;
   text?: string;
-  code?: string[] | null;
+  code?: string[] | string | null;
+  language?: string | null;
   type: 'CHOICE' | 'FILL_IN_BLANK';
   fillInBlank?: string | null;
   isCasesensitive?: string;

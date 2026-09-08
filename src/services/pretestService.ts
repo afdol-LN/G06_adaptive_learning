@@ -134,65 +134,6 @@ export class PretestService {
     };
   }
 
-  static highlightCodeLine(codeLine: string): { __html: string } {
-    if (!codeLine) return { __html: "" };
-
-    const keywords = [
-      "def",
-      "return",
-      "if",
-      "else",
-      "elif",
-      "for",
-      "in",
-      "while",
-      "import",
-      "from",
-      "class",
-      "True",
-      "False",
-      "None",
-      "and",
-      "or",
-      "not",
-      "print",
-      "range",
-      "append",
-      "pop",
-      "len",
-      "const",
-      "let",
-      "var",
-      "function",
-    ];
-
-    let highlightedHtml = codeLine
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;");
-
-    highlightedHtml = highlightedHtml.replace(/(#[^]*)$/, '<span class="code-cm">$1</span>');
-    highlightedHtml = highlightedHtml.replace(/(\/\/[^]*)$/, '<span class="code-cm">$1</span>');
-
-    const stringPlaceholders: string[] = [];
-    highlightedHtml = highlightedHtml.replace(/("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*')/g, (match) => {
-      stringPlaceholders.push(match);
-      return `\x00STR${stringPlaceholders.length - 1}\x00`;
-    });
-
-    highlightedHtml = highlightedHtml.replace(
-      new RegExp(`\\b(${keywords.join("|")})\\b`, "g"),
-      '<span class="code-kw">$1</span>'
-    );
-    highlightedHtml = highlightedHtml.replace(/\b(\d+)\b/g, '<span class="code-num">$1</span>');
-    highlightedHtml = highlightedHtml.replace(
-      /\x00STR(\d+)\x00/g,
-      (_, index) => `<span class="code-str">${stringPlaceholders[parseInt(index)]}</span>`
-    );
-
-    return { __html: highlightedHtml };
-  }
-
   static getFallbackQuestions(): PretestQuestion[] {
     return [
       {

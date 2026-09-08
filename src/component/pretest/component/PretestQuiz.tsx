@@ -1,5 +1,6 @@
 import React from "react";
 import { PretestControllerType } from "../controller/usePretestController";
+import CodeBlock from "../../common/CodeBlock";
 
 interface PretestQuizProps {
   controller: PretestControllerType;
@@ -7,12 +8,6 @@ interface PretestQuizProps {
 
 export const PretestQuiz: React.FC<PretestQuizProps> = ({ controller }) => {
   const currentQuestion = controller.currentQuestion;
-
-  const codeLines: string[] = typeof currentQuestion.code === "string"
-    ? currentQuestion.code.split("\n")
-    : Array.isArray(currentQuestion.code)
-    ? currentQuestion.code
-    : [];
 
   const choiceLabels = ["A", "B", "C", "D", "E", "F"];
 
@@ -85,17 +80,10 @@ export const PretestQuiz: React.FC<PretestQuizProps> = ({ controller }) => {
             {currentQuestion.description || currentQuestion.text}
           </div>
 
-          {codeLines.length > 0 && (
-            <div className="code-block">
-              {codeLines.map((lineText, lineIndex) => (
-                <div
-                  key={lineIndex}
-                  className="code-line"
-                  dangerouslySetInnerHTML={controller.highlightCodeLine(lineText)}
-                ></div>
-              ))}
-            </div>
-          )}
+          <CodeBlock
+            code={currentQuestion.code}
+            language={currentQuestion.language}
+          />
 
           {currentQuestion.type === "FILL_IN_BLANK" ? (
             /* ── Fill-In-The-Blank Input UI ── */

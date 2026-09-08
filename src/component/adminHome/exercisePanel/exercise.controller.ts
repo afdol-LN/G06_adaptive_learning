@@ -11,6 +11,9 @@ import { TimeUnit, toSeconds } from "../../../utils/timeUnit";
 
 export interface ExerciseFormValues {
   description: string;
+  /** โค้ดประกอบโจทย์ แสดงในกล่องแยกเหนือตัวเลือก ว่างได้ */
+  code: string;
+  language: string;
   level: number;
   skillId: number | null;
   type: ExerciseType;
@@ -25,6 +28,8 @@ export interface ExerciseFormValues {
 
 export const EMPTY_EXERCISE_FORM: ExerciseFormValues = {
   description: "",
+  code: "",
+  language: "python",
   level: 1,
   skillId: null,
   type: "CHOICE",
@@ -135,6 +140,9 @@ export function exerciseController() {
     try {
       const basePayload = {
         description: form.description.trim(),
+        // ส่ง "" มาได้เพื่อลบโค้ดทิ้ง backend แปลงเป็น null ให้เอง
+        code: form.code,
+        language: form.language,
         skillId: form.skillId,
         skillLevel: form.level,
         type: form.type,

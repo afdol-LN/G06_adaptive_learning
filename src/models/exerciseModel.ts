@@ -23,6 +23,8 @@ export interface Exercise {
   type: ExerciseType;
   fillInBlank: string | null;
   isCasesensitive: IsCaseSensitive;
+  code?: string | null;
+  language?: string | null;
   skill?: Skill;
   exerciseChoices?: ExerciseChoice[];
 }
@@ -39,8 +41,9 @@ export interface CreateExerciseRequest {
   type: ExerciseType;
   status?: ExerciseStatus;
   expectTime?: number;
-  fillInBlank?: string;
-  isCasesensitive?: IsCaseSensitive;
+  code?: string;
+  language?: string;
+
   choices?: ExerciseChoiceInput[];
 }
 
@@ -51,8 +54,9 @@ export interface UpdateExerciseRequest {
   type?: ExerciseType;
   status?: ExerciseStatus;
   expectTime?: number;
-  fillInBlank?: string;
-  isCasesensitive?: IsCaseSensitive;
+  code?: string;
+  language?: string;
+
   choices?: ExerciseChoiceInput[];
 }
 

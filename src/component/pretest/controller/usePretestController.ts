@@ -206,10 +206,6 @@ export function usePretestController() {
     navigate("/home");
   }, [navigate, resultsList, updateBranch, toast]);
 
-  const highlightCodeLine = useCallback((codeLine: string) => {
-    return PretestService.highlightCodeLine(codeLine);
-  }, []);
-
   return {
     isLoading,
     questions,
@@ -230,7 +226,6 @@ export function usePretestController() {
     confirmSkipQuestion,
     navigateToDashboard,
     setShowUnansweredModal,
-    highlightCodeLine,
   };
 }
 

@@ -11,6 +11,8 @@ export interface ExerciseDraftPayload {
   skillLevel: number;
   type: ExerciseType;
   expectTime?: number;
+  code?: string;
+  language?: string;
   fillInBlank?: string;
   isCasesensitive?: IsCaseSensitive;
   choices?: { script: string; isAnswer: boolean }[];

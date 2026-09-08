@@ -137,8 +137,8 @@ export default function AiGenerateForm({
             rows={3}
             placeholder={
               isExercise
-                ? 'เช่น "เน้นการ index และกรณี out-of-bounds ใช้ภาษา C"'
-                : 'เช่น "ต่อยอดจาก skill พื้นฐานเรื่อง loop"'
+                ? 'เช่น "เน้นการ index และ slicing ของ list ในภาษา Python"'
+                : 'เช่น "ต่อยอดจาก skill พื้นฐานเรื่อง loop ในภาษา Python"'
             }
             value={form.instruction}
             onChange={(e) => onChange("instruction", e.target.value)}

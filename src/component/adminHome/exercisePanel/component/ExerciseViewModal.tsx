@@ -1,6 +1,7 @@
 import { FaMagnifyingGlass, FaCheck, FaPen } from "react-icons/fa6";
 import { Exercise } from "../../../../models/exerciseModel";
 import { getStatusColor } from "../../../../utils/adminUi";
+import CodeBlock from "../../../common/CodeBlock";
 
 interface ExerciseViewModalProps {
   exercise: Exercise | null;
@@ -25,6 +26,13 @@ export default function ExerciseViewModal({ exercise, onClose, onEdit }: Exercis
             <label className="ad-label">คำอธิบายโจทย์</label>
             <div>{exercise.description}</div>
           </div>
+
+          {exercise.code && (
+            <div className="ad-field">
+              <label className="ad-label">โค้ดประกอบโจทย์</label>
+              <CodeBlock code={exercise.code} language={exercise.language} />
+            </div>
+          )}
 
           <div className="ad-field-row">
             <div className="ad-field">

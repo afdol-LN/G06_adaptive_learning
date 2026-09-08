@@ -31,6 +31,8 @@ export default function ExerciseFormModal({
   submitLabel,
 }: ExerciseFormModalProps) {
   const [description, setDescription] = useState<string>("");
+  const [code, setCode] = useState<string>("");
+  const [language, setLanguage] = useState<string>("python");
   const [level, setLevel] = useState<number>(EMPTY_EXERCISE_FORM.level);
   const [skillId, setSkillId] = useState<number | null>(null);
   const [type, setType] = useState<ExerciseType>(EMPTY_EXERCISE_FORM.type);
@@ -46,6 +48,8 @@ export default function ExerciseFormModal({
     if (!isOpen) return;
     if (editingExercise) {
       setDescription(editingExercise.description);
+      setCode(editingExercise.code ?? "");
+      setLanguage(editingExercise.language ?? "python");
       setLevel(editingExercise.level);
       setSkillId(editingExercise.skillId);
       setType(editingExercise.type);
@@ -68,6 +72,8 @@ export default function ExerciseFormModal({
       setExpectTimeUnit(etUnit);
     } else {
       setDescription("");
+      setCode("");
+      setLanguage(EMPTY_EXERCISE_FORM.language);
       setLevel(EMPTY_EXERCISE_FORM.level);
       setSkillId(activeSkills[0]?.skillId ?? null);
       setType(EMPTY_EXERCISE_FORM.type);
@@ -97,6 +103,8 @@ export default function ExerciseFormModal({
     e.preventDefault();
     await onSave({
       description,
+      code,
+      language,
       level,
       skillId,
       type,
@@ -155,6 +163,44 @@ export default function ExerciseFormModal({
                 required
               />
             </div>
+
+            <div className="ad-field">
+              <label className="ad-label">
+                โค้ดประกอบโจทย์ (ไม่บังคับ)
+              </label>
+              <textarea
+                className="ad-input ad-code-input"
+                value={code}
+                onChange={(e) => setCode(e.target.value)}
+                rows={6}
+                spellCheck={false}
+                placeholder={"เว้นว่างได้ถ้าโจทย์ไม่ต้องใช้โค้ด\nโค้ดจะแสดงในกล่องแยกเหนือตัวเลือก"}
+              />
+              <span className="ad-hint-text">
+                ถ้าโจทย์เขียนว่า &quot;โค้ดนี้...&quot; ต้องใส่โค้ดตรงนี้ ไม่ใช่ในช่องคำอธิบาย
+                เพราะช่องคำอธิบายแสดงเป็นข้อความธรรมดา การขึ้นบรรทัดจะหายไป
+              </span>
+            </div>
+
+            {code.trim() !== "" && (
+              <div className="ad-field">
+                <label className="ad-label">ภาษาของโค้ด</label>
+                <select
+                  className="ad-select"
+                  value={language}
+                  onChange={(e) => setLanguage(e.target.value)}
+                >
+                  <option value="python">Python</option>
+                  <option value="javascript">JavaScript</option>
+                  <option value="typescript">TypeScript</option>
+                  <option value="java">Java</option>
+                  <option value="c">C</option>
+                  <option value="cpp">C++</option>
+                  <option value="sql">SQL</option>
+                  <option value="plaintext">ข้อความธรรมดา</option>
+                </select>
+              </div>
+            )}
 
             <div className="ad-field-row">
               <div className="ad-field">

@@ -6,6 +6,7 @@ import {
   SkillDraftPayload,
 } from "../../../../models/aiDraftModel";
 import { getStatusColor, getTierColor, getTierLabel } from "../../../../utils/adminUi";
+import CodeBlock from "../../../common/CodeBlock";
 
 interface DraftCardProps {
   draft: AiDraft;
@@ -46,6 +47,7 @@ function ExerciseBody({
   return (
     <>
       <p className="ad-ai-draft-title">{payload.description}</p>
+      <CodeBlock code={payload.code} language={payload.language} />
       <div className="ad-ai-draft-meta">
         <span>Skill: {skillNameById(payload.skillId)}</span>
         <span>ระดับ {payload.skillLevel}</span>

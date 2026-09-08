@@ -1,17 +1,21 @@
 import React from 'react';
 import './decorate/Exercise.css';
 import { useExerciseController } from './exercise/controller/useExerciseController';
+import CodeBlock from './common/CodeBlock';
 
 export default function Exercise() {
   const controller = useExerciseController();
 
   if (controller.isLoading || !controller.question) {
     return (
-      <div className="wrap">
-        <div className="stage">
-          <div className="qcard">กำลังโหลดคำถาม...</div>
+      <>
+        <div className="glow-bg"><div className="g1"></div><div className="g2"></div><div className="g3"></div></div>
+        <div className="wrap">
+          <div className="stage">
+            <div className="qcard">กำลังโหลดคำถาม...</div>
+          </div>
         </div>
-      </div>
+      </>
     );
   }
 
@@ -52,6 +56,11 @@ export default function Exercise() {
             <div className="card-ribbon"></div>
             <div className="card-body">
               <div className="q-question">{controller.question.description}</div>
+
+              <CodeBlock
+                code={controller.question.code}
+                language={controller.question.language}
+              />
 
               {controller.question.type === 'CHOICE' ? (
                 <div className="choices">

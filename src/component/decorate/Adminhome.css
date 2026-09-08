@@ -3,7 +3,12 @@
 ══════════════════════════════════════ */
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;600;700;800&display=swap');
 
-:root {
+/* ประกาศทั้งบน :root และ .ad-app
+   .ad-app อยู่ใกล้ element กว่า จึงชนะ :root ของไฟล์ CSS หน้าอื่น
+   (Exercise.css / Pretest.css ตั้งชื่อ token ซ้ำกันแต่ค่าไม่เหมือนกัน)
+   ไม่ว่า bundle จะโหลดไฟล์ไหนทีหลัง สีของหน้า admin ก็ไม่เพี้ยน */
+:root,
+.ad-app {
   --bg: #f2f7fa;
   --surface: #ffffff;
   --border: #c2d3e0;
@@ -37,6 +42,12 @@
   font-family: 'DM Sans', system-ui, sans-serif;
   display: flex;
   flex-direction: row;
+  /* position + z-index: ยกทั้งหน้า admin ขึ้นเหนือ fixed overlay ที่ z-index:0
+     ซึ่งมาจาก CSS ของหน้าอื่นใน bundle เดียวกัน
+     isolation: ขัง z-index ภายใน (sidebar 50, overlay 200) ไว้ในนี้ ไม่ให้ไปชนหน้าอื่น */
+  position: relative;
+  z-index: 1;
+  isolation: isolate;
 }
 
 /* ════ SIDEBAR ════ */
@@ -47,9 +58,8 @@
   height: 100vh;
   width: 220px;
   flex-shrink: 0;
-  background: rgba(255, 255, 255, 0.97);
+  background: var(--surface);
   border-right: 1px solid var(--border);
-  backdrop-filter: blur(16px);
   display: flex;
   flex-direction: column;
   box-shadow: 2px 0 12px rgba(0, 71, 171, 0.07);
@@ -1795,4 +1805,14 @@
 
 .ad-btn-regen:hover:not(:disabled) {
   background: rgba(245, 158, 11, 0.1);
+}
+
+/* ช่องกรอกโค้ดในฟอร์ม exercise — ต้อง monospace ไม่งั้น indent ดูไม่ออก */
+.ad-code-input {
+  font-family: ui-monospace, "DM Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+  font-size: 13px;
+  line-height: 1.7;
+  white-space: pre;
+  overflow-x: auto;
+  tab-size: 4;
 }
