@@ -2,7 +2,6 @@ import { useState } from "react";
 import "../decorate/Adminhome.css";
 import { useNavigate } from "react-router-dom";
 import {
-  FaBolt,
   FaArrowRightFromBracket,
   FaChevronLeft,
   FaChevronRight,
@@ -14,6 +13,7 @@ import GoalTab from "./goalPanel/GoalTab";
 import ExerciseTab from "./exercisePanel/ExerciseTab";
 import HistoryTab from "./HistoryTab";
 import AiTab from "./aiPanel/AiTab";
+import AppLogo from "../common/AppLogo";
 import { summaryController } from "./summaryPanel/summary.controller";
 import { historyController } from "./historyPanel/history.controller";
 import { getTierColor, getScoreColor, getStatusColor, gradeLabel, TABS } from "../../utils/adminUi";
@@ -48,7 +48,7 @@ export default function AdminHome() {
         </button>
 
         <div className="ad-sidebar-head">
-          <div className="ad-nav-icon"><FaBolt /></div>
+          <div className="ad-nav-icon"><AppLogo /></div>
           <div className="ad-sidebar-brand-text">
             <span className="ad-nav-brand">G06 · ALS</span>
             <span className="ad-nav-badge">Admin</span>

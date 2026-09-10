@@ -64,7 +64,7 @@ html, body {
   box-shadow:0 4px 20px rgba(0,0,128,0.03);
 }
 .logo{display:flex;align-items:center;gap:10px}
-.logo-box{width:32px;height:32px;border:1.5px solid var(--gold);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;background:#fff;color:var(--gold3);box-shadow:0 0 10px rgba(0,71,171,0.1)}
+.logo-box{width:32px;height:32px;padding:3px;border:1.5px solid var(--gold);border-radius:8px;background:#fff;box-shadow:0 0 10px rgba(0,71,171,0.1)}
 .logo-txt{font-family:'Playfair Display',serif;font-size:16px;color:var(--gold3);letter-spacing:.04em;font-weight:700}
 .logo-dot{width:4px;height:4px;border-radius:50%;background:var(--bdr2)}
 .logo-sub{font-size:11px;color:var(--dim);font-family:'DM Mono',monospace;font-weight:600}

@@ -1,5 +1,21 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import type { IconType } from "react-icons";
+import {
+  FaArrowLeft,
+  FaBullseye,
+  FaCheck,
+  FaChevronDown,
+  FaChevronLeft,
+  FaChevronRight,
+  FaCircleQuestion,
+  FaClockRotateLeft,
+  FaHouse,
+  FaPlus,
+  FaSitemap,
+  FaUser,
+  FaUserGraduate,
+} from "react-icons/fa6";
 import { useApp } from "../../context/AppContext";
 import { useBranchSkillController } from "./controller/branchSkill.controller";
 import { useBranchStatsController } from "./controller/branchStats.controller";
@@ -12,9 +28,22 @@ import { ProfileTab } from "./tabs/ProfileTab";
 import { NextExercisePicker } from "./skillTree/NextExercisePicker";
 import { ExerciseConfirmModal } from "./skillTree/ExerciseConfirmModal";
 import CreateBranchModal from "../CreateBranchModal";
+import AppLogo from "../common/AppLogo";
 import { LayoutSkill } from "./utils/skillTree";
 import "../decorate/Home.css";
 import "../decorate/Tour.css";
+
+type HomeTabKey = "Home" | "SkillTree" | "History" | "Profile";
+
+const NAV_ITEMS: { key: HomeTabKey; label: string; Icon: IconType }[] = [
+  { key: "Home", label: "Home", Icon: FaHouse },
+  { key: "SkillTree", label: "Skill Tree", Icon: FaSitemap },
+  { key: "History", label: "History", Icon: FaClockRotateLeft },
+  { key: "Profile", label: "Profile", Icon: FaUser },
+];
+
+// จำสถานะ sidebar (ย่อ/ขยาย) ไว้ข้าม session
+const SIDEBAR_COLLAPSED_KEY = "homeSidebarCollapsed";
 
 export const HomeShell: React.FC = () => {
   const {
@@ -38,7 +67,13 @@ export const HomeShell: React.FC = () => {
   const pendingForceTourRef = useRef(false);
 
   // Tab State
-  const [activeTab, setActiveTab] = useState<"Home" | "SkillTree" | "History" | "Profile">("Home");
+  const [activeTab, setActiveTab] = useState<HomeTabKey>("Home");
+
+  // Sidebar State — ครั้งแรกบนจอแคบให้เริ่มแบบย่อ
+  const [sidebarCollapsed, setSidebarCollapsed] = useState<boolean>(() => {
+    const stored = localStorage.getItem(SIDEBAR_COLLAPSED_KEY);
+    return stored !== null ? stored === "1" : window.innerWidth < 768;
+  });
 
   // Dropdown States
   const [showGoalMenu, setShowGoalMenu] = useState(false);
@@ -59,6 +94,10 @@ export const HomeShell: React.FC = () => {
   useEffect(() => {
     fetchMyBranches();
   }, []);
+
+  useEffect(() => {
+    localStorage.setItem(SIDEBAR_COLLAPSED_KEY, sidebarCollapsed ? "1" : "0");
+  }, [sidebarCollapsed]);
 
   // Close dropdowns on click outside
   useEffect(() => {
@@ -101,7 +140,13 @@ export const HomeShell: React.FC = () => {
     }
   };
 
-  const switchTab = (tab: "Home" | "SkillTree" | "History" | "Profile") => {
+  const toggleSidebar = () => {
+    setShowGoalMenu(false);
+    setShowProfileMenu(false);
+    setSidebarCollapsed((c) => !c);
+  };
+
+  const switchTab = (tab: HomeTabKey) => {
     setActiveTab(tab);
     skillTreeController.setSelectedSkill(null);
   };
@@ -137,7 +182,7 @@ export const HomeShell: React.FC = () => {
     setConfirmSkill(skill);
   };
 
-  const avatar = userProfile?.gender === "FEMALE" ? "👩‍🎓" : "👨‍🎓";
+  const avatar = <FaUserGraduate aria-hidden />;
   const profileFullName = [userProfile?.fname, userProfile?.lname].filter(Boolean).join(" ");
   const fullName = profileFullName || localStorage.getItem("fullname") || "นักเรียน ALS";
 
@@ -163,210 +208,163 @@ export const HomeShell: React.FC = () => {
     );
   }
 
+  const goalLabel = activeBranch.goalName || "เลือกสายการเรียน";
+
   return (
     <div className="app" data-tour="tour-page">
-      {/* Navbar */}
-      <nav className="navbar">
-        <div className="nav-logo" data-tour="tour-logo">
-          <span className="nav-logo-text">{fullName}</span>
+      {/* Sidebar */}
+      <aside className={`sidebar ${sidebarCollapsed ? "collapsed" : ""}`}>
+        <button
+          type="button"
+          className="sb-toggle"
+          onClick={toggleSidebar}
+          aria-expanded={!sidebarCollapsed}
+          aria-label={sidebarCollapsed ? "แสดงแถบเมนู" : "ซ่อนแถบเมนู"}
+          title={sidebarCollapsed ? "แสดงแถบเมนู" : "ซ่อนแถบเมนู"}
+        >
+          {sidebarCollapsed ? <FaChevronRight aria-hidden /> : <FaChevronLeft aria-hidden />}
+        </button>
 
-          {/* Goal switcher dropdown */}
-          <div ref={goalMenuRef} style={{ position: "relative", marginLeft: "8px" }} data-tour="tour-goal-switcher">
-            <button
-              onClick={() => setShowGoalMenu(!showGoalMenu)}
-              style={{
-                fontSize: "12px",
-                fontWeight: "600",
-                color: "#0047AB",
-                background: "rgba(0,71,171,0.08)",
-                border: "1px solid rgba(0,71,171,0.2)",
-                borderRadius: "99px",
-                padding: "3px 10px",
-                cursor: "pointer",
-                whiteSpace: "nowrap",
-                display: "flex",
-                alignItems: "center",
-                gap: "4px",
-              }}
-            >
-              {activeBranch.goalName || "เลือกสายการเรียน"}
-              <span style={{ fontSize: "10px" }}>▾</span>
-            </button>
-            {showGoalMenu && (
-              <div
-                style={{
-                  position: "absolute",
-                  top: "calc(100% + 8px)",
-                  left: 0,
-                  minWidth: "220px",
-                  background: "#fff",
-                  border: "1px solid #c2d3e0",
-                  borderRadius: "14px",
-                  boxShadow: "0 8px 32px rgba(0,71,171,0.13)",
-                  zIndex: 300,
-                  overflow: "hidden",
-                  display: "flex",
-                  flexDirection: "column",
-                  maxHeight: "360px",
-                }}
-              >
-                <div style={{ overflowY: "auto", maxHeight: "300px" }}>
-                  {branches.map((b) => (
+        <div className="sb-header" data-tour="tour-logo">
+          <div className="sb-brand-icon"><AppLogo /></div>
+          <span className="sb-brand sb-label">G06 · ALS</span>
+        </div>
+
+        {/* Goal switcher dropdown */}
+        <div className="sb-goal" ref={goalMenuRef} data-tour="tour-goal-switcher">
+          <button
+            className="sb-goal-btn"
+            onClick={() => setShowGoalMenu(!showGoalMenu)}
+            title={sidebarCollapsed ? goalLabel : undefined}
+          >
+            <span className="sb-icon"><FaBullseye aria-hidden /></span>
+            <span className="sb-label sb-goal-name">{goalLabel}</span>
+            <span className="sb-label sb-caret"><FaChevronDown aria-hidden /></span>
+          </button>
+          {showGoalMenu && (
+            <div className="goal-dropdown">
+              <div className="goal-dropdown-list">
+                {branches.map((b) => {
+                  const isActive = String(b.id) === String(activeBranch.id);
+                  return (
                     <button
                       key={b.id}
+                      className={`goal-dropdown-item ${isActive ? "active" : ""}`}
                       onClick={() => {
                         switchBranch(b.id);
                         setShowGoalMenu(false);
                       }}
-                      style={{
-                        width: "100%",
-                        padding: "10px 14px",
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "10px",
-                        background: String(b.id) === String(activeBranch.id) ? "#e8f0fe" : "transparent",
-                        border: "none",
-                        cursor: "pointer",
-                        textAlign: "left",
-                        borderBottom: "1px solid #f1f5f9",
-                        fontFamily: "inherit",
-                      }}
                     >
                       <div>
-                        <div style={{ fontSize: "13px", fontWeight: "700", color: "#0f172a" }}>{b.goalName}</div>
-                        <div style={{ fontSize: "11px", color: "#64748b" }}>
+                        <div className="goal-dropdown-name">{b.goalName}</div>
+                        <div className="goal-dropdown-meta">
                           {b.campus} · ปี {b.year || 1}
                         </div>
                       </div>
-                      {String(b.id) === String(activeBranch.id) && (
-                        <span style={{ marginLeft: "auto", color: "#0047AB", fontSize: "12px" }}>✓</span>
-                      )}
+                      {isActive && <span className="goal-dropdown-check"><FaCheck aria-hidden /></span>}
                     </button>
-                  ))}
+                  );
+                })}
+              </div>
+
+              <button
+                className="goal-dropdown-action primary"
+                onClick={() => {
+                  setShowCreateModal(true);
+                  setShowGoalMenu(false);
+                }}
+              >
+                <span className="goal-dropdown-action-icon"><FaPlus aria-hidden /></span>
+                <span>เพิ่มเป้าหมายใหม่</span>
+              </button>
+
+              <button
+                className="goal-dropdown-action"
+                onClick={() => {
+                  setShowGoalMenu(false);
+                  navigate("/selectbranch");
+                }}
+              >
+                <span className="goal-dropdown-action-icon"><FaArrowLeft aria-hidden /></span>
+                <span>ไปหน้าเลือกเป้าหมาย</span>
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* Navigation Tabs */}
+        <nav className="sb-nav" data-tour="tour-nav-tabs">
+          {NAV_ITEMS.map((t) => (
+            <button
+              key={t.key}
+              className={`sb-nav-item ${activeTab === t.key ? "active" : ""}`}
+              onClick={() => switchTab(t.key)}
+              aria-current={activeTab === t.key ? "page" : undefined}
+              title={sidebarCollapsed ? t.label : undefined}
+            >
+              <span className="sb-icon"><t.Icon aria-hidden /></span>
+              <span className="sb-label">{t.label}</span>
+            </button>
+          ))}
+        </nav>
+
+        <div className="sb-footer">
+          <button
+            className="sb-nav-item sb-help"
+            onClick={handleHelpClick}
+            title="ดูวิธีใช้งานหน้านี้อีกครั้ง"
+          >
+            <span className="sb-icon"><FaCircleQuestion aria-hidden /></span>
+            <span className="sb-label">วิธีใช้งาน</span>
+          </button>
+
+          {/* User profile dropdown */}
+          <div className="sb-user-wrapper" ref={profileMenuRef} data-tour="tour-profile-menu">
+            <button
+              className="sb-user"
+              onClick={() => setShowProfileMenu(!showProfileMenu)}
+              title={sidebarCollapsed ? fullName : undefined}
+            >
+              <div className="nav-user-avatar">{avatar}</div>
+              <span className="sb-label nav-user-name">{fullName}</span>
+              <span className={`sb-label nav-chevron ${showProfileMenu ? "open" : ""}`}><FaChevronDown aria-hidden /></span>
+            </button>
+            {showProfileMenu && (
+              <div className="profile-dropdown">
+                <div className="dropdown-header">
+                  <div className="dropdown-avatar">{avatar}</div>
+                  <div>
+                    <div className="dropdown-name">{fullName}</div>
+                    <div className="dropdown-email">{activeBranch.goalName}</div>
+                  </div>
                 </div>
-
+                <div className="dropdown-sep" />
                 <button
+                  className="dropdown-item"
                   onClick={() => {
-                    setShowCreateModal(true);
-                    setShowGoalMenu(false);
-                  }}
-                  style={{
-                    width: "100%",
-                    padding: "10px 14px",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "8px",
-                    background: "#f8fafc",
-                    border: "none",
-                    cursor: "pointer",
-                    textAlign: "left",
-                    color: "#0047AB",
-                    fontWeight: "700",
-                    borderTop: "1px solid #e2e8f0",
-                    flexShrink: 0,
+                    switchTab("Profile");
+                    setShowProfileMenu(false);
                   }}
                 >
-                  <span style={{ fontSize: "18px" }}>+</span>
-                  <span style={{ fontSize: "13px" }}>เพิ่มเป้าหมายใหม่</span>
+                  Profile
                 </button>
-
+                <div className="dropdown-sep" />
                 <button
+                  className="dropdown-item danger"
                   onClick={() => {
-                    setShowGoalMenu(false);
-                    navigate("/selectbranch");
-                  }}
-                  style={{
-                    width: "100%",
-                    padding: "10px 14px",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "8px",
-                    background: "#f8fafc",
-                    border: "none",
-                    cursor: "pointer",
-                    textAlign: "left",
-                    color: "#64748b",
-                    fontWeight: "700",
-                    borderTop: "1px solid #e2e8f0",
-                    flexShrink: 0,
+                    localStorage.removeItem("access_token");
+                    localStorage.removeItem("userProfile");
+                    localStorage.removeItem("activeBranchId");
+                    navigate("/");
                   }}
                 >
-                  <span style={{ fontSize: "16px" }}>↩</span>
-                  <span style={{ fontSize: "13px" }}>ไปหน้าเลือกเป้าหมาย</span>
+                  Log Out
                 </button>
               </div>
             )}
           </div>
         </div>
-
-        {/* Navigation Tabs */}
-        <div className="nav-tabs" data-tour="tour-nav-tabs">
-          {[
-            { key: "Home", label: "Home" },
-            { key: "SkillTree", label: "Skill Tree" },
-            { key: "History", label: "History" },
-            { key: "Profile", label: "Profile" },
-          ].map((t) => (
-            <button
-              key={t.key}
-              className={`nav-tab ${activeTab === t.key ? "active" : ""}`}
-              onClick={() => switchTab(t.key as any)}
-            >
-              {t.label}
-            </button>
-          ))}
-        </div>
-
-        <button
-          className="nav-help-btn"
-          onClick={handleHelpClick}
-          title="ดูวิธีใช้งานหน้านี้อีกครั้ง"
-        >
-          ?
-        </button>
-
-        {/* User profile dropdown */}
-        <div className="nav-user-wrapper" ref={profileMenuRef} data-tour="tour-profile-menu">
-          <button className="nav-user" onClick={() => setShowProfileMenu(!showProfileMenu)}>
-            <div className="nav-user-avatar">{avatar}</div>
-            <span className="nav-user-name">{fullName}</span>
-            <span className={`nav-chevron ${showProfileMenu ? "open" : ""}`}>▾</span>
-          </button>
-          {showProfileMenu && (
-            <div className="profile-dropdown">
-              <div className="dropdown-header">
-                <div className="dropdown-avatar">{avatar}</div>
-                <div>
-                  <div className="dropdown-name">{fullName}</div>
-                  <div className="dropdown-email">{activeBranch.goalName}</div>
-                </div>
-              </div>
-              <div className="dropdown-sep" />
-              <button
-                className="dropdown-item"
-                onClick={() => {
-                  switchTab("Profile");
-                  setShowProfileMenu(false);
-                }}
-              >
-                Profile
-              </button>
-              <div className="dropdown-sep" />
-              <button
-                className="dropdown-item danger"
-                onClick={() => {
-                  localStorage.removeItem("access_token");
-                  localStorage.removeItem("userProfile");
-                  localStorage.removeItem("activeBranchId");
-                  navigate("/");
-                }}
-              >
-                Log Out
-              </button>
-            </div>
-          )}
-        </div>
-      </nav>
+      </aside>
 
       {/* Tabs Content */}
       <div className="content">

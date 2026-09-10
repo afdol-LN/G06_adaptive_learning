@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './decorate/GetStart.css';
+import AppLogo from './common/AppLogo';
 
 export default function GetStart() {
     const navigate = useNavigate();
@@ -68,7 +69,7 @@ export default function GetStart() {
       <main className="page">
         <div className="icon-wrap">
           <div className="icon-ring">
-            <span className="icon-inner">⚡</span>
+            <span className="icon-inner"><AppLogo /></span>
           </div>
         </div>
 

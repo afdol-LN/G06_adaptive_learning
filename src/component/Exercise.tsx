@@ -2,6 +2,7 @@ import React from 'react';
 import './decorate/Exercise.css';
 import { useExerciseController } from './exercise/controller/useExerciseController';
 import CodeBlock from './common/CodeBlock';
+import AppLogo from './common/AppLogo';
 
 export default function Exercise() {
   const controller = useExerciseController();
@@ -27,7 +28,7 @@ export default function Exercise() {
       <div className="wrap">
         <div className="topbar">
           <div className="logo">
-            <div className="logo-box">⚡</div>
+            <div className="logo-box"><AppLogo /></div>
             <span className="logo-txt">G06 · ALS</span>
             <div className="logo-dot"></div>
             <span className="logo-sub">Adaptive Learning</span>

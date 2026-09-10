@@ -116,6 +116,13 @@ body, #root {
   margin-bottom: 2rem;
 }
 
+/* กล่องโลโก้ในวงกลม — AppLogo จะเต็มกล่องนี้ */
+.icon-inner {
+  display: block;
+  width: 52px;
+  height: 52px;
+}
+
 .eyebrow {
   font-size: 0.875rem;
   text-transform: uppercase;
