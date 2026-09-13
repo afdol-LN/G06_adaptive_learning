@@ -55,7 +55,8 @@
   --node-open-bg: #ffffff;   --node-open-border: #0047AB;   --node-open-text: #0047AB;   --node-open-bar: #f0f4ff;
   --node-ready-bg: #f0f9ff;  --node-ready-border: #60a5fa;  --node-ready-text: #1d4ed8;  --node-ready-bar: #e0f2fe;
   --node-locked-bg: #f8fafc; --node-locked-border: #cbd5e1; --node-locked-text: #94a3b8; --node-locked-bar: #f1f5f9;
-  --edge-open: #0047AB; --edge-ready: #60a5fa; --edge-locked: #cbd5e1;
+  /* edge-locked ≥ 3:1 on white (WCAG non-text) — it was #cbd5e1 and nearly invisible */
+  --edge-open: #0047AB; --edge-ready: #60a5fa; --edge-locked: #8494a9;
 
   /* behaviour classes — utils/behavior.BEHAVIOR_META */
   --beh-mastery: #0047AB; --beh-fast: #059669; --beh-steady: #2563eb; --beh-slow: #d97706; --beh-struggler: #dc2626;
@@ -106,7 +107,7 @@
   --node-open-bg: #121b2e;   --node-open-border: #6b9bff;   --node-open-text: #9dbcff;   --node-open-bar: #1b2742;
   --node-ready-bg: #10223d;  --node-ready-border: #60a5fa;  --node-ready-text: #93c5fd;  --node-ready-bar: #16294a;
   --node-locked-bg: #141c2c; --node-locked-border: #33415c; --node-locked-text: #6b7a96; --node-locked-bar: #1a2335;
-  --edge-open: #6b9bff; --edge-ready: #60a5fa; --edge-locked: #33415c;
+  --edge-open: #6b9bff; --edge-ready: #60a5fa; --edge-locked: #6b7a96;
 
   --beh-mastery: #8fb4ff; --beh-fast: #34d399; --beh-steady: #60a5fa; --beh-slow: #fbbf24; --beh-struggler: #f87171;
 }

@@ -91,10 +91,11 @@ export const SkillTreeSVG: React.FC<SkillTreeSVGProps> = ({
               d={path}
               fill="none"
               style={{ stroke: getEdgeColor(reqId, skill.skillId) }}
-              strokeWidth={isActive ? 2 : 1}
+              strokeWidth={isActive ? 2 : 1.5}
               strokeLinejoin="round"
-              strokeDasharray={isActive ? "none" : "4,4"}
-              strokeOpacity={selected ? 0.08 : isActive ? 0.85 : 0.3}
+              strokeDasharray={isActive ? "none" : "6,4"}
+              // edges into locked / not-yet-unlocked skills stay dashed but must be readable (was 0.3 opacity)
+              strokeOpacity={selected ? 0.08 : isActive ? 0.85 : 0.9}
             />
           );
         })
