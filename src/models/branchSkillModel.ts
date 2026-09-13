@@ -18,5 +18,7 @@ export interface BranchSkill extends SkillProgress {
   skillsName: string;
   tier: string;
   status: string;
+  /** questions answered in this skill's unfinished session (its draft); 0 / missing = none (adt-learning/docs/adr/0003) */
+  draftAnsweredCount?: number;
   skillPrequisite: SkillPrerequisite[];
 }

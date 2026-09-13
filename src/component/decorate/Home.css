@@ -44,6 +44,8 @@
   --ok-bg:  #ecfdf5; --ok-ink:  #059669; --ok-border:  #a7f3d0;
   --mid-bg: #eff6ff; --mid-ink: #2563eb; --mid-border: #bfdbfe;
   --bad-bg: #fef2f2; --bad-ink: #dc2626; --bad-border: #fecaca;
+  /* draft badge — an unfinished session to resume (amber-700 ink passes AA on the pale fill) */
+  --draft-bg: #fffbeb; --draft-ink: #b45309; --draft-border: #fde68a;
 
   /* progress ramp — utils/skillTree.getProgressColor */
   --prog-100: #0047AB; --prog-75: #3b82f6; --prog-20: #60a5fa; --prog-1: #93c5fd; --prog-0: #cbd5e1;
@@ -96,6 +98,7 @@
   --ok-bg:  rgba(52, 211, 153, 0.12); --ok-ink:  #34d399; --ok-border:  rgba(52, 211, 153, 0.35);
   --mid-bg: rgba(96, 165, 250, 0.12); --mid-ink: #93c5fd; --mid-border: rgba(96, 165, 250, 0.35);
   --bad-bg: rgba(248, 113, 113, 0.12); --bad-ink: #f87171; --bad-border: rgba(248, 113, 113, 0.35);
+  --draft-bg: rgba(251, 191, 36, 0.12); --draft-ink: #fbbf24; --draft-border: rgba(251, 191, 36, 0.35);
 
   --prog-100: #8fb4ff; --prog-75: #6b9bff; --prog-20: #4d7fd9; --prog-1: #3d63a8; --prog-0: #33415c;
 
@@ -574,6 +577,18 @@ body {
 .tree-dot            { fill: var(--border); }
 .tree-node-ring      { stroke: var(--accent); }
 .tree-node-locked    { fill: var(--node-locked-text); }
+
+/* Drafts — an unfinished practice session the Exercise page resumes (adt-learning/docs/adr/0003) */
+.tree-node-draft  { fill: var(--draft-ink); font-weight: 700; }
+.side-panel-draft { margin-top: 6px; font-size: 12px; font-weight: 600; color: var(--draft-ink); }
+.ex-picker-draft,
+.session-draft-badge {
+  align-self: flex-start; display: inline-block;
+  padding: 1px 8px; border-radius: 999px;
+  font-size: 11px; font-weight: 700; color: var(--draft-ink);
+  background: var(--draft-bg); border: 1px solid var(--draft-border);
+}
+.session-draft-badge { margin-left: 8px; vertical-align: middle; }
 .tree-node.clickable { cursor: pointer; }
 .tree-node.locked    { cursor: not-allowed; }
 @keyframes pulseRingBlue { 0% { opacity: 0.8; } 50% { opacity: 0.2; } 100% { opacity: 0.8; } }

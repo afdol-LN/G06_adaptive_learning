@@ -177,7 +177,7 @@ html, body {
 .opt:hover{border-color:var(--gold);transform:translateX(3px);box-shadow:0 4px 12px rgba(0,71,171,0.08)}
 .opt.sel{border-color:var(--gold);background:var(--tint);box-shadow:0 4px 15px rgba(0,71,171,0.12)}
 .opt.rev-ok{border-color:var(--green);background:rgba(16,185,129,.05);pointer-events:none;animation:okPulse .45s ease;box-shadow:0 4px 15px rgba(16,185,129,0.15)}
-.opt.rev-no{border-color:var(--red);background:rgba(239,68,68,.05);opacity:.7;pointer-events:none}
+.opt.rev-no{border-color:var(--red);background:rgba(239,68,68,.05);pointer-events:none}
 @keyframes okPulse{0%{transform:translateX(0)}30%{transform:translateX(6px)}100%{transform:translateX(0)}}
 .opt-letter{width:32px;height:32px;border-radius:8px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:12px;font-weight:700;background:var(--s2);border:1px solid var(--bdr);color:var(--sub);transition:all .2s}
 .opt.sel .opt-letter{background:var(--gold-fill);border-color:var(--gold-fill);color:var(--on-accent)}
@@ -231,7 +231,7 @@ html, body {
 .popup{width:100%;max-width:580px;background:var(--s1);border:1px solid var(--bdr);border-radius:24px;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,128,.15);transform:translateY(40px) scale(.95);transition:all .4s cubic-bezier(.34,1.15,.64,1)}
 .overlay.open .popup{transform:none}
 .ph{padding:32px 32px 24px;text-align:center;position:relative;overflow:hidden;background:linear-gradient(135deg,var(--tint),var(--tint-2));border-bottom:1px solid var(--bdr)}
-.ph-trophy{font-size:50px;display:block;margin-bottom:12px;animation:trophyIn .7s cubic-bezier(.34,1.5,.64,1) .1s both}
+.ph-trophy{font-size:50px;display:block;margin-bottom:12px;color:var(--gold);animation:trophyIn .7s cubic-bezier(.34,1.5,.64,1) .1s both}
 @keyframes trophyIn{from{transform:scale(0) rotate(-20deg);opacity:0}to{transform:none;opacity:1}}
 .ph-title{font-family:'Playfair Display',serif;font-size:28px;font-weight:700;color:var(--gold3)}
 .ph-sub{font-size:13px;font-weight:500;color:var(--sub);margin-top:6px;line-height:1.5}
@@ -297,8 +297,34 @@ html, body {
 .ns-back2{margin-top:20px;background:none;border:none;padding:10px 24px;font-family:var(--font-sans);font-size:14px;font-weight:600;color:var(--dim);cursor:pointer;transition:all .2s}
 .ns-back2:hover{color:var(--gold3)}
 
+/* ════ ANSWER STATES: answering → checking → revealed (adt-learning/docs/adr/0002) ════ */
+.wrap svg{flex-shrink:0}
+.choices.locked .opt{cursor:default}
+.choices.locked .opt:hover{transform:none}
+.opt-ck{display:inline-flex}
+.wrap .fill-blank-input{width:100%;padding:14px 18px;border-radius:12px;border:1.5px solid var(--bdr);background:var(--s1);color:var(--text);font-family:var(--font-sans);font-size:15px;outline:none;transition:border-color .2s,box-shadow .2s}
+.wrap .fill-blank-input:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(0,71,171,.12)}
+.wrap .fill-blank-input.rev-ok{border-color:var(--green);box-shadow:0 0 0 3px rgba(16,185,129,.15)}
+.wrap .fill-blank-input.rev-no{border-color:var(--red);box-shadow:0 0 0 3px rgba(220,38,38,.15)}
+.btn-next.checking:disabled{opacity:.85;filter:none}
+.btn-next .spin{animation:exSpin .8s linear infinite}
+@keyframes exSpin{to{transform:rotate(360deg)}}
+
+/* ════ GUIDE: Tour + Rules, top right of the topbar ════ */
+.ex-tool-btn{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:10px;border:1px solid var(--bdr);background:var(--s1);color:var(--sub);font-family:var(--font-sans);font-size:12px;font-weight:600;cursor:pointer;transition:border-color .18s,color .18s}
+.ex-tool-btn:hover,.ex-tool-btn.on{border-color:var(--gold);color:var(--gold)}
+.ex-tool-btn:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.ex-tool-btn:disabled{opacity:.5;cursor:not-allowed}
+.ex-exit-popup{max-width:440px}
+.ex-rules{position:relative}
+.ex-rules-card{position:absolute;top:calc(100% + 10px);right:0;z-index:120;width:min(360px,calc(100vw - 32px));padding:18px 20px;border-radius:16px;background:var(--s1);border:1px solid var(--bdr);box-shadow:0 12px 40px rgba(0,71,171,.18);animation:hintIn .2s ease}
+.ex-rules-title{font-size:14px;font-weight:700;color:var(--gold3);margin-bottom:10px}
+.ex-rules-list{padding-left:18px;display:flex;flex-direction:column;gap:8px;font-size:13px;line-height:1.55;color:var(--text)}
+.ex-rules-note{display:block;margin-top:2px;color:var(--gold);font-weight:600}
+
 @media(max-width:600px){
   .topbar{padding:0 16px}
+  .logo-dot,.logo-sub{display:none}
   .prog-area{padding:16px 20px 10px}
   .card-head,.card-body,.card-foot{padding-left:20px;padding-right:20px}
   .ph,.pb,.pf{padding-left:20px;padding-right:20px}

@@ -1,7 +1,7 @@
 import React from "react";
 import { FaBookOpen, FaXmark } from "react-icons/fa6";
 import { usePreferences } from "../../../context/PreferencesContext";
-import { LayoutSkill, getProgressColor, displayProgressPercent, formatProgressLabel } from "../utils/skillTree";
+import { LayoutSkill, getProgressColor, displayProgressPercent, formatProgressLabel, getDraftCount } from "../utils/skillTree";
 
 interface SkillSidePanelProps {
   selected: LayoutSkill | null;
@@ -37,6 +37,7 @@ export const SkillSidePanel: React.FC<SkillSidePanelProps> = ({
 
   const isUnlocked = unlocked.has(skill.skillId);
   const canDo = canUnlockFn(skill.skillId);
+  const draftCount = getDraftCount(skill);
 
   const nodeRow = (n: LayoutSkill) => (
     <div key={n.skillId} className="node-row" onClick={() => setSelected(n)}>
@@ -78,6 +79,7 @@ export const SkillSidePanel: React.FC<SkillSidePanelProps> = ({
               ? t("skill.status.ready")
               : t("skill.status.locked")}
         </p>
+        {draftCount > 0 && <p className="side-panel-draft">{t("skill.draft.long", { count: draftCount })}</p>}
       </div>
 
       <div className="side-panel-section">
@@ -104,7 +106,9 @@ export const SkillSidePanel: React.FC<SkillSidePanelProps> = ({
           disabled={!isUnlocked && !canDo}
           onClick={() => onStartExercise(skill)}
         >
-          {isUnlocked
+          {draftCount > 0 && (isUnlocked || canDo)
+            ? t("skill.action.resume")
+            : isUnlocked
             ? t("skill.action.go")
             : canDo
               ? t("skill.action.unlock")

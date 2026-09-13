@@ -132,6 +132,11 @@ export function displayProgressPercent(skill: SkillProgress): number {
   return skill.attemptCount > 0 ? skill.progressPercent : 0;
 }
 
+// จำนวนข้อที่ตอบแล้วในแบบร่างของทักษะนี้ — 0 = ไม่มีแบบร่างให้ทำต่อ (adt-learning/docs/adr/0003)
+export function getDraftCount(skill: { draftAnsweredCount?: number }): number {
+  return skill.draftAnsweredCount ?? 0;
+}
+
 // notStartedLabel มาจาก t("skill.notStarted") ของ component ที่เรียก
 export function formatProgressLabel(skill: SkillProgress, notStartedLabel: string): string {
   return skill.attemptCount > 0 ? `${skill.progressPercent}%` : notStartedLabel;

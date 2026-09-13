@@ -34,7 +34,10 @@ export const SessionCard: React.FC<SessionCardProps> = ({ session }) => {
         <div className="session-head-left">
           <div className="session-num">#{session.sessionId}</div>
           <div>
-            <div className="session-title">{title}</div>
+            <div className="session-title">
+              {title}
+              {session.inProgress && <span className="session-draft-badge">{t("session.inProgress")}</span>}
+            </div>
             <div className="session-meta">
               {dateStr} · {t("session.questionCount", { count: totalCount })}
             </div>

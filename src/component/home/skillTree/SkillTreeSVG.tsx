@@ -9,6 +9,7 @@ import {
   getProgressColor,
   displayProgressPercent,
   formatProgressLabel,
+  getDraftCount,
 } from "../utils/skillTree";
 
 // ทุกสีในแผนผังเป็น CSS variable จาก Home.css (มีค่าของธีมมืดแยก) และต้องใส่ผ่าน style
@@ -251,6 +252,20 @@ export const SkillTreeSVG: React.FC<SkillTreeSVGProps> = ({
             >
               {skill.skillsName.length > 20 ? skill.skillsName.slice(0, 19) + "…" : skill.skillsName}
             </text>
+
+            {/* Draft: an unfinished session the Exercise page will resume (adt-learning/docs/adr/0003) */}
+            {getDraftCount(skill) > 0 && (
+              <text
+                x={nx + NODE_W - 12}
+                y={ny + 16}
+                textAnchor="end"
+                dominantBaseline="central"
+                fontSize={12}
+                className="tree-node-draft"
+              >
+                {t("skill.draft.short", { count: getDraftCount(skill) })}
+              </text>
+            )}
 
             {/* Locked or Progress Label */}
             {!isUnlocked && !canUnlockThis ? (

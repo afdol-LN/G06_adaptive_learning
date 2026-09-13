@@ -23,6 +23,14 @@ export interface StartSessionResponse {
   pL: number;
   /** Same value the skill-tree node shows */
   progress: SkillProgress;
+  /** Most questions this session can have (backend SESSION_QUESTION_LIMIT) */
+  questionLimit: number;
+  /** true when this continues the skill's draft (adt-learning/docs/adr/0003) */
+  resumed: boolean;
+  /** already answered in this session — the counter continues from here */
+  answeredCount: number;
+  /** of those, correct — the summary counts the whole session */
+  correctCount: number;
   question: NextQuestion;
 }
 

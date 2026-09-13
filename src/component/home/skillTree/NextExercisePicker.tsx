@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { FaCheck, FaXmark } from "react-icons/fa6";
 import { usePreferences } from "../../../context/PreferencesContext";
-import { LayoutSkill, getProgressColor, displayProgressPercent, formatProgressLabel } from "../utils/skillTree";
+import { LayoutSkill, getProgressColor, displayProgressPercent, formatProgressLabel, getDraftCount } from "../utils/skillTree";
 
 interface NextExercisePickerProps {
   skills: LayoutSkill[];
@@ -44,6 +44,9 @@ export const NextExercisePicker: React.FC<NextExercisePickerProps> = ({
                 <span className="ex-picker-prog" style={{ color: getProgressColor(displayProgressPercent(s)) }}>
                   {formatProgressLabel(s, t("skill.notStarted"))}
                 </span>
+                {getDraftCount(s) > 0 && (
+                  <span className="ex-picker-draft">{t("skill.draft.short", { count: getDraftCount(s) })}</span>
+                )}
               </div>
               {picked?.skillId === s.skillId && (
                 <span className="ex-picker-check"><FaCheck aria-hidden /></span>
@@ -56,7 +59,9 @@ export const NextExercisePicker: React.FC<NextExercisePickerProps> = ({
           disabled={!picked}
           onClick={() => picked && onGo(picked)}
         >
-          {picked ? t("picker.go", { name: picked.skillsName }) : t("picker.pickFirst")}
+          {picked
+            ? t(getDraftCount(picked) > 0 ? "picker.resume" : "picker.go", { name: picked.skillsName })
+            : t("picker.pickFirst")}
         </button>
       </div>
     </div>
