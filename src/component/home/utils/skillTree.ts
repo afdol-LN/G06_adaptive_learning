@@ -12,17 +12,29 @@ export interface LayoutSkill extends BranchSkill {
 export interface LayoutGoalNode extends GoalNode {
   x: number;
   y: number;
+  /** the skills whose edges run into the goal node — the ends of the tree, see treeEndSkillIds */
+  fromSkillIds: number[];
 }
 
-// The goal node sits one row below the deepest skill, under the average x of the skills it
-// requires, so every edge into it runs downward (adt-learning/docs/adr/0005)
+// Ends of the tree: skills that no other skill in this tree lists as a prerequisite
+export function treeEndSkillIds(skills: BranchSkill[]): number[] {
+  const builtOn = new Set(
+    skills.flatMap((s) => (s.skillPrequisite || []).map((p) => p.prerequisiteSkillId))
+  );
+  return skills.filter((s) => !builtOn.has(s.skillId)).map((s) => s.skillId);
+}
+
+// The skill tree above stays exactly as it is; the goal node hangs one row below the deepest skill,
+// joined only to the ends of the tree and centred under them (adt-learning/docs/adr/0005)
 export function layoutGoalNode(goal: GoalNode | null, skills: LayoutSkill[]): LayoutGoalNode | null {
   if (!goal || skills.length === 0) return null;
-  const required = skills.filter((s) => goal.requiredSkillIds.includes(s.skillId));
-  const parents = required.length > 0 ? required : skills;
+  const fromSkillIds = treeEndSkillIds(skills);
+  const ends = skills.filter((s) => fromSkillIds.includes(s.skillId));
+  const anchor = ends.length > 0 ? ends : skills;
   return {
     ...goal,
-    x: parents.reduce((sum, s) => sum + s.x, 0) / parents.length,
+    fromSkillIds,
+    x: anchor.reduce((sum, s) => sum + s.x, 0) / anchor.length,
     y: Math.max(...skills.map((s) => s.y)) + NODE_H + ROW_GAP,
   };
 }

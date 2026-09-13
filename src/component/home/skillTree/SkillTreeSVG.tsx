@@ -57,7 +57,7 @@ export const SkillTreeSVG: React.FC<SkillTreeSVGProps> = ({
 
   const notStarted = t("skill.notStarted");
   const getNodeById = (id: number) => skills.find((s) => s.skillId === id);
-  const isGoalRequired = (skillId: number) => !!goal && goal.requiredSkillIds.includes(skillId);
+  const isGoalParent = (skillId: number) => !!goal && goal.fromSkillIds.includes(skillId);
 
   const getEdgeColor = (fromId: number, toId: number) => {
     if (unlocked.has(toId)) return "var(--edge-open)";
@@ -77,11 +77,11 @@ export const SkillTreeSVG: React.FC<SkillTreeSVGProps> = ({
   const svgWidth = maxX - minX;
   const svgHeight = maxY - minY;
 
-  // Edges into the goal node — one from each required skill, merging on a line just above the goal
-  // row. Solid once that skill is at 100% (the same test that unlocks a skill), dashed until then.
+  // Edges into the goal node — only from the ends of the tree (skills nothing else builds on),
+  // merging on a line just above the goal row. Solid once that skill is at 100%, dashed until then.
   const goalEdges =
     goal &&
-    goal.requiredSkillIds.map((reqId) => {
+    goal.fromSkillIds.map((reqId) => {
       const from = getNodeById(reqId);
       if (!from) return null;
       const mastered = from.progressPercent === 100;
@@ -112,7 +112,7 @@ export const SkillTreeSVG: React.FC<SkillTreeSVGProps> = ({
     const { bg, border, text, bar } = getGoalNodeColors(g.isComplete);
     const nx = g.x - NODE_W / 2;
     const ny = g.y - NODE_H / 2;
-    const isRelated = !selected || isGoalRequired(selected.skillId);
+    const isRelated = !selected || isGoalParent(selected.skillId);
 
     return (
       <g
@@ -305,8 +305,8 @@ export const SkillTreeSVG: React.FC<SkillTreeSVGProps> = ({
           isSelected ||
           (skill.skillPrequisite || []).some((r) => r.prerequisiteSkillId === selected.skillId) ||
           (selected.skillPrequisite || []).some((r) => r.prerequisiteSkillId === skill.skillId);
-        // with the goal node selected, only the skills it requires stay lit
-        const dimmed = (selected && !isRelated) || (goalSelected && !isGoalRequired(skill.skillId));
+        // with the goal node selected, only the skills joined to it stay lit
+        const dimmed = (selected && !isRelated) || (goalSelected && !isGoalParent(skill.skillId));
 
         const { bg, border, text, bar } = getNodeColors(isUnlocked, canUnlockThis, displayProgressPercent(skill));
         const nx = skill.x - NODE_W / 2;

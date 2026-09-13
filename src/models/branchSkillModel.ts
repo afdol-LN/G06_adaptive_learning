@@ -29,7 +29,7 @@ export interface BranchSkill extends SkillProgress {
 export interface GoalNode {
   goalId: number;
   goalName: string;
-  /** an edge runs from each of these skills into the goal node */
+  /** the skills whose mastery decides completion — not the edges: the tree joins the goal node to its end skills only */
   requiredSkillIds: number[];
   masteredCount: number;
   requiredCount: number;
