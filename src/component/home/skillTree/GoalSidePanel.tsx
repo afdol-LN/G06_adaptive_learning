@@ -5,7 +5,7 @@ import {
   LayoutGoalNode,
   LayoutSkill,
   getProgressColor,
-  goalProgressPercent,
+  formatGoalCompletedOn,
   displayProgressPercent,
   formatProgressLabel,
 } from "../utils/skillTree";
@@ -18,14 +18,14 @@ interface GoalSidePanelProps {
   onSelectSkill: (skill: LayoutSkill) => void;
 }
 
-// แผงสรุปของ goal node ท้าย skill tree — ทำทักษะที่เป้าหมายต้องการครบกี่ตัวแล้ว
-// ไม่มีปุ่มไปทำ exercise เพราะ goal node ไม่ใช่ทักษะ ฝึกเองไม่ได้ (adt-learning/docs/adr/0005)
+// แผงสรุปของ goal node ท้าย skill tree — ความคืบหน้าเป้าหมาย (ตัวเลขเดียวกับการ์ดหน้า Home)
+// และทักษะที่เป้าหมายต้องการ ไม่มีปุ่มไปทำ exercise เพราะ goal node ไม่ใช่ทักษะ (adt-learning/docs/adr/0005)
 export const GoalSidePanel: React.FC<GoalSidePanelProps> = ({ goal, open, onClose, skills, onSelectSkill }) => {
-  const { t } = usePreferences();
+  const { t, locale } = usePreferences();
   if (!open || !goal) return null;
 
   const notStarted = t("skill.notStarted");
-  const pct = goalProgressPercent(goal);
+  const pct = goal.progressPercent;
   const required = goal.requiredSkillIds
     .map((id) => skills.find((s) => s.skillId === id))
     .filter((s): s is LayoutSkill => !!s);
@@ -45,11 +45,15 @@ export const GoalSidePanel: React.FC<GoalSidePanelProps> = ({ goal, open, onClos
             <div className="progress-fill" style={{ width: `${pct}%`, background: getProgressColor(pct) }} />
           </div>
           <span className="progress-pct" style={{ color: getProgressColor(pct) }}>
-            {t("goalNode.count", { done: goal.masteredCount, total: goal.requiredCount })}
+            {goal.isComplete ? t("goalNode.complete") : `${pct}%`}
           </span>
         </div>
         <p className="side-panel-status">
-          {goal.isComplete ? t("goalNode.statusDone") : t("goalNode.statusTodo")}
+          {goal.isComplete
+            ? goal.completedAt
+              ? t("goalNode.completedOn", { date: formatGoalCompletedOn(goal.completedAt, locale) })
+              : t("goalNode.statusDone")
+            : `${t("goalNode.count", { done: goal.masteredCount, total: goal.requiredCount })} · ${t("goalNode.statusTodo")}`}
         </p>
       </div>
 

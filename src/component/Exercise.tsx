@@ -13,6 +13,7 @@ import {
   FaCheck,
   FaCircleQuestion,
   FaClipboardCheck,
+  FaFlagCheckered,
   FaHouse,
   FaPlay,
   FaSpinner,
@@ -251,17 +252,31 @@ export default function Exercise() {
                 </div>
               )}
             </div>
+            {/* This answer completed the branch's goal (adt-learning/docs/adr/0005) */}
+            {controller.summary?.goalCompleted && (
+              <div className="ph-goal" role="status">
+                <FaFlagCheckered aria-hidden />
+                <span>{t('exercise.goalDone.title', { name: controller.summary.goalCompleted.goalName })}</span>
+              </div>
+            )}
           </div>
           <div className="pf">
             <button className="btn-home" onClick={controller.goHome}>
               <FaHouse aria-hidden />
               <span>{t('exercise.done.home')}</span>
             </button>
-            {controller.summary?.nextRecommendation && (
-              <button className="btn-sess" onClick={controller.goHome}>
-                <FaPlay aria-hidden />
-                <span>{t('exercise.done.next', { name: controller.summary.nextRecommendation.skillsName })}</span>
+            {controller.summary?.goalCompleted ? (
+              <button className="btn-sess" onClick={controller.goToSkillTree}>
+                <FaFlagCheckered aria-hidden />
+                <span>{t('exercise.goalDone.cta')}</span>
               </button>
+            ) : (
+              controller.summary?.nextRecommendation && (
+                <button className="btn-sess" onClick={controller.goHome}>
+                  <FaPlay aria-hidden />
+                  <span>{t('exercise.done.next', { name: controller.summary.nextRecommendation.skillsName })}</span>
+                </button>
+              )
             )}
           </div>
         </div>

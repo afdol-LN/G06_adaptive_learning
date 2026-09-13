@@ -10,7 +10,7 @@ import {
   getNodeColors,
   getGoalNodeColors,
   getProgressColor,
-  goalProgressPercent,
+  formatGoalCompletedOn,
   displayProgressPercent,
   formatProgressLabel,
   getDraftCount,
@@ -49,7 +49,7 @@ export const SkillTreeSVG: React.FC<SkillTreeSVGProps> = ({
   goalSelected = false,
   onGoalClick,
 }) => {
-  const { t } = usePreferences();
+  const { t, locale } = usePreferences();
 
   if (skills.length === 0) {
     return <p className="side-panel-empty">{t("skill.emptyTree")}</p>;
@@ -107,7 +107,8 @@ export const SkillTreeSVG: React.FC<SkillTreeSVGProps> = ({
     });
 
   const renderGoalNode = (g: LayoutGoalNode) => {
-    const pct = goalProgressPercent(g);
+    // goal progress from the backend — the same number as the Home "Goal progress" card
+    const pct = g.progressPercent;
     const { bg, border, text, bar } = getGoalNodeColors(g.isComplete);
     const nx = g.x - NODE_W / 2;
     const ny = g.y - NODE_H / 2;
@@ -146,7 +147,7 @@ export const SkillTreeSVG: React.FC<SkillTreeSVGProps> = ({
           style={{ fill: bg, stroke: goalSelected ? "var(--accent)" : border }}
         />
 
-        {/* Required skills at 100% */}
+        {/* Goal progress bar */}
         <rect x={nx + 2} y={ny + NODE_H - 10} width={NODE_W - 4} height={7} rx={3.5} style={{ fill: bar }} />
         <rect
           x={nx + 2}
@@ -184,8 +185,23 @@ export const SkillTreeSVG: React.FC<SkillTreeSVGProps> = ({
           fontWeight="600"
           style={{ fill: getProgressColor(pct) }}
         >
+          {g.isComplete ? t("goalNode.complete") : `${pct}%`}
+        </text>
+
+        {/* Top right: the x/y count while in progress, the completion date once done */}
+        <text
+          x={nx + NODE_W - 12}
+          y={ny + 19}
+          textAnchor="end"
+          dominantBaseline="central"
+          fontSize={12}
+          fontWeight="600"
+          style={{ fill: text }}
+        >
           {g.isComplete
-            ? t("goalNode.complete")
+            ? g.completedAt
+              ? formatGoalCompletedOn(g.completedAt, locale)
+              : ""
             : t("goalNode.count", { done: g.masteredCount, total: g.requiredCount })}
         </text>
       </g>

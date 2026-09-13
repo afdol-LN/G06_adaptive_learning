@@ -91,7 +91,18 @@ export const HomeTab: React.FC<HomeTabProps> = ({
     { num: stats ? `${stats.skillsUnlockedCount}` : "0", label: t("home.stat.skills"), cls: "gold" },
     { num: stats ? `${stats.sessionsCount}` : "0", label: t("home.stat.sessions"), cls: "green" },
     { num: stats ? `${stats.dayStreak}` : "0", label: t("home.stat.streak"), cls: "blue" },
-    { num: stats ? `${stats.goalProgressPercent}%` : "0%", label: t("home.stat.progress"), cls: "purple" },
+    {
+      num: stats ? `${stats.goalProgressPercent}%` : "0%",
+      label: t("home.stat.progress"),
+      cls: "purple",
+      // the same numbers as the goal node at the end of the tree (adt-learning/docs/adr/0005)
+      sub:
+        !stats || stats.goalRequiredCount === 0
+          ? undefined
+          : stats.goalComplete
+            ? t("goalNode.complete")
+            : t("goalNode.count", { done: stats.goalMasteredCount, total: stats.goalRequiredCount }),
+    },
   ];
 
   return (
@@ -119,6 +130,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
               <div key={i} className={`stat-card ${s.cls}`}>
                 <div className="stat-num">{s.num}</div>
                 <div className="stat-label">{s.label}</div>
+                {s.sub && <div className="stat-sub">{s.sub}</div>}
               </div>
             ))}
           </div>

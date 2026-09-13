@@ -27,10 +27,9 @@ export function layoutGoalNode(goal: GoalNode | null, skills: LayoutSkill[]): La
   };
 }
 
-// Share of required skills at 100% — floored, so the bar only fills once the goal is complete.
-// A count ratio from the backend's counts, not a Progress value (never derived from P(L) here).
-export function goalProgressPercent(goal: GoalNode): number {
-  return goal.requiredCount > 0 ? Math.floor((goal.masteredCount / goal.requiredCount) * 100) : 0;
+// "13 Sep 2026" / "13 ก.ย. 2569" — the day the goal was first completed (adt-learning/docs/adr/0005)
+export function formatGoalCompletedOn(iso: string, locale: string): string {
+  return new Date(iso).toLocaleDateString(locale, { day: "numeric", month: "short", year: "numeric" });
 }
 
 export function layoutSkills(skills: BranchSkill[]): LayoutSkill[] {

@@ -33,7 +33,12 @@ export interface GoalNode {
   requiredSkillIds: number[];
   masteredCount: number;
   requiredCount: number;
+  /** goal progress: average Progress of the required skills (not started = 0); 100 once complete */
+  progressPercent: number;
+  /** sticky — stays true after the first completion, even if a required skill drops later */
   isComplete: boolean;
+  /** ISO time of the first completion; null if not complete, or completed before it was recorded */
+  completedAt: string | null;
 }
 
 /** GET /branch/:branchId/skills */

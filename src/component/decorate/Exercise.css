@@ -240,6 +240,9 @@ html, body {
 .sp-ps{border:1px solid var(--gold2);color:var(--gold)}
 .sp-str{border:1px solid var(--orange);color:var(--orange)}
 .sp-cor{border:1px solid var(--green);color:var(--green)}
+/* goal completed on this answer (adt-learning/docs/adr/0005) */
+.ph-goal{display:inline-flex;align-items:center;gap:8px;margin-top:16px;padding:8px 18px;border-radius:999px;border:1.5px solid var(--green);background:var(--s1);color:var(--green);font-size:14px;font-weight:700;animation:trophyIn .7s cubic-bezier(.34,1.5,.64,1) .3s both}
+.ph-goal svg{flex-shrink:0}
 .pb{padding:24px 28px}
 .pb-sec{font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);margin-bottom:16px;display:flex;align-items:center;gap:10px}
 .pb-sec::after{content:'';flex:1;height:1px;background:var(--bdr)}

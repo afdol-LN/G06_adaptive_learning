@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import type { IconType } from "react-icons";
 import {
   FaArrowLeft,
@@ -70,7 +70,11 @@ export const HomeShell: React.FC = () => {
   const homeTour = useHomeTourController(t);
 
   // Tab State
-  const [activeTab, setActiveTab] = useState<HomeTabKey>("Home");
+  // Exercise's "View skill tree" (after completing the goal) opens a tab directly via router state
+  const location = useLocation();
+  const [activeTab, setActiveTab] = useState<HomeTabKey>(
+    () => (location.state as { tab?: HomeTabKey } | null)?.tab ?? "Home"
+  );
 
   // Sidebar State — ครั้งแรกบนจอแคบให้เริ่มแบบย่อ
   const [sidebarCollapsed, setSidebarCollapsed] = useState<boolean>(() => {

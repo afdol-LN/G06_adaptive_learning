@@ -47,6 +47,8 @@ export interface SessionSummary {
   pLAfter: number;
   newlyUnlockedSkills: { skillId: number; skillsName: string }[];
   nextRecommendation: RecommendedSkill | null;
+  /** only on the answer that completed the branch's goal — celebrate it (adt-learning/docs/adr/0005) */
+  goalCompleted?: { goalId: number; goalName: string } | null;
 }
 
 export interface SubmitAnswerResponse {
