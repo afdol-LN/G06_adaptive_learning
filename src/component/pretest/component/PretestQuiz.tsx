@@ -1,5 +1,6 @@
 import React from "react";
 import { PretestControllerType } from "../controller/usePretestController";
+import CodeBlock from "../../common/CodeBlock";
 
 interface PretestQuizProps {
   controller: PretestControllerType;
@@ -7,12 +8,6 @@ interface PretestQuizProps {
 
 export const PretestQuiz: React.FC<PretestQuizProps> = ({ controller }) => {
   const currentQuestion = controller.currentQuestion;
-
-  const codeLines: string[] = typeof currentQuestion.code === "string"
-    ? currentQuestion.code.split("\n")
-    : Array.isArray(currentQuestion.code)
-    ? currentQuestion.code
-    : [];
 
   const choiceLabels = ["A", "B", "C", "D", "E", "F"];
 
@@ -70,9 +65,9 @@ export const PretestQuiz: React.FC<PretestQuizProps> = ({ controller }) => {
           <span
             className="q-diff-tag"
             style={{
-              background: `${currentQuestion.diffColor || "#38b874"}18`,
-              border: `1px solid ${currentQuestion.diffColor || "#38b874"}44`,
-              color: currentQuestion.diffColor || "#38b874",
+              background: `${currentQuestion.diffColor || "#10b981"}18`,
+              border: `1px solid ${currentQuestion.diffColor || "#10b981"}44`,
+              color: currentQuestion.diffColor || "#10b981",
             }}
           >
             Level {currentQuestion.level || currentQuestion.diff || 1} •{" "}
@@ -85,17 +80,10 @@ export const PretestQuiz: React.FC<PretestQuizProps> = ({ controller }) => {
             {currentQuestion.description || currentQuestion.text}
           </div>
 
-          {codeLines.length > 0 && (
-            <div className="code-block">
-              {codeLines.map((lineText, lineIndex) => (
-                <div
-                  key={lineIndex}
-                  className="code-line"
-                  dangerouslySetInnerHTML={controller.highlightCodeLine(lineText)}
-                ></div>
-              ))}
-            </div>
-          )}
+          <CodeBlock
+            code={currentQuestion.code}
+            language={currentQuestion.language}
+          />
 
           {currentQuestion.type === "FILL_IN_BLANK" ? (
             /* ── Fill-In-The-Blank Input UI ── */
@@ -184,7 +172,7 @@ export const PretestQuiz: React.FC<PretestQuizProps> = ({ controller }) => {
               >
                 <path
                   d="M3 8h10M9 4l4 4-4 4"
-                  stroke="#0b1120"
+                  stroke="currentColor"
                   strokeWidth="2"
                   strokeLinecap="round"
                   strokeLinejoin="round"

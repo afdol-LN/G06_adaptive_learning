@@ -39,6 +39,10 @@ export interface GoalItem {
 }
 
 export interface BranchCreationData {
+  // Real backend branch id (from POST /branch/mine), so the local branch
+  // record uses the same id the server knows — required for later calls
+  // like pretest submit that look the branch up by id server-side.
+  id: string;
   campus: string;
   faculty: string;
   major: string;

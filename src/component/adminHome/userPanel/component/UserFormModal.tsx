@@ -1,28 +1,35 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { FaPen, FaPlus } from "react-icons/fa6";
 import "../../../decorate/CreateUserModal.css";
 import {
   CreateUserByAdminRequest,
+  UpdateUserByAdminRequest,
   GenderOption,
   RoleOption,
+  UserResponseAdmin,
 } from "../../../../models/userModel";
+import { usePreferences } from "../../../../context/PreferencesContext";
 
-interface CreateUserModalProps {
+interface UserFormModalProps {
   isOpen: boolean;
+  editingUser: UserResponseAdmin | null;
   onClose: () => void;
-  onSubmit: (data: CreateUserByAdminRequest) => Promise<void>;
+  onSubmit: (data: CreateUserByAdminRequest | UpdateUserByAdminRequest) => Promise<void>;
   isLoading: boolean;
   gendersList: GenderOption[];
   rolesList: RoleOption[];
 }
 
-export default function CreateUserModal({
+export default function UserFormModal({
   isOpen,
+  editingUser,
   onClose,
   onSubmit,
   isLoading,
   gendersList,
   rolesList,
-}: CreateUserModalProps) {
+}: UserFormModalProps) {
+  const { t } = usePreferences();
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [dob, setDob] = useState("");
@@ -35,66 +42,90 @@ export default function CreateUserModal({
   const [usernameMsg, setUsernameMsg] = useState({ text: "", type: "" });
   const [formError, setFormError] = useState("");
 
+  const isEdit = editingUser !== null;
+
+  useEffect(() => {
+    if (!isOpen) return;
+    setFormError("");
+    setUsernameMsg({ text: "", type: "" });
+    setShowPassword(false);
+    setPassword("");
+
+    if (editingUser) {
+      const [first, ...rest] = (editingUser.fullName || "").split(" ");
+      setFirstName(first || "");
+      setLastName(rest.join(" "));
+      setDob(editingUser.birthDate || "");
+      setGenderId(editingUser.genderId ?? 4);
+      setUsername(editingUser.username || "");
+      setRole(editingUser.role || "user");
+    } else {
+      setFirstName("");
+      setLastName("");
+      setDob("");
+      setGenderId(gendersList.length > 0 ? gendersList[0].id : 4);
+      setUsername("");
+      setRole("user");
+    }
+  }, [isOpen, editingUser, gendersList]);
+
   if (!isOpen) return null;
 
   const checkUsername = (val: string) => {
     setUsername(val);
     setFormError("");
-    const takenNames = ["admin", "psu_user", "test"];
+    // const takenNames = ["admin", "psu_user", "test"];
     const cleanVal = val.trim().toLowerCase();
 
-    if (!cleanVal) {
+    if (!cleanVal || cleanVal === (editingUser?.username || "").toLowerCase()) {
       setUsernameMsg({ text: "", type: "" });
       return;
     }
     if (cleanVal.length < 4) {
-      setUsernameMsg({ text: "At least 4 characters required", type: "err" });
+      setUsernameMsg({ text: t("admin.userForm.usernameShort"), type: "err" });
       return;
     }
-    if (takenNames.includes(cleanVal)) {
-      setUsernameMsg({ text: "Username already taken", type: "err" });
-      return;
-    }
+    // if (takenNames.includes(cleanVal)) {
+    //   setUsernameMsg({ text: "Username already taken", type: "err" });
+    //   return;
+    // }
 
-    setUsernameMsg({ text: "Username available", type: "ok" });
+    setUsernameMsg({ text: t("admin.userForm.usernameOk"), type: "ok" });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setFormError("");
 
-    if (!firstName || !lastName || !dob || !username || !password || !role) {
-      setFormError("Please fill in all required fields.");
+    if (!firstName || !lastName || !dob || !username || !role) {
+      setFormError(t("admin.userForm.required"));
+      return;
+    }
+    if (!isEdit && !password) {
+      setFormError(t("admin.userForm.required"));
       return;
     }
     if (usernameMsg.type === "err") {
-      setFormError("Please choose a valid username.");
+      setFormError(t("admin.userForm.invalidUsername"));
       return;
     }
 
     const fullName = `${firstName} ${lastName}`.trim();
-    const payload: CreateUserByAdminRequest = {
+    const payload: CreateUserByAdminRequest | UpdateUserByAdminRequest = {
       fullName,
       birthDate: dob,
       genderId: Number(genderId),
       username: username.trim(),
-      password,
       role,
+      ...(password ? { password } : {}),
     };
 
     try {
       await onSubmit(payload);
-      // Reset fields after successful submit
-      setFirstName("");
-      setLastName("");
-      setDob("");
-      setGenderId(gendersList.length > 0 ? gendersList[0].id : 4);
-      setUsername("");
-      setPassword("");
-      setRole("user");
-      setUsernameMsg({ text: "", type: "" });
     } catch (err: any) {
-      setFormError(err.message || "Failed to create user.");
+      setFormError(
+        err.message || (isEdit ? t("admin.users.saveFailedUpdate") : t("admin.users.saveFailedCreate"))
+      );
     }
   };
 
@@ -102,12 +133,22 @@ export default function CreateUserModal({
     <div className="ad-create-user-overlay" role="dialog" aria-modal="true">
       <div className="ad-create-user-modal">
         <div className="ad-create-user-header">
-          <span className="ad-create-user-title">เพิ่มผู้ใช้งานใหม่</span>
+          <span className="ad-create-user-title">
+            {isEdit ? (
+              <>
+                <FaPen /> {t("admin.userForm.titleEdit")}
+              </>
+            ) : (
+              <>
+                <FaPlus /> {t("admin.userForm.titleCreate")}
+              </>
+            )}
+          </span>
           <button
             type="button"
             className="ad-create-user-close"
             onClick={onClose}
-            aria-label="Close"
+            aria-label={t("admin.common.close")}
           >
             <svg
               width="20"
@@ -118,6 +159,7 @@ export default function CreateUserModal({
               strokeWidth="2"
               strokeLinecap="round"
               strokeLinejoin="round"
+              aria-hidden
             >
               <line x1="18" y1="6" x2="6" y2="18" />
               <line x1="6" y1="6" x2="18" y2="18" />
@@ -126,40 +168,26 @@ export default function CreateUserModal({
         </div>
 
         <form onSubmit={handleSubmit} className="ad-create-user-body">
-          {formError && (
-            <div
-              style={{
-                padding: "10px 14px",
-                borderRadius: "8px",
-                background: "#fef2f2",
-                border: "1px solid #fecaca",
-                color: "#dc2626",
-                fontSize: "13px",
-                fontWeight: 600,
-              }}
-            >
-              {formError}
-            </div>
-          )}
+          {formError && <div className="ad-form-error">{formError}</div>}
 
           <div className="ad-create-user-row">
             <div className="ad-create-user-field">
-              <label className="ad-create-user-label">First Name</label>
+              <label className="ad-create-user-label">{t("admin.userForm.firstName")}</label>
               <input
                 type="text"
                 className="ad-create-user-input"
-                placeholder="สมชาย"
+                placeholder={t("admin.userForm.firstNamePh")}
                 value={firstName}
                 onChange={(e) => setFirstName(e.target.value)}
                 required
               />
             </div>
             <div className="ad-create-user-field">
-              <label className="ad-create-user-label">Last Name</label>
+              <label className="ad-create-user-label">{t("admin.userForm.lastName")}</label>
               <input
                 type="text"
                 className="ad-create-user-input"
-                placeholder="ใจดี"
+                placeholder={t("admin.userForm.lastNamePh")}
                 value={lastName}
                 onChange={(e) => setLastName(e.target.value)}
                 required
@@ -169,7 +197,7 @@ export default function CreateUserModal({
 
           <div className="ad-create-user-row">
             <div className="ad-create-user-field">
-              <label className="ad-create-user-label">Date of Birth</label>
+              <label className="ad-create-user-label">{t("admin.userForm.dob")}</label>
               <input
                 type="date"
                 className="ad-create-user-input"
@@ -180,7 +208,7 @@ export default function CreateUserModal({
               />
             </div>
             <div className="ad-create-user-field">
-              <label className="ad-create-user-label">Gender</label>
+              <label className="ad-create-user-label">{t("admin.userForm.gender")}</label>
               <select
                 className="ad-create-user-select"
                 value={genderId}
@@ -200,7 +228,7 @@ export default function CreateUserModal({
           </div>
 
           <div className="ad-create-user-field">
-            <label className="ad-create-user-label">Username</label>
+            <label className="ad-create-user-label">{t("admin.userForm.username")}</label>
             <input
               type="text"
               className={`ad-create-user-input ${
@@ -219,15 +247,17 @@ export default function CreateUserModal({
           </div>
 
           <div className="ad-create-user-field">
-            <label className="ad-create-user-label">Password</label>
+            <label className="ad-create-user-label">
+              {t("admin.userForm.password")}{isEdit ? t("admin.userForm.passwordKeep") : ""}
+            </label>
             <div className="ad-pw-container">
               <input
                 type={showPassword ? "text" : "password"}
                 className="ad-create-user-input ad-pw-input"
-                placeholder="At least 8 characters"
+                placeholder={isEdit ? "••••••••" : t("admin.userForm.passwordHint")}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                required
+                required={!isEdit}
               />
               <button
                 type="button"
@@ -235,13 +265,13 @@ export default function CreateUserModal({
                 onClick={() => setShowPassword(!showPassword)}
                 tabIndex={-1}
               >
-                {showPassword ? "Hide" : "Show"}
+                {showPassword ? t("admin.userForm.hide") : t("admin.userForm.show")}
               </button>
             </div>
           </div>
 
           <div className="ad-create-user-field">
-            <label className="ad-create-user-label">Role</label>
+            <label className="ad-create-user-label">{t("admin.userForm.role")}</label>
             <select
               className="ad-create-user-select"
               value={role}
@@ -255,8 +285,8 @@ export default function CreateUserModal({
                 ))
               ) : (
                 <>
-                  <option value="user">User / ผู้เรียน</option>
-                  <option value="admin">Admin / ผู้ดูแลระบบ</option>
+                  <option value="user">{t("admin.userForm.roleUser")}</option>
+                  <option value="admin">{t("admin.userForm.roleAdmin")}</option>
                 </>
               )}
             </select>
@@ -269,14 +299,14 @@ export default function CreateUserModal({
               onClick={onClose}
               disabled={isLoading}
             >
-              ยกเลิก
+              {t("admin.common.cancel")}
             </button>
             <button
               type="submit"
               className="ad-btn-primary"
               disabled={isLoading}
             >
-              {isLoading ? "กำลังบันทึก..." : "บันทึกข้อมูล"}
+              {isLoading ? t("admin.common.saving") : t("admin.common.saveData")}
             </button>
           </div>
         </form>

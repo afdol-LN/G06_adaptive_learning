@@ -1,13 +1,29 @@
 import React, { useState } from "react";
 import { SessionHistoryItem } from "../../../models/sessionHistoryModel";
+import { usePreferences } from "../../../context/PreferencesContext";
+import type { TKey } from "../../../i18n";
 import { SessionCard } from "../../common/SessionCard";
+
+type Topic = "all" | "pretest" | "practice";
+type Grade = "great" | "good" | "poor";
+
+const TOPIC_KEYS: Record<Exclude<Topic, "all">, TKey> = {
+  pretest: "session.type.pretest",
+  practice: "session.type.practice",
+};
+const GRADE_KEYS: Record<Grade, TKey> = {
+  great: "grade.great",
+  good: "grade.good",
+  poor: "grade.poor",
+};
 
 interface HistoryTabProps {
   sessions: SessionHistoryItem[];
 }
 
 export const HistoryTab: React.FC<HistoryTabProps> = ({ sessions }) => {
-  const [topicFilter, setTopicFilter] = useState("all");
+  const { t } = usePreferences();
+  const [topicFilter, setTopicFilter] = useState<Topic>("all");
   const [historyFilter, setHistoryFilter] = useState<Set<string>>(new Set(["all"]));
 
   const handleHistoryFilter = (filter: string) => {
@@ -29,7 +45,7 @@ export const HistoryTab: React.FC<HistoryTabProps> = ({ sessions }) => {
     });
   };
 
-  const getSessionGrade = (s: SessionHistoryItem): string => {
+  const getSessionGrade = (s: SessionHistoryItem): Grade => {
     const correctCount = s.questions.filter((q) => q.isCorrect).length;
     const totalCount = s.questions.length;
     const score = totalCount > 0 ? Math.round((correctCount / totalCount) * 100) : 0;
@@ -38,59 +54,44 @@ export const HistoryTab: React.FC<HistoryTabProps> = ({ sessions }) => {
     return "poor"; // matches SessionCard
   };
 
-  const getSessionTitle = (s: SessionHistoryItem): string => {
-    return s.isPretest ? "Pretest / แบบทดสอบก่อนเรียน" : "แบบฝึกหัดทักษะ";
-  };
-
-  const allTopics = ["all", "Pretest / แบบทดสอบก่อนเรียน", "แบบฝึกหัดทักษะ"];
-
-  const gradeLabel = (g: string) => {
-    if (g === "great") return "ดีมาก";
-    if (g === "good") return "ดี";
-    return "ต้องปรับปรุง";
-  };
+  const getSessionTopic = (s: SessionHistoryItem): Exclude<Topic, "all"> =>
+    s.isPretest ? "pretest" : "practice";
 
   const filteredSessions = sessions.filter((s) => {
-    const grade = getSessionGrade(s);
-    const title = getSessionTitle(s);
-
-    const gm = historyFilter.has("all") || historyFilter.has(grade);
-    const tm = topicFilter === "all" || title === topicFilter;
+    const gm = historyFilter.has("all") || historyFilter.has(getSessionGrade(s));
+    const tm = topicFilter === "all" || getSessionTopic(s) === topicFilter;
     return gm && tm;
   });
 
   return (
     <div className="tab-history">
       <div className="history-header">
-        <h2 className="history-title">Session History ({sessions.length} sessions)</h2>
-        <div className="history-filter">
+        <h2 className="history-title">{t("history.title", { count: sessions.length })}</h2>
+        <div className="history-filter" data-tour="tour-history-filter">
           <select
             className="filter-select"
             value={topicFilter}
-            onChange={(e) => setTopicFilter(e.target.value)}
+            onChange={(e) => setTopicFilter(e.target.value as Topic)}
           >
-            {allTopics.map((t) => (
-              <option key={t} value={t}>
-                {t === "all" ? "ทุกประเภท" : t}
-              </option>
-            ))}
+            <option value="all">{t("history.allTypes")}</option>
+            <option value="pretest">{t(TOPIC_KEYS.pretest)}</option>
+            <option value="practice">{t(TOPIC_KEYS.practice)}</option>
           </select>
-          {["all", "great", "good", "poor"].map((f) => (
+          {(["all", "great", "good", "poor"] as const).map((f) => (
             <button
               key={f}
               className={`filter-btn ${historyFilter.has(f) ? "active" : ""}`}
+              aria-pressed={historyFilter.has(f)}
               onClick={() => handleHistoryFilter(f)}
             >
-              {f === "all" ? "ทั้งหมด" : gradeLabel(f)}
+              {f === "all" ? t("history.all") : t(GRADE_KEYS[f])}
             </button>
           ))}
         </div>
       </div>
-      <div className="history-list">
+      <div className="history-list" data-tour="tour-history-list">
         {filteredSessions.length === 0 ? (
-          <p style={{ color: "#94a3b8", textAlign: "center", padding: "48px" }}>
-            ไม่พบประวัติเซสชันที่ตรงตามเงื่อนไขตัวกรอง
-          </p>
+          <p className="empty-note lg">{t("history.empty")}</p>
         ) : (
           [...filteredSessions].reverse().map((s) => (
             <SessionCard key={s.sessionId} session={s} />

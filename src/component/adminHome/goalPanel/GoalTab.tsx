@@ -1,23 +1,28 @@
 import {
-  FaBullseye,
   FaMagnifyingGlass,
   FaPlus,
-  FaEye,
-  FaPen,
-  FaToggleOff,
-  FaToggleOn,
 } from "react-icons/fa6";
 import GoalFormModal from "./component/GoalFormModal";
 import GoalViewModal from "./component/GoalViewModal";
 import { goalController } from "./goal.controller";
+import { ActionButtons } from "../../common/ActionButtons";
+import { StatusSwitch } from "../../common/StatusSwitch";
+import { usePreferences } from "../../../context/PreferencesContext";
 
-export default function GoalTab() {
+interface GoalTabProps {
+  icon?: React.ReactNode;
+}
+
+export default function GoalTab({ icon }: GoalTabProps) {
+  const { t } = usePreferences();
   const {
     goals,
     isLoading,
     error,
     goalSearch,
     setGoalSearch,
+    statusFilter,
+    setStatusFilter,
     filteredGoals,
     activeSkills,
     getStatusColor,
@@ -41,8 +46,8 @@ export default function GoalTab() {
   return (
     <div className="ad-tab-goals">
       <div className="ad-page-header">
-        <h1 className="ad-page-title"><FaBullseye /> จัดการ Goal</h1>
-        <span className="ad-page-sub">Goal ทั้งหมด {goals.length} รายการ</span>
+        <h1 className="ad-page-title">{icon} {t("admin.goals.title")}</h1>
+        <span className="ad-page-sub">{t("admin.goals.count", { count: goals.length })}</span>
       </div>
 
       <div className="ad-toolbar">
@@ -50,91 +55,82 @@ export default function GoalTab() {
           <span className="ad-search-icon"><FaMagnifyingGlass /></span>
           <input
             className="ad-search"
-            placeholder="ค้นหาชื่อ Goal..."
+            placeholder={t("admin.goals.search")}
             value={goalSearch}
             onChange={(e) => setGoalSearch(e.target.value)}
           />
         </div>
+
+        <select
+          className="ad-select"
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value as any)}
+        >
+          <option value="all">{t("admin.common.allStatus")}</option>
+          <option value="active">{t("admin.status.active")}</option>
+          <option value="inactive">{t("admin.status.inactive")}</option>
+        </select>
+
         <button className="ad-btn-primary ad-btn-add" onClick={openCreateForm}>
-          <FaPlus /> เพิ่ม Goal ใหม่
+          <FaPlus /> {t("admin.goals.add")}
         </button>
       </div>
 
-      {error && (
-        <div style={{ color: "#dc2626", fontSize: 13, fontWeight: 600, margin: "8px 0" }}>
-          {error}
-        </div>
-      )}
+      {error && <div className="ad-inline-error">{error}</div>}
 
       <div className="ad-card">
         <table className="ad-table">
           <thead>
             <tr>
-              <th>Goal</th>
-              <th>สถานะ</th>
-              <th>Skill Require</th>
-              <th>Actions</th>
+              <th>{t("admin.goals.col.goal")}</th>
+              <th>{t("admin.goals.col.skillRequire")}</th>
+              <th>{t("admin.common.actions")}</th>
+              <th>{t("admin.common.status")}</th>
             </tr>
           </thead>
           <tbody>
             {isLoading ? (
               <tr>
                 <td colSpan={4} style={{ textAlign: "center", padding: 24 }}>
-                  กำลังโหลด...
+                  {t("admin.common.loading")}
                 </td>
               </tr>
             ) : filteredGoals.length === 0 ? (
               <tr>
                 <td colSpan={4} style={{ textAlign: "center", padding: 24 }}>
-                  ไม่พบ Goal ที่ตรงกับเงื่อนไข
+                  {t("admin.goals.empty")}
                 </td>
               </tr>
             ) : (
-              filteredGoals.map((g) => (
-                <tr key={g.id}>
-                  <td>
-                    <span className="ad-skill-name">{g.goal}</span>
-                  </td>
-                  <td>
-                    <span className="ad-status-dot" style={{ background: getStatusColor(g.status) }} />
-                    <span className="ad-muted">{g.status}</span>
-                  </td>
-                  <td>
-                    <div className="ad-req-tags">
-                      {!g.goalSkillRequire || g.goalSkillRequire.length === 0 ? (
-                        <span className="ad-muted">—</span>
-                      ) : (
-                        g.goalSkillRequire.map((r) => (
-                          <span key={r.skillId} className="ad-req-tag">
-                            {r.skill?.skillsName || `#${r.skillId}`}
-                          </span>
-                        ))
-                      )}
-                    </div>
-                  </td>
-                  <td>
-                    <div className="ad-action-btns">
-                      <button className="ad-btn-sm ad-btn-view" onClick={() => openView(g)}>
-                        <FaEye /> ดู
-                      </button>
-                      <button className="ad-btn-sm ad-btn-view" onClick={() => openEditForm(g)}>
-                        <FaPen /> แก้ไข
-                      </button>
-                      <button className="ad-btn-sm ad-btn-toggle" onClick={() => toggleGoalStatus(g)}>
-                        {g.status === "active" ? (
-                          <>
-                            <FaToggleOff /> ระงับ
-                          </>
+              filteredGoals.map((g) => {
+                const fadeClass = g.status === "inactive" ? "ad-fade-cell" : "";
+                return (
+                  <tr key={g.id}>
+                    <td className={fadeClass}>
+                      <span className="ad-skill-name">{g.goal}</span>
+                    </td>
+                    <td className={fadeClass}>
+                      <div className="ad-req-tags">
+                        {!g.goalSkillRequire || g.goalSkillRequire.length === 0 ? (
+                          <span className="ad-muted">—</span>
                         ) : (
-                          <>
-                            <FaToggleOn /> เปิด
-                          </>
+                          g.goalSkillRequire.map((r) => (
+                            <span key={r.skillId} className="ad-req-tag">
+                              {r.skill?.skillsName || `#${r.skillId}`}
+                            </span>
+                          ))
                         )}
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))
+                      </div>
+                    </td>
+                    <td>
+                      <ActionButtons onView={() => openView(g)} onEdit={() => openEditForm(g)} />
+                    </td>
+                    <td>
+                      <StatusSwitch status={g.status} onToggle={() => toggleGoalStatus(g)} />
+                    </td>
+                  </tr>
+                );
+              })
             )}
           </tbody>
         </table>

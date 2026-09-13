@@ -8,9 +8,13 @@ import {
   IsCaseSensitive,
 } from "../../../models/exerciseModel";
 import { TimeUnit, toSeconds } from "../../../utils/timeUnit";
+import { usePreferences } from "../../../context/PreferencesContext";
 
 export interface ExerciseFormValues {
   description: string;
+  /** โค้ดประกอบโจทย์ แสดงในกล่องแยกเหนือตัวเลือก ว่างได้ */
+  code: string;
+  language: string;
   level: number;
   skillId: number | null;
   type: ExerciseType;
@@ -25,6 +29,8 @@ export interface ExerciseFormValues {
 
 export const EMPTY_EXERCISE_FORM: ExerciseFormValues = {
   description: "",
+  code: "",
+  language: "python",
   level: 1,
   skillId: null,
   type: "CHOICE",
@@ -38,6 +44,7 @@ export const EMPTY_EXERCISE_FORM: ExerciseFormValues = {
 };
 
 export function exerciseController() {
+  const { t } = usePreferences();
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [activeSkills, setActiveSkills] = useState<Skill[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -126,7 +133,7 @@ export function exerciseController() {
 
   const saveExercise = async (form: ExerciseFormValues): Promise<boolean> => {
     if (!form.skillId) {
-      setFormError("กรุณาเลือก Skill");
+      setFormError(t("admin.exercises.pickSkill"));
       return false;
     }
 
@@ -135,6 +142,9 @@ export function exerciseController() {
     try {
       const basePayload = {
         description: form.description.trim(),
+        // ส่ง "" มาได้เพื่อลบโค้ดทิ้ง backend แปลงเป็น null ให้เอง
+        code: form.code,
+        language: form.language,
         skillId: form.skillId,
         skillLevel: form.level,
         type: form.type,

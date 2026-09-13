@@ -2,8 +2,8 @@ import React, { useEffect, useState } from "react";
 import { FaPen, FaPlus, FaCheck } from "react-icons/fa6";
 import { Skill, SkillPrerequisiteInput } from "../../../../models/skillModel";
 import { SkillFormValues, EMPTY_SKILL_FORM } from "../skill.controller";
-
-const TIERS = ["T1", "T2", "T3", "T4", "T5"];
+import { TIERS, getTierLabel, statusKey } from "../../../../utils/adminUi";
+import { usePreferences } from "../../../../context/PreferencesContext";
 
 interface SkillFormModalProps {
   isOpen: boolean;
@@ -13,6 +13,10 @@ interface SkillFormModalProps {
   formError: string | null;
   onSave: (form: SkillFormValues) => Promise<boolean>;
   onClose: () => void;
+  /** ทับหัวข้อ modal — ใช้ตอน reuse ฟอร์มนี้กับร่างจาก AI ผู้ช่วย */
+  title?: string;
+  /** ทับข้อความปุ่มบันทึก */
+  submitLabel?: string;
 }
 
 export default function SkillFormModal({
@@ -23,15 +27,24 @@ export default function SkillFormModal({
   formError,
   onSave,
   onClose,
+  title,
+  submitLabel,
 }: SkillFormModalProps) {
+  const { t } = usePreferences();
   const [skillCode, setSkillCode] = useState<string>("");
   const [skillsName, setSkillsName] = useState<string>("");
   const [tier, setTier] = useState<string>(EMPTY_SKILL_FORM.tier);
   const [status, setStatus] = useState<string>(EMPTY_SKILL_FORM.status);
   const [prerequisiteIds, setPrerequisiteIds] = useState<number[]>([]);
+  const [prereqSearch, setPrereqSearch] = useState<string>("");
+  const [isTierOpen, setIsTierOpen] = useState<boolean>(false);
+  const [isStatusOpen, setIsStatusOpen] = useState<boolean>(false);
 
   useEffect(() => {
     if (!isOpen) return;
+    setPrereqSearch("");
+    setIsTierOpen(false);
+    setIsStatusOpen(false);
     if (editingSkill) {
       setSkillCode(String(editingSkill.skillCode));
       setSkillsName(editingSkill.skillsName);
@@ -49,9 +62,29 @@ export default function SkillFormModal({
     }
   }, [isOpen, editingSkill]);
 
+  useEffect(() => {
+    const handleOutsideClick = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (!target.closest(".ad-field")) {
+        setIsTierOpen(false);
+        setIsStatusOpen(false);
+      }
+    };
+    if (isTierOpen || isStatusOpen) {
+      document.addEventListener("click", handleOutsideClick);
+    }
+    return () => {
+      document.removeEventListener("click", handleOutsideClick);
+    };
+  }, [isTierOpen, isStatusOpen]);
+
   if (!isOpen) return null;
 
   const isEdit = editingSkill !== null;
+  const statusLabel = (value: string) => {
+    const key = statusKey(value);
+    return key ? t(key) : value;
+  };
 
   const togglePrerequisite = (id: number) => {
     setPrerequisiteIds((prev) =>
@@ -74,7 +107,15 @@ export default function SkillFormModal({
     });
   };
 
-  const candidateSkills = allSkills.filter((s) => s.skillId !== editingSkill?.skillId);
+  const candidateSkills = allSkills
+    .filter((s) => s.skillId !== editingSkill?.skillId)
+    .sort((a, b) => a.skillsName.localeCompare(b.skillsName));
+
+  const filteredCandidates = candidateSkills.filter(
+    (s) =>
+      s.skillsName.toLowerCase().includes(prereqSearch.toLowerCase()) ||
+      (s.skillCode || "").toLowerCase().includes(prereqSearch.toLowerCase())
+  );
 
   return (
     <div className="ad-overlay" onClick={onClose}>
@@ -83,11 +124,11 @@ export default function SkillFormModal({
           <span className="ad-modal-title">
             {isEdit ? (
               <>
-                <FaPen /> แก้ไข Skill
+                <FaPen /> {title ?? t("admin.skillForm.titleEdit")}
               </>
             ) : (
               <>
-                <FaPlus /> เพิ่ม Skill ใหม่
+                <FaPlus /> {title ?? t("admin.skillForm.titleCreate")}
               </>
             )}
           </span>
@@ -95,24 +136,10 @@ export default function SkillFormModal({
 
         <form onSubmit={handleSubmit}>
           <div className="ad-modal-body">
-            {formError && (
-              <div
-                style={{
-                  padding: "10px 14px",
-                  borderRadius: "8px",
-                  background: "#fef2f2",
-                  border: "1px solid #fecaca",
-                  color: "#dc2626",
-                  fontSize: "13px",
-                  fontWeight: 600,
-                }}
-              >
-                {formError}
-              </div>
-            )}
+            {formError && <div className="ad-form-error">{formError}</div>}
 
             <div className="ad-field">
-              <label className="ad-label">Skill code</label>
+              <label className="ad-label">{t("admin.skills.col.code")}</label>
               <input
                 type="text"
                 className="ad-input"
@@ -124,7 +151,7 @@ export default function SkillFormModal({
             </div>
 
             <div className="ad-field">
-              <label className="ad-label">ชื่อ Skill</label>
+              <label className="ad-label">{t("admin.skillForm.name")}</label>
               <input
                 type="text"
                 className="ad-input"
@@ -135,42 +162,107 @@ export default function SkillFormModal({
             </div>
 
             <div className="ad-field-row">
-              <div className="ad-field">
-                <label className="ad-label">Tier</label>
-                <select className="ad-select" value={tier} onChange={(e) => setTier(e.target.value)}>
-                  {TIERS.map((t) => (
-                    <option key={t} value={t}>{t}</option>
-                  ))}
-                </select>
+              <div className="ad-field" style={{ flex: 1, minWidth: "120px", position: "relative" }}>
+                <label className="ad-label">{t("admin.skills.col.tier")}</label>
+                <button
+                  type="button"
+                  className="ad-select"
+                  onClick={() => {
+                    setIsTierOpen(!isTierOpen);
+                    setIsStatusOpen(false);
+                  }}
+                  style={{
+                    width: "100%",
+                    textAlign: "left",
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                  }}
+                >
+                  <span>{getTierLabel(tier)}</span>
+                </button>
+                {isTierOpen && (
+                  <div className="ad-select-options-list">
+                    {TIERS.map((tierOpt) => (
+                      <div
+                        key={tierOpt.code}
+                        className={`ad-select-option-item ${tier === tierOpt.code ? "active" : ""}`}
+                        onClick={() => {
+                          setTier(tierOpt.code);
+                          setIsTierOpen(false);
+                        }}
+                      >
+                        {tierOpt.label}
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
-              <div className="ad-field">
-                <label className="ad-label">สถานะ</label>
-                <select className="ad-select" value={status} onChange={(e) => setStatus(e.target.value)}>
-                  <option value="active">active</option>
-                  <option value="inactive">inactive</option>
-                </select>
+              <div className="ad-field" style={{ flex: 1, minWidth: "120px", position: "relative" }}>
+                <label className="ad-label">{t("admin.common.status")}</label>
+                <button
+                  type="button"
+                  className="ad-select"
+                  onClick={() => {
+                    setIsStatusOpen(!isStatusOpen);
+                    setIsTierOpen(false);
+                  }}
+                  style={{
+                    width: "100%",
+                    textAlign: "left",
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                  }}
+                >
+                  <span>{statusLabel(status)}</span>
+                </button>
+                {isStatusOpen && (
+                  <div className="ad-select-options-list">
+                    {["active", "inactive"].map((value) => (
+                      <div
+                        key={value}
+                        className={`ad-select-option-item ${status === value ? "active" : ""}`}
+                        onClick={() => {
+                          setStatus(value);
+                          setIsStatusOpen(false);
+                        }}
+                      >
+                        {statusLabel(value)}
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
 
             <div className="ad-field">
-              <label className="ad-label">Prerequisite (เลือกได้หลายรายการ)</label>
+              <label className="ad-label">{t("admin.skillForm.prereq")}</label>
+              <input
+                type="text"
+                className="ad-input"
+                placeholder={t("admin.skillForm.prereqSearch")}
+                value={prereqSearch}
+                onChange={(e) => setPrereqSearch(e.target.value)}
+                style={{ marginBottom: "8px" }}
+              />
               <div className="ad-req-tags">
-                {candidateSkills.length === 0 ? (
-                  <span className="ad-muted">— ไม่มี Skill อื่นให้เลือก —</span>
+                {filteredCandidates.length === 0 ? (
+                  <span className="ad-muted">
+                    {candidateSkills.length === 0
+                      ? t("admin.skillForm.noOther")
+                      : t("admin.skillForm.noMatch")}
+                  </span>
                 ) : (
-                  candidateSkills.map((s) => {
+                  filteredCandidates.map((s) => {
                     const selected = prerequisiteIds.includes(s.skillId);
                     return (
                       <button
                         type="button"
                         key={s.skillId}
-                        className="ad-req-tag"
+                        className={`ad-req-tag pickable${selected ? " selected" : ""}`}
                         onClick={() => togglePrerequisite(s.skillId)}
-                        style={
-                          selected
-                            ? { background: "#eff6ff", borderColor: "#93c5fd", color: "#2563eb", cursor: "pointer" }
-                            : { cursor: "pointer" }
-                        }
+                        aria-pressed={selected}
                       >
                         {selected ? (
                           <>
@@ -190,10 +282,10 @@ export default function SkillFormModal({
 
           <div className="ad-modal-footer">
             <button type="button" className="ad-btn-cancel" onClick={onClose} disabled={isSaving}>
-              ยกเลิก
+              {t("admin.common.cancel")}
             </button>
             <button type="submit" className="ad-btn-primary" disabled={isSaving}>
-              {isSaving ? "กำลังบันทึก..." : "บันทึก"}
+              {isSaving ? t("admin.common.saving") : (submitLabel ?? t("admin.common.save"))}
             </button>
           </div>
         </form>

@@ -1,25 +1,35 @@
 import { userService } from "./user.service";
 import { useCallback, useEffect, useState } from "react";
+import { useToast } from "../../../context/ToastContext";
+import { usePreferences } from "../../../context/PreferencesContext";
 import {
   UserResponseAdmin,
   GenderOption,
   RoleOption,
   CreateUserByAdminRequest,
+  UpdateUserByAdminRequest,
 } from "../../../models/userModel";
 import { getStatusColor, getScoreColor } from "../../../utils/adminUi";
 
 export function userController() {
+  const toast = useToast();
+  const { t } = usePreferences();
   const [users, setUsers] = useState<UserResponseAdmin[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [erros, setErrors] = useState<string | null>(null);
   const [userSearch, setUserSearch] = useState<string>("");
+  const [statusFilter, setStatusFilter] = useState<"all" | "active" | "inactive">("all");
   const [userFiltered, setUserFiltered] = useState<UserResponseAdmin[]>([]);
-  const [viewUser, setViewUser] = useState<UserResponseAdmin | null>(null);
 
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState<boolean>(false);
+  const [isFormModalOpen, setIsFormModalOpen] = useState<boolean>(false);
+  const [editingUser, setEditingUser] = useState<UserResponseAdmin | null>(null);
   const [gendersList, setGendersList] = useState<GenderOption[]>([]);
   const [rolesList, setRolesList] = useState<RoleOption[]>([]);
-  const [isCreatingUser, setIsCreatingUser] = useState<boolean>(false);
+  const [isSavingUser, setIsSavingUser] = useState<boolean>(false);
+
+  const [viewingUser, setViewingUser] = useState<UserResponseAdmin | null>(null);
+  const [viewBranches, setViewBranches] = useState<any[]>([]);
+  const [isLoadingViewBranches, setIsLoadingViewBranches] = useState<boolean>(false);
 
   useEffect(() => {
     loadUser();
@@ -36,7 +46,6 @@ export function userController() {
       setUserFiltered([]);
     } else {
       const data = result?.data || [];
-      console.log('users data : ', data)
       setUsers(data);
       setUserFiltered(data);
       setErrors(null);
@@ -59,56 +68,93 @@ export function userController() {
   }, []);
 
   useEffect(() => {
-    if (!userSearch.trim()) {
-      setUserFiltered(users);
-    } else {
-      const term = userSearch.toLowerCase();
-      const filtered = users.filter((user) =>
-        (user.fullName || "").toLowerCase().includes(term) ||
-        (user.facultyName || "").toLowerCase().includes(term) ||
-        (user.campusName || "").toLowerCase().includes(term) ||
-        (user.majorName || "").toLowerCase().includes(term) ||
-        (Array.isArray(user.goals) ? user.goals.join(" ") : user.goals || "").toLowerCase().includes(term) ||
-        (user.status || "").toLowerCase().includes(term)
-      );
-      setUserFiltered(filtered);
-    }
-  }, [userSearch, users]);
+    const term = userSearch.trim().toLowerCase();
+    const filtered = users.filter((user) => {
+      if (term) {
+        const matches =
+          (user.fullName || "").toLowerCase().includes(term) ||
+          (user.facultyName || "").toLowerCase().includes(term) ||
+          (user.campusName || "").toLowerCase().includes(term) ||
+          (user.majorName || "").toLowerCase().includes(term) ||
+          (Array.isArray(user.goals) ? user.goals.join(" ") : user.goals || "").toLowerCase().includes(term);
+        if (!matches) return false;
+      }
+      if (statusFilter !== "all" && user.status !== statusFilter) return false;
+      return true;
+    });
+    setUserFiltered(filtered);
+  }, [userSearch, statusFilter, users]);
 
   const toggleUserStatus = async (targetUser: UserResponseAdmin) => {
     if (!targetUser.id) {
-      alert("ไม่พบรหัสผู้ใช้ (ID) สำหรับทำรายการ");
+      toast.error(t("admin.users.toast.noId"));
       return;
     }
     const newStatus = targetUser.status === "active" ? "inactive" : "active";
     setIsLoading(true);
     const result = await userService.updateUserStatus(targetUser.id, newStatus);
     if (result.isError) {
-      alert(`อัปเดตสถานะไม่สำเร็จ: ${result.errorMessage || "เกิดข้อผิดพลาด"}`);
+      toast.error(t("admin.users.toast.statusFailed"), result.errorMessage || t("admin.common.error"));
     } else {
       const updatedUsers = users.map((u) =>
         u.id === targetUser.id ? { ...u, status: newStatus } : u
       );
       setUsers(updatedUsers);
-      if (viewUser && viewUser.id === targetUser.id) {
-        setViewUser({ ...viewUser, status: newStatus });
+      if (viewingUser && viewingUser.id === targetUser.id) {
+        setViewingUser({ ...viewingUser, status: newStatus });
       }
     }
     setIsLoading(false);
   };
 
-  const handleCreateUser = async (data: CreateUserByAdminRequest) => {
-    setIsCreatingUser(true);
+  const openCreateModal = () => {
+    setEditingUser(null);
+    setIsFormModalOpen(true);
+  };
+
+  const openEditModal = (user: UserResponseAdmin) => {
+    setEditingUser(user);
+    setViewingUser(null);
+    setIsFormModalOpen(true);
+  };
+
+  const closeFormModal = () => {
+    setIsFormModalOpen(false);
+    setEditingUser(null);
+  };
+
+  const handleSaveUser = async (data: CreateUserByAdminRequest | UpdateUserByAdminRequest) => {
+    setIsSavingUser(true);
     try {
-      const result = await userService.createAdminUser(data);
+      const result = editingUser?.id
+        ? await userService.updateAdminUser(editingUser.id, data as UpdateUserByAdminRequest)
+        : await userService.createAdminUser(data as CreateUserByAdminRequest);
+
       if (result.isError) {
-        throw new Error(result.errorMessage || "ไม่สามารถสร้างผู้ใช้งานได้");
+        throw new Error(
+          result.errorMessage ||
+            (editingUser ? t("admin.users.saveFailedUpdate") : t("admin.users.saveFailedCreate"))
+        );
       }
-      setIsCreateModalOpen(false);
+      closeFormModal();
       await loadUser();
     } finally {
-      setIsCreatingUser(false);
+      setIsSavingUser(false);
     }
+  };
+
+  const openViewModal = async (user: UserResponseAdmin) => {
+    setViewingUser(user);
+    if (!user.id) return;
+    setIsLoadingViewBranches(true);
+    const res = await userService.getUserBranches(user.id);
+    setViewBranches(!res.isError && res.data ? res.data : []);
+    setIsLoadingViewBranches(false);
+  };
+
+  const closeViewModal = () => {
+    setViewingUser(null);
+    setViewBranches([]);
   };
 
   return {
@@ -117,17 +163,25 @@ export function userController() {
     erros,
     userSearch,
     setUserSearch,
+    statusFilter,
+    setStatusFilter,
     userFiltered,
-    viewUser,
-    setViewUser,
     getStatusColor,
     getScoreColor,
     toggleUserStatus,
-    isCreateModalOpen,
-    setIsCreateModalOpen,
+    isFormModalOpen,
+    editingUser,
+    openCreateModal,
+    openEditModal,
+    closeFormModal,
     gendersList,
     rolesList,
-    isCreatingUser,
-    handleCreateUser,
+    isSavingUser,
+    handleSaveUser,
+    viewingUser,
+    viewBranches,
+    isLoadingViewBranches,
+    openViewModal,
+    closeViewModal,
   };
 }

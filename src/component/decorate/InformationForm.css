@@ -1,10 +1,11 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  /* Cobalt Sky Light Mode Palette */
+  /* Admin palette (Adminhome.css) under this screen's legacy names:
+     navy = page ground, navy2/navy3 = surfaces, gold = cobalt accent */
   --navy:    #f2f7fa; 
   --navy2:   #ffffff;
-  --navy3:   #e9f0f5;
+  --navy3:   #f8fafc;
   --border:  #c2d3e0;
   --border2: #6D8196;
   --gold:    #0047AB; /* Cobalt Blue */
@@ -12,15 +13,15 @@
   --gold3:   #000080; /* Navy Blue */
   --text:    #000080; /* Navy Text */
   --muted:   #6D8196; /* Slate Grey */
-  --muted2:  #8fa3b5;
-  --danger:  #e05c5c;
-  --success: #38b874;
+  --muted2:  #94a3b8;
+  --danger:  #dc2626;
+  --success: #10b981;
 }
 
 html, body { 
   min-height: 100%; 
   background: var(--navy); 
-  font-family: 'DM Sans', sans-serif; 
+  font-family: var(--font-sans); 
   color: var(--text); 
 }
 
@@ -54,7 +55,7 @@ html, body {
   display:flex; align-items:center; justify-content:center; font-size:15px; 
   background:#ffffff; color: var(--gold3); box-shadow:0 0 16px rgba(130, 200, 229, 0.4); 
 }
-.brand-name { font-family: 'DM Sans', sans-serif; font-size:16px; color:var(--gold3); letter-spacing:.05em; font-weight: 700; }
+.brand-name { font-family: var(--font-sans); font-size:16px; color:var(--gold3); letter-spacing:.05em; font-weight: 700; }
 
 /* ── Progress bar ── */
 .progress-wrap { width: 100%; max-width: 620px; margin-bottom: 40px; opacity: 0; animation: fadeIn .6s ease .2s forwards; }
@@ -119,7 +120,7 @@ label { display:block; font-size:11px; font-weight:700; letter-spacing:.1em; tex
 select, input[type="text"] {
   width: 100%; padding: 12px 16px;
   background: var(--navy3); border: 1px solid var(--border); border-radius: 10px;
-  color: var(--text); font-family:'DM Sans',sans-serif; font-size:14px;
+  color: var(--text); font-family:var(--font-sans); font-size:14px;
   outline: none; -webkit-appearance:none; appearance:none;
   transition: border-color .2s, box-shadow .2s, background .2s;
 }
@@ -134,7 +135,7 @@ select:disabled { opacity:0.6; cursor:not-allowed; }
   padding: 14px 16px; border-radius: 10px;
   border: 1.5px solid var(--border);
   cursor: pointer; transition: all .2s;
-  background: #f4f8fb;
+  background: var(--navy3);
   position: relative; overflow: hidden;
 }
 .goal-card::before { content:''; position:absolute; inset:0; background:var(--gold); opacity:0; transition:opacity .2s; }
@@ -201,7 +202,7 @@ input[type="range"]::-moz-range-thumb {
 }
 .btn-back {
   padding: 12px 24px; background:#ffffff; border:1px solid var(--border);
-  border-radius:10px; color:var(--muted); font-family:'DM Sans',sans-serif;
+  border-radius:10px; color:var(--muted); font-family:var(--font-sans);
   font-size:13px; font-weight: 600; cursor:pointer; transition:all .2s;
 }
 .btn-back:hover:not(:disabled) { border-color:var(--border2); color:var(--text); }
@@ -209,9 +210,9 @@ input[type="range"]::-moz-range-thumb {
 
 .btn-next {
   display:inline-flex; align-items:center; gap:10px;
-  padding:13px 28px; background:linear-gradient(135deg, #0056d6, var(--gold));
+  padding:13px 28px; background:linear-gradient(135deg, var(--gold), var(--gold2));
   border:none; border-radius:10px; color:#ffffff;
-  font-family:'DM Sans',sans-serif; font-size:14px; font-weight:600;
+  font-family:var(--font-sans); font-size:14px; font-weight:600;
   letter-spacing:.06em; text-transform:uppercase;
   cursor:pointer; position:relative; overflow:hidden;
   box-shadow:0 4px 15px rgba(0, 71, 171, 0.25);

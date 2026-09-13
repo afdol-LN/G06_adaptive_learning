@@ -1,26 +1,27 @@
 import { SessionHistoryItem } from "../../../models/sessionHistoryModel";
+import type { TKey } from "../../../i18n";
 
-export const BEHAVIOR_META = {
-  mastery: { label: 'Mastery', color: '#0047AB', bg: '#e8f0fe', border: '#93c5fd', desc: 'เชี่ยวชาญและสม่ำเสมอ — คุณเรียนรู้ได้ครบและแม่นยำมาก' },
-  fast: { label: 'Fast', color: '#059669', bg: '#ecfdf5', border: '#6ee7b7', desc: 'ตอบเร็วและแม่นยำ — แต่ควรทบทวน skill เก่าเพิ่มเติม' },
-  steady: { label: 'Steady', color: '#2563eb', bg: '#eff6ff', border: '#bfdbfe', desc: 'สม่ำเสมอและมั่นคง — เพิ่มความเร็วและทบทวนให้มากขึ้น' },
-  slow: { label: 'Slow', color: '#d97706', bg: '#fffbeb', border: '#fde68a', desc: 'เข้าใจดีแต่ใช้เวลานาน — ฝึกทำโจทย์ให้เร็วขึ้น' },
-  struggler: { label: 'Struggler', color: '#dc2626', bg: '#fef2f2', border: '#fecaca', desc: 'ยังต้องฝึกเพิ่ม — ลองทบทวนพื้นฐานและทำ session บ่อยขึ้น' },
+export type BehaviorClass = 'mastery' | 'fast' | 'steady' | 'slow' | 'struggler';
+export type BehaviorDim = 'time' | 'streak' | 'momentum';
+
+// สีอ้าง token --beh-* ใน Home.css (มีค่าแยกของธีมมืด) ส่วนข้อความอยู่ใน i18n
+export const BEHAVIOR_META: Record<BehaviorClass, { color: string; labelKey: TKey; descKey: TKey }> = {
+  mastery:   { color: 'var(--beh-mastery)',   labelKey: 'behavior.mastery',   descKey: 'behavior.mastery.desc' },
+  fast:      { color: 'var(--beh-fast)',      labelKey: 'behavior.fast',      descKey: 'behavior.fast.desc' },
+  steady:    { color: 'var(--beh-steady)',    labelKey: 'behavior.steady',    descKey: 'behavior.steady.desc' },
+  slow:      { color: 'var(--beh-slow)',      labelKey: 'behavior.slow',      descKey: 'behavior.slow.desc' },
+  struggler: { color: 'var(--beh-struggler)', labelKey: 'behavior.struggler', descKey: 'behavior.struggler.desc' },
 };
 
-export const DIM_LABELS = {
-  time: { label: 'Time Score', icon: '' },
-  streak: { label: 'Correct Score', icon: '' },
-  momentum: { label: 'Momentum Score', icon: '' },
+export const DIM_LABEL_KEYS: Record<BehaviorDim, TKey> = {
+  time: 'profile.dim.time',
+  streak: 'profile.dim.streak',
+  momentum: 'profile.dim.momentum',
 };
 
 export interface BehaviorResult {
-  dims: {
-    time: number;
-    streak: number;
-    momentum: number;
-  };
-  cls: keyof typeof BEHAVIOR_META;
+  dims: Record<BehaviorDim, number>;
+  cls: BehaviorClass;
   score: number;
   avgTime: number;
 }
@@ -40,11 +41,11 @@ export function computeBehavior(sessions: SessionHistoryItem[]): BehaviorResult 
     let c = 0, w = 0, exp = 0, act = 0;
     s.questions.forEach(q => {
       if (q.isCorrect) c++; else w++;
-      
+
       const start = q.startTime ? new Date(q.startTime).getTime() : 0;
       const end = q.endTime ? new Date(q.endTime).getTime() : 0;
       const timeSpent = (start && end) ? Math.round((end - start) / 1000) : 15;
-      
+
       act += timeSpent || 15;
       exp += 15; // default expected time per exercise question
       totalQuestions++;
@@ -73,7 +74,7 @@ export function computeBehavior(sessions: SessionHistoryItem[]): BehaviorResult 
     momentum: Math.round(mFinal * 100),
   };
 
-  let cls: keyof typeof BEHAVIOR_META = 'struggler';
+  let cls: BehaviorClass = 'struggler';
   if (score >= 80) cls = 'mastery';
   else if (score >= 60) {
     if (dims.time - dims.streak >= 15) cls = 'fast';

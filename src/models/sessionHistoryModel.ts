@@ -23,5 +23,7 @@ export interface SessionHistoryItem {
   startTime: string;
   endTime: string;
   isPretest: boolean;
+  /** unfinished practice session — a draft the student can resume (adt-learning/docs/adr/0003) */
+  inProgress?: boolean;
   questions: SessionQuestionHistory[];
 }

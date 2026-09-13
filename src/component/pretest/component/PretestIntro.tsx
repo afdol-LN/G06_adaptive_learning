@@ -38,7 +38,7 @@ export const PretestIntro: React.FC<PretestIntroProps> = ({ controller }) => {
         <strong>⚠ หมายเหตุ:</strong> แบบทดสอบประกอบด้วยแบบตัวเลือก (Choice) และแบบเติมคำ (Fill-in-the-blank) เมื่อกด Next แล้ว <strong>จะไม่สามารถย้อนกลับมาแก้คำตอบได้</strong>
       </div>
       <button className="btn-go" onClick={controller.startQuiz}>
-        <span>GO — เริ่มเลย</span>
+        <span>เริ่มเลย</span>
         <svg
           className="go-arrow"
           width="18"
@@ -48,7 +48,7 @@ export const PretestIntro: React.FC<PretestIntroProps> = ({ controller }) => {
         >
           <path
             d="M3 9h12M11 5l4 4-4 4"
-            stroke="#0b1120"
+            stroke="currentColor"
             strokeWidth="2.2"
             strokeLinecap="round"
             strokeLinejoin="round"

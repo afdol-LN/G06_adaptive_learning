@@ -179,3 +179,13 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* Dark theme — the modal renders inside .ad-app, so the tokens come from Adminhome.css.
+   Only the literals above that assume a light page are overridden. */
+:root[data-theme="dark"] .ad-create-user-overlay { background: var(--overlay); }
+:root[data-theme="dark"] .ad-create-user-header  { background: linear-gradient(135deg, var(--tint), var(--tint-2)); }
+:root[data-theme="dark"] .ad-create-user-close:hover { background: color-mix(in srgb, var(--accent) 12%, transparent); }
+:root[data-theme="dark"] .ad-create-user-input:focus,
+:root[data-theme="dark"] .ad-create-user-select:focus,
+:root[data-theme="dark"] .ad-pw-toggle-btn:hover { background: var(--surface); }
+:root[data-theme="dark"] .ad-create-user-input.error { background: var(--bad-bg); }

@@ -1,4 +1,5 @@
 import React from "react";
+import AppLogo from "../../common/AppLogo";
 
 interface SelectBranchModalProps {
   branches: any[];
@@ -39,7 +40,7 @@ export const SelectBranchModal: React.FC<SelectBranchModalProps> = ({
         }}
       >
         <div style={{ textAlign: "center", marginBottom: "24px" }}>
-          <div style={{ fontSize: "28px", marginBottom: "8px" }}>⚡</div>
+          <div style={{ width: "40px", height: "40px", margin: "0 auto 8px" }}><AppLogo /></div>
           <h2
             style={{
               fontSize: "18px",

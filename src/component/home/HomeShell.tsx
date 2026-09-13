@@ -1,18 +1,52 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import type { IconType } from "react-icons";
+import {
+  FaArrowLeft,
+  FaBullseye,
+  FaCheck,
+  FaChevronDown,
+  FaChevronLeft,
+  FaChevronRight,
+  FaCircleQuestion,
+  FaClockRotateLeft,
+  FaHouse,
+  FaPlus,
+  FaSitemap,
+  FaUser,
+  FaUserGraduate,
+} from "react-icons/fa6";
 import { useApp } from "../../context/AppContext";
+import { usePreferences } from "../../context/PreferencesContext";
+import type { TKey } from "../../i18n";
 import { useBranchSkillController } from "./controller/branchSkill.controller";
 import { useBranchStatsController } from "./controller/branchStats.controller";
 import { useSessionHistoryController } from "./controller/sessionHistory.controller";
+import { useHomeTourController } from "./controller/homeTour.controller";
 import { HomeTab } from "./tabs/HomeTab";
 import { SkillTreeTab } from "./tabs/SkillTreeTab";
 import { HistoryTab } from "./tabs/HistoryTab";
 import { ProfileTab } from "./tabs/ProfileTab";
 import { NextExercisePicker } from "./skillTree/NextExercisePicker";
 import { ExerciseConfirmModal } from "./skillTree/ExerciseConfirmModal";
+import { Topbar } from "../common/Topbar";
 import CreateBranchModal from "../CreateBranchModal";
+import AppLogo from "../common/AppLogo";
 import { LayoutSkill } from "./utils/skillTree";
 import "../decorate/Home.css";
+import "../decorate/Tour.css";
+
+type HomeTabKey = "Home" | "SkillTree" | "History" | "Profile";
+
+const NAV_ITEMS: { key: HomeTabKey; labelKey: TKey; Icon: IconType }[] = [
+  { key: "Home", labelKey: "nav.home", Icon: FaHouse },
+  { key: "SkillTree", labelKey: "nav.skillTree", Icon: FaSitemap },
+  { key: "History", labelKey: "nav.history", Icon: FaClockRotateLeft },
+  { key: "Profile", labelKey: "nav.profile", Icon: FaUser },
+];
+
+// จำสถานะ sidebar (ย่อ/ขยาย) ไว้ข้าม session
+const SIDEBAR_COLLAPSED_KEY = "homeSidebarCollapsed";
 
 export const HomeShell: React.FC = () => {
   const {
@@ -23,6 +57,7 @@ export const HomeShell: React.FC = () => {
     switchBranch,
     fetchMyBranches,
   } = useApp();
+  const { t } = usePreferences();
 
   const navigate = useNavigate();
 
@@ -32,9 +67,16 @@ export const HomeShell: React.FC = () => {
   const skillTreeController = useBranchSkillController(branchId);
   const statsController = useBranchStatsController(branchId);
   const historyController = useSessionHistoryController(branchId);
+  const homeTour = useHomeTourController(t);
 
   // Tab State
-  const [activeTab, setActiveTab] = useState<"Home" | "SkillTree" | "History" | "Profile">("Home");
+  const [activeTab, setActiveTab] = useState<HomeTabKey>("Home");
+
+  // Sidebar State — ครั้งแรกบนจอแคบให้เริ่มแบบย่อ
+  const [sidebarCollapsed, setSidebarCollapsed] = useState<boolean>(() => {
+    const stored = localStorage.getItem(SIDEBAR_COLLAPSED_KEY);
+    return stored !== null ? stored === "1" : window.innerWidth < 768;
+  });
 
   // Dropdown States
   const [showGoalMenu, setShowGoalMenu] = useState(false);
@@ -56,6 +98,10 @@ export const HomeShell: React.FC = () => {
     fetchMyBranches();
   }, []);
 
+  useEffect(() => {
+    localStorage.setItem(SIDEBAR_COLLAPSED_KEY, sidebarCollapsed ? "1" : "0");
+  }, [sidebarCollapsed]);
+
   // Close dropdowns on click outside
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -71,7 +117,30 @@ export const HomeShell: React.FC = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const switchTab = (tab: "Home" | "SkillTree" | "History" | "Profile") => {
+  // Each tab has its own tour: auto-start it the first time the user opens that tab,
+  // and close whatever tour is running when they move to another tab
+  const hasBranch = Boolean(activeBranch);
+  const pageTourSeen = homeTour.hasSeenTour(activeTab);
+  useEffect(() => {
+    if (!hasBranch || pageTourSeen !== false) return;
+    homeTour.startTour(activeTab);
+    return () => homeTour.cancelTour();
+  }, [hasBranch, activeTab, pageTourSeen]);
+
+  // Help replays the tour of the tab the user is on — no jump back to Home
+  const handleHelpClick = () => {
+    setShowGoalMenu(false);
+    setShowProfileMenu(false);
+    homeTour.startTour(activeTab, { force: true });
+  };
+
+  const toggleSidebar = () => {
+    setShowGoalMenu(false);
+    setShowProfileMenu(false);
+    setSidebarCollapsed((c) => !c);
+  };
+
+  const switchTab = (tab: HomeTabKey) => {
     setActiveTab(tab);
     skillTreeController.setSelectedSkill(null);
   };
@@ -107,252 +176,240 @@ export const HomeShell: React.FC = () => {
     setConfirmSkill(skill);
   };
 
-  const avatar = userProfile?.gender === "FEMALE" ? "👩‍🎓" : "👨‍🎓";
-  const fullName = userProfile
-    ? `${userProfile.fname || ""} ${userProfile.lname || ""}`.trim()
-    : "นักเรียน ALS";
+  const avatar = <FaUserGraduate aria-hidden />;
+  const profileFullName = [userProfile?.fname, userProfile?.lname].filter(Boolean).join(" ");
+  const fullName = profileFullName || localStorage.getItem("fullname") || t("user.fallbackName");
 
   // If no branch is selected or active, prompt user
   if (!activeBranch) {
     return (
-      <div className="app" style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100vh", background: "#f8fafc" }}>
-        <div style={{ textAlign: "center", background: "#fff", padding: "40px", borderRadius: "16px", boxShadow: "0 8px 32px rgba(0,0,0,0.05)" }}>
-          <h2 style={{ fontSize: "20px", fontWeight: "700", color: "#1e293b", marginBottom: "16px" }}>
-            ยังไม่พบเป้าหมายการเรียนรู้หลัก
-          </h2>
-          <p style={{ color: "#64748b", marginBottom: "24px" }}>
-            กรุณาเลือกหรือเพิ่มเป้าหมายการเรียนรู้ใหม่ก่อนทำแบบฝึกหัด
-          </p>
-          <button
-            onClick={() => navigate("/selectbranch")}
-            style={{ padding: "10px 24px", background: "#0047AB", color: "#fff", fontWeight: "700", border: "none", borderRadius: "8px", cursor: "pointer" }}
-          >
-            เลือกเป้าหมายการเรียนรู้
+      <div className="app no-branch">
+        <div className="no-branch-card">
+          <h2 className="no-branch-title">{t("noBranch.title")}</h2>
+          <p className="no-branch-desc">{t("noBranch.desc")}</p>
+          <button className="no-branch-cta" onClick={() => navigate("/selectbranch")}>
+            {t("noBranch.cta")}
           </button>
         </div>
       </div>
     );
   }
 
-  return (
-    <div className="app">
-      {/* Navbar */}
-      <nav className="navbar">
-        <div className="nav-logo">
-          <span className="nav-logo-text">PSU · ALS</span>
+  const goalLabel = activeBranch.goalName || t("goal.placeholder");
+  const activeNav = NAV_ITEMS.find((n) => n.key === activeTab) ?? NAV_ITEMS[0];
+  const sidebarToggleLabel = sidebarCollapsed ? t("sidebar.show") : t("sidebar.hide");
 
-          {/* Goal switcher dropdown */}
-          <div ref={goalMenuRef} style={{ position: "relative", marginLeft: "8px" }}>
-            <button
-              onClick={() => setShowGoalMenu(!showGoalMenu)}
-              style={{
-                fontSize: "12px",
-                fontWeight: "600",
-                color: "#0047AB",
-                background: "rgba(0,71,171,0.08)",
-                border: "1px solid rgba(0,71,171,0.2)",
-                borderRadius: "99px",
-                padding: "3px 10px",
-                cursor: "pointer",
-                whiteSpace: "nowrap",
-                display: "flex",
-                alignItems: "center",
-                gap: "4px",
-              }}
-            >
-              {activeBranch.goalName || "เลือกสายการเรียน"}
-              <span style={{ fontSize: "10px" }}>▾</span>
-            </button>
-            {showGoalMenu && (
-              <div
-                style={{
-                  position: "absolute",
-                  top: "calc(100% + 8px)",
-                  left: 0,
-                  minWidth: "220px",
-                  background: "#fff",
-                  border: "1px solid #c2d3e0",
-                  borderRadius: "14px",
-                  boxShadow: "0 8px 32px rgba(0,71,171,0.13)",
-                  zIndex: 300,
-                  overflow: "hidden",
-                  display: "flex",
-                  flexDirection: "column",
-                  maxHeight: "360px",
-                }}
-              >
-                <div style={{ overflowY: "auto", maxHeight: "300px" }}>
-                  {branches.map((b) => (
+  return (
+    <div className="app" data-tour="tour-page">
+      {/* Sidebar */}
+      <aside className={`sidebar ${sidebarCollapsed ? "collapsed" : ""}`}>
+        <button
+          type="button"
+          className="sb-toggle"
+          onClick={toggleSidebar}
+          aria-expanded={!sidebarCollapsed}
+          aria-label={sidebarToggleLabel}
+          title={sidebarToggleLabel}
+        >
+          {sidebarCollapsed ? <FaChevronRight aria-hidden /> : <FaChevronLeft aria-hidden />}
+        </button>
+
+        <div className="sb-header" data-tour="tour-logo">
+          <div className="sb-brand-icon"><AppLogo /></div>
+          <span className="sb-brand sb-label">G06 · ALS</span>
+        </div>
+
+        {/* Goal switcher dropdown */}
+        <div className="sb-goal" ref={goalMenuRef} data-tour="tour-goal-switcher">
+          <button
+            className="sb-goal-btn"
+            onClick={() => setShowGoalMenu(!showGoalMenu)}
+            title={sidebarCollapsed ? goalLabel : undefined}
+          >
+            <span className="sb-icon"><FaBullseye aria-hidden /></span>
+            <span className="sb-label sb-goal-name">{goalLabel}</span>
+            <span className="sb-label sb-caret"><FaChevronDown aria-hidden /></span>
+          </button>
+          {showGoalMenu && (
+            <div className="goal-dropdown">
+              <div className="goal-dropdown-list">
+                {branches.map((b) => {
+                  const isActive = String(b.id) === String(activeBranch.id);
+                  return (
                     <button
                       key={b.id}
+                      className={`goal-dropdown-item ${isActive ? "active" : ""}`}
                       onClick={() => {
                         switchBranch(b.id);
                         setShowGoalMenu(false);
                       }}
-                      style={{
-                        width: "100%",
-                        padding: "10px 14px",
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "10px",
-                        background: String(b.id) === String(activeBranch.id) ? "#e8f0fe" : "transparent",
-                        border: "none",
-                        cursor: "pointer",
-                        textAlign: "left",
-                        borderBottom: "1px solid #f1f5f9",
-                        fontFamily: "inherit",
-                      }}
                     >
                       <div>
-                        <div style={{ fontSize: "13px", fontWeight: "700", color: "#0f172a" }}>{b.goalName}</div>
-                        <div style={{ fontSize: "11px", color: "#64748b" }}>
-                          {b.campus} · ปี {b.year || 1}
+                        <div className="goal-dropdown-name">{b.goalName}</div>
+                        <div className="goal-dropdown-meta">
+                          {b.campus} · {t("goal.year", { year: b.year || 1 })}
                         </div>
                       </div>
-                      {String(b.id) === String(activeBranch.id) && (
-                        <span style={{ marginLeft: "auto", color: "#0047AB", fontSize: "12px" }}>✓</span>
-                      )}
+                      {isActive && <span className="goal-dropdown-check"><FaCheck aria-hidden /></span>}
                     </button>
-                  ))}
-                </div>
+                  );
+                })}
+              </div>
 
+              <button
+                className="goal-dropdown-action primary"
+                onClick={() => {
+                  setShowCreateModal(true);
+                  setShowGoalMenu(false);
+                }}
+              >
+                <span className="goal-dropdown-action-icon"><FaPlus aria-hidden /></span>
+                <span>{t("goal.add")}</span>
+              </button>
+
+              <button
+                className="goal-dropdown-action"
+                onClick={() => {
+                  setShowGoalMenu(false);
+                  navigate("/selectbranch");
+                }}
+              >
+                <span className="goal-dropdown-action-icon"><FaArrowLeft aria-hidden /></span>
+                <span>{t("goal.backToSelect")}</span>
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* Navigation Tabs */}
+        <nav className="sb-nav" data-tour="tour-nav-tabs">
+          {NAV_ITEMS.map((item) => {
+            const label = t(item.labelKey);
+            return (
+              <button
+                key={item.key}
+                className={`sb-nav-item ${activeTab === item.key ? "active" : ""}`}
+                onClick={() => switchTab(item.key)}
+                aria-current={activeTab === item.key ? "page" : undefined}
+                title={sidebarCollapsed ? label : undefined}
+              >
+                <span className="sb-icon"><item.Icon aria-hidden /></span>
+                <span className="sb-label">{label}</span>
+              </button>
+            );
+          })}
+        </nav>
+
+        <div className="sb-footer">
+          <button
+            className="sb-nav-item sb-help"
+            data-tour="tour-help"
+            onClick={handleHelpClick}
+            title={t("sidebar.helpHint")}
+          >
+            <span className="sb-icon"><FaCircleQuestion aria-hidden /></span>
+            <span className="sb-label">{t("sidebar.help")}</span>
+          </button>
+
+          {/* User profile dropdown */}
+          <div className="sb-user-wrapper" ref={profileMenuRef} data-tour="tour-profile-menu">
+            <button
+              className="sb-user"
+              onClick={() => setShowProfileMenu(!showProfileMenu)}
+              title={sidebarCollapsed ? fullName : undefined}
+            >
+              <div className="nav-user-avatar">{avatar}</div>
+              <span className="sb-label nav-user-name">{fullName}</span>
+              <span className={`sb-label nav-chevron ${showProfileMenu ? "open" : ""}`}><FaChevronDown aria-hidden /></span>
+            </button>
+            {showProfileMenu && (
+              <div className="profile-dropdown">
+                <div className="dropdown-header">
+                  <div className="dropdown-avatar">{avatar}</div>
+                  <div>
+                    <div className="dropdown-name">{fullName}</div>
+                    <div className="dropdown-email">{activeBranch.goalName}</div>
+                  </div>
+                </div>
+                <div className="dropdown-sep" />
                 <button
+                  className="dropdown-item"
                   onClick={() => {
-                    setShowCreateModal(true);
-                    setShowGoalMenu(false);
-                  }}
-                  style={{
-                    width: "100%",
-                    padding: "10px 14px",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "8px",
-                    background: "#f8fafc",
-                    border: "none",
-                    cursor: "pointer",
-                    textAlign: "left",
-                    color: "#0047AB",
-                    fontWeight: "700",
-                    borderTop: "1px solid #e2e8f0",
-                    flexShrink: 0,
+                    switchTab("Profile");
+                    setShowProfileMenu(false);
                   }}
                 >
-                  <span style={{ fontSize: "18px" }}>+</span>
-                  <span style={{ fontSize: "13px" }}>เพิ่มเป้าหมายใหม่</span>
+                  {t("menu.profile")}
+                </button>
+                <div className="dropdown-sep" />
+                <button
+                  className="dropdown-item danger"
+                  onClick={() => {
+                    localStorage.removeItem("access_token");
+                    localStorage.removeItem("userProfile");
+                    localStorage.removeItem("activeBranchId");
+                    navigate("/");
+                  }}
+                >
+                  {t("menu.logout")}
                 </button>
               </div>
             )}
           </div>
         </div>
+      </aside>
 
-        {/* Navigation Tabs */}
-        <div className="nav-tabs">
-          {[
-            { key: "Home", label: "Home" },
-            { key: "SkillTree", label: "Skill Tree" },
-            { key: "History", label: "History" },
-            { key: "Profile", label: "Profile" },
-          ].map((t) => (
-            <button
-              key={t.key}
-              className={`nav-tab ${activeTab === t.key ? "active" : ""}`}
-              onClick={() => switchTab(t.key as any)}
-            >
-              {t.label}
-            </button>
-          ))}
-        </div>
+      {/* Main column: topbar + tab content (sits beside the sidebar, never under it) */}
+      <div className="app-main">
+        <Topbar title={t(activeNav.labelKey)} />
 
-        {/* User profile dropdown */}
-        <div className="nav-user-wrapper" ref={profileMenuRef}>
-          <button className="nav-user" onClick={() => setShowProfileMenu(!showProfileMenu)}>
-            <div className="nav-user-avatar">{avatar}</div>
-            <span className="nav-user-name">{fullName}</span>
-            <span className={`nav-chevron ${showProfileMenu ? "open" : ""}`}>▾</span>
-          </button>
-          {showProfileMenu && (
-            <div className="profile-dropdown">
-              <div className="dropdown-header">
-                <div className="dropdown-avatar">{avatar}</div>
-                <div>
-                  <div className="dropdown-name">{fullName}</div>
-                  <div className="dropdown-email">{activeBranch.goalName}</div>
-                </div>
-              </div>
-              <div className="dropdown-sep" />
-              <button
-                className="dropdown-item"
-                onClick={() => {
-                  switchTab("Profile");
-                  setShowProfileMenu(false);
-                }}
-              >
-                Profile
-              </button>
-              <div className="dropdown-sep" />
-              <button
-                className="dropdown-item danger"
-                onClick={() => {
-                  localStorage.removeItem("access_token");
-                  localStorage.removeItem("userProfile");
-                  localStorage.removeItem("activeBranchId");
-                  navigate("/");
-                }}
-              >
-                Log Out
-              </button>
-            </div>
+        <div className="content">
+          {activeTab === "Home" && (
+            <HomeTab
+              userProfile={userProfile}
+              activeBranch={activeBranch}
+              stats={statsController.stats}
+              skills={skillTreeController.skills}
+              treeSkills={skillTreeController.treeSkills}
+              unlocked={skillTreeController.unlockedSkills}
+              canUnlock={skillTreeController.canUnlock}
+              selected={skillTreeController.selectedSkill}
+              setSelected={skillTreeController.setSelectedSkill}
+              hovered={hovered}
+              setHovered={setHovered}
+              sessions={historyController.sessions}
+              onStartExercise={handleStartExercise}
+              setShowPicker={setShowPicker}
+              handleNodeClick={handleNodeClick}
+              switchTab={switchTab}
+            />
+          )}
+
+          {activeTab === "SkillTree" && (
+            <SkillTreeTab
+              treeSkills={skillTreeController.treeSkills}
+              unlocked={skillTreeController.unlockedSkills}
+              canUnlockFn={skillTreeController.canUnlock}
+              onNodeClick={handleNodeClick}
+              selected={skillTreeController.selectedSkill}
+              setSelected={skillTreeController.setSelectedSkill}
+              hovered={hovered}
+              setHovered={setHovered}
+              onStartExercise={handleStartExercise}
+            />
+          )}
+
+          {activeTab === "History" && <HistoryTab sessions={historyController.sessions} />}
+
+          {activeTab === "Profile" && (
+            <ProfileTab
+              unlocked={skillTreeController.unlockedSkills}
+              sessions={historyController.sessions}
+              userProfile={userProfile}
+              activeBranch={activeBranch}
+            />
           )}
         </div>
-      </nav>
-
-      {/* Tabs Content */}
-      <div className="content">
-        {activeTab === "Home" && (
-          <HomeTab
-            userProfile={userProfile}
-            activeBranch={activeBranch}
-            stats={statsController.stats}
-            skills={skillTreeController.skills}
-            treeSkills={skillTreeController.treeSkills}
-            unlocked={skillTreeController.unlockedSkills}
-            canUnlock={skillTreeController.canUnlock}
-            selected={skillTreeController.selectedSkill}
-            setSelected={skillTreeController.setSelectedSkill}
-            hovered={hovered}
-            setHovered={setHovered}
-            sessions={historyController.sessions}
-            onStartExercise={handleStartExercise}
-            setShowPicker={setShowPicker}
-            handleNodeClick={handleNodeClick}
-            switchTab={switchTab}
-          />
-        )}
-
-        {activeTab === "SkillTree" && (
-          <SkillTreeTab
-            treeSkills={skillTreeController.treeSkills}
-            unlocked={skillTreeController.unlockedSkills}
-            canUnlockFn={skillTreeController.canUnlock}
-            onNodeClick={handleNodeClick}
-            selected={skillTreeController.selectedSkill}
-            setSelected={skillTreeController.setSelectedSkill}
-            hovered={hovered}
-            setHovered={setHovered}
-            onStartExercise={handleStartExercise}
-          />
-        )}
-
-        {activeTab === "History" && <HistoryTab sessions={historyController.sessions} />}
-
-        {activeTab === "Profile" && (
-          <ProfileTab
-            unlocked={skillTreeController.unlockedSkills}
-            sessions={historyController.sessions}
-            userProfile={userProfile}
-            activeBranch={activeBranch}
-          />
-        )}
       </div>
 
       {/* Modals */}

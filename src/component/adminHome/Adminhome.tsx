@@ -2,13 +2,6 @@ import { useState } from "react";
 import "../decorate/Adminhome.css";
 import { useNavigate } from "react-router-dom";
 import {
-  FaBolt,
-  FaChartPie,
-  FaUsers,
-  FaTree,
-  FaBullseye,
-  FaPenToSquare,
-  FaClipboardList,
   FaArrowRightFromBracket,
   FaChevronLeft,
   FaChevronRight,
@@ -19,21 +12,18 @@ import SkillTab from "./skillPanel/SkillTab";
 import GoalTab from "./goalPanel/GoalTab";
 import ExerciseTab from "./exercisePanel/ExerciseTab";
 import HistoryTab from "./HistoryTab";
+import AiTab from "./aiPanel/AiTab";
+import AppLogo from "../common/AppLogo";
+import { Topbar } from "../common/Topbar";
+import { usePreferences } from "../../context/PreferencesContext";
 import { summaryController } from "./summaryPanel/summary.controller";
 import { historyController } from "./historyPanel/history.controller";
-import { getTierColor, getScoreColor, getStatusColor, gradeLabel } from "../../utils/adminUi";
+import { getTierColor, getScoreColor, getStatusColor, gradeKey, TABS } from "../../utils/adminUi";
 
-const TABS = [
-  { key: "summary", icon: <FaChartPie />, label: "สรุปภาพรวม" },
-  { key: "users", icon: <FaUsers />, label: "ผู้ใช้งาน" },
-  { key: "skills", icon: <FaTree />, label: "จัดการ Skill" },
-  { key: "goals", icon: <FaBullseye />, label: "จัดการ Goal" },
-  { key: "exercises", icon: <FaPenToSquare />, label: "จัดการ Exercise" },
-  { key: "history", icon: <FaClipboardList />, label: "ประวัติโจทย์" },
-];
 
 export default function AdminHome() {
   const navigate = useNavigate();
+  const { t } = usePreferences();
   const [activeTab, setActiveTab] = useState("summary");
   const [visitedTabs, setVisitedTabs] = useState<Set<string>>(new Set(["summary"]));
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -47,6 +37,10 @@ export default function AdminHome() {
   const { filteredHistory, histSearch, setHistSearch, histGrade, setHistGrade } =
     historyController();
 
+  const tabIcon = (key: string) => TABS.find((tab) => tab.key === key)?.icon;
+  const activeTabDef = TABS.find((tab) => tab.key === activeTab) ?? TABS[0];
+  const toggleLabel = sidebarOpen ? t("admin.sidebar.collapse") : t("admin.sidebar.expand");
+
   return (
     <div className="ad-app">
       {/* ── SIDEBAR ── */}
@@ -55,32 +49,38 @@ export default function AdminHome() {
           type="button"
           className="ad-sidebar-toggle"
           onClick={() => setSidebarOpen((prev) => !prev)}
-          title={sidebarOpen ? "ย่อ Sidebar" : "ขยาย Sidebar"}
+          title={toggleLabel}
+          aria-label={toggleLabel}
+          aria-expanded={sidebarOpen}
         >
-          {sidebarOpen ? <FaChevronLeft /> : <FaChevronRight />}
+          {sidebarOpen ? <FaChevronLeft aria-hidden /> : <FaChevronRight aria-hidden />}
         </button>
 
         <div className="ad-sidebar-head">
-          <div className="ad-nav-icon"><FaBolt /></div>
+          <div className="ad-nav-icon"><AppLogo /></div>
           <div className="ad-sidebar-brand-text">
             <span className="ad-nav-brand">G06 · ALS</span>
-            <span className="ad-nav-badge">Admin</span>
+            <span className="ad-nav-badge">{t("admin.badge")}</span>
           </div>
         </div>
 
         <div className="ad-sidebar-tabs">
-          {TABS.map((t) => (
-            <button
-              key={t.key}
-              type="button"
-              className={`ad-sidebar-tab ${activeTab === t.key ? "active" : ""}`}
-              onClick={() => handleTabClick(t.key)}
-              title={t.label}
-            >
-              <span className="ad-sidebar-tab-icon">{t.icon}</span>
-              <span className="ad-sidebar-tab-label">{t.label}</span>
-            </button>
-          ))}
+          {TABS.map((tab) => {
+            const label = t(tab.labelKey);
+            return (
+              <button
+                key={tab.key}
+                type="button"
+                className={`ad-sidebar-tab ${activeTab === tab.key ? "active" : ""}`}
+                onClick={() => handleTabClick(tab.key)}
+                aria-current={activeTab === tab.key ? "page" : undefined}
+                title={label}
+              >
+                <span className="ad-sidebar-tab-icon">{tab.icon}</span>
+                <span className="ad-sidebar-tab-label">{label}</span>
+              </button>
+            );
+          })}
         </div>
 
         <div className="ad-sidebar-foot">
@@ -88,75 +88,88 @@ export default function AdminHome() {
             type="button"
             className="ad-sidebar-logout"
             onClick={() => navigate("/")}
-            title="ออกจากระบบ"
+            title={t("admin.logout")}
           >
             <span className="ad-sidebar-tab-icon"><FaArrowRightFromBracket /></span>
-            <span className="ad-sidebar-tab-label">ออกจากระบบ</span>
+            <span className="ad-sidebar-tab-label">{t("admin.logout")}</span>
           </button>
         </div>
       </aside>
 
-      {/* ── MAIN ── */}
-      <main className="ad-main">
-        {/* ══ SUMMARY ══ */}
-        {visitedTabs.has("summary") && (
-          <div style={{ display: activeTab === "summary" ? undefined : "none" }}>
-            <SummaryTab
-              SUMMARY={summary}
-              skills={skillProgress}
-              users={userActivity}
-              getTierColor={getTierColor}
-              getScoreColor={getScoreColor}
-              getStatusColor={getStatusColor}
-              maxBar={maxBar}
-              dayLabels={dayLabels}
-            />
-          </div>
-        )}
+      {/* ── MAIN COLUMN: shared topbar + tab content, beside the sidebar ── */}
+      <div className="ad-column">
+        <Topbar title={t(activeTabDef.labelKey)} />
 
-        {/* ══ USERS ══ */}
-        {visitedTabs.has("users") && (
-          <div style={{ display: activeTab === "users" ? undefined : "none" }}>
-            <UsersTab />
-          </div>
-        )}
+        <main className="ad-main">
+          {/* ══ SUMMARY ══ */}
+          {visitedTabs.has("summary") && (
+            <div style={{ display: activeTab === "summary" ? undefined : "none" }}>
+              <SummaryTab
+                icon={tabIcon("summary")}
+                SUMMARY={summary}
+                skills={skillProgress}
+                users={userActivity}
+                getTierColor={getTierColor}
+                getScoreColor={getScoreColor}
+                getStatusColor={getStatusColor}
+                maxBar={maxBar}
+                dayLabels={dayLabels}
+              />
+            </div>
+          )}
 
-        {/* ══ SKILLS ══ */}
-        {visitedTabs.has("skills") && (
-          <div style={{ display: activeTab === "skills" ? undefined : "none" }}>
-            <SkillTab />
-          </div>
-        )}
+          {/* ══ USERS ══ */}
+          {visitedTabs.has("users") && (
+            <div style={{ display: activeTab === "users" ? undefined : "none" }}>
+              <UsersTab icon={tabIcon("users")} />
+            </div>
+          )}
 
-        {/* ══ GOALS ══ */}
-        {visitedTabs.has("goals") && (
-          <div style={{ display: activeTab === "goals" ? undefined : "none" }}>
-            <GoalTab />
-          </div>
-        )}
+          {/* ══ SKILLS ══ */}
+          {visitedTabs.has("skills") && (
+            <div style={{ display: activeTab === "skills" ? undefined : "none" }}>
+              <SkillTab icon={tabIcon("skills")} />
+            </div>
+          )}
 
-        {/* ══ EXERCISES ══ */}
-        {visitedTabs.has("exercises") && (
-          <div style={{ display: activeTab === "exercises" ? undefined : "none" }}>
-            <ExerciseTab />
-          </div>
-        )}
+          {/* ══ GOALS ══ */}
+          {visitedTabs.has("goals") && (
+            <div style={{ display: activeTab === "goals" ? undefined : "none" }}>
+              <GoalTab icon={tabIcon("goals")} />
+            </div>
+          )}
 
-        {/* ══ HISTORY ══ */}
-        {visitedTabs.has("history") && (
-          <div style={{ display: activeTab === "history" ? undefined : "none" }}>
-            <HistoryTab
-              filteredHistory={filteredHistory}
-              histSearch={histSearch}
-              setHistSearch={setHistSearch}
-              histGrade={histGrade}
-              setHistGrade={setHistGrade}
-              gradeLabel={gradeLabel}
-              getScoreColor={getScoreColor}
-            />
-          </div>
-        )}
-      </main>
+          {/* ══ EXERCISES ══ */}
+          {visitedTabs.has("exercises") && (
+            <div style={{ display: activeTab === "exercises" ? undefined : "none" }}>
+              <ExerciseTab icon={tabIcon("exercises")} />
+            </div>
+          )}
+
+          {/* ══ HISTORY ══ */}
+          {visitedTabs.has("history") && (
+            <div style={{ display: activeTab === "history" ? undefined : "none" }}>
+              <HistoryTab
+                icon={tabIcon("history")}
+                filteredHistory={filteredHistory}
+                histSearch={histSearch}
+                setHistSearch={setHistSearch}
+                histGrade={histGrade}
+                setHistGrade={setHistGrade}
+                gradeLabel={(grade: string) => t(gradeKey(grade))}
+                getScoreColor={getScoreColor}
+              />
+            </div>
+          )}
+
+          {/* ══ AI ผู้ช่วย ══ */}
+          {visitedTabs.has("ai") && (
+            <div style={{ display: activeTab === "ai" ? undefined : "none" }}>
+              <AiTab icon={tabIcon("ai")} />
+            </div>
+          )}
+        </main>
+      </div>
     </div>
   );
 }

@@ -9,7 +9,7 @@ import {
 export class GoalService {
   getAllGoals = async (): Promise<ApiResponse<Goal[]>> => {
     try {
-      const result = await AppClient.get("/goal");
+      const result = await AppClient.get("/goal", { includeInactive: "true" });
       return { isError: false, data: result as Goal[], errorMessage: "" };
     } catch (error: any) {
       return {

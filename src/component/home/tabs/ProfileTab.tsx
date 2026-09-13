@@ -1,13 +1,23 @@
 import React from "react";
+import { FaClock, FaBullseye, FaBolt, FaUserGraduate } from "react-icons/fa6";
 import { SessionHistoryItem } from "../../../models/sessionHistoryModel";
-import { computeBehavior, BEHAVIOR_META, DIM_LABELS } from "../utils/behavior";
-import { FaClock, FaBullseye, FaBolt } from "react-icons/fa6";
+import { usePreferences } from "../../../context/PreferencesContext";
+import {
+  computeBehavior,
+  BEHAVIOR_META,
+  DIM_LABEL_KEYS,
+  type BehaviorClass,
+  type BehaviorDim,
+} from "../utils/behavior";
 
-const DIM_ICONS = {
-  time: <FaClock />,
-  streak: <FaBullseye />,
-  momentum: <FaBolt />,
+const DIM_ICONS: Record<BehaviorDim, React.ReactNode> = {
+  time: <FaClock aria-hidden />,
+  streak: <FaBullseye aria-hidden />,
+  momentum: <FaBolt aria-hidden />,
 };
+
+// --meta = สีของ behavior class (token --beh-* ใน Home.css) ใช้ผสมสีพื้น/ขอบให้เข้ากับทั้งสองธีม
+const metaVar = (color: string) => ({ "--meta": color } as React.CSSProperties);
 
 interface ProfileTabProps {
   unlocked: Set<number>;
@@ -34,119 +44,92 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({
   userProfile,
   activeBranch,
 }) => {
+  const { t } = usePreferences();
   const behavior = computeBehavior(sessions);
   const meta = BEHAVIOR_META[behavior.cls];
 
-  const fullName = userProfile
-    ? `${userProfile.fname || ""} ${userProfile.lname || ""}`.trim()
-    : "นักเรียน ALS";
-  const avatar = userProfile?.gender === "FEMALE" ? "👩‍🎓" : "👨‍🎓";
+  const profileFullName = [userProfile?.fname, userProfile?.lname].filter(Boolean).join(" ");
+  const fullName = profileFullName || localStorage.getItem("fullname") || t("user.fallbackName");
+
+  const personalRows = [
+    { label: t("profile.fullName"), value: fullName },
+    { label: t("profile.faculty"), value: activeBranch?.faculty || "—" },
+    { label: t("profile.major"), value: activeBranch?.major || "—" },
+    { label: t("profile.year"), value: activeBranch?.year || "—" },
+    { label: t("profile.campus"), value: activeBranch?.campus || "—" },
+    { label: t("profile.learningGoal"), value: activeBranch?.goalName || "—" },
+  ];
 
   return (
     <div className="tab-profile">
       <div className="profile-container">
-        <div className="profile-hero">
-          <div className="profile-avatar-lg">{avatar}</div>
+        <div className="profile-hero" data-tour="tour-profile-hero">
+          <div className="profile-avatar-lg"><FaUserGraduate aria-hidden /></div>
           <div className="profile-info-main">
             <div className="profile-name">{fullName}</div>
             <div className="profile-goal">
-              เป้าหมาย: {activeBranch?.goalName || "ยังไม่ได้ตั้งเป้าหมาย"}
+              {t("profile.goal", { goal: activeBranch?.goalName || t("profile.goalUnset") })}
             </div>
           </div>
           <div className="profile-skill-count">
-            <div className="profile-skill-count-label">Skills ปลดล็อก</div>
+            <div className="profile-skill-count-label">{t("profile.skillsUnlocked")}</div>
             <div className="profile-skill-count-num">{unlocked.size}</div>
           </div>
         </div>
 
-        <div className="behavior-card" style={{ background: meta.bg, borderColor: meta.border }}>
+        <div className="behavior-card" style={metaVar(meta.color)} data-tour="tour-behavior">
           <div className="behavior-class-header">
-            <div className="behavior-class-badge" style={{ background: meta.color }}>
-              <span className="bcb-label">{meta.label} Learner</span>
+            <div className="behavior-class-badge">
+              <span className="bcb-label">{t("profile.learner", { label: t(meta.labelKey) })}</span>
             </div>
-            <div
-              className="behavior-score-wrap"
-              style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "4px" }}
-            >
-              <div
-                className="behavior-score-ring"
-                style={{ border: `3px solid ${meta.color}`, borderRadius: "50%", padding: "8px 12px" }}
-              >
-                <span className="behavior-score-num" style={{ color: meta.color, fontWeight: "800" }}>
-                  {behavior.score}
-                </span>
+            <div className="behavior-score-wrap">
+              <div className="behavior-score-ring">
+                <span className="behavior-score-num">{behavior.score}</span>
                 <span className="behavior-score-sub">/ 100</span>
               </div>
-              <span style={{ fontSize: "12px", fontWeight: "600", color: meta.color }}>
-                คะแนนพฤติกรรม
-              </span>
+              <span className="behavior-score-caption">{t("profile.behaviorScore")}</span>
             </div>
           </div>
-          <p className="behavior-desc" style={{ color: meta.color }}>
-            {meta.desc}
-          </p>
-          <div className="behavior-dims">
-            <div
-              className="behavior-dim-row"
-              style={{ padding: "8px 0", borderBottom: "1px solid #e2e8f0", marginBottom: "8px" }}
-            >
-              <span className="bdim-icon" style={{ fontSize: "16px", display: "flex", alignItems: "center", color: "#64748b" }}>
-                <FaClock />
-              </span>
-              <span className="bdim-label" style={{ fontWeight: "600", color: "#334155" }}>
-                เวลาทำโจทย์เฉลี่ย
-              </span>
-              <span className="bdim-val" style={{ marginLeft: "auto", fontWeight: "800", color: meta.color }}>
-                {behavior.avgTime} วินาที / ข้อ
-              </span>
+          <p className="behavior-desc">{t(meta.descKey)}</p>
+          <div className="behavior-dims" data-tour="tour-behavior-dims">
+            <div className="behavior-dim-row behavior-dim-avg">
+              <span className="bdim-icon"><FaClock aria-hidden /></span>
+              <span className="bdim-label">{t("profile.avgTime")}</span>
+              <span className="bdim-val">{t("profile.avgTimeVal", { sec: behavior.avgTime })}</span>
             </div>
-            {Object.entries(behavior.dims).map(([key, val]) => {
-              const dm = DIM_LABELS[key as keyof typeof DIM_LABELS];
-              const icon = DIM_ICONS[key as keyof typeof DIM_ICONS];
+            {(Object.keys(behavior.dims) as BehaviorDim[]).map((key) => {
+              const val = behavior.dims[key];
               return (
                 <div key={key} className="behavior-dim-row">
-                  <span className="bdim-icon" style={{ display: "flex", alignItems: "center", color: meta.color }}>{icon}</span>
-                  <span className="bdim-label">{dm.label}</span>
+                  <span className="bdim-icon">{DIM_ICONS[key]}</span>
+                  <span className="bdim-label">{t(DIM_LABEL_KEYS[key])}</span>
                   <div className="bdim-track">
-                    <div className="bdim-fill" style={{ width: `${val}%`, background: meta.color }} />
+                    <div className="bdim-fill" style={{ width: `${val}%` }} />
                     <div className="bdim-marker" style={{ left: "50%" }} />
                     <div className="bdim-marker" style={{ left: "70%" }} />
                   </div>
-                  <span className="bdim-val" style={{ color: meta.color }}>
-                    {val}%
-                  </span>
+                  <span className="bdim-val">{val}%</span>
                 </div>
               );
             })}
           </div>
           <div className="behavior-class-legend">
-            {Object.entries(BEHAVIOR_META).map(([k, m]) => (
+            {(Object.keys(BEHAVIOR_META) as BehaviorClass[]).map((k) => (
               <span
                 key={k}
                 className={`bcl-item ${behavior.cls === k ? "active" : ""}`}
-                style={
-                  behavior.cls === k
-                    ? { background: m.color, color: "#fff", borderColor: m.color }
-                    : {}
-                }
+                style={metaVar(BEHAVIOR_META[k].color)}
               >
-                {m.label}
+                {t(BEHAVIOR_META[k].labelKey)}
               </span>
             ))}
           </div>
         </div>
 
         <div className="profile-grid">
-          <div className="profile-card">
-            <div className="profile-card-title">ข้อมูลส่วนตัว</div>
-            {[
-              { label: "ชื่อ-นามสกุล", value: fullName },
-              { label: "คณะ", value: activeBranch?.faculty || "—" },
-              { label: "สาขา", value: activeBranch?.major || "—" },
-              { label: "ชั้นปี", value: activeBranch?.year || "—" },
-              { label: "วิทยาเขต", value: activeBranch?.campus || "—" },
-              { label: "เป้าหมายการเรียน", value: activeBranch?.goalName || "—" },
-            ].map((row, i) => (
+          <div className="profile-card" data-tour="tour-profile-personal">
+            <div className="profile-card-title">{t("profile.personal")}</div>
+            {personalRows.map((row, i) => (
               <div key={i} className="profile-row">
                 <span className="profile-row-label">{row.label}</span>
                 <span className="profile-row-val">{row.value}</span>

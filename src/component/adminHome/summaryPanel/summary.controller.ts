@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { summaryService } from "./summary.service";
+import { usePreferences } from "../../../context/PreferencesContext";
 import {
   AdminSummary,
   SummarySkillProgress,
@@ -15,9 +16,8 @@ const EMPTY_SUMMARY: AdminSummary = {
   weekSessions: [0, 0, 0, 0, 0, 0, 0],
 };
 
-const DAY_LABELS = ["จ", "อ", "พ", "พฤ", "ศ", "ส", "อา"];
-
 export function summaryController() {
+  const { t } = usePreferences();
   const [summary, setSummary] = useState<AdminSummary>(EMPTY_SUMMARY);
   const [skillProgress, setSkillProgress] = useState<SummarySkillProgress[]>([]);
   const [userActivity, setUserActivity] = useState<SummaryUserActivity[]>([]);
@@ -51,6 +51,7 @@ export function summaryController() {
     isLoading,
     error,
     maxBar,
-    dayLabels: DAY_LABELS,
+    // จันทร์ → อาทิตย์ ตามลำดับของ weekSessions ('|' คั่นใน i18n)
+    dayLabels: t("admin.summary.days").split("|"),
   };
 }

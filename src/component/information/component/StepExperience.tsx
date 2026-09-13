@@ -52,14 +52,13 @@ export const StepExperience: React.FC<StepExperienceProps> = ({
             {currentExpData.level}
           </div>
           <div className="exp-title">{currentExpData.title}</div>
-          <div className="exp-desc">{currentExpData.desc}</div>
-          <div className="exp-badges">
+          {/* <div className="exp-badges">
             {currentExpData.badges.map((b, i) => (
               <span key={i} className="badge">
                 {b}
               </span>
             ))}
-          </div>
+          </div> */}
         </div>
       </div>
     </div>

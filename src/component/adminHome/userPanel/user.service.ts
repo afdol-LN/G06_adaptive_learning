@@ -3,6 +3,7 @@ import {
   getUsersResponseAdmin,
   UserResponseAdmin,
   CreateUserByAdminRequest,
+  UpdateUserByAdminRequest,
   RoleOption,
   GenderOption,
 } from "../../../models/userModel";
@@ -82,6 +83,35 @@ export class UserService {
         isError: true,
         data: null,
         errorMessage: error.message || "Failed to create user",
+      };
+    }
+  };
+
+  updateAdminUser = async (
+    id: number,
+    data: UpdateUserByAdminRequest
+  ): Promise<ApiResponse<any>> => {
+    try {
+      const result = await AppClient.put(`/userprofile/admin/update_user/${id}`, data);
+      return result as ApiResponse<any>;
+    } catch (error: any) {
+      return {
+        isError: true,
+        data: null,
+        errorMessage: error.message || "Failed to update user",
+      };
+    }
+  };
+
+  getUserBranches = async (userId: number): Promise<ApiResponse<any>> => {
+    try {
+      const result = await AppClient.get(`/branch/user/${userId}`);
+      return result as ApiResponse<any>;
+    } catch (error: any) {
+      return {
+        isError: true,
+        data: null,
+        errorMessage: error.message || "Failed to fetch user branches",
       };
     }
   };
