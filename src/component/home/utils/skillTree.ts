@@ -1,11 +1,36 @@
-import { BranchSkill, SkillProgress } from "../../../models/branchSkillModel";
+import { BranchSkill, GoalNode, SkillProgress } from "../../../models/branchSkillModel";
 
 export const NODE_W = 260;
 export const NODE_H = 120;
+const ROW_GAP = 130;
 
 export interface LayoutSkill extends BranchSkill {
   x: number;
   y: number;
+}
+
+export interface LayoutGoalNode extends GoalNode {
+  x: number;
+  y: number;
+}
+
+// The goal node sits one row below the deepest skill, under the average x of the skills it
+// requires, so every edge into it runs downward (adt-learning/docs/adr/0005)
+export function layoutGoalNode(goal: GoalNode | null, skills: LayoutSkill[]): LayoutGoalNode | null {
+  if (!goal || skills.length === 0) return null;
+  const required = skills.filter((s) => goal.requiredSkillIds.includes(s.skillId));
+  const parents = required.length > 0 ? required : skills;
+  return {
+    ...goal,
+    x: parents.reduce((sum, s) => sum + s.x, 0) / parents.length,
+    y: Math.max(...skills.map((s) => s.y)) + NODE_H + ROW_GAP,
+  };
+}
+
+// Share of required skills at 100% — floored, so the bar only fills once the goal is complete.
+// A count ratio from the backend's counts, not a Progress value (never derived from P(L) here).
+export function goalProgressPercent(goal: GoalNode): number {
+  return goal.requiredCount > 0 ? Math.floor((goal.masteredCount / goal.requiredCount) * 100) : 0;
 }
 
 export function layoutSkills(skills: BranchSkill[]): LayoutSkill[] {
@@ -53,7 +78,7 @@ export function layoutSkills(skills: BranchSkill[]): LayoutSkill[] {
     ids.forEach((id, i) => {
       positions[id] = {
         x: startX + i * (NODE_W + 50),
-        y: d * (NODE_H + 130),
+        y: d * (NODE_H + ROW_GAP),
       };
     });
   });
@@ -125,6 +150,11 @@ export function getNodeColors(isUnlocked: boolean, canUnlockThis: boolean, progr
   if (isUnlocked) return nodePalette('open');
   if (canUnlockThis) return nodePalette('ready');
   return nodePalette('locked');
+}
+
+// The goal node is a target, not a practisable skill: "open" colours with a dashed border until complete
+export function getGoalNodeColors(isComplete: boolean) {
+  return nodePalette(isComplete ? 'done' : 'open');
 }
 
 // ใช้ร่วมกันทั้ง skill tree และหน้า Exercise — ทุกหน้าต้องได้ตัวเลขเดียวกัน

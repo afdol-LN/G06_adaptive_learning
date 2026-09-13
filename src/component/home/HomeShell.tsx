@@ -151,6 +151,10 @@ export const HomeShell: React.FC = () => {
     );
   };
 
+  const handleGoalClick = () => {
+    skillTreeController.setGoalSelected(!skillTreeController.goalSelected);
+  };
+
   const handleStartExercise = (skill: LayoutSkill) => {
     setConfirmSkill(skill);
   };
@@ -382,6 +386,10 @@ export const HomeShell: React.FC = () => {
               setShowPicker={setShowPicker}
               handleNodeClick={handleNodeClick}
               switchTab={switchTab}
+              goal={skillTreeController.goalNode}
+              goalSelected={skillTreeController.goalSelected}
+              onGoalClick={handleGoalClick}
+              setGoalSelected={skillTreeController.setGoalSelected}
             />
           )}
 
@@ -396,6 +404,10 @@ export const HomeShell: React.FC = () => {
               hovered={hovered}
               setHovered={setHovered}
               onStartExercise={handleStartExercise}
+              goal={skillTreeController.goalNode}
+              goalSelected={skillTreeController.goalSelected}
+              onGoalClick={handleGoalClick}
+              setGoalSelected={skillTreeController.setGoalSelected}
             />
           )}
 

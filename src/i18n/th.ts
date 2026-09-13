@@ -154,6 +154,14 @@ export const th = {
   "exercise.rules.draft": "ออกกลางคันได้ คำตอบที่ส่งแล้วและข้อที่ทำอยู่จะเก็บเป็นแบบร่าง กลับมาทำต่อได้จาก Skill Tree (ข้อที่ค้างไว้เริ่มนับเวลาใหม่)",
   "skill.draft.short": "ทำค้างไว้ · {count} ข้อ",
   "skill.draft.long": "มีแบบร่างค้างอยู่ — ตอบไปแล้ว {count} ข้อ",
+
+  // ── Goal node (ท้าย skill tree) ──
+  "goalNode.label": "เป้าหมาย",
+  "goalNode.complete": "สำเร็จแล้ว",
+  "goalNode.count": "{done}/{total} ทักษะ",
+  "goalNode.statusDone": "ทักษะที่เป้าหมายนี้ต้องการถึง 100% ครบแล้ว",
+  "goalNode.statusTodo": "ทำทักษะที่เป้าหมายนี้ต้องการให้ถึง 100% ครบทุกตัว",
+  "goalNode.required": "ทักษะที่เป้าหมายต้องการ",
   "skill.action.resume": "ทำต่อ →",
   "confirm.resumeTitle": "ทำต่อจากที่ค้างไว้?",
   "confirm.resumeLead": "คุณตอบไปแล้ว {count} ข้อใน",

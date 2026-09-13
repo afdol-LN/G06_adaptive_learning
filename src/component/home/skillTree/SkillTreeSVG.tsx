@@ -1,12 +1,16 @@
 import React from "react";
+import { FaFlagCheckered } from "react-icons/fa6";
 import { usePreferences } from "../../../context/PreferencesContext";
 import { ZoomableSVG } from "./ZoomableSVG";
 import {
   NODE_W,
   NODE_H,
   LayoutSkill,
+  LayoutGoalNode,
   getNodeColors,
+  getGoalNodeColors,
   getProgressColor,
+  goalProgressPercent,
   displayProgressPercent,
   formatProgressLabel,
   getDraftCount,
@@ -24,7 +28,13 @@ interface SkillTreeSVGProps {
   hovered: number | null;
   setHovered: (id: number | null) => void;
   zoomable?: boolean;
+  /** goal node ท้าย tree (adt-learning/docs/adr/0005) — null เมื่อ goal ไม่มีทักษะที่ต้องการ */
+  goal?: LayoutGoalNode | null;
+  goalSelected?: boolean;
+  onGoalClick?: () => void;
 }
+
+const truncateName = (name: string) => (name.length > 20 ? name.slice(0, 19) + "…" : name);
 
 export const SkillTreeSVG: React.FC<SkillTreeSVGProps> = ({
   skills,
@@ -35,6 +45,9 @@ export const SkillTreeSVG: React.FC<SkillTreeSVGProps> = ({
   hovered,
   setHovered,
   zoomable = false,
+  goal = null,
+  goalSelected = false,
+  onGoalClick,
 }) => {
   const { t } = usePreferences();
 
@@ -44,6 +57,7 @@ export const SkillTreeSVG: React.FC<SkillTreeSVGProps> = ({
 
   const notStarted = t("skill.notStarted");
   const getNodeById = (id: number) => skills.find((s) => s.skillId === id);
+  const isGoalRequired = (skillId: number) => !!goal && goal.requiredSkillIds.includes(skillId);
 
   const getEdgeColor = (fromId: number, toId: number) => {
     if (unlocked.has(toId)) return "var(--edge-open)";
@@ -54,12 +68,129 @@ export const SkillTreeSVG: React.FC<SkillTreeSVGProps> = ({
   const isRelatedEdge = (fromId: number, toId: number) =>
     selected && (fromId === selected.skillId || toId === selected.skillId);
 
-  const minX = Math.min(...skills.map((s) => s.x || 0)) - NODE_W / 2 - 40;
-  const minY = Math.min(...skills.map((s) => s.y || 0)) - NODE_H / 2 - 40;
-  const maxX = Math.max(...skills.map((s) => s.x || 0)) + NODE_W / 2 + 40;
-  const maxY = Math.max(...skills.map((s) => s.y || 0)) + NODE_H / 2 + 40;
+  // the goal node sits below every skill, so it counts toward the canvas bounds too
+  const placed: { x: number; y: number }[] = goal ? [...skills, goal] : skills;
+  const minX = Math.min(...placed.map((s) => s.x || 0)) - NODE_W / 2 - 40;
+  const minY = Math.min(...placed.map((s) => s.y || 0)) - NODE_H / 2 - 40;
+  const maxX = Math.max(...placed.map((s) => s.x || 0)) + NODE_W / 2 + 40;
+  const maxY = Math.max(...placed.map((s) => s.y || 0)) + NODE_H / 2 + 40;
   const svgWidth = maxX - minX;
   const svgHeight = maxY - minY;
+
+  // Edges into the goal node — one from each required skill, merging on a line just above the goal
+  // row. Solid once that skill is at 100% (the same test that unlocks a skill), dashed until then.
+  const goalEdges =
+    goal &&
+    goal.requiredSkillIds.map((reqId) => {
+      const from = getNodeById(reqId);
+      if (!from) return null;
+      const mastered = from.progressPercent === 100;
+      const related = goalSelected || selected?.skillId === reqId;
+      const x1 = from.x;
+      const y1 = from.y + NODE_H / 2;
+      const x2 = goal.x;
+      const y2 = goal.y - NODE_H / 2;
+      const midY = y2 - 40;
+      return (
+        <path
+          key={`edge-goal-${reqId}`}
+          d={`M${x1},${y1} L${x1},${midY} L${x2},${midY} L${x2},${y2}`}
+          fill="none"
+          style={{ stroke: related ? "var(--accent)" : mastered ? "var(--edge-open)" : "var(--edge-locked)" }}
+          strokeWidth={related ? 2.6 : mastered ? 2 : 1.5}
+          strokeLinejoin="round"
+          strokeLinecap="round"
+          strokeDasharray={mastered ? "none" : "6,4"}
+          strokeOpacity={selected && !related ? 0.08 : 0.9}
+        />
+      );
+    });
+
+  const renderGoalNode = (g: LayoutGoalNode) => {
+    const pct = goalProgressPercent(g);
+    const { bg, border, text, bar } = getGoalNodeColors(g.isComplete);
+    const nx = g.x - NODE_W / 2;
+    const ny = g.y - NODE_H / 2;
+    const isRelated = !selected || isGoalRequired(selected.skillId);
+
+    return (
+      <g
+        className="tree-node clickable"
+        onClick={(e) => {
+          e.stopPropagation();
+          onGoalClick?.();
+        }}
+        style={{ opacity: isRelated ? 1 : 0.25, transition: "opacity .2s" }}
+      >
+        {goalSelected && (
+          <rect
+            x={nx - 4}
+            y={ny - 4}
+            width={NODE_W + 8}
+            height={NODE_H + 8}
+            rx={11}
+            fill="none"
+            strokeWidth={2.5}
+            opacity={0.9}
+            className="tree-node-ring"
+          />
+        )}
+        <rect
+          x={nx}
+          y={ny}
+          width={NODE_W}
+          height={NODE_H}
+          rx={8}
+          strokeWidth={goalSelected ? 2.5 : 1.5}
+          strokeDasharray={g.isComplete ? undefined : "6,4"}
+          style={{ fill: bg, stroke: goalSelected ? "var(--accent)" : border }}
+        />
+
+        {/* Required skills at 100% */}
+        <rect x={nx + 2} y={ny + NODE_H - 10} width={NODE_W - 4} height={7} rx={3.5} style={{ fill: bar }} />
+        <rect
+          x={nx + 2}
+          y={ny + NODE_H - 10}
+          width={Math.max(0, ((NODE_W - 4) * pct) / 100)}
+          height={7}
+          rx={3.5}
+          style={{ fill: getProgressColor(pct) }}
+          opacity={0.9}
+        />
+
+        <FaFlagCheckered x={nx + 12} y={ny + 11} size={16} style={{ color: text }} aria-hidden />
+        <text x={nx + 34} y={ny + 19} dominantBaseline="central" fontSize={12} fontWeight="700" style={{ fill: text }}>
+          {t("goalNode.label")}
+        </text>
+
+        <text
+          x={g.x}
+          y={g.y - 4}
+          textAnchor="middle"
+          dominantBaseline="central"
+          fontSize={19}
+          fontWeight="700"
+          style={{ fill: text }}
+        >
+          {truncateName(g.goalName)}
+        </text>
+
+        <text
+          x={g.x}
+          y={g.y + 24}
+          textAnchor="middle"
+          dominantBaseline="central"
+          fontSize={15}
+          fontWeight="600"
+          style={{ fill: getProgressColor(pct) }}
+        >
+          {g.isComplete
+            ? t("goalNode.complete")
+            : t("goalNode.count", { done: g.masteredCount, total: g.requiredCount })}
+        </text>
+      </g>
+    );
+  };
 
   const inner = (
     <>
@@ -95,11 +226,13 @@ export const SkillTreeSVG: React.FC<SkillTreeSVGProps> = ({
               strokeLinejoin="round"
               strokeDasharray={isActive ? "none" : "6,4"}
               // edges into locked / not-yet-unlocked skills stay dashed but must be readable (was 0.3 opacity)
-              strokeOpacity={selected ? 0.08 : isActive ? 0.85 : 0.9}
+              strokeOpacity={selected || goalSelected ? 0.08 : isActive ? 0.85 : 0.9}
             />
           );
         })
       )}
+
+      {goalEdges}
 
       {/* Highlighted edges */}
       {selected &&
@@ -156,6 +289,8 @@ export const SkillTreeSVG: React.FC<SkillTreeSVGProps> = ({
           isSelected ||
           (skill.skillPrequisite || []).some((r) => r.prerequisiteSkillId === selected.skillId) ||
           (selected.skillPrequisite || []).some((r) => r.prerequisiteSkillId === skill.skillId);
+        // with the goal node selected, only the skills it requires stay lit
+        const dimmed = (selected && !isRelated) || (goalSelected && !isGoalRequired(skill.skillId));
 
         const { bg, border, text, bar } = getNodeColors(isUnlocked, canUnlockThis, displayProgressPercent(skill));
         const nx = skill.x - NODE_W / 2;
@@ -173,7 +308,7 @@ export const SkillTreeSVG: React.FC<SkillTreeSVGProps> = ({
             onMouseEnter={() => setHovered(skill.skillId)}
             onMouseLeave={() => setHovered(null)}
             style={{
-              opacity: selected && !isRelated ? 0.25 : 1,
+              opacity: dimmed ? 0.25 : 1,
               transition: "opacity .2s",
             }}
           >
@@ -251,7 +386,7 @@ export const SkillTreeSVG: React.FC<SkillTreeSVGProps> = ({
               fontWeight="700"
               style={{ fill: text }}
             >
-              {skill.skillsName.length > 20 ? skill.skillsName.slice(0, 19) + "…" : skill.skillsName}
+              {truncateName(skill.skillsName)}
             </text>
 
             {/* Draft: an unfinished session the Exercise page will resume (adt-learning/docs/adr/0003) */}
@@ -296,6 +431,9 @@ export const SkillTreeSVG: React.FC<SkillTreeSVGProps> = ({
           </g>
         );
       })}
+
+      {/* Goal node — the end of every branch's tree (adt-learning/docs/adr/0005) */}
+      {goal && renderGoalNode(goal)}
     </>
   );
 

@@ -6,7 +6,8 @@ import { SessionHistoryItem } from "../../../models/sessionHistoryModel";
 import { usePreferences } from "../../../context/PreferencesContext";
 import { SkillTreeSVG } from "../skillTree/SkillTreeSVG";
 import { SkillSidePanel } from "../skillTree/SkillSidePanel";
-import { LayoutSkill, getProgressColor, displayProgressPercent } from "../utils/skillTree";
+import { GoalSidePanel } from "../skillTree/GoalSidePanel";
+import { LayoutGoalNode, LayoutSkill, getProgressColor, displayProgressPercent } from "../utils/skillTree";
 import { SessionCard } from "../../common/SessionCard";
 
 interface HomeTabProps {
@@ -34,6 +35,10 @@ interface HomeTabProps {
   setShowPicker: (show: boolean) => void;
   handleNodeClick: (skill: LayoutSkill) => void;
   switchTab: (tab: "Home" | "SkillTree" | "History" | "Profile") => void;
+  goal: LayoutGoalNode | null;
+  goalSelected: boolean;
+  onGoalClick: () => void;
+  setGoalSelected: (selected: boolean) => void;
 }
 
 export const HomeTab: React.FC<HomeTabProps> = ({
@@ -53,6 +58,10 @@ export const HomeTab: React.FC<HomeTabProps> = ({
   setShowPicker,
   handleNodeClick,
   switchTab,
+  goal,
+  goalSelected,
+  onGoalClick,
+  setGoalSelected,
 }) => {
   const { t } = usePreferences();
   const [twText, setTwText] = useState("");
@@ -157,6 +166,9 @@ export const HomeTab: React.FC<HomeTabProps> = ({
             hovered={hovered}
             setHovered={setHovered}
             zoomable={false}
+            goal={goal}
+            goalSelected={goalSelected}
+            onGoalClick={onGoalClick}
           />
           <button
             className="tree-expand-btn"
@@ -217,6 +229,13 @@ export const HomeTab: React.FC<HomeTabProps> = ({
         unlocked={unlocked}
         canUnlockFn={canUnlock}
         onStartExercise={onStartExercise}
+      />
+      <GoalSidePanel
+        goal={goal}
+        open={goalSelected}
+        onClose={() => setGoalSelected(false)}
+        skills={treeSkills}
+        onSelectSkill={setSelected}
       />
     </div>
   );

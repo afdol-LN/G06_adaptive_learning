@@ -22,3 +22,23 @@ export interface BranchSkill extends SkillProgress {
   draftAnsweredCount?: number;
   skillPrequisite: SkillPrerequisite[];
 }
+
+/** The goal node that ends every branch's skill tree. The backend derives it on every read and
+ *  never stores it, so every branch has one (adt-learning/docs/adr/0005). Complete when every
+ *  required skill is at Progress 100% — counted by the backend, the frontend only draws it. */
+export interface GoalNode {
+  goalId: number;
+  goalName: string;
+  /** an edge runs from each of these skills into the goal node */
+  requiredSkillIds: number[];
+  masteredCount: number;
+  requiredCount: number;
+  isComplete: boolean;
+}
+
+/** GET /branch/:branchId/skills */
+export interface BranchSkillTree {
+  skills: BranchSkill[];
+  /** null when the goal requires no skills */
+  goal: GoalNode | null;
+}

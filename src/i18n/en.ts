@@ -154,6 +154,14 @@ export const en: Record<keyof typeof th, string> = {
   "tour.exercise.rules.desc": "Open the rules any time: question count, timing and progress. The clock is paused while they're open.",
   "skill.draft.short": "In progress · {count} answered",
   "skill.draft.long": "Draft in progress — {count} answered",
+
+  // ── Goal node (end of the skill tree) ──
+  "goalNode.label": "Goal",
+  "goalNode.complete": "Completed",
+  "goalNode.count": "{done}/{total} skills",
+  "goalNode.statusDone": "Every skill this goal requires is at 100%",
+  "goalNode.statusTodo": "Bring every skill this goal requires to 100%",
+  "goalNode.required": "Skills this goal requires",
   "skill.action.resume": "Continue →",
   "confirm.resumeTitle": "Continue your draft?",
   "confirm.resumeLead": "You've answered {count} in",
