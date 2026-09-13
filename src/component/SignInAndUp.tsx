@@ -10,6 +10,8 @@ import { useToast } from "../context/ToastContext";
 import authIllustration from "../assets/18.svg";
 import SpatterBackground from "./SpatterBackground";
 import BrandMark from "./common/BrandMark";
+import PreferenceControls from "./common/PreferenceControls";
+import { usePreferences } from "../context/PreferencesContext";
 
 const LIGHT_INK = "#0047ab";
 const DARK_INK = "#6ea8ff";
@@ -18,7 +20,9 @@ export default function SignInAndUp() {
   //views Model user
   const userVm = new userViewModel();
   const [activeTab, setActiveTab] = useState("login");
-  const [dark, setDark] = useState(false);
+  // ภาษา/ธีมใช้ค่าเดียวกับทั้งแอป (PreferencesContext) — เลือกที่หน้านี้แล้วติดไปหลัง login ด้วย
+  const { theme, t } = usePreferences();
+  const dark = theme === "dark";
 
   //naviagate
   const navigate = useNavigate();
@@ -45,22 +49,20 @@ export default function SignInAndUp() {
 
   const handleLoginSubmit = async (credentials: { username: string; password: string }) => {
     if (!credentials.username || !credentials.password) {
-      //close
-      console.log('username and password : ', credentials.username, credentials.password)
-      toast.error("Please fill in all fields");
+      toast.error(t("auth.error.fillAll"));
       return;
     }
     setIsLoading(true);
     //login api call
     const result = await userVm.login(credentials.username, credentials.password);
     if (result?.isError) {
-      toast.error(result?.errorMessage || "Login failed");
+      toast.error(result?.errorMessage || t("auth.toast.loginFailed"));
       setIsLoading(false);
       return;
     } else {
       setTimeout(() => {
         setIsLoading(false);
-        toast.success(`Welcome back, ${credentials.username}! 🎓`);
+        toast.success(t("auth.toast.welcomeBack", { name: credentials.username }));
         handleNavigation();
       }, 1400);
     }
@@ -70,13 +72,13 @@ export default function SignInAndUp() {
     setIsLoading(true);
     const result = await userVm.register(credentials);
     if (result?.isError) {
-      toast.error(result?.errorMessage || "Registration failed");
+      toast.error(result?.errorMessage || t("auth.toast.registerFailed"));
       setIsLoading(false);
       return;
     } else {
       setTimeout(() => {
         setIsLoading(false);
-        toast.success(`Account created! Welcome, ${credentials.fullName} 🎉`);
+        toast.success(t("auth.toast.registered", { name: credentials.fullName }));
         handleNavigation();
       }, 1600);
     }
@@ -137,13 +139,7 @@ export default function SignInAndUp() {
       </div>
       <div className="auth-glow" ref={glowRef}></div>
 
-      <button
-        type="button"
-        className="theme-toggle"
-        onClick={() => setDark((d) => !d)}
-      >
-        {dark ? "Light ☀" : "Dark ☾"}
-      </button>
+      <PreferenceControls className="auth-prefs" />
 
       <main
         className="page"
@@ -166,13 +162,13 @@ export default function SignInAndUp() {
               className={`tab-btn ${activeTab === "login" ? "active" : ""}`}
               onClick={() => setActiveTab("login")}
             >
-              Login
+              {t("auth.tab.login")}
             </button>
             <button
               className={`tab-btn ${activeTab === "register" ? "active" : ""}`}
               onClick={() => setActiveTab("register")}
             >
-              Register
+              {t("auth.tab.register")}
             </button>
           </div>
 

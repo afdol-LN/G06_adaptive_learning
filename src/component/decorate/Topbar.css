@@ -1,6 +1,7 @@
 /* ══════════════════════════════════════
    Topbar.css — shared top bar (page title + language + theme)
-   Used on every screen except login. It reads the host screen's tokens
+   The bar is used on every screen except login; its language/theme controls
+   (common/PreferenceControls) are also used on login. It reads the host screen's tokens
    (--surface, --border, --text, --muted, --accent …) with fallbacks, so it
    fits the student shell (Home.css) and the admin panel (Adminhome.css) alike.
    Prefix tb- : all feature CSS in this app is global, and Exercise.tsx

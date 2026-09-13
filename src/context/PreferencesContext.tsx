@@ -55,7 +55,7 @@ export function PreferencesProvider({ children }: { children: ReactNode }) {
   }, [lang]);
 
   // ธีมอยู่บน <html data-theme> ให้ stylesheet ของทุกหน้าใช้ :root[data-theme="dark"] ได้
-  // หน้า login ไม่ได้รับผล เพราะธีมของมันผูกกับ .auth-page[data-theme] ของตัวเอง
+  // หน้า login ใช้ค่าธีม/ภาษาเดียวกันนี้ แต่สีของมันผูกกับ .auth-page[data-theme] ของตัวเอง (signInAndUp.css)
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
   }, [theme]);

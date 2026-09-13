@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import { FaEye, FaEyeSlash } from "react-icons/fa6";
+import { usePreferences } from "../../context/PreferencesContext";
 
 interface LoginPanelProps {
   onSubmit: (credentials: { username: string; password: string }) => void;
@@ -7,46 +9,49 @@ interface LoginPanelProps {
 }
 
 export default function LoginPanel({ onSubmit, isLoading, onSwitchTab }:LoginPanelProps) {
+  const { t } = usePreferences();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showLoginPw, setShowLoginPw] = useState(false);
 
   const handleSubmit = async (e?: React.FormEvent) => {
     e?.preventDefault();
-    console.log("user data :", username,password)
     await onSubmit({username, password});
   }
 
   return (
     <div className="panel active">
-      <h2 className="panel-title">Welcome back</h2>
-      <p className="panel-sub">Sign in to continue your learning journey</p>
+      <h2 className="panel-title">{t("auth.login.title")}</h2>
+      <p className="panel-sub">{t("auth.login.sub")}</p>
 
       <div className="field">
-        <label>Username</label>
+        <label>{t("auth.username")}</label>
         <input
           type="text"
-          placeholder="Enter username here"
+          placeholder={t("auth.username.placeholder")}
           value={username}
           onChange={(e) => setUsername(e.target.value)}
         />
       </div>
 
       <div className="field">
-        <label>Password</label>
+        <label>{t("auth.password")}</label>
         <div className="pw-wrap">
           <input
             type={showLoginPw ? "text" : "password"}
-            placeholder="Enter password here"
+            placeholder={t("auth.password.placeholder")}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
           <button
+            type="button"
             className="pw-toggle"
             onClick={() => setShowLoginPw(!showLoginPw)}
             tabIndex={-1}
+            aria-label={showLoginPw ? t("auth.password.hide") : t("auth.password.show")}
+            title={showLoginPw ? t("auth.password.hide") : t("auth.password.show")}
           >
-            {showLoginPw ? "🙈" : "👁"}
+            {showLoginPw ? <FaEyeSlash aria-hidden /> : <FaEye aria-hidden />}
           </button>
         </div>
       </div>
@@ -66,19 +71,19 @@ export default function LoginPanel({ onSubmit, isLoading, onSwitchTab }:LoginPan
         onClick={handleSubmit}
         onKeyDown={(e) => e.key === 'Enter'}
       >
-        <span>Sign In</span>
+        <span>{t("auth.login.submit")}</span>
       </button>
 
       <div className="divider">
         <div className="divider-line"></div>
-        <div className="divider-text">or</div>
+        <div className="divider-text">{t("auth.or")}</div>
         <div className="divider-line"></div>
       </div>
 
       <div
         style={{ textAlign: "center", fontSize: "13px", color: "var(--muted)" }}
       >
-        Don't have an account?
+        {t("auth.login.noAccount")}
         <a
           href="#"
           onClick={(e) => {
@@ -91,7 +96,7 @@ export default function LoginPanel({ onSubmit, isLoading, onSwitchTab }:LoginPan
             marginLeft: "4px",
           }}
         >
-          Create one →
+          {t("auth.login.toRegister")}
         </a>
       </div>
     </div>

@@ -169,34 +169,33 @@
   padding: 28px 20px;
 }
 
-/* theme toggle — fixed so it stays put while the (internally scrolling)
-   .auth-page content scrolls underneath it */
-.auth-page .theme-toggle {
+/* Language + theme — the same TH|EN control and sun/moon switch as the app's
+   Topbar (common/PreferenceControls, styled by Topbar.css). Fixed so it stays
+   put while the (internally scrolling) .auth-page content scrolls underneath.
+   Those tb- controls read --border/--surface-2/--text/--muted/--accent…, which
+   other stylesheets declare on a global :root for their own light theme — so
+   re-point every one of them at the auth tokens here, and the switch follows
+   .auth-page[data-theme] like the rest of this page. */
+.auth-page .auth-prefs {
   position: fixed;
   top: 18px;
   right: 20px;
   z-index: 5;
-  font-family: var(--font-sans);
-  font-size: 12px;
-  padding: 9px 15px;
-  border-radius: 10px;
+  padding: 6px;
+  border-radius: 14px;
   border: 1px solid var(--auth-glass-edge);
   background: var(--auth-glass);
-  color: var(--auth-text);
-  cursor: pointer;
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
-  transition: transform 0.18s cubic-bezier(.34, 1.56, .64, 1), box-shadow 0.18s, border-color 0.18s;
-}
+  box-shadow: 0 8px 22px rgba(0, 0, 80, 0.1);
 
-.auth-page .theme-toggle:hover {
-  transform: translateY(-2px);
-  border-color: var(--gold);
-  box-shadow: 0 8px 22px rgba(0, 71, 171, 0.22);
-}
-
-.auth-page .theme-toggle:active {
-  transform: translateY(0) scale(0.97);
+  --border: var(--auth-field-edge);
+  --surface-2: var(--auth-field);
+  --text: var(--auth-text);
+  --muted: var(--auth-muted);
+  --accent: #0047ab;
+  --accent-fill: #0047ab;
+  --on-accent: #ffffff;
 }
 
 /* logo / brand */
@@ -380,7 +379,12 @@
   margin-bottom: 7px;
 }
 
+/* input[type="text"] is listed on its own because InformationForm.css has a
+   bare global `select, input[type="text"]` rule — same specificity as
+   `.auth-page input` and loaded later, so it painted the text fields
+   near-white with navy text even in dark mode. */
 .auth-page input,
+.auth-page input[type="text"],
 .auth-page select {
   width: 100%;
   padding: 12px 16px;
@@ -478,6 +482,11 @@
   line-height: 1;
   border-radius: 8px;
   transition: transform 0.2s cubic-bezier(.34, 1.56, .64, 1), background 0.2s, color 0.2s;
+}
+
+.auth-page .pw-toggle svg {
+  display: block;
+  flex-shrink: 0;
 }
 
 .auth-page .pw-toggle:hover {
@@ -778,7 +787,7 @@
     padding: 14px 22px;
   }
 
-  .auth-page .theme-toggle {
+  .auth-page .auth-prefs {
     top: 12px;
     right: 12px;
   }

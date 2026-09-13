@@ -1,5 +1,8 @@
 import React, { useState } from "react";
+import { FaEye, FaEyeSlash } from "react-icons/fa6";
 import {RegisterCredentials} from "../../models/userModel";
+import { usePreferences } from "../../context/PreferencesContext";
+import type { TKey } from "../../i18n";
 
 
 interface RegisterPanelProps {
@@ -8,7 +11,12 @@ interface RegisterPanelProps {
   onSwitchTab: (tab?: string) => void;
 }
 
+// เก็บ key ของข้อความแทนตัวข้อความ — สลับภาษาแล้วข้อความใต้ช่องจะเปลี่ยนตามทันที
+type FieldMsg = { key: TKey | null; type: "" | "ok" | "err" };
+const NO_MSG: FieldMsg = { key: null, type: "" };
+
 export default function RegisterPanel({ onSubmit, isLoading, onSwitchTab }: RegisterPanelProps) {
+  const { t } = usePreferences();
   const [fname, setFname] = useState("");
   const [lname, setLname] = useState("");
   const [dob, setDob] = useState("");
@@ -20,8 +28,8 @@ export default function RegisterPanel({ onSubmit, isLoading, onSwitchTab }: Regi
 
   const [showRegPw, setShowRegPw] = useState(false);
   const [showRegConfirm, setShowRegConfirm] = useState(false);
-  const [usernameMsg, setUsernameMsg] = useState({ text: "", type: "" });
-  const [confirmMsg, setConfirmMsg] = useState({ text: "", type: "" });
+  const [usernameMsg, setUsernameMsg] = useState<FieldMsg>(NO_MSG);
+  const [confirmMsg, setConfirmMsg] = useState<FieldMsg>(NO_MSG);
 
   // const checkUsername = (val: string) => {
   //   setUsername(val);
@@ -37,23 +45,23 @@ export default function RegisterPanel({ onSubmit, isLoading, onSwitchTab }: Regi
 
   const checkMatch = (val: string) => {
     setConfirm(val);
-    if (!val) return setConfirmMsg({ text: "", type: "" });
-    if (password === val) return setConfirmMsg({ text: "✓ Passwords match", type: "ok" });
-    setConfirmMsg({ text: "Passwords do not match", type: "err" });
+    if (!val) return setConfirmMsg(NO_MSG);
+    if (password === val) return setConfirmMsg({ key: "auth.password.match", type: "ok" });
+    setConfirmMsg({ key: "auth.password.mismatch", type: "err" });
   };
 
   const handleSubmit = async (e?: React.FormEvent) => {
     e?.preventDefault();
     if (!fname || !lname || !dob || !username || !password || !confirm) {
-      setConfirmMsg({ text: "Please fill in all fields", type: "err" });
+      setConfirmMsg({ key: "auth.error.fillAll", type: "err" });
       return;
     }
     if (!gender) {
-      setConfirmMsg({ text: "Please select a gender", type: "err" });
+      setConfirmMsg({ key: "auth.error.gender", type: "err" });
       return;
     }
     if (password !== confirm) {
-      setConfirmMsg({ text: "Passwords do not match", type: "err" });
+      setConfirmMsg({ key: "auth.password.mismatch", type: "err" });
       return;
     }
 
@@ -71,24 +79,24 @@ export default function RegisterPanel({ onSubmit, isLoading, onSwitchTab }: Regi
 
   return (
     <div className="panel active">
-      <h2 className="panel-title">Create account</h2>
+      <h2 className="panel-title">{t("auth.register.title")}</h2>
       <p className="panel-sub"></p>
 
       <div className="field-row">
         <div>
-          <label>First Name</label>
+          <label>{t("auth.firstName")}</label>
           <input
             type="text"
-            placeholder="Enter your firstname"
+            placeholder={t("auth.firstName.placeholder")}
             value={fname}
             onChange={(e) => setFname(e.target.value)}
           />
         </div>
         <div>
-          <label>Last Name</label>
+          <label>{t("auth.lastName")}</label>
           <input
             type="text"
-            placeholder="Enter your lastname"
+            placeholder={t("auth.lastName.placeholder")}
             value={lname}
             onChange={(e) => setLname(e.target.value)}
           />
@@ -97,7 +105,7 @@ export default function RegisterPanel({ onSubmit, isLoading, onSwitchTab }: Regi
 
       <div className="field-row">
         <div>
-          <label>Date of Birth</label>
+          <label>{t("auth.birthDate")}</label>
           <input
             type="date"
             max="2010-12-31"
@@ -106,32 +114,30 @@ export default function RegisterPanel({ onSubmit, isLoading, onSwitchTab }: Regi
           />
         </div>
         <div>
-          <label>Gender</label>
+          <label>{t("auth.gender")}</label>
           <div className="select-wrap">
             <select value={gender} onChange={(e) => setGender(Number(e.target.value))}>
               <option value={0} disabled>
-                เลือก...
+                {t("auth.gender.placeholder")}
               </option>
-              <option value={1}>Male</option>
-              <option value={2}>Female</option>
-              <option value={3}>LGBTQ+</option>
+              <option value={1}>{t("auth.gender.male")}</option>
+              <option value={2}>{t("auth.gender.female")}</option>
+              <option value={3}>{t("auth.gender.lgbtq")}</option>
             </select>
           </div>
         </div>
       </div>
 
       <div className="field">
-        <label>Username</label>
+        <label>{t("auth.username")}</label>
         <input
           type="text"
-          placeholder="Username"
+          placeholder={t("auth.username")}
           value={username}
           onChange={(e) => {
             const val = e.target.value;
             setUsername(val);
-            setUsernameMsg(
-              val.trim() ? { text: "✓ Username available", type: "ok" } : { text: "", type: "" },
-            );
+            setUsernameMsg(val.trim() ? { key: "auth.username.available", type: "ok" } : NO_MSG);
           }}
           className={
             usernameMsg.type === "err"
@@ -141,11 +147,11 @@ export default function RegisterPanel({ onSubmit, isLoading, onSwitchTab }: Regi
               : ""
           }
         />
-        <div className={`field-msg ${usernameMsg.type}`}>{usernameMsg.text}</div>
+        <div className={`field-msg ${usernameMsg.type}`}>{usernameMsg.key && t(usernameMsg.key)}</div>
       </div>
 
       <div className="field">
-        <label>Password</label>
+        <label>{t("auth.password")}</label>
         <div className="pw-wrap">
           <input
             type={showRegPw ? "text" : "password"}
@@ -154,8 +160,8 @@ export default function RegisterPanel({ onSubmit, isLoading, onSwitchTab }: Regi
             onChange={(e) => {
               setPassword(e.target.value);
               if (confirm) {
-                if (e.target.value === confirm) setConfirmMsg({ text: "✓ Passwords match", type: "ok" });
-                else setConfirmMsg({ text: "Passwords do not match", type: "err" });
+                if (e.target.value === confirm) setConfirmMsg({ key: "auth.password.match", type: "ok" });
+                else setConfirmMsg({ key: "auth.password.mismatch", type: "err" });
               }
             }}
           />
@@ -164,14 +170,16 @@ export default function RegisterPanel({ onSubmit, isLoading, onSwitchTab }: Regi
             className="pw-toggle"
             onClick={() => setShowRegPw(!showRegPw)}
             tabIndex={-1}
+            aria-label={showRegPw ? t("auth.password.hide") : t("auth.password.show")}
+            title={showRegPw ? t("auth.password.hide") : t("auth.password.show")}
           >
-            {showRegPw ? "🙈" : "👁"}
+            {showRegPw ? <FaEyeSlash aria-hidden /> : <FaEye aria-hidden />}
           </button>
         </div>
       </div>
 
       <div className="field">
-        <label>Confirm Password</label>
+        <label>{t("auth.confirmPassword")}</label>
         <div className="pw-wrap">
           <input
             type={showRegConfirm ? "text" : "password"}
@@ -191,11 +199,13 @@ export default function RegisterPanel({ onSubmit, isLoading, onSwitchTab }: Regi
             className="pw-toggle"
             onClick={() => setShowRegConfirm(!showRegConfirm)}
             tabIndex={-1}
+            aria-label={showRegConfirm ? t("auth.password.hide") : t("auth.password.show")}
+            title={showRegConfirm ? t("auth.password.hide") : t("auth.password.show")}
           >
-            {showRegConfirm ? "🙈" : "👁"}
+            {showRegConfirm ? <FaEyeSlash aria-hidden /> : <FaEye aria-hidden />}
           </button>
         </div>
-        <div className={`field-msg ${confirmMsg.type}`}>{confirmMsg.text}</div>
+        <div className={`field-msg ${confirmMsg.type}`}>{confirmMsg.key && t(confirmMsg.key)}</div>
       </div>
 
       <button
@@ -203,7 +213,7 @@ export default function RegisterPanel({ onSubmit, isLoading, onSwitchTab }: Regi
         className={`btn-primary ${isLoading ? "loading" : ""}`}
         onClick={handleSubmit}
       >
-        <span>Create Account</span>
+        <span>{t("auth.register.submit")}</span>
       </button>
 
       <div
@@ -214,7 +224,7 @@ export default function RegisterPanel({ onSubmit, isLoading, onSwitchTab }: Regi
           marginTop: "16px",
         }}
       >
-        Already have an account?
+        {t("auth.register.hasAccount")}
         <a
           href=""
           onClick={(e) => {
@@ -227,7 +237,7 @@ export default function RegisterPanel({ onSubmit, isLoading, onSwitchTab }: Regi
             marginLeft: "4px",
           }}
         >
-          Sign in →
+          {t("auth.register.toLogin")}
         </a>
       </div>
     </div>
