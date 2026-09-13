@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { FaPlus, FaTrash } from "react-icons/fa6";
 import { Skill } from "../../../../models/skillModel";
 import { GoalSkillRequireInput } from "../../../../models/goalModel";
+import { usePreferences } from "../../../../context/PreferencesContext";
+import type { TKey } from "../../../../i18n";
 
 interface SkillRequireEditorProps {
   activeSkills: Skill[];
@@ -10,14 +12,15 @@ interface SkillRequireEditorProps {
 }
 
 // Bloom's Taxonomy (revised): 6 cognitive levels, from Remember to Create.
-const BLOOM_LEVELS = [
-  { level: 1, name: "Remember", description: "จำข้อเท็จจริงและแนวคิดพื้นฐานได้" },
-  { level: 2, name: "Understand", description: "อธิบายแนวคิดหรือความคิดรวบยอดได้" },
-  { level: 3, name: "Apply", description: "นำข้อมูลไปใช้ในสถานการณ์ใหม่ได้" },
-  { level: 4, name: "Analyze", description: "แยกแยะและเชื่อมโยงความสัมพันธ์ของแนวคิดได้" },
-  { level: 5, name: "Evaluate", description: "ตัดสินคุณค่าและให้เหตุผลสนับสนุนได้" },
-  { level: 6, name: "Create", description: "สร้างผลงานหรือแนวคิดใหม่ได้" },
-] as const;
+// ชื่อระดับเป็นศัพท์สากล (อังกฤษทั้งสองภาษา) ส่วนคำอธิบายอยู่ใน i18n
+const BLOOM_LEVELS: { level: number; name: string; descKey: TKey }[] = [
+  { level: 1, name: "Remember", descKey: "admin.bloom.1" },
+  { level: 2, name: "Understand", descKey: "admin.bloom.2" },
+  { level: 3, name: "Apply", descKey: "admin.bloom.3" },
+  { level: 4, name: "Analyze", descKey: "admin.bloom.4" },
+  { level: 5, name: "Evaluate", descKey: "admin.bloom.5" },
+  { level: 6, name: "Create", descKey: "admin.bloom.6" },
+];
 
 const bloomLevel = (level: number | null | undefined) =>
   BLOOM_LEVELS.find((b) => b.level === level);
@@ -27,6 +30,7 @@ export default function SkillRequireEditor({
   value,
   onChange,
 }: SkillRequireEditorProps) {
+  const { t } = usePreferences();
   const usedIds = new Set(value.map((v) => v.skillId));
   const availableSkills = activeSkills.filter((s) => !usedIds.has(s.skillId));
 
@@ -59,14 +63,14 @@ export default function SkillRequireEditor({
 
   const levelLabel = (level: number | null | undefined) => {
     const bloom = bloomLevel(level);
-    return bloom ? `${bloom.level}. ${bloom.name}` : "ไม่ระบุ level";
+    return bloom ? `${bloom.level}. ${bloom.name}` : t("admin.common.noLevel");
   };
 
   const selectedBloom = bloomLevel(levelRequire === "" ? null : levelRequire);
 
   return (
     <div className="ad-field">
-      <label className="ad-label">Skill ที่ต้องใช้</label>
+      <label className="ad-label">{t("admin.skillRequire.label")}</label>
 
       <div className="ad-field-row ad-skill-require-row">
         <select
@@ -75,7 +79,7 @@ export default function SkillRequireEditor({
           onChange={(e) => setSelectedSkillId(e.target.value === "" ? "" : Number(e.target.value))}
         >
           <option value="" disabled>
-            -- เลือก Skill --
+            {t("admin.common.pickSkill")}
           </option>
           {availableSkills.map((s) => (
             <option key={s.skillId} value={s.skillId}>
@@ -90,9 +94,9 @@ export default function SkillRequireEditor({
             setLevelRequire(e.target.value === "" ? "" : Number(e.target.value))
           }
         >
-          <option value="">-- Level --</option>
+          <option value="">{t("admin.skillRequire.levelPh")}</option>
           {BLOOM_LEVELS.map((b) => (
-            <option key={b.level} value={b.level} title={b.description}>
+            <option key={b.level} value={b.level} title={t(b.descKey)}>
               {b.level}. {b.name}
             </option>
           ))}
@@ -103,14 +107,14 @@ export default function SkillRequireEditor({
           onClick={handleAdd}
           disabled={selectedSkillId === ""}
         >
-          <FaPlus /> เพิ่ม
+          <FaPlus /> {t("admin.common.add")}
         </button>
       </div>
-      {selectedBloom && <div className="ad-hint-text">{selectedBloom.description}</div>}
+      {selectedBloom && <div className="ad-hint-text">{t(selectedBloom.descKey)}</div>}
 
       <div className="ad-choices-edit">
         {value.length === 0 ? (
-          <span className="ad-muted">— ยังไม่ได้เลือก Skill —</span>
+          <span className="ad-muted">{t("admin.skillRequire.noneSelected")}</span>
         ) : (
           value.map((v) => (
             <div key={v.skillId} className="ad-choice-row">
@@ -120,6 +124,7 @@ export default function SkillRequireEditor({
                 type="button"
                 className="ad-btn-sm ad-btn-del"
                 onClick={() => handleRemove(v.skillId)}
+                aria-label={skillName(v.skillId)}
               >
                 <FaTrash />
               </button>

@@ -1,5 +1,6 @@
 import React from 'react';
 import { FaMagnifyingGlass } from 'react-icons/fa6';
+import { usePreferences } from '../../context/PreferencesContext';
 
 export default function HistoryTab({
   icon,
@@ -11,27 +12,37 @@ export default function HistoryTab({
   gradeLabel,
   getScoreColor
 }) {
+  const { t } = usePreferences();
+
   return (
     <div className="ad-tab-history">
       <div className="ad-page-header">
-        <h1 className="ad-page-title">{icon} ประวัติการทำโจทย์ทั้งหมด</h1>
-        <span className="ad-page-sub">พบ {filteredHistory.length} รายการ</span>
+        <h1 className="ad-page-title">{icon} {t('admin.history.title')}</h1>
+        <span className="ad-page-sub">{t('admin.common.foundCount', { count: filteredHistory.length })}</span>
       </div>
       <div className="ad-toolbar">
         <div className="ad-search-wrap">
           <span className="ad-search-icon"><FaMagnifyingGlass /></span>
-          <input className="ad-search" placeholder="ค้นหาชื่อผู้ใช้, ชื่อ Skill..." value={histSearch} onChange={e => setHistSearch(e.target.value)} />
+          <input className="ad-search" placeholder={t('admin.history.search')} value={histSearch} onChange={e => setHistSearch(e.target.value)} />
         </div>
         {['all', 'great', 'good', 'low'].map(g => (
           <button key={g} className={`ad-filter-btn ${histGrade === g ? 'active' : ''}`} onClick={() => setHistGrade(g)}>
-            {g === 'all' ? 'ทั้งหมด' : gradeLabel(g)}
+            {g === 'all' ? t('admin.common.all') : gradeLabel(g)}
           </button>
         ))}
       </div>
       <div className="ad-card">
         <table className="ad-table">
           <thead>
-            <tr><th>#</th><th>ผู้ใช้</th><th>Skill</th><th>วันที่</th><th>ถูก/ทั้งหมด</th><th>Score</th><th>ผลลัพธ์</th></tr>
+            <tr>
+              <th>#</th>
+              <th>{t('admin.history.col.user')}</th>
+              <th>{t('admin.history.col.skill')}</th>
+              <th>{t('admin.history.col.date')}</th>
+              <th>{t('admin.history.col.correct')}</th>
+              <th>{t('admin.history.col.score')}</th>
+              <th>{t('admin.history.col.result')}</th>
+            </tr>
           </thead>
           <tbody>
             {filteredHistory.map((h, i) => (
@@ -53,7 +64,7 @@ export default function HistoryTab({
               </tr>
             ))}
             {filteredHistory.length === 0 && (
-              <tr><td colSpan={7} style={{ textAlign: 'center', padding: 32, color: 'var(--muted)' }}>ไม่พบข้อมูล</td></tr>
+              <tr><td colSpan={7} style={{ textAlign: 'center', padding: 32, color: 'var(--muted)' }}>{t('admin.history.empty')}</td></tr>
             )}
           </tbody>
         </table>

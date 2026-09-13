@@ -9,7 +9,7 @@
   align-items: flex-end;
   pointer-events: none;
   max-width: min(400px, calc(100vw - 44px));
-  font-family: 'DM Sans', sans-serif;
+  font-family: var(--font-sans);
 }
 
 .toastsys-item {

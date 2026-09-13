@@ -9,6 +9,7 @@ import SkillViewModal from "./component/SkillViewModal";
 import { skillController } from "./skill.controller";
 import { ActionButtons } from "../../common/ActionButtons";
 import { StatusSwitch } from "../../common/StatusSwitch";
+import { usePreferences } from "../../../context/PreferencesContext";
 
 interface SkillTabProps {
   icon?: React.ReactNode;
@@ -17,6 +18,7 @@ interface SkillTabProps {
 }
 
 export default function SkillTab({ icon, getSkillQuestions, setViewSkillQ }: SkillTabProps) {
+  const { t } = usePreferences();
   const {
     skills,
     isLoading,
@@ -55,8 +57,8 @@ export default function SkillTab({ icon, getSkillQuestions, setViewSkillQ }: Ski
   return (
     <div className="ad-tab-skills">
       <div className="ad-page-header">
-        <h1 className="ad-page-title">{icon} จัดการ Skill</h1>
-        <span className="ad-page-sub">Skill ทั้งหมด {skills.length} รายการ</span>
+        <h1 className="ad-page-title">{icon} {t("admin.skills.title")}</h1>
+        <span className="ad-page-sub">{t("admin.skills.count", { count: skills.length })}</span>
       </div>
 
       <div className="ad-toolbar">
@@ -64,7 +66,7 @@ export default function SkillTab({ icon, getSkillQuestions, setViewSkillQ }: Ski
           <span className="ad-search-icon"><FaMagnifyingGlass /></span>
           <input
             className="ad-search"
-            placeholder="ค้นหาชื่อ Skill, Tier..."
+            placeholder={t("admin.skills.search")}
             value={skillSearch}
             onChange={(e) => setSkillSearch(e.target.value)}
           />
@@ -75,46 +77,42 @@ export default function SkillTab({ icon, getSkillQuestions, setViewSkillQ }: Ski
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value as any)}
         >
-          <option value="all">ทุกสถานะ</option>
-          <option value="active">active</option>
-          <option value="inactive">inactive</option>
+          <option value="all">{t("admin.common.allStatus")}</option>
+          <option value="active">{t("admin.status.active")}</option>
+          <option value="inactive">{t("admin.status.inactive")}</option>
         </select>
 
         <button className="ad-btn-primary ad-btn-add" onClick={openCreateForm}>
-          <FaPlus /> เพิ่ม Skill ใหม่
+          <FaPlus /> {t("admin.skills.add")}
         </button>
       </div>
 
-      {error && (
-        <div style={{ color: "#dc2626", fontSize: 13, fontWeight: 600, margin: "8px 0" }}>
-          {error}
-        </div>
-      )}
+      {error && <div className="ad-inline-error">{error}</div>}
 
       <div className="ad-card">
         <table className="ad-table">
           <thead>
             <tr>
-              <th>Skill code</th>
-              <th>Skill</th>
-              <th>Tier</th>
-              <th>Prerequisite</th>
-              {getSkillQuestions && <th>โจทย์</th>}
-              <th>Actions</th>
-              <th>สถานะ</th>
+              <th>{t("admin.skills.col.code")}</th>
+              <th>{t("admin.skills.col.skill")}</th>
+              <th>{t("admin.skills.col.tier")}</th>
+              <th>{t("admin.skills.col.prereq")}</th>
+              {getSkillQuestions && <th>{t("admin.skills.col.questions")}</th>}
+              <th>{t("admin.common.actions")}</th>
+              <th>{t("admin.common.status")}</th>
             </tr>
           </thead>
           <tbody>
             {isLoading ? (
               <tr>
                 <td colSpan={8} style={{ textAlign: "center", padding: 24 }}>
-                  กำลังโหลด...
+                  {t("admin.common.loading")}
                 </td>
               </tr>
             ) : filteredSkills.length === 0 ? (
               <tr>
                 <td colSpan={8} style={{ textAlign: "center", padding: 24 }}>
-                  ไม่พบ Skill ที่ตรงกับเงื่อนไข
+                  {t("admin.skills.empty")}
                 </td>
               </tr>
             ) : (
@@ -159,12 +157,8 @@ export default function SkillTab({ icon, getSkillQuestions, setViewSkillQ }: Ski
                     </td>
                     {getSkillQuestions && setViewSkillQ && (
                       <td className={fadeClass}>
-                        <button
-                          className="ad-btn-sm"
-                          style={{ borderColor: "rgba(139,92,246,0.3)", color: "#8b5cf6" }}
-                          onClick={() => setViewSkillQ(s)}
-                        >
-                          <FaPenToSquare /> {getSkillQuestions(s.skillId).length} ข้อ
+                        <button className="ad-btn-sm ad-btn-questions" onClick={() => setViewSkillQ(s)}>
+                          <FaPenToSquare /> {t("admin.skills.questionCount", { count: getSkillQuestions(s.skillId).length })}
                         </button>
                       </td>
                     )}
@@ -206,11 +200,11 @@ export default function SkillTab({ icon, getSkillQuestions, setViewSkillQ }: Ski
           <div className="ad-confirm" onClick={(e) => e.stopPropagation()}>
             <div className="ad-confirm-icon"><FaTriangleExclamation /></div>
             <div className="ad-confirm-msg">
-              ต้องการลบ Skill "{deleteTarget.skillsName}" ออกจากระบบใช่ไหม?
+              {t("admin.skills.deleteConfirm", { name: deleteTarget.skillsName })}
             </div>
             <div className="ad-confirm-btns">
               <button className="ad-btn-cancel" onClick={cancelDelete} disabled={isDeleting}>
-                ยกเลิก
+                {t("admin.common.cancel")}
               </button>
               {/* <button className="ad-btn-danger" onClick={confirmDelete} disabled={isDeleting}>
                 {isDeleting ? "กำลังลบ..." : "ยืนยัน ลบ"}

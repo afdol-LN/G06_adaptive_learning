@@ -1,6 +1,7 @@
 import { userService } from "./user.service";
 import { useCallback, useEffect, useState } from "react";
 import { useToast } from "../../../context/ToastContext";
+import { usePreferences } from "../../../context/PreferencesContext";
 import {
   UserResponseAdmin,
   GenderOption,
@@ -12,6 +13,7 @@ import { getStatusColor, getScoreColor } from "../../../utils/adminUi";
 
 export function userController() {
   const toast = useToast();
+  const { t } = usePreferences();
   const [users, setUsers] = useState<UserResponseAdmin[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [erros, setErrors] = useState<string | null>(null);
@@ -85,14 +87,14 @@ export function userController() {
 
   const toggleUserStatus = async (targetUser: UserResponseAdmin) => {
     if (!targetUser.id) {
-      toast.error("ไม่พบรหัสผู้ใช้ (ID) สำหรับทำรายการ");
+      toast.error(t("admin.users.toast.noId"));
       return;
     }
     const newStatus = targetUser.status === "active" ? "inactive" : "active";
     setIsLoading(true);
     const result = await userService.updateUserStatus(targetUser.id, newStatus);
     if (result.isError) {
-      toast.error("อัปเดตสถานะไม่สำเร็จ", result.errorMessage || "เกิดข้อผิดพลาด");
+      toast.error(t("admin.users.toast.statusFailed"), result.errorMessage || t("admin.common.error"));
     } else {
       const updatedUsers = users.map((u) =>
         u.id === targetUser.id ? { ...u, status: newStatus } : u
@@ -130,7 +132,8 @@ export function userController() {
 
       if (result.isError) {
         throw new Error(
-          result.errorMessage || `ไม่สามารถ${editingUser ? "แก้ไข" : "สร้าง"}ผู้ใช้งานได้`
+          result.errorMessage ||
+            (editingUser ? t("admin.users.saveFailedUpdate") : t("admin.users.saveFailedCreate"))
         );
       }
       closeFormModal();

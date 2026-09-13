@@ -17,6 +17,8 @@ import {
   FaUserGraduate,
 } from "react-icons/fa6";
 import { useApp } from "../../context/AppContext";
+import { usePreferences } from "../../context/PreferencesContext";
+import type { TKey } from "../../i18n";
 import { useBranchSkillController } from "./controller/branchSkill.controller";
 import { useBranchStatsController } from "./controller/branchStats.controller";
 import { useSessionHistoryController } from "./controller/sessionHistory.controller";
@@ -27,6 +29,7 @@ import { HistoryTab } from "./tabs/HistoryTab";
 import { ProfileTab } from "./tabs/ProfileTab";
 import { NextExercisePicker } from "./skillTree/NextExercisePicker";
 import { ExerciseConfirmModal } from "./skillTree/ExerciseConfirmModal";
+import { Topbar } from "../common/Topbar";
 import CreateBranchModal from "../CreateBranchModal";
 import AppLogo from "../common/AppLogo";
 import { LayoutSkill } from "./utils/skillTree";
@@ -35,11 +38,11 @@ import "../decorate/Tour.css";
 
 type HomeTabKey = "Home" | "SkillTree" | "History" | "Profile";
 
-const NAV_ITEMS: { key: HomeTabKey; label: string; Icon: IconType }[] = [
-  { key: "Home", label: "Home", Icon: FaHouse },
-  { key: "SkillTree", label: "Skill Tree", Icon: FaSitemap },
-  { key: "History", label: "History", Icon: FaClockRotateLeft },
-  { key: "Profile", label: "Profile", Icon: FaUser },
+const NAV_ITEMS: { key: HomeTabKey; labelKey: TKey; Icon: IconType }[] = [
+  { key: "Home", labelKey: "nav.home", Icon: FaHouse },
+  { key: "SkillTree", labelKey: "nav.skillTree", Icon: FaSitemap },
+  { key: "History", labelKey: "nav.history", Icon: FaClockRotateLeft },
+  { key: "Profile", labelKey: "nav.profile", Icon: FaUser },
 ];
 
 // จำสถานะ sidebar (ย่อ/ขยาย) ไว้ข้าม session
@@ -54,6 +57,7 @@ export const HomeShell: React.FC = () => {
     switchBranch,
     fetchMyBranches,
   } = useApp();
+  const { t } = usePreferences();
 
   const navigate = useNavigate();
 
@@ -63,8 +67,7 @@ export const HomeShell: React.FC = () => {
   const skillTreeController = useBranchSkillController(branchId);
   const statsController = useBranchStatsController(branchId);
   const historyController = useSessionHistoryController(branchId);
-  const homeTour = useHomeTourController();
-  const pendingForceTourRef = useRef(false);
+  const homeTour = useHomeTourController(t);
 
   // Tab State
   const [activeTab, setActiveTab] = useState<HomeTabKey>("Home");
@@ -114,30 +117,21 @@ export const HomeShell: React.FC = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Auto-start the onboarding tour the first time the user lands on the Home tab
+  // Each tab has its own tour: auto-start it the first time the user opens that tab,
+  // and close whatever tour is running when they move to another tab
+  const hasBranch = Boolean(activeBranch);
+  const pageTourSeen = homeTour.hasSeenTour(activeTab);
   useEffect(() => {
-    if (!activeBranch || activeTab !== "Home" || homeTour.hasSeenTour !== false) return;
-    homeTour.startTour();
+    if (!hasBranch || pageTourSeen !== false) return;
+    homeTour.startTour(activeTab);
     return () => homeTour.cancelTour();
-  }, [activeBranch, activeTab, homeTour.hasSeenTour]);
+  }, [hasBranch, activeTab, pageTourSeen]);
 
-  // Replay requested via the Help button while on another tab — wait for Home to mount
-  useEffect(() => {
-    if (pendingForceTourRef.current && activeTab === "Home") {
-      pendingForceTourRef.current = false;
-      homeTour.startTour({ force: true });
-    }
-  }, [activeTab]);
-
+  // Help replays the tour of the tab the user is on — no jump back to Home
   const handleHelpClick = () => {
     setShowGoalMenu(false);
     setShowProfileMenu(false);
-    if (activeTab !== "Home") {
-      pendingForceTourRef.current = true;
-      switchTab("Home");
-    } else {
-      homeTour.startTour({ force: true });
-    }
+    homeTour.startTour(activeTab, { force: true });
   };
 
   const toggleSidebar = () => {
@@ -184,31 +178,26 @@ export const HomeShell: React.FC = () => {
 
   const avatar = <FaUserGraduate aria-hidden />;
   const profileFullName = [userProfile?.fname, userProfile?.lname].filter(Boolean).join(" ");
-  const fullName = profileFullName || localStorage.getItem("fullname") || "นักเรียน ALS";
+  const fullName = profileFullName || localStorage.getItem("fullname") || t("user.fallbackName");
 
   // If no branch is selected or active, prompt user
   if (!activeBranch) {
     return (
-      <div className="app" style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100vh", background: "#f8fafc" }}>
-        <div style={{ textAlign: "center", background: "#fff", padding: "40px", borderRadius: "16px", boxShadow: "0 8px 32px rgba(0,0,0,0.05)" }}>
-          <h2 style={{ fontSize: "20px", fontWeight: "700", color: "#1e293b", marginBottom: "16px" }}>
-            ยังไม่พบเป้าหมายการเรียนรู้หลัก
-          </h2>
-          <p style={{ color: "#64748b", marginBottom: "24px" }}>
-            กรุณาเลือกหรือเพิ่มเป้าหมายการเรียนรู้ใหม่ก่อนทำแบบฝึกหัด
-          </p>
-          <button
-            onClick={() => navigate("/selectbranch")}
-            style={{ padding: "10px 24px", background: "#0047AB", color: "#fff", fontWeight: "700", border: "none", borderRadius: "8px", cursor: "pointer" }}
-          >
-            เลือกเป้าหมายการเรียนรู้
+      <div className="app no-branch">
+        <div className="no-branch-card">
+          <h2 className="no-branch-title">{t("noBranch.title")}</h2>
+          <p className="no-branch-desc">{t("noBranch.desc")}</p>
+          <button className="no-branch-cta" onClick={() => navigate("/selectbranch")}>
+            {t("noBranch.cta")}
           </button>
         </div>
       </div>
     );
   }
 
-  const goalLabel = activeBranch.goalName || "เลือกสายการเรียน";
+  const goalLabel = activeBranch.goalName || t("goal.placeholder");
+  const activeNav = NAV_ITEMS.find((n) => n.key === activeTab) ?? NAV_ITEMS[0];
+  const sidebarToggleLabel = sidebarCollapsed ? t("sidebar.show") : t("sidebar.hide");
 
   return (
     <div className="app" data-tour="tour-page">
@@ -219,8 +208,8 @@ export const HomeShell: React.FC = () => {
           className="sb-toggle"
           onClick={toggleSidebar}
           aria-expanded={!sidebarCollapsed}
-          aria-label={sidebarCollapsed ? "แสดงแถบเมนู" : "ซ่อนแถบเมนู"}
-          title={sidebarCollapsed ? "แสดงแถบเมนู" : "ซ่อนแถบเมนู"}
+          aria-label={sidebarToggleLabel}
+          title={sidebarToggleLabel}
         >
           {sidebarCollapsed ? <FaChevronRight aria-hidden /> : <FaChevronLeft aria-hidden />}
         </button>
@@ -258,7 +247,7 @@ export const HomeShell: React.FC = () => {
                       <div>
                         <div className="goal-dropdown-name">{b.goalName}</div>
                         <div className="goal-dropdown-meta">
-                          {b.campus} · ปี {b.year || 1}
+                          {b.campus} · {t("goal.year", { year: b.year || 1 })}
                         </div>
                       </div>
                       {isActive && <span className="goal-dropdown-check"><FaCheck aria-hidden /></span>}
@@ -275,7 +264,7 @@ export const HomeShell: React.FC = () => {
                 }}
               >
                 <span className="goal-dropdown-action-icon"><FaPlus aria-hidden /></span>
-                <span>เพิ่มเป้าหมายใหม่</span>
+                <span>{t("goal.add")}</span>
               </button>
 
               <button
@@ -286,7 +275,7 @@ export const HomeShell: React.FC = () => {
                 }}
               >
                 <span className="goal-dropdown-action-icon"><FaArrowLeft aria-hidden /></span>
-                <span>ไปหน้าเลือกเป้าหมาย</span>
+                <span>{t("goal.backToSelect")}</span>
               </button>
             </div>
           )}
@@ -294,28 +283,32 @@ export const HomeShell: React.FC = () => {
 
         {/* Navigation Tabs */}
         <nav className="sb-nav" data-tour="tour-nav-tabs">
-          {NAV_ITEMS.map((t) => (
-            <button
-              key={t.key}
-              className={`sb-nav-item ${activeTab === t.key ? "active" : ""}`}
-              onClick={() => switchTab(t.key)}
-              aria-current={activeTab === t.key ? "page" : undefined}
-              title={sidebarCollapsed ? t.label : undefined}
-            >
-              <span className="sb-icon"><t.Icon aria-hidden /></span>
-              <span className="sb-label">{t.label}</span>
-            </button>
-          ))}
+          {NAV_ITEMS.map((item) => {
+            const label = t(item.labelKey);
+            return (
+              <button
+                key={item.key}
+                className={`sb-nav-item ${activeTab === item.key ? "active" : ""}`}
+                onClick={() => switchTab(item.key)}
+                aria-current={activeTab === item.key ? "page" : undefined}
+                title={sidebarCollapsed ? label : undefined}
+              >
+                <span className="sb-icon"><item.Icon aria-hidden /></span>
+                <span className="sb-label">{label}</span>
+              </button>
+            );
+          })}
         </nav>
 
         <div className="sb-footer">
           <button
             className="sb-nav-item sb-help"
+            data-tour="tour-help"
             onClick={handleHelpClick}
-            title="ดูวิธีใช้งานหน้านี้อีกครั้ง"
+            title={t("sidebar.helpHint")}
           >
             <span className="sb-icon"><FaCircleQuestion aria-hidden /></span>
-            <span className="sb-label">วิธีใช้งาน</span>
+            <span className="sb-label">{t("sidebar.help")}</span>
           </button>
 
           {/* User profile dropdown */}
@@ -346,7 +339,7 @@ export const HomeShell: React.FC = () => {
                     setShowProfileMenu(false);
                   }}
                 >
-                  Profile
+                  {t("menu.profile")}
                 </button>
                 <div className="dropdown-sep" />
                 <button
@@ -358,7 +351,7 @@ export const HomeShell: React.FC = () => {
                     navigate("/");
                   }}
                 >
-                  Log Out
+                  {t("menu.logout")}
                 </button>
               </div>
             )}
@@ -366,53 +359,57 @@ export const HomeShell: React.FC = () => {
         </div>
       </aside>
 
-      {/* Tabs Content */}
-      <div className="content">
-        {activeTab === "Home" && (
-          <HomeTab
-            userProfile={userProfile}
-            activeBranch={activeBranch}
-            stats={statsController.stats}
-            skills={skillTreeController.skills}
-            treeSkills={skillTreeController.treeSkills}
-            unlocked={skillTreeController.unlockedSkills}
-            canUnlock={skillTreeController.canUnlock}
-            selected={skillTreeController.selectedSkill}
-            setSelected={skillTreeController.setSelectedSkill}
-            hovered={hovered}
-            setHovered={setHovered}
-            sessions={historyController.sessions}
-            onStartExercise={handleStartExercise}
-            setShowPicker={setShowPicker}
-            handleNodeClick={handleNodeClick}
-            switchTab={switchTab}
-          />
-        )}
+      {/* Main column: topbar + tab content (sits beside the sidebar, never under it) */}
+      <div className="app-main">
+        <Topbar title={t(activeNav.labelKey)} />
 
-        {activeTab === "SkillTree" && (
-          <SkillTreeTab
-            treeSkills={skillTreeController.treeSkills}
-            unlocked={skillTreeController.unlockedSkills}
-            canUnlockFn={skillTreeController.canUnlock}
-            onNodeClick={handleNodeClick}
-            selected={skillTreeController.selectedSkill}
-            setSelected={skillTreeController.setSelectedSkill}
-            hovered={hovered}
-            setHovered={setHovered}
-            onStartExercise={handleStartExercise}
-          />
-        )}
+        <div className="content">
+          {activeTab === "Home" && (
+            <HomeTab
+              userProfile={userProfile}
+              activeBranch={activeBranch}
+              stats={statsController.stats}
+              skills={skillTreeController.skills}
+              treeSkills={skillTreeController.treeSkills}
+              unlocked={skillTreeController.unlockedSkills}
+              canUnlock={skillTreeController.canUnlock}
+              selected={skillTreeController.selectedSkill}
+              setSelected={skillTreeController.setSelectedSkill}
+              hovered={hovered}
+              setHovered={setHovered}
+              sessions={historyController.sessions}
+              onStartExercise={handleStartExercise}
+              setShowPicker={setShowPicker}
+              handleNodeClick={handleNodeClick}
+              switchTab={switchTab}
+            />
+          )}
 
-        {activeTab === "History" && <HistoryTab sessions={historyController.sessions} />}
+          {activeTab === "SkillTree" && (
+            <SkillTreeTab
+              treeSkills={skillTreeController.treeSkills}
+              unlocked={skillTreeController.unlockedSkills}
+              canUnlockFn={skillTreeController.canUnlock}
+              onNodeClick={handleNodeClick}
+              selected={skillTreeController.selectedSkill}
+              setSelected={skillTreeController.setSelectedSkill}
+              hovered={hovered}
+              setHovered={setHovered}
+              onStartExercise={handleStartExercise}
+            />
+          )}
 
-        {activeTab === "Profile" && (
-          <ProfileTab
-            unlocked={skillTreeController.unlockedSkills}
-            sessions={historyController.sessions}
-            userProfile={userProfile}
-            activeBranch={activeBranch}
-          />
-        )}
+          {activeTab === "History" && <HistoryTab sessions={historyController.sessions} />}
+
+          {activeTab === "Profile" && (
+            <ProfileTab
+              unlocked={skillTreeController.unlockedSkills}
+              sessions={historyController.sessions}
+              userProfile={userProfile}
+              activeBranch={activeBranch}
+            />
+          )}
+        </div>
       </div>
 
       {/* Modals */}

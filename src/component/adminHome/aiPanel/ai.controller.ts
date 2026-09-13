@@ -16,6 +16,7 @@ import { ExerciseFormValues } from "../exercisePanel/exercise.controller";
 import { SkillFormValues } from "../skillPanel/skill.controller";
 import { GoalFormValues } from "../goalPanel/goal.controller";
 import { toSeconds } from "../../../utils/timeUnit";
+import { usePreferences } from "../../../context/PreferencesContext";
 
 export interface GenerateFormValues {
   entityType: AiDraftEntityType;
@@ -45,6 +46,7 @@ export const BLOOM_LEVELS = [
 ] as const;
 
 export function aiController() {
+  const { t } = usePreferences();
   const [drafts, setDrafts] = useState<AiDraft[]>([]);
   const [allSkills, setAllSkills] = useState<Skill[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -126,7 +128,7 @@ export function aiController() {
 
   const generate = async (): Promise<boolean> => {
     if (form.entityType === "exercise" && !form.skillId) {
-      setGenerateError("กรุณาเลือก Skill ก่อนสั่งสร้างโจทย์");
+      setGenerateError(t("admin.ai.form.pickSkillFirst"));
       return false;
     }
 
@@ -330,7 +332,7 @@ export function aiController() {
     values: ExerciseFormValues,
   ): Promise<boolean> => {
     if (!values.skillId) {
-      setFormError("กรุณาเลือก Skill");
+      setFormError(t("admin.exercises.pickSkill"));
       return false;
     }
     const base: ExerciseDraftPayload = {

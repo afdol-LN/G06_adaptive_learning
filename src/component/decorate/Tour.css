@@ -1,5 +1,5 @@
 /* ══════════════════════════════════════
-   Tour.css — Home page onboarding tour (driver.js theme + trigger button)
+   Tour.css — per-page onboarding tours of the student shell (driver.js theme)
 ══════════════════════════════════════ */
 
 /* driver.js popover theme override */
@@ -9,7 +9,7 @@
   padding: 24px;
   border-radius: 16px;
   box-shadow: 0 12px 40px rgba(0, 71, 171, 0.22);
-  font-family: 'DM Sans', inherit;
+  font-family: var(--font-sans);
 }
 .driver-popover-title {
   color: var(--text);

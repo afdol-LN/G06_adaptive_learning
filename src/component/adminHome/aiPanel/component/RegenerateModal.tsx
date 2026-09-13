@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { FaRotate } from "react-icons/fa6";
 import { AiDraft } from "../../../../models/aiDraftModel";
+import { usePreferences } from "../../../../context/PreferencesContext";
 
 interface RegenerateModalProps {
   draft: AiDraft | null;
@@ -19,6 +20,7 @@ export default function RegenerateModal({
   onConfirm,
   onClose,
 }: RegenerateModalProps) {
+  const { t } = usePreferences();
   const [instruction, setInstruction] = useState<string>("");
 
   useEffect(() => {
@@ -41,25 +43,23 @@ export default function RegenerateModal({
       >
         <div className="ad-modal-header">
           <span className="ad-modal-title">
-            <FaRotate /> ให้ AI สร้างใหม่ (#{draft.id})
+            <FaRotate /> {t("admin.ai.regen.title", { id: draft.id })}
           </span>
         </div>
 
         <form onSubmit={handleSubmit}>
           <div className="ad-modal-body">
             <div className="ad-field">
-              <label className="ad-label">อยากให้เปลี่ยนอย่างไร</label>
+              <label className="ad-label">{t("admin.ai.regen.how")}</label>
               <textarea
                 className="ad-input"
                 rows={3}
-                placeholder='เช่น "เปลี่ยนเป็นโจทย์เกี่ยวกับ 2D array" หรือ "ทำให้ตัวเลือกสั้นลง"'
+                placeholder={t("admin.ai.regen.ph")}
                 value={instruction}
                 onChange={(e) => setInstruction(e.target.value)}
                 disabled={isBusy}
               />
-              <span className="ad-hint-text">
-                เว้นว่างได้ — AI จะร่างใหม่โดยไม่ซ้ำของเดิม
-              </span>
+              <span className="ad-hint-text">{t("admin.ai.regen.hint")}</span>
             </div>
           </div>
 
@@ -70,10 +70,10 @@ export default function RegenerateModal({
               onClick={onClose}
               disabled={isBusy}
             >
-              ยกเลิก
+              {t("admin.common.cancel")}
             </button>
             <button type="submit" className="ad-btn-primary" disabled={isBusy}>
-              {isBusy ? "กำลังสร้างใหม่..." : "สร้างใหม่"}
+              {isBusy ? t("admin.ai.regen.busy") : t("admin.ai.draft.regenerate")}
             </button>
           </div>
         </form>

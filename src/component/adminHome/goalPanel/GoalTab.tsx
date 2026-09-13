@@ -7,12 +7,14 @@ import GoalViewModal from "./component/GoalViewModal";
 import { goalController } from "./goal.controller";
 import { ActionButtons } from "../../common/ActionButtons";
 import { StatusSwitch } from "../../common/StatusSwitch";
+import { usePreferences } from "../../../context/PreferencesContext";
 
 interface GoalTabProps {
   icon?: React.ReactNode;
 }
 
 export default function GoalTab({ icon }: GoalTabProps) {
+  const { t } = usePreferences();
   const {
     goals,
     isLoading,
@@ -44,8 +46,8 @@ export default function GoalTab({ icon }: GoalTabProps) {
   return (
     <div className="ad-tab-goals">
       <div className="ad-page-header">
-        <h1 className="ad-page-title">{icon} จัดการ Goal</h1>
-        <span className="ad-page-sub">Goal ทั้งหมด {goals.length} รายการ</span>
+        <h1 className="ad-page-title">{icon} {t("admin.goals.title")}</h1>
+        <span className="ad-page-sub">{t("admin.goals.count", { count: goals.length })}</span>
       </div>
 
       <div className="ad-toolbar">
@@ -53,7 +55,7 @@ export default function GoalTab({ icon }: GoalTabProps) {
           <span className="ad-search-icon"><FaMagnifyingGlass /></span>
           <input
             className="ad-search"
-            placeholder="ค้นหาชื่อ Goal..."
+            placeholder={t("admin.goals.search")}
             value={goalSearch}
             onChange={(e) => setGoalSearch(e.target.value)}
           />
@@ -64,43 +66,39 @@ export default function GoalTab({ icon }: GoalTabProps) {
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value as any)}
         >
-          <option value="all">ทุกสถานะ</option>
-          <option value="active">active</option>
-          <option value="inactive">inactive</option>
+          <option value="all">{t("admin.common.allStatus")}</option>
+          <option value="active">{t("admin.status.active")}</option>
+          <option value="inactive">{t("admin.status.inactive")}</option>
         </select>
 
         <button className="ad-btn-primary ad-btn-add" onClick={openCreateForm}>
-          <FaPlus /> เพิ่ม Goal ใหม่
+          <FaPlus /> {t("admin.goals.add")}
         </button>
       </div>
 
-      {error && (
-        <div style={{ color: "#dc2626", fontSize: 13, fontWeight: 600, margin: "8px 0" }}>
-          {error}
-        </div>
-      )}
+      {error && <div className="ad-inline-error">{error}</div>}
 
       <div className="ad-card">
         <table className="ad-table">
           <thead>
             <tr>
-              <th>Goal</th>
-              <th>Skill Require</th>
-              <th>Actions</th>
-              <th>สถานะ</th>
+              <th>{t("admin.goals.col.goal")}</th>
+              <th>{t("admin.goals.col.skillRequire")}</th>
+              <th>{t("admin.common.actions")}</th>
+              <th>{t("admin.common.status")}</th>
             </tr>
           </thead>
           <tbody>
             {isLoading ? (
               <tr>
                 <td colSpan={4} style={{ textAlign: "center", padding: 24 }}>
-                  กำลังโหลด...
+                  {t("admin.common.loading")}
                 </td>
               </tr>
             ) : filteredGoals.length === 0 ? (
               <tr>
                 <td colSpan={4} style={{ textAlign: "center", padding: 24 }}>
-                  ไม่พบ Goal ที่ตรงกับเงื่อนไข
+                  {t("admin.goals.empty")}
                 </td>
               </tr>
             ) : (

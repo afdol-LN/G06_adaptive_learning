@@ -1,0 +1,133 @@
+/* ══════════════════════════════════════
+   Topbar.css — shared top bar (page title + language + theme)
+   Used on every screen except login. It reads the host screen's tokens
+   (--surface, --border, --text, --muted, --accent …) with fallbacks, so it
+   fits the student shell (Home.css) and the admin panel (Adminhome.css) alike.
+   Prefix tb- : all feature CSS in this app is global, and Exercise.tsx
+   already owns a bare .topbar class.
+══════════════════════════════════════ */
+
+.tb-bar {
+  position: relative;
+  z-index: 40;
+  flex-shrink: 0;
+  height: var(--topbar-h, 57px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 0 24px 0 32px;
+  background: var(--glass, var(--surface, #ffffff));
+  border-bottom: 1px solid var(--border, #c2d3e0);
+}
+
+.tb-title {
+  min-width: 0;
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text, #000080);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tb-prefs {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+/* ── Language: TH | EN segmented control ── */
+.tb-lang {
+  display: inline-flex;
+  gap: 2px;
+  padding: 3px;
+  border-radius: 10px;
+  border: 1px solid var(--border, #c2d3e0);
+  background: var(--surface-2, var(--bg, #f2f7fa));
+}
+
+.tb-lang-opt {
+  min-width: 38px;
+  padding: 5px 10px;
+  border: none;
+  border-radius: 7px;
+  background: none;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  line-height: 1;
+  color: var(--muted, #6d8196);
+  cursor: pointer;
+  transition: background 0.18s, color 0.18s;
+}
+
+.tb-lang-opt:hover { color: var(--text, #000080); }
+
+.tb-lang-opt.active {
+  background: var(--accent-fill, var(--accent, #0047ab));
+  color: var(--on-accent, #ffffff);
+  box-shadow: 0 2px 8px rgba(0, 71, 171, 0.25);
+}
+
+/* ── Theme: sun/moon switch (role="switch") ── */
+.tb-theme {
+  display: inline-flex;
+  padding: 0;
+  border: none;
+  border-radius: 99px;
+  background: none;
+  cursor: pointer;
+}
+
+.tb-theme-track {
+  position: relative;
+  display: block;
+  width: 52px;
+  height: 28px;
+  border-radius: 99px;
+  border: 1px solid var(--border, #c2d3e0);
+  background: var(--surface-2, var(--bg, #f2f7fa));
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.tb-theme-thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  background: #ffffff;
+  color: #d97706;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+  transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.2s, color 0.2s;
+}
+
+/* An <svg> sized only by its width/height="1em" attributes collapses to 0px
+   as a flex item in a sized box (Chrome) — keep icons from shrinking. */
+.tb-theme-thumb svg { flex-shrink: 0; }
+
+.tb-theme.on .tb-theme-track {
+  background: var(--accent-fill, var(--accent, #0047ab));
+  border-color: var(--accent-fill, var(--accent, #0047ab));
+}
+
+.tb-theme.on .tb-theme-thumb {
+  transform: translateX(24px);
+  background: #0b1220;
+  color: #fcd34d;
+}
+
+.tb-lang-opt:focus-visible,
+.tb-theme:focus-visible {
+  outline: 2px solid var(--accent, #0047ab);
+  outline-offset: 2px;
+}

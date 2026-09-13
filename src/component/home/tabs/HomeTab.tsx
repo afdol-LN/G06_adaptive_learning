@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from "react";
+import { FaClipboardList, FaUserGraduate } from "react-icons/fa6";
 import { BranchSkill } from "../../../models/branchSkillModel";
 import { BranchStats } from "../../../models/branchStatsModel";
 import { SessionHistoryItem } from "../../../models/sessionHistoryModel";
+import { usePreferences } from "../../../context/PreferencesContext";
 import { SkillTreeSVG } from "../skillTree/SkillTreeSVG";
 import { SkillSidePanel } from "../skillTree/SkillSidePanel";
 import { LayoutSkill, getProgressColor, displayProgressPercent } from "../utils/skillTree";
@@ -31,7 +33,7 @@ interface HomeTabProps {
   onStartExercise: (skill: LayoutSkill) => void;
   setShowPicker: (show: boolean) => void;
   handleNodeClick: (skill: LayoutSkill) => void;
-  switchTab: (tab: string) => void;
+  switchTab: (tab: "Home" | "SkillTree" | "History" | "Profile") => void;
 }
 
 export const HomeTab: React.FC<HomeTabProps> = ({
@@ -52,12 +54,12 @@ export const HomeTab: React.FC<HomeTabProps> = ({
   handleNodeClick,
   switchTab,
 }) => {
+  const { t } = usePreferences();
   const [twText, setTwText] = useState("");
   const [showCursor, setShowCursor] = useState(true);
 
   const profileFullName = [userProfile?.fname, userProfile?.lname].filter(Boolean).join(" ");
-  const fullName = profileFullName || localStorage.getItem("fullname") || "นักเรียน ALS";
-  const avatar = userProfile?.gender === "FEMALE" ? "👩‍🎓" : "👨‍🎓";
+  const fullName = profileFullName || localStorage.getItem("fullname") || t("user.fallbackName");
 
   // Typewriter effect
   useEffect(() => {
@@ -77,10 +79,10 @@ export const HomeTab: React.FC<HomeTabProps> = ({
 
   // Safe Stats mapping from backend API values
   const statsList = [
-    { num: stats ? `${stats.skillsUnlockedCount}` : "0", label: "Skills Unlocked", cls: "gold" },
-    { num: stats ? `${stats.sessionsCount}` : "0", label: "Sessions Done", cls: "green" },
-    { num: stats ? `${stats.dayStreak}` : "0", label: "Day Streak", cls: "blue" },
-    { num: stats ? `${stats.goalProgressPercent}%` : "0%", label: "Goal Progress", cls: "purple" },
+    { num: stats ? `${stats.skillsUnlockedCount}` : "0", label: t("home.stat.skills"), cls: "gold" },
+    { num: stats ? `${stats.sessionsCount}` : "0", label: t("home.stat.sessions"), cls: "green" },
+    { num: stats ? `${stats.dayStreak}` : "0", label: t("home.stat.streak"), cls: "blue" },
+    { num: stats ? `${stats.goalProgressPercent}%` : "0%", label: t("home.stat.progress"), cls: "purple" },
   ];
 
   return (
@@ -89,15 +91,15 @@ export const HomeTab: React.FC<HomeTabProps> = ({
         <div className="home-top">
           {/* Hero */}
           <div className="home-hero">
-            <div className="home-hero-avatar">{avatar}</div>
+            <div className="home-hero-avatar"><FaUserGraduate aria-hidden /></div>
             <div className="home-hero-info">
-              <div className="home-greeting">ยินดีต้อนรับกลับ</div>
+              <div className="home-greeting">{t("home.greeting")}</div>
               <h1 className="home-username">
                 {twText}
                 {showCursor && <span className="cursor" />}
               </h1>
               <div className="home-goal">
-                เป้าหมาย: <span className="goal-badge">{activeBranch?.goalName || "ยังไม่ระบุ"}</span>
+                {t("home.goal")} <span className="goal-badge">{activeBranch?.goalName || t("home.goalUnset")}</span>
               </div>
             </div>
           </div>
@@ -113,52 +115,27 @@ export const HomeTab: React.FC<HomeTabProps> = ({
           </div>
 
           {/* Progress summary */}
-          <div
-            style={{
-              background: "#f0f9ff",
-              border: "1px solid #bae6fd",
-              borderRadius: "12px",
-              padding: "12px 16px",
-              marginBottom: "16px",
-              display: "flex",
-              alignItems: "center",
-              gap: "16px",
-              flexWrap: "wrap",
-            }}
-          >
-            <span style={{ fontSize: "12px", fontWeight: "700", color: "#0369a1" }}>
-              Progress โดยรวม
-            </span>
+          <div className="progress-summary">
+            <span className="progress-summary-label">{t("home.progressSummary")}</span>
             {skills
               .filter((s) => s.attemptCount > 0)
               .map((s) => {
                 const positionedSkill = treeSkills.find((ts) => ts.skillId === s.skillId);
+                const pct = displayProgressPercent(s);
                 return (
                   <div
                     key={s.skillId}
+                    className="progress-summary-item"
                     onClick={() => positionedSkill && handleNodeClick(positionedSkill)}
-                    style={{ display: "flex", alignItems: "center", gap: "6px", cursor: "pointer" }}
-                    title={`Skill: ${s.skillsName}\nProgress: ${displayProgressPercent(s)}%`}
+                    title={t("home.progressTooltip", { name: s.skillsName, pct })}
                   >
-                    <span style={{ fontSize: "13px", fontWeight: "600", color: "#475569" }}>
+                    <span className="progress-summary-name">
                       {s.skillsName.length > 12 ? s.skillsName.substring(0, 10) + "…" : s.skillsName}
                     </span>
-                    <div
-                      style={{
-                        width: "40px",
-                        height: "6px",
-                        background: "#e0f2fe",
-                        borderRadius: "3px",
-                        overflow: "hidden",
-                      }}
-                    >
+                    <div className="progress-summary-track">
                       <div
-                        style={{
-                          width: `${displayProgressPercent(s)}%`,
-                          height: "100%",
-                          background: getProgressColor(displayProgressPercent(s)),
-                          borderRadius: "3px",
-                        }}
+                        className="progress-summary-fill"
+                        style={{ width: `${pct}%`, background: getProgressColor(pct) }}
                       />
                     </div>
                   </div>
@@ -166,15 +143,11 @@ export const HomeTab: React.FC<HomeTabProps> = ({
               })}
           </div>
 
-          <div className="section-label">Skill Tree — คลิกที่โหนดเพื่อดูรายละเอียด</div>
+          <div className="section-label">{t("home.treeLabel")}</div>
         </div>
 
         {/* Tree */}
-        <div
-          className="home-tree-wrap"
-          data-tour="tour-skill-tree"
-          style={{ height: "640px", overflow: "hidden", position: "relative" }}
-        >
+        <div className="home-tree-wrap" data-tour="tour-skill-tree">
           <SkillTreeSVG
             skills={treeSkills}
             unlocked={unlocked}
@@ -186,37 +159,24 @@ export const HomeTab: React.FC<HomeTabProps> = ({
             zoomable={false}
           />
           <button
+            className="tree-expand-btn"
             onClick={(e) => {
               e.stopPropagation();
               switchTab("SkillTree");
             }}
-            style={{
-              position: "absolute",
-              bottom: "16px",
-              right: "16px",
-              background: "#fff",
-              border: "1px solid #c2d3e0",
-              borderRadius: "8px",
-              width: "36px",
-              height: "36px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              cursor: "pointer",
-              boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-              zIndex: 10,
-            }}
-            title="ขยายเต็มจอ"
+            title={t("home.expandTree")}
+            aria-label={t("home.expandTree")}
           >
             <svg
               width="18"
               height="18"
               viewBox="0 0 24 24"
               fill="none"
-              stroke="#0047AB"
+              stroke="currentColor"
               strokeWidth="2"
               strokeLinecap="round"
               strokeLinejoin="round"
+              aria-hidden
             >
               <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" />
             </svg>
@@ -226,17 +186,17 @@ export const HomeTab: React.FC<HomeTabProps> = ({
         {/* Next exercise */}
         <div className="home-next-ex-bar">
           <button className="btn-next-exercise" onClick={() => setShowPicker(true)}>
-            Next Exercise — เลือกเรื่องที่จะทำ
+            {t("home.nextExercise")}
           </button>
         </div>
 
         {/* Recent sessions (last 5) */}
         <div className="home-sessions" data-tour="tour-sessions">
-          <div className="section-label">📋 Session ล่าสุด</div>
+          <div className="section-label section-label-icon">
+            <FaClipboardList aria-hidden /> {t("home.recentSessions")}
+          </div>
           {sessions.length === 0 ? (
-            <p style={{ color: "#94a3b8", textAlign: "center", padding: "24px" }}>
-              ยังไม่มี session — เริ่มทำ Exercise ได้เลย!
-            </p>
+            <p className="empty-note">{t("home.noSessions")}</p>
           ) : (
             <div className="session-list">
               {[...sessions]

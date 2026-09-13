@@ -1,6 +1,7 @@
 import React from "react";
-import { LayoutSkill, getProgressColor, displayProgressPercent, formatProgressLabel } from "../utils/skillTree";
 import { FaBookOpen } from "react-icons/fa6";
+import { usePreferences } from "../../../context/PreferencesContext";
+import { LayoutSkill, getProgressColor, displayProgressPercent, formatProgressLabel } from "../utils/skillTree";
 
 interface ExerciseConfirmModalProps {
   skill: LayoutSkill;
@@ -13,40 +14,38 @@ export const ExerciseConfirmModal: React.FC<ExerciseConfirmModalProps> = ({
   onConfirm,
   onCancel,
 }) => {
-
+  const { t } = usePreferences();
+  const pct = displayProgressPercent(skill);
 
   return (
     <div className="confirm-overlay" onClick={onCancel}>
       <div className="confirm-modal" onClick={(e) => e.stopPropagation()}>
         <div className="confirm-icon-wrap">
-          <FaBookOpen style={{ color: "#0047AB" }} />
+          <FaBookOpen aria-hidden />
         </div>
-        <h2 className="confirm-title">เริ่มทำ Exercise?</h2>
+        <h2 className="confirm-title">{t("confirm.title")}</h2>
         <p className="confirm-desc">
-          คุณต้องการเริ่มทำ Exercise
+          {t("confirm.lead")}
           <br />
-          <strong>{skill.skillsName}</strong> ใช่หรือไม่?
+          <strong>{skill.skillsName}</strong> {t("confirm.tail")}
         </p>
         <div className="confirm-progress-row">
           <div className="confirm-progress-track">
             <div
               className="confirm-progress-fill"
-              style={{
-                width: `${displayProgressPercent(skill)}%`,
-                background: getProgressColor(displayProgressPercent(skill)),
-              }}
+              style={{ width: `${pct}%`, background: getProgressColor(pct) }}
             />
           </div>
-          <span className="confirm-progress-pct" style={{ color: getProgressColor(displayProgressPercent(skill)) }}>
-            {formatProgressLabel(skill)}
+          <span className="confirm-progress-pct" style={{ color: getProgressColor(pct) }}>
+            {formatProgressLabel(skill, t("skill.notStarted"))}
           </span>
         </div>
         <div className="confirm-btn-row">
           <button className="confirm-btn-cancel" onClick={onCancel}>
-            ไม่ใช่
+            {t("confirm.cancel")}
           </button>
           <button className="confirm-btn-ok" onClick={onConfirm}>
-            ใช่ เริ่มเลย!
+            {t("confirm.ok")}
           </button>
         </div>
       </div>

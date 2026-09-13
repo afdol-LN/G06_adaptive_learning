@@ -7,6 +7,7 @@ import {
   FaClipboardList,
   FaWandMagicSparkles,
 } from "react-icons/fa6";
+import type { TKey } from "../i18n";
 
 export interface TierInfo {
   code: string;
@@ -54,17 +55,24 @@ export function getStatusColor(status?: string): string {
   }
 }
 
-export function gradeLabel(grade: string): string {
-  return grade === "great" ? "ดีเยี่ยม" : grade === "good" ? "ดี" : "ต้องปรับปรุง";
+// ข้อความของเกรดอยู่ใน i18n — component เรียก t(gradeKey(grade))
+export function gradeKey(grade: string): TKey {
+  return grade === "great" ? "admin.grade.great" : grade === "good" ? "admin.grade.good" : "admin.grade.low";
 }
 
-export const TABS = [
-  { key: "summary", icon: <FaChartPie />, label: "สรุปภาพรวม" },
-  { key: "users", icon: <FaUsers />, label: "ผู้ใช้งาน" },
-  { key: "skills", icon: <FaBook />, label: "จัดการ Skill" },
-  { key: "goals", icon: <FaBullseye />, label: "จัดการ Goal" },
-  { key: "exercises", icon: <FaPenToSquare />, label: "จัดการ Exercise" },
-  { key: "history", icon: <FaClipboardList />, label: "ประวัติโจทย์" },
-  { key: "ai", icon: <FaWandMagicSparkles />, label: "AI ผู้ช่วย" },
-];
+// สถานะ active/inactive ที่แสดงบนหน้าจอ — ค่าอื่นที่ไม่รู้จักแสดงตามที่ backend ส่งมา
+export function statusKey(status?: string): TKey | null {
+  if (status === "active") return "admin.status.active";
+  if (status === "inactive") return "admin.status.inactive";
+  return null;
+}
 
+export const TABS: { key: string; icon: React.ReactNode; labelKey: TKey }[] = [
+  { key: "summary", icon: <FaChartPie />, labelKey: "admin.tab.summary" },
+  { key: "users", icon: <FaUsers />, labelKey: "admin.tab.users" },
+  { key: "skills", icon: <FaBook />, labelKey: "admin.tab.skills" },
+  { key: "goals", icon: <FaBullseye />, labelKey: "admin.tab.goals" },
+  { key: "exercises", icon: <FaPenToSquare />, labelKey: "admin.tab.exercises" },
+  { key: "history", icon: <FaClipboardList />, labelKey: "admin.tab.history" },
+  { key: "ai", icon: <FaWandMagicSparkles />, labelKey: "admin.tab.ai" },
+];

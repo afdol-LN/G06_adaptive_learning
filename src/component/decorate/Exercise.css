@@ -29,7 +29,7 @@ html, body {
   min-height: 100vh;     /* เปลี่ยนจาก height: 100%; เพื่อให้ขยายตามเนื้อหาได้ */
   background: var(--bg);
   color: var(--text);
-  font-family: 'DM Sans', sans-serif;
+  font-family: var(--font-sans);
   overflow-x: hidden;    /* ซ่อนแถบเลื่อนแนวนอน */
   overflow-y: auto;      /* เปิดให้เลื่อนขึ้น-ลงได้ */
 }
@@ -160,12 +160,12 @@ html, body {
   display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;
 }
 .foot-l{display:flex;align-items:center;gap:10px}
-.btn-hint{padding:9px 16px;border-radius:10px;border:1px solid var(--bdr);background:#fff;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;color:var(--sub);cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:6px;box-shadow:0 2px 4px rgba(0,0,0,0.02)}
+.btn-hint{padding:9px 16px;border-radius:10px;border:1px solid var(--bdr);background:#fff;font-family:var(--font-sans);font-size:12px;font-weight:600;color:var(--sub);cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:6px;box-shadow:0 2px 4px rgba(0,0,0,0.02)}
 .btn-hint:hover:not(:disabled){border-color:var(--gold);color:var(--gold);box-shadow:0 4px 8px rgba(0,71,171,0.08)}
 .btn-hint.used{border-color:rgba(0,71,171,.3);color:var(--gold);background:rgba(0,71,171,.05);pointer-events:none}
-.btn-skip{padding:9px 16px;border-radius:10px;border:1px solid transparent;background:none;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;color:var(--dim);cursor:pointer;transition:all .2s}
+.btn-skip{padding:9px 16px;border-radius:10px;border:1px solid transparent;background:none;font-family:var(--font-sans);font-size:12px;font-weight:600;color:var(--dim);cursor:pointer;transition:all .2s}
 .btn-skip:hover:not(:disabled){color:var(--text);background:var(--bdr)}
-.btn-next{padding:12px 32px;border:none;border-radius:12px;background:linear-gradient(135deg,var(--gold2),var(--gold));font-family:'DM Sans',sans-serif;font-size:14px;font-weight:700;color:#fff;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;box-shadow:0 6px 20px rgba(0,71,171,.25);transition:all .22s;display:flex;align-items:center;gap:8px}
+.btn-next{padding:12px 32px;border:none;border-radius:12px;background:linear-gradient(135deg,var(--gold2),var(--gold));font-family:var(--font-sans);font-size:14px;font-weight:700;color:#fff;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;box-shadow:0 6px 20px rgba(0,71,171,.25);transition:all .22s;display:flex;align-items:center;gap:8px}
 .btn-next:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 8px 25px rgba(0,71,171,.4)}
 .btn-next:disabled{opacity:.4;pointer-events:none;filter:grayscale(100%)}
 .btn-next.last{background:linear-gradient(135deg,#34d399,#10b981);box-shadow:0 6px 20px rgba(16,185,129,.25)}
@@ -226,9 +226,9 @@ html, body {
 .v-SKIP{background:rgba(139,92,246,.1);color:var(--purple);border:1px solid rgba(139,92,246,.3)}
 .v-DOWN{background:rgba(239,68,68,.1);color:var(--red);border:1px solid rgba(239,68,68,.3)}
 .pf{padding:16px 28px 24px;display:flex;gap:12px;background:#f8fafc;border-top:1px solid var(--bdr)}
-.btn-home{flex:1;padding:14px;border:1.5px solid var(--bdr);border-radius:12px;background:#fff;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;color:var(--sub);cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px}
+.btn-home{flex:1;padding:14px;border:1.5px solid var(--bdr);border-radius:12px;background:#fff;font-family:var(--font-sans);font-size:13px;font-weight:700;color:var(--sub);cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px}
 .btn-home:hover{border-color:var(--bdr2);color:var(--text);box-shadow:0 4px 10px rgba(0,0,0,0.03)}
-.btn-sess{flex:2;padding:14px;border:none;border-radius:12px;background:linear-gradient(135deg,var(--gold2),var(--gold));font-family:'DM Sans',sans-serif;font-size:14px;font-weight:700;color:#fff;cursor:pointer;letter-spacing:.04em;box-shadow:0 6px 20px rgba(0,71,171,.25);transition:all .22s;display:flex;align-items:center;justify-content:center;gap:8px}
+.btn-sess{flex:2;padding:14px;border:none;border-radius:12px;background:linear-gradient(135deg,var(--gold2),var(--gold));font-family:var(--font-sans);font-size:14px;font-weight:700;color:#fff;cursor:pointer;letter-spacing:.04em;box-shadow:0 6px 20px rgba(0,71,171,.25);transition:all .22s;display:flex;align-items:center;justify-content:center;gap:8px}
 .btn-sess:hover{transform:translateY(-2px);box-shadow:0 8px 25px rgba(0,71,171,.4)}
 
 /* NEXT SESSION SCREEN */
@@ -247,10 +247,10 @@ html, body {
 .nr-val{font-family:'DM Mono',monospace;font-weight:700;color:var(--text)}
 .nr-val.accent{color:var(--gold);font-size:16px}
 .nr-val.ok{color:var(--green)}
-.nr-tag{padding:4px 10px;border-radius:6px;font-size:11px;font-weight:700;background:var(--s2);border:1px solid var(--bdr);color:var(--gold3);font-family:'DM Sans',sans-serif}
-.ns-start{padding:16px 48px;border:none;border-radius:14px;background:linear-gradient(135deg,var(--gold2),var(--gold));font-family:'DM Sans',sans-serif;font-size:16px;font-weight:700;color:#fff;cursor:pointer;letter-spacing:.05em;box-shadow:0 8px 25px rgba(0,71,171,.3);transition:all .22s}
+.nr-tag{padding:4px 10px;border-radius:6px;font-size:11px;font-weight:700;background:var(--s2);border:1px solid var(--bdr);color:var(--gold3);font-family:var(--font-sans)}
+.ns-start{padding:16px 48px;border:none;border-radius:14px;background:linear-gradient(135deg,var(--gold2),var(--gold));font-family:var(--font-sans);font-size:16px;font-weight:700;color:#fff;cursor:pointer;letter-spacing:.05em;box-shadow:0 8px 25px rgba(0,71,171,.3);transition:all .22s}
 .ns-start:hover{transform:translateY(-3px);box-shadow:0 12px 30px rgba(0,71,171,.45)}
-.ns-back2{margin-top:20px;background:none;border:none;padding:10px 24px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;color:var(--dim);cursor:pointer;transition:all .2s}
+.ns-back2{margin-top:20px;background:none;border:none;padding:10px 24px;font-family:var(--font-sans);font-size:14px;font-weight:600;color:var(--dim);cursor:pointer;transition:all .2s}
 .ns-back2:hover{color:var(--gold3)}
 
 @media(max-width:600px){

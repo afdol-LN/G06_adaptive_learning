@@ -13,6 +13,7 @@ import Exercise from "./component/Exercise";
 import AdminHome from "./component/adminHome/Adminhome";
 import SkillTree from "./component/SkillTree";
 import { AppProvider, useApp } from "./context/AppContext";
+import { PreferencesProvider } from "./context/PreferencesContext";
 import { ToastProvider } from "./context/ToastContext";
 import GlobalLoader from "./component/common/GlobalLoader";
 import ToastContainer from "./component/common/ToastContainer";
@@ -45,9 +46,11 @@ function AppContent() {
 function App() {
   return (
     <ToastProvider>
-      <AppProvider>
-        <AppContent />
-      </AppProvider>
+      <PreferencesProvider>
+        <AppProvider>
+          <AppContent />
+        </AppProvider>
+      </PreferencesProvider>
     </ToastProvider>
   );
 }

@@ -1,5 +1,6 @@
 import dagre from "dagre";
 import { GoalSkillRequireEntry } from "../../../../models/goalModel";
+import { usePreferences } from "../../../../context/PreferencesContext";
 
 interface TreeNode {
   skillId: number;
@@ -68,9 +69,13 @@ function layoutTree(requires: GoalSkillRequireEntry[]): {
   return { nodes, edges, width: graph.width ?? 0, height: graph.height ?? 0 };
 }
 
+// สีของแผนผังมาจาก class ใน Adminhome.css (ad-goal-tree-*) ซึ่งมีค่าของธีมมืด
+// — ไม่ใส่เป็น fill/stroke attribute เพราะ attribute อ้าง CSS variable ไม่ได้
 export default function GoalLearningTree({ requires }: { requires: GoalSkillRequireEntry[] }) {
+  const { t } = usePreferences();
+
   if (requires.length === 0) {
-    return <span className="ad-muted">— ยังไม่มี Skill ที่ต้องใช้ —</span>;
+    return <span className="ad-muted">{t("admin.goalView.treeEmpty")}</span>;
   }
 
   const { nodes, edges, width, height } = layoutTree(requires);
@@ -79,7 +84,7 @@ export default function GoalLearningTree({ requires }: { requires: GoalSkillRequ
     <svg className="ad-goal-tree" width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
       <defs>
         <marker id="goal-tree-arrow" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
-          <path d="M0,0 L8,4 L0,8 Z" fill="#94a3b8" />
+          <path d="M0,0 L8,4 L0,8 Z" className="ad-goal-tree-arrow" />
         </marker>
       </defs>
       {edges.map((e, i) => (
@@ -87,19 +92,19 @@ export default function GoalLearningTree({ requires }: { requires: GoalSkillRequ
           key={`${e.fromSkillId}-${e.toSkillId}-${i}`}
           points={e.points.map((p) => `${p.x},${p.y}`).join(" ")}
           fill="none"
-          stroke="#94a3b8"
+          className="ad-goal-tree-edge"
           strokeWidth={2}
           markerEnd="url(#goal-tree-arrow)"
         />
       ))}
       {nodes.map((n) => (
         <g key={n.skillId} transform={`translate(${n.x - NODE_WIDTH / 2}, ${n.y - NODE_HEIGHT / 2})`}>
-          <rect width={NODE_WIDTH} height={NODE_HEIGHT} rx={8} fill="#eff6ff" stroke="#93c5fd" />
-          <text x={12} y={22} fontSize={13} fontWeight={700} fill="#0f172a">
+          <rect width={NODE_WIDTH} height={NODE_HEIGHT} rx={8} className="ad-goal-tree-node" />
+          <text x={12} y={22} fontSize={13} fontWeight={700} className="ad-goal-tree-name">
             {n.name}
           </text>
-          <text x={12} y={40} fontSize={12} fill="#475569">
-            {n.level != null ? `level ${n.level}` : "ไม่ระบุ level"}
+          <text x={12} y={40} fontSize={12} className="ad-goal-tree-level">
+            {n.level != null ? t("admin.common.level", { n: n.level }) : t("admin.common.noLevel")}
           </text>
         </g>
       ))}

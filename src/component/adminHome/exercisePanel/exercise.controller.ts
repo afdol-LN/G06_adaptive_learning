@@ -8,6 +8,7 @@ import {
   IsCaseSensitive,
 } from "../../../models/exerciseModel";
 import { TimeUnit, toSeconds } from "../../../utils/timeUnit";
+import { usePreferences } from "../../../context/PreferencesContext";
 
 export interface ExerciseFormValues {
   description: string;
@@ -43,6 +44,7 @@ export const EMPTY_EXERCISE_FORM: ExerciseFormValues = {
 };
 
 export function exerciseController() {
+  const { t } = usePreferences();
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [activeSkills, setActiveSkills] = useState<Skill[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -131,7 +133,7 @@ export function exerciseController() {
 
   const saveExercise = async (form: ExerciseFormValues): Promise<boolean> => {
     if (!form.skillId) {
-      setFormError("กรุณาเลือก Skill");
+      setFormError(t("admin.exercises.pickSkill"));
       return false;
     }
 

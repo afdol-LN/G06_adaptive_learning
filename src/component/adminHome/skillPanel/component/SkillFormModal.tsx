@@ -2,7 +2,8 @@ import React, { useEffect, useState } from "react";
 import { FaPen, FaPlus, FaCheck } from "react-icons/fa6";
 import { Skill, SkillPrerequisiteInput } from "../../../../models/skillModel";
 import { SkillFormValues, EMPTY_SKILL_FORM } from "../skill.controller";
-import { TIERS, getTierLabel } from "../../../../utils/adminUi";
+import { TIERS, getTierLabel, statusKey } from "../../../../utils/adminUi";
+import { usePreferences } from "../../../../context/PreferencesContext";
 
 interface SkillFormModalProps {
   isOpen: boolean;
@@ -29,6 +30,7 @@ export default function SkillFormModal({
   title,
   submitLabel,
 }: SkillFormModalProps) {
+  const { t } = usePreferences();
   const [skillCode, setSkillCode] = useState<string>("");
   const [skillsName, setSkillsName] = useState<string>("");
   const [tier, setTier] = useState<string>(EMPTY_SKILL_FORM.tier);
@@ -79,6 +81,10 @@ export default function SkillFormModal({
   if (!isOpen) return null;
 
   const isEdit = editingSkill !== null;
+  const statusLabel = (value: string) => {
+    const key = statusKey(value);
+    return key ? t(key) : value;
+  };
 
   const togglePrerequisite = (id: number) => {
     setPrerequisiteIds((prev) =>
@@ -118,11 +124,11 @@ export default function SkillFormModal({
           <span className="ad-modal-title">
             {isEdit ? (
               <>
-                <FaPen /> {title ?? "แก้ไข Skill"}
+                <FaPen /> {title ?? t("admin.skillForm.titleEdit")}
               </>
             ) : (
               <>
-                <FaPlus /> {title ?? "เพิ่ม Skill ใหม่"}
+                <FaPlus /> {title ?? t("admin.skillForm.titleCreate")}
               </>
             )}
           </span>
@@ -130,24 +136,10 @@ export default function SkillFormModal({
 
         <form onSubmit={handleSubmit}>
           <div className="ad-modal-body">
-            {formError && (
-              <div
-                style={{
-                  padding: "10px 14px",
-                  borderRadius: "8px",
-                  background: "#fef2f2",
-                  border: "1px solid #fecaca",
-                  color: "#dc2626",
-                  fontSize: "13px",
-                  fontWeight: 600,
-                }}
-              >
-                {formError}
-              </div>
-            )}
+            {formError && <div className="ad-form-error">{formError}</div>}
 
             <div className="ad-field">
-              <label className="ad-label">Skill code</label>
+              <label className="ad-label">{t("admin.skills.col.code")}</label>
               <input
                 type="text"
                 className="ad-input"
@@ -159,7 +151,7 @@ export default function SkillFormModal({
             </div>
 
             <div className="ad-field">
-              <label className="ad-label">ชื่อ Skill</label>
+              <label className="ad-label">{t("admin.skillForm.name")}</label>
               <input
                 type="text"
                 className="ad-input"
@@ -171,7 +163,7 @@ export default function SkillFormModal({
 
             <div className="ad-field-row">
               <div className="ad-field" style={{ flex: 1, minWidth: "120px", position: "relative" }}>
-                <label className="ad-label">Tier</label>
+                <label className="ad-label">{t("admin.skills.col.tier")}</label>
                 <button
                   type="button"
                   className="ad-select"
@@ -191,23 +183,23 @@ export default function SkillFormModal({
                 </button>
                 {isTierOpen && (
                   <div className="ad-select-options-list">
-                    {TIERS.map((t) => (
+                    {TIERS.map((tierOpt) => (
                       <div
-                        key={t.code}
-                        className={`ad-select-option-item ${tier === t.code ? "active" : ""}`}
+                        key={tierOpt.code}
+                        className={`ad-select-option-item ${tier === tierOpt.code ? "active" : ""}`}
                         onClick={() => {
-                          setTier(t.code);
+                          setTier(tierOpt.code);
                           setIsTierOpen(false);
                         }}
                       >
-                        {t.label}
+                        {tierOpt.label}
                       </div>
                     ))}
                   </div>
                 )}
               </div>
               <div className="ad-field" style={{ flex: 1, minWidth: "120px", position: "relative" }}>
-                <label className="ad-label">สถานะ</label>
+                <label className="ad-label">{t("admin.common.status")}</label>
                 <button
                   type="button"
                   className="ad-select"
@@ -223,23 +215,20 @@ export default function SkillFormModal({
                     alignItems: "center",
                   }}
                 >
-                  <span>{status}</span>
+                  <span>{statusLabel(status)}</span>
                 </button>
                 {isStatusOpen && (
                   <div className="ad-select-options-list">
-                    {[
-                      { value: "active", label: "active" },
-                      { value: "inactive", label: "inactive" },
-                    ].map((opt) => (
+                    {["active", "inactive"].map((value) => (
                       <div
-                        key={opt.value}
-                        className={`ad-select-option-item ${status === opt.value ? "active" : ""}`}
+                        key={value}
+                        className={`ad-select-option-item ${status === value ? "active" : ""}`}
                         onClick={() => {
-                          setStatus(opt.value);
+                          setStatus(value);
                           setIsStatusOpen(false);
                         }}
                       >
-                        {opt.label}
+                        {statusLabel(value)}
                       </div>
                     ))}
                   </div>
@@ -248,11 +237,11 @@ export default function SkillFormModal({
             </div>
 
             <div className="ad-field">
-              <label className="ad-label">Prerequisite (เลือกได้หลายรายการ)</label>
+              <label className="ad-label">{t("admin.skillForm.prereq")}</label>
               <input
                 type="text"
                 className="ad-input"
-                placeholder="ค้นหา Prerequisite..."
+                placeholder={t("admin.skillForm.prereqSearch")}
                 value={prereqSearch}
                 onChange={(e) => setPrereqSearch(e.target.value)}
                 style={{ marginBottom: "8px" }}
@@ -261,8 +250,8 @@ export default function SkillFormModal({
                 {filteredCandidates.length === 0 ? (
                   <span className="ad-muted">
                     {candidateSkills.length === 0
-                      ? "— ไม่มี Skill อื่นให้เลือก —"
-                      : "— ไม่พบ Skill ที่ค้นหา —"}
+                      ? t("admin.skillForm.noOther")
+                      : t("admin.skillForm.noMatch")}
                   </span>
                 ) : (
                   filteredCandidates.map((s) => {
@@ -271,13 +260,9 @@ export default function SkillFormModal({
                       <button
                         type="button"
                         key={s.skillId}
-                        className="ad-req-tag"
+                        className={`ad-req-tag pickable${selected ? " selected" : ""}`}
                         onClick={() => togglePrerequisite(s.skillId)}
-                        style={
-                          selected
-                            ? { background: "#eff6ff", borderColor: "#93c5fd", color: "#2563eb", cursor: "pointer" }
-                            : { cursor: "pointer" }
-                        }
+                        aria-pressed={selected}
                       >
                         {selected ? (
                           <>
@@ -297,10 +282,10 @@ export default function SkillFormModal({
 
           <div className="ad-modal-footer">
             <button type="button" className="ad-btn-cancel" onClick={onClose} disabled={isSaving}>
-              ยกเลิก
+              {t("admin.common.cancel")}
             </button>
             <button type="submit" className="ad-btn-primary" disabled={isSaving}>
-              {isSaving ? "กำลังบันทึก..." : (submitLabel ?? "บันทึก")}
+              {isSaving ? t("admin.common.saving") : (submitLabel ?? t("admin.common.save"))}
             </button>
           </div>
         </form>

@@ -1,4 +1,6 @@
 import React from "react";
+import { usePreferences } from "../../context/PreferencesContext";
+import { statusKey } from "../../utils/adminUi";
 
 interface StatusSwitchProps {
   status: string;
@@ -7,6 +9,8 @@ interface StatusSwitchProps {
 }
 
 export const StatusSwitch: React.FC<StatusSwitchProps> = ({ status, onToggle, disabled }) => {
+  const { t } = usePreferences();
+  const key = statusKey(status);
   return (
     <div style={{ display: "inline-flex", alignItems: "center", gap: 8, height: 20 }}>
       <label className="ad-switch" style={{ flexShrink: 0 }}>
@@ -28,7 +32,7 @@ export const StatusSwitch: React.FC<StatusSwitchProps> = ({ status, onToggle, di
           lineHeight: 1,
         }}
       >
-        {status}
+        {key ? t(key) : status}
       </span>
     </div>
   );

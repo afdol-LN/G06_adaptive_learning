@@ -4,6 +4,7 @@ import { Skill } from "../../../../models/skillModel";
 import { Exercise, ExerciseType, IsCaseSensitive } from "../../../../models/exerciseModel";
 import { ExerciseFormValues, EMPTY_EXERCISE_FORM } from "../exercise.controller";
 import { TimeUnit, fromSeconds } from "../../../../utils/timeUnit";
+import { usePreferences } from "../../../../context/PreferencesContext";
 
 interface ExerciseFormModalProps {
   isOpen: boolean;
@@ -30,6 +31,7 @@ export default function ExerciseFormModal({
   title,
   submitLabel,
 }: ExerciseFormModalProps) {
+  const { t } = usePreferences();
   const [description, setDescription] = useState<string>("");
   const [code, setCode] = useState<string>("");
   const [language, setLanguage] = useState<string>("python");
@@ -125,11 +127,11 @@ export default function ExerciseFormModal({
           <span className="ad-modal-title">
             {isEdit ? (
               <>
-                <FaPen /> {title ?? "แก้ไข Exercise"}
+                <FaPen /> {title ?? t("admin.exForm.titleEdit")}
               </>
             ) : (
               <>
-                <FaPlus /> {title ?? "เพิ่ม Exercise ใหม่"}
+                <FaPlus /> {title ?? t("admin.exForm.titleCreate")}
               </>
             )}
           </span>
@@ -137,24 +139,10 @@ export default function ExerciseFormModal({
 
         <form onSubmit={handleSubmit}>
           <div className="ad-modal-body">
-            {formError && (
-              <div
-                style={{
-                  padding: "10px 14px",
-                  borderRadius: "8px",
-                  background: "#fef2f2",
-                  border: "1px solid #fecaca",
-                  color: "#dc2626",
-                  fontSize: "13px",
-                  fontWeight: 600,
-                }}
-              >
-                {formError}
-              </div>
-            )}
+            {formError && <div className="ad-form-error">{formError}</div>}
 
             <div className="ad-field">
-              <label className="ad-label">คำอธิบายโจทย์ (Description)</label>
+              <label className="ad-label">{t("admin.exForm.description")}</label>
               <textarea
                 className="ad-input"
                 value={description}
@@ -165,26 +153,21 @@ export default function ExerciseFormModal({
             </div>
 
             <div className="ad-field">
-              <label className="ad-label">
-                โค้ดประกอบโจทย์ (ไม่บังคับ)
-              </label>
+              <label className="ad-label">{t("admin.exForm.code")}</label>
               <textarea
                 className="ad-input ad-code-input"
                 value={code}
                 onChange={(e) => setCode(e.target.value)}
                 rows={6}
                 spellCheck={false}
-                placeholder={"เว้นว่างได้ถ้าโจทย์ไม่ต้องใช้โค้ด\nโค้ดจะแสดงในกล่องแยกเหนือตัวเลือก"}
+                placeholder={t("admin.exForm.codePh")}
               />
-              <span className="ad-hint-text">
-                ถ้าโจทย์เขียนว่า &quot;โค้ดนี้...&quot; ต้องใส่โค้ดตรงนี้ ไม่ใช่ในช่องคำอธิบาย
-                เพราะช่องคำอธิบายแสดงเป็นข้อความธรรมดา การขึ้นบรรทัดจะหายไป
-              </span>
+              <span className="ad-hint-text">{t("admin.exForm.codeHint")}</span>
             </div>
 
             {code.trim() !== "" && (
               <div className="ad-field">
-                <label className="ad-label">ภาษาของโค้ด</label>
+                <label className="ad-label">{t("admin.exForm.language")}</label>
                 <select
                   className="ad-select"
                   value={language}
@@ -197,14 +180,14 @@ export default function ExerciseFormModal({
                   <option value="c">C</option>
                   <option value="cpp">C++</option>
                   <option value="sql">SQL</option>
-                  <option value="plaintext">ข้อความธรรมดา</option>
+                  <option value="plaintext">{t("admin.exForm.plaintext")}</option>
                 </select>
               </div>
             )}
 
             <div className="ad-field-row">
               <div className="ad-field">
-                <label className="ad-label">Level</label>
+                <label className="ad-label">{t("admin.exercises.col.level")}</label>
                 <input
                   type="number"
                   min={1}
@@ -215,7 +198,7 @@ export default function ExerciseFormModal({
                 />
               </div>
               <div className="ad-field">
-                <label className="ad-label">Skill</label>
+                <label className="ad-label">{t("admin.exercises.col.skill")}</label>
                 <select
                   className="ad-select"
                   value={skillId ?? ""}
@@ -223,7 +206,7 @@ export default function ExerciseFormModal({
                   required
                 >
                   <option value="" disabled>
-                    -- เลือก Skill --
+                    {t("admin.common.pickSkill")}
                   </option>
                   {activeSkills.map((s) => (
                     <option key={s.skillId} value={s.skillId}>
@@ -236,7 +219,7 @@ export default function ExerciseFormModal({
 
             <div className="ad-field-row">
               <div className="ad-field">
-                <label className="ad-label">เวลาที่คาดหวัง (Expected time)</label>
+                <label className="ad-label">{t("admin.exForm.expectTime")}</label>
                 <input
                   type="number"
                   min={1}
@@ -248,47 +231,47 @@ export default function ExerciseFormModal({
                 />
               </div>
               <div className="ad-field">
-                <label className="ad-label">หน่วย (Unit)</label>
+                <label className="ad-label">{t("admin.exForm.unit")}</label>
                 <select
                   className="ad-select"
                   value={expectTimeUnit}
                   onChange={(e) => setExpectTimeUnit(e.target.value as TimeUnit)}
                 >
-                  <option value="second">วินาที (second)</option>
-                  <option value="minute">นาที (minute)</option>
-                  <option value="hour">ชั่วโมง (hour)</option>
+                  <option value="second">{t("admin.exForm.unit.second")}</option>
+                  <option value="minute">{t("admin.exForm.unit.minute")}</option>
+                  <option value="hour">{t("admin.exForm.unit.hour")}</option>
                 </select>
               </div>
             </div>
 
             <div className="ad-field-row">
               <div className="ad-field">
-                <label className="ad-label">ประเภทโจทย์ (Type)</label>
+                <label className="ad-label">{t("admin.exForm.type")}</label>
                 <select
                   className="ad-select"
                   value={type}
                   onChange={(e) => setType(e.target.value as ExerciseType)}
                 >
-                  <option value="CHOICE">CHOICE (ตัวเลือก)</option>
-                  <option value="FILL_IN_BLANK">FILL_IN_BLANK (เติมคำ)</option>
+                  <option value="CHOICE">{t("admin.exForm.type.choice")}</option>
+                  <option value="FILL_IN_BLANK">{t("admin.exForm.type.fill")}</option>
                 </select>
               </div>
               <div className="ad-field">
-                <label className="ad-label">สถานะ</label>
+                <label className="ad-label">{t("admin.common.status")}</label>
                 <select
                   className="ad-select"
                   value={status}
                   onChange={(e) => setStatus(e.target.value as "active" | "inactive")}
                 >
-                  <option value="active">active</option>
-                  <option value="inactive">inactive</option>
+                  <option value="active">{t("admin.status.active")}</option>
+                  <option value="inactive">{t("admin.status.inactive")}</option>
                 </select>
               </div>
             </div>
 
             {type === "CHOICE" ? (
               <div className="ad-field">
-                <label className="ad-label">ตัวเลือกคำตอบ (เลือก 1 ข้อที่ถูก)</label>
+                <label className="ad-label">{t("admin.exForm.choices")}</label>
                 {choices.map((script, index) => (
                   <div
                     key={index}
@@ -297,7 +280,7 @@ export default function ExerciseFormModal({
                     <input
                       type="text"
                       className="ad-input"
-                      placeholder={`ตัวเลือกที่ ${index + 1}`}
+                      placeholder={t("admin.exForm.choiceN", { n: index + 1 })}
                       value={script}
                       onChange={(e) => handleChoiceChange(index, e.target.value)}
                       required
@@ -312,14 +295,14 @@ export default function ExerciseFormModal({
                         checked={correctChoiceIndex === index}
                         onChange={() => setCorrectChoiceIndex(index)}
                       />
-                      คำตอบ
+                      {t("admin.exForm.isAnswer")}
                     </label>
                   </div>
                 ))}
               </div>
             ) : (
               <div className="ad-field">
-                <label className="ad-label">คำตอบที่ถูกต้อง (Fill in blank)</label>
+                <label className="ad-label">{t("admin.exForm.fillAnswer")}</label>
                 <input
                   type="text"
                   className="ad-input"
@@ -334,7 +317,7 @@ export default function ExerciseFormModal({
                     checked={isCasesensitive === "YES"}
                     onChange={(e) => setIsCasesensitive(e.target.checked ? "YES" : "NO")}
                   />
-                  ตรวจตัวพิมพ์เล็ก/ใหญ่ (Case sensitive)
+                  {t("admin.exForm.caseSensitive")}
                 </label>
               </div>
             )}
@@ -342,10 +325,10 @@ export default function ExerciseFormModal({
 
           <div className="ad-modal-footer">
             <button type="button" className="ad-btn-cancel" onClick={onClose} disabled={isSaving}>
-              ยกเลิก
+              {t("admin.common.cancel")}
             </button>
             <button type="submit" className="ad-btn-primary" disabled={isSaving}>
-              {isSaving ? "กำลังบันทึก..." : (submitLabel ?? "บันทึก")}
+              {isSaving ? t("admin.common.saving") : (submitLabel ?? t("admin.common.save"))}
             </button>
           </div>
         </form>

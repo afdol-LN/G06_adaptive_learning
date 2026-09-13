@@ -6,12 +6,14 @@ import UserFormModal from "./component/UserFormModal";
 import UserViewModal from "./component/UserViewModal";
 import { UserResponseAdmin } from "../../../models/userModel";
 import { StatusSwitch } from "../../common/StatusSwitch";
+import { usePreferences } from "../../../context/PreferencesContext";
 
 interface UsersTabProps {
   icon?: React.ReactNode;
 }
 
 export default function UsersTab({ icon }: UsersTabProps) {
+  const { t } = usePreferences();
   const {
     users,
     isLoading,
@@ -49,15 +51,15 @@ export default function UsersTab({ icon }: UsersTabProps) {
         }}
       >
         <div>
-          <h1 className="ad-page-title">{icon} จัดการผู้ใช้งาน</h1>
-          <span className="ad-page-sub">ผู้ใช้ทั้งหมด {users.length} คน</span>
+          <h1 className="ad-page-title">{icon} {t("admin.users.title")}</h1>
+          <span className="ad-page-sub">{t("admin.users.count", { count: users.length })}</span>
         </div>
         <button
           type="button"
           className="ad-btn-primary ad-btn-add"
           onClick={openCreateModal}
         >
-          เพิ่มผู้ใช้ใหม่
+          {t("admin.users.add")}
         </button>
       </div>
 
@@ -75,22 +77,22 @@ export default function UsersTab({ icon }: UsersTabProps) {
         <table className="ad-table">
           <thead>
             <tr>
-              <th>ชื่อ - นามสกุล</th>
-              <th>Actions</th>
-              <th>สถานะ</th>
+              <th>{t("admin.users.col.name")}</th>
+              <th>{t("admin.common.actions")}</th>
+              <th>{t("admin.common.status")}</th>
             </tr>
           </thead>
           <tbody>
             {isLoading ? (
               <tr>
                 <td colSpan={3} style={{ textAlign: "center", padding: 24 }}>
-                  กำลังโหลด...
+                  {t("admin.common.loading")}
                 </td>
               </tr>
             ) : userFiltered.length === 0 ? (
               <tr>
                 <td colSpan={3} style={{ textAlign: "center", padding: 24 }}>
-                  ไม่พบผู้ใช้งานที่ตรงกับเงื่อนไข
+                  {t("admin.users.empty")}
                 </td>
               </tr>
             ) : (
@@ -133,10 +135,10 @@ export default function UsersTab({ icon }: UsersTabProps) {
                     <td>
                       <div style={{ display: "flex", gap: 8 }}>
                         <button className="ad-btn-sm ad-btn-view" onClick={() => openViewModal(u)}>
-                          <FaEye /> ดู
+                          <FaEye /> {t("admin.common.view")}
                         </button>
                         <button className="ad-btn-sm" onClick={() => openEditModal(u)}>
-                          <FaPen /> แก้ไข
+                          <FaPen /> {t("admin.common.edit")}
                         </button>
                       </div>
                     </td>

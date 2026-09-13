@@ -11,12 +11,14 @@ import {
   AiDraftEntityType,
   AiDraftStatus,
 } from "../../../models/aiDraftModel";
+import { usePreferences } from "../../../context/PreferencesContext";
 
 interface AiTabProps {
   icon?: ReactNode;
 }
 
 export default function AiTab({ icon }: AiTabProps) {
+  const { t } = usePreferences();
   const {
     drafts,
     allSkills,
@@ -65,10 +67,10 @@ export default function AiTab({ icon }: AiTabProps) {
   return (
     <div className="ad-tab-ai">
       <div className="ad-page-header">
-        <h1 className="ad-page-title">{icon} AI ผู้ช่วย</h1>
+        <h1 className="ad-page-title">{icon} {t("admin.ai.title")}</h1>
         <span className="ad-page-sub">
-          ให้ AI ร่าง Exercise / Skill / Goal แล้วตรวจก่อนบันทึกลงระบบ
-          {statusFilter === "pending" && ` · รอตรวจ ${pendingCount} รายการ`}
+          {t("admin.ai.sub")}
+          {statusFilter === "pending" && t("admin.ai.pendingCount", { count: pendingCount })}
         </span>
       </div>
 
@@ -90,10 +92,10 @@ export default function AiTab({ icon }: AiTabProps) {
             setStatusFilter(e.target.value as AiDraftStatus | "all")
           }
         >
-          <option value="pending">รอตรวจ</option>
-          <option value="approved">อนุมัติแล้ว</option>
-          <option value="rejected">ปฏิเสธแล้ว</option>
-          <option value="all">ทุกสถานะ</option>
+          <option value="pending">{t("admin.ai.status.pending")}</option>
+          <option value="approved">{t("admin.ai.status.approved")}</option>
+          <option value="rejected">{t("admin.ai.status.rejected")}</option>
+          <option value="all">{t("admin.common.allStatus")}</option>
         </select>
 
         <select
@@ -103,7 +105,7 @@ export default function AiTab({ icon }: AiTabProps) {
             setEntityFilter(e.target.value as AiDraftEntityType | "all")
           }
         >
-          <option value="all">ทุกประเภท</option>
+          <option value="all">{t("admin.common.allTypes")}</option>
           <option value="exercise">Exercise</option>
           <option value="skill">Skill</option>
           <option value="goal">Goal</option>
@@ -113,12 +115,10 @@ export default function AiTab({ icon }: AiTabProps) {
       {error && <div className="ad-ai-alert-error">{error}</div>}
 
       {isLoading ? (
-        <div className="ad-muted">กำลังโหลด...</div>
+        <div className="ad-muted">{t("admin.common.loading")}</div>
       ) : drafts.length === 0 ? (
         <div className="ad-card ad-ai-empty">
-          <span className="ad-muted">
-            ยังไม่มีร่างที่ตรงกับเงื่อนไข — ใช้ฟอร์มด้านบนสั่งให้ AI ร่างให้ได้เลย
-          </span>
+          <span className="ad-muted">{t("admin.ai.empty")}</span>
         </div>
       ) : (
         <div className="ad-ai-draft-grid">
@@ -164,8 +164,8 @@ export default function AiTab({ icon }: AiTabProps) {
         formError={formError}
         onSave={saveExerciseDraft}
         onClose={closeEdit}
-        title="แก้ไขร่าง Exercise"
-        submitLabel="บันทึกร่าง"
+        title={t("admin.ai.editExercise")}
+        submitLabel={t("admin.ai.saveDraft")}
       />
 
       <SkillFormModal
@@ -176,8 +176,8 @@ export default function AiTab({ icon }: AiTabProps) {
         formError={formError}
         onSave={saveSkillDraft}
         onClose={closeEdit}
-        title="แก้ไขร่าง Skill"
-        submitLabel="บันทึกร่าง"
+        title={t("admin.ai.editSkill")}
+        submitLabel={t("admin.ai.saveDraft")}
       />
 
       <GoalFormModal
@@ -188,8 +188,8 @@ export default function AiTab({ icon }: AiTabProps) {
         formError={formError}
         onSave={saveGoalDraft}
         onClose={closeEdit}
-        title="แก้ไขร่าง Goal"
-        submitLabel="บันทึกร่าง"
+        title={t("admin.ai.editGoal")}
+        submitLabel={t("admin.ai.saveDraft")}
       />
     </div>
   );

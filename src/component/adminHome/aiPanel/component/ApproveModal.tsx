@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { FaCheck } from "react-icons/fa6";
 import { AiDraft } from "../../../../models/aiDraftModel";
+import { usePreferences } from "../../../../context/PreferencesContext";
 
 interface ApproveModalProps {
   draft: AiDraft | null;
@@ -19,6 +20,7 @@ export default function ApproveModal({
   onConfirm,
   onClose,
 }: ApproveModalProps) {
+  const { t } = usePreferences();
   const [status, setStatus] = useState<"active" | "inactive">("inactive");
 
   useEffect(() => {
@@ -41,14 +43,14 @@ export default function ApproveModal({
       >
         <div className="ad-modal-header">
           <span className="ad-modal-title">
-            <FaCheck /> อนุมัติร่าง #{draft.id}
+            <FaCheck /> {t("admin.ai.approve.title", { id: draft.id })}
           </span>
         </div>
 
         <form onSubmit={handleSubmit}>
           <div className="ad-modal-body">
             <div className="ad-field">
-              <label className="ad-label">บันทึกลงระบบด้วยสถานะ</label>
+              <label className="ad-label">{t("admin.ai.approve.saveAs")}</label>
               <select
                 className="ad-select"
                 value={status}
@@ -56,14 +58,10 @@ export default function ApproveModal({
                   setStatus(e.target.value as "active" | "inactive")
                 }
               >
-                <option value="inactive">
-                  inactive — บันทึกไว้ก่อน ยังไม่ส่งถึงนักศึกษา
-                </option>
-                <option value="active">active — เปิดใช้งานทันที</option>
+                <option value="inactive">{t("admin.ai.approve.optInactive")}</option>
+                <option value="active">{t("admin.ai.approve.optActive")}</option>
               </select>
-              <span className="ad-hint-text">
-                เปลี่ยนสถานะทีหลังได้ที่แท็บจัดการของแต่ละประเภท
-              </span>
+              <span className="ad-hint-text">{t("admin.ai.approve.hint")}</span>
             </div>
           </div>
 
@@ -74,10 +72,10 @@ export default function ApproveModal({
               onClick={onClose}
               disabled={isBusy}
             >
-              ยกเลิก
+              {t("admin.common.cancel")}
             </button>
             <button type="submit" className="ad-btn-primary" disabled={isBusy}>
-              {isBusy ? "กำลังบันทึก..." : "ยืนยันอนุมัติ"}
+              {isBusy ? t("admin.common.saving") : t("admin.ai.approve.confirm")}
             </button>
           </div>
         </form>

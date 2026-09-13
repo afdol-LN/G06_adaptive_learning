@@ -1,6 +1,7 @@
 import React from "react";
+import { FaBookOpen, FaXmark } from "react-icons/fa6";
+import { usePreferences } from "../../../context/PreferencesContext";
 import { LayoutSkill, getProgressColor, displayProgressPercent, formatProgressLabel } from "../utils/skillTree";
-import { FaBookOpen } from "react-icons/fa6";
 
 interface SkillSidePanelProps {
   selected: LayoutSkill | null;
@@ -19,9 +20,12 @@ export const SkillSidePanel: React.FC<SkillSidePanelProps> = ({
   canUnlockFn,
   onStartExercise,
 }) => {
+  const { t } = usePreferences();
   if (!selected) return null;
   const skill = skills.find((s) => s.skillId === selected.skillId);
   if (!skill) return null;
+
+  const notStarted = t("skill.notStarted");
 
   const prereqNodes = (skill.skillPrequisite || [])
     .map((p) => skills.find((s) => s.skillId === p.prerequisiteSkillId))
@@ -34,15 +38,22 @@ export const SkillSidePanel: React.FC<SkillSidePanelProps> = ({
   const isUnlocked = unlocked.has(skill.skillId);
   const canDo = canUnlockFn(skill.skillId);
 
+  const nodeRow = (n: LayoutSkill) => (
+    <div key={n.skillId} className="node-row" onClick={() => setSelected(n)}>
+      <span className="node-row-name">{n.skillsName}</span>
+      <span className="node-row-pct" style={{ color: getProgressColor(displayProgressPercent(n)) }}>
+        {formatProgressLabel(n, notStarted)}
+      </span>
+    </div>
+  );
+
   return (
     <div className="side-panel">
       <div className="side-panel-section">
         <div className="side-panel-top-row">
-          <span className="side-panel-icon" style={{ display: "flex", alignItems: "center", color: "#0047AB" }}>
-            <FaBookOpen />
-          </span>
-          <button className="btn-close" onClick={() => setSelected(null)}>
-            ✕
+          <span className="side-panel-icon"><FaBookOpen aria-hidden /></span>
+          <button className="btn-close" onClick={() => setSelected(null)} aria-label={t("common.close")}>
+            <FaXmark aria-hidden />
           </button>
         </div>
         <div className="side-panel-title">{skill.skillsName}</div>
@@ -57,43 +68,33 @@ export const SkillSidePanel: React.FC<SkillSidePanelProps> = ({
             />
           </div>
           <span className="progress-pct" style={{ color: getProgressColor(displayProgressPercent(skill)) }}>
-            {formatProgressLabel(skill)}
+            {formatProgressLabel(skill, notStarted)}
           </span>
         </div>
         <p className="side-panel-status">
-          {isUnlocked ? "ปลดล็อกแล้ว" : canDo ? "พร้อมปลดล็อก" : "ยังล็อกอยู่"}
+          {isUnlocked
+            ? t("skill.status.unlocked")
+            : canDo
+              ? t("skill.status.ready")
+              : t("skill.status.locked")}
         </p>
       </div>
 
       <div className="side-panel-section">
-        <p className="side-panel-label">มาจาก (Prerequisite)</p>
+        <p className="side-panel-label">{t("skill.prereq")}</p>
         {prereqNodes.length === 0 ? (
-          <p className="side-panel-empty">— ไม่มี (จุดเริ่มต้น)</p>
+          <p className="side-panel-empty">{t("skill.prereqNone")}</p>
         ) : (
-          prereqNodes.map((n) => (
-            <div key={n.skillId} className="node-row" onClick={() => setSelected(n)}>
-              <span className="node-row-name">{n.skillsName}</span>
-              <span className="node-row-pct" style={{ color: getProgressColor(displayProgressPercent(n)) }}>
-                {formatProgressLabel(n)}
-              </span>
-            </div>
-          ))
+          prereqNodes.map(nodeRow)
         )}
       </div>
 
       <div className="side-panel-section">
-        <p className="side-panel-label">ต่อไป (Unlocks)</p>
+        <p className="side-panel-label">{t("skill.unlocks")}</p>
         {nextNodes.length === 0 ? (
-          <p className="side-panel-empty">— ไม่มี (จุดสิ้นสุด)</p>
+          <p className="side-panel-empty">{t("skill.unlocksNone")}</p>
         ) : (
-          nextNodes.map((n) => (
-            <div key={n.skillId} className="node-row" onClick={() => setSelected(n)}>
-              <span className="node-row-name">{n.skillsName}</span>
-              <span className="node-row-pct" style={{ color: getProgressColor(displayProgressPercent(n)) }}>
-                {formatProgressLabel(n)}
-              </span>
-            </div>
-          ))
+          nextNodes.map(nodeRow)
         )}
       </div>
 
@@ -103,7 +104,11 @@ export const SkillSidePanel: React.FC<SkillSidePanelProps> = ({
           disabled={!isUnlocked && !canDo}
           onClick={() => onStartExercise(skill)}
         >
-          {isUnlocked ? "ไปทำ Exercise →" : canDo ? "ปลดล็อก + Exercise →" : "ยังทำไม่ได้"}
+          {isUnlocked
+            ? t("skill.action.go")
+            : canDo
+              ? t("skill.action.unlock")
+              : t("skill.action.disabled")}
         </button>
       </div>
     </div>

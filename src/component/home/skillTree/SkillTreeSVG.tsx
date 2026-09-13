@@ -1,5 +1,5 @@
 import React from "react";
-import { BranchSkill } from "../../../models/branchSkillModel";
+import { usePreferences } from "../../../context/PreferencesContext";
 import { ZoomableSVG } from "./ZoomableSVG";
 import {
   NODE_W,
@@ -11,6 +11,8 @@ import {
   formatProgressLabel,
 } from "../utils/skillTree";
 
+// ทุกสีในแผนผังเป็น CSS variable จาก Home.css (มีค่าของธีมมืดแยก) และต้องใส่ผ่าน style
+// หรือ className เท่านั้น — var() ใช้ไม่ได้ใน presentation attribute อย่าง fill="..."
 
 interface SkillTreeSVGProps {
   skills: LayoutSkill[];
@@ -33,16 +35,19 @@ export const SkillTreeSVG: React.FC<SkillTreeSVGProps> = ({
   setHovered,
   zoomable = false,
 }) => {
+  const { t } = usePreferences();
+
   if (skills.length === 0) {
-    return <p className="side-panel-empty">— ยังไม่มี Skill ในเส้นทางนี้ —</p>;
+    return <p className="side-panel-empty">{t("skill.emptyTree")}</p>;
   }
 
+  const notStarted = t("skill.notStarted");
   const getNodeById = (id: number) => skills.find((s) => s.skillId === id);
 
   const getEdgeColor = (fromId: number, toId: number) => {
-    if (unlocked.has(toId)) return "#0047AB";
-    if (canUnlockFn(toId)) return "#60a5fa";
-    return "#cbd5e1";
+    if (unlocked.has(toId)) return "var(--edge-open)";
+    if (canUnlockFn(toId)) return "var(--edge-ready)";
+    return "var(--edge-locked)";
   };
 
   const isRelatedEdge = (fromId: number, toId: number) =>
@@ -59,7 +64,7 @@ export const SkillTreeSVG: React.FC<SkillTreeSVGProps> = ({
     <>
       <defs>
         <pattern id="dots-cobalt" width="40" height="40" patternUnits="userSpaceOnUse">
-          <circle cx="1" cy="1" r="1" fill="#c2d3e0" />
+          <circle cx="1" cy="1" r="1" className="tree-dot" />
         </pattern>
       </defs>
       <rect x={minX} y={minY} width={svgWidth} height={svgHeight} fill="url(#dots-cobalt)" />
@@ -72,7 +77,6 @@ export const SkillTreeSVG: React.FC<SkillTreeSVGProps> = ({
           if (!from || isRelatedEdge(reqId, skill.skillId)) return null;
 
           const isActive = unlocked.has(skill.skillId);
-          const color = getEdgeColor(reqId, skill.skillId);
           const x1 = from.x;
           const y1 = from.y + NODE_H / 2;
           const x2 = skill.x;
@@ -85,7 +89,7 @@ export const SkillTreeSVG: React.FC<SkillTreeSVGProps> = ({
               key={`edge-${reqId}-${skill.skillId}`}
               d={path}
               fill="none"
-              stroke={color}
+              style={{ stroke: getEdgeColor(reqId, skill.skillId) }}
               strokeWidth={isActive ? 2 : 1}
               strokeLinejoin="round"
               strokeDasharray={isActive ? "none" : "4,4"}
@@ -110,14 +114,14 @@ export const SkillTreeSVG: React.FC<SkillTreeSVGProps> = ({
             const y2 = skill.y - NODE_H / 2;
             const midY = y1 + (y2 - y1) / 2;
             const path = `M${x1},${y1} L${x1},${midY} L${x2},${midY} L${x2},${y2}`;
-            const hc = reqId === selected.skillId ? "#0047AB" : "#10b981";
+            const hc = reqId === selected.skillId ? "var(--accent)" : "var(--node-done-border)";
 
             return (
               <g key={`edge-rel-${reqId}-${skill.skillId}`}>
                 <path
                   d={path}
                   fill="none"
-                  stroke={hc}
+                  style={{ stroke: hc }}
                   strokeWidth={7}
                   strokeOpacity={0.15}
                   strokeLinecap="round"
@@ -126,7 +130,7 @@ export const SkillTreeSVG: React.FC<SkillTreeSVGProps> = ({
                 <path
                   d={path}
                   fill="none"
-                  stroke={hc}
+                  style={{ stroke: hc }}
                   strokeWidth={isActive ? 2.6 : 2.2}
                   strokeLinejoin="round"
                   strokeDasharray={isActive ? "none" : "5,4"}
@@ -179,7 +183,6 @@ export const SkillTreeSVG: React.FC<SkillTreeSVGProps> = ({
                 height={NODE_H + 8}
                 rx={11}
                 fill="none"
-                stroke="#60a5fa"
                 strokeWidth={2}
                 className="pulse-ring-blue"
               />
@@ -192,9 +195,9 @@ export const SkillTreeSVG: React.FC<SkillTreeSVGProps> = ({
                 height={NODE_H + 8}
                 rx={11}
                 fill="none"
-                stroke="#0047AB"
                 strokeWidth={2.5}
                 opacity={0.9}
+                className="tree-node-ring"
               />
             )}
             {isHov && !isSelected && (
@@ -205,7 +208,7 @@ export const SkillTreeSVG: React.FC<SkillTreeSVGProps> = ({
                 height={NODE_H + 6}
                 rx={10}
                 fill="none"
-                stroke={border}
+                style={{ stroke: border }}
                 strokeWidth={1.5}
                 opacity={0.5}
               />
@@ -216,23 +219,23 @@ export const SkillTreeSVG: React.FC<SkillTreeSVGProps> = ({
               width={NODE_W}
               height={NODE_H}
               rx={8}
-              fill={bg}
-              stroke={isSelected ? "#0047AB" : border}
               strokeWidth={isSelected ? 2.5 : 1.5}
               style={{
+                fill: bg,
+                stroke: isSelected ? "var(--accent)" : border,
                 filter: isUnlocked ? "drop-shadow(0 2px 6px rgba(0,71,171,0.10))" : "none",
               }}
             />
 
             {/* Progress bar */}
-            <rect x={nx + 2} y={ny + NODE_H - 10} width={NODE_W - 4} height={7} rx={3.5} fill={bar} />
+            <rect x={nx + 2} y={ny + NODE_H - 10} width={NODE_W - 4} height={7} rx={3.5} style={{ fill: bar }} />
             <rect
               x={nx + 2}
               y={ny + NODE_H - 10}
               width={Math.max(0, ((NODE_W - 4) * displayProgressPercent(skill)) / 100)}
               height={7}
               rx={3.5}
-              fill={pColor}
+              style={{ fill: pColor }}
               opacity={0.9}
             />
 
@@ -244,15 +247,22 @@ export const SkillTreeSVG: React.FC<SkillTreeSVGProps> = ({
               dominantBaseline="central"
               fontSize={19}
               fontWeight="700"
-              fill={text}
+              style={{ fill: text }}
             >
               {skill.skillsName.length > 20 ? skill.skillsName.slice(0, 19) + "…" : skill.skillsName}
             </text>
 
             {/* Locked or Progress Label */}
             {!isUnlocked && !canUnlockThis ? (
-              <text x={skill.x} y={skill.y + 18} textAnchor="middle" dominantBaseline="central" fontSize={15} fill="#94a3b8">
-                🔒 ล็อก
+              <text
+                x={skill.x}
+                y={skill.y + 18}
+                textAnchor="middle"
+                dominantBaseline="central"
+                fontSize={15}
+                className="tree-node-locked"
+              >
+                {t("skill.locked")}
               </text>
             ) : (
               <text
@@ -261,10 +271,10 @@ export const SkillTreeSVG: React.FC<SkillTreeSVGProps> = ({
                 textAnchor="middle"
                 dominantBaseline="central"
                 fontSize={15}
-                fill={pColor}
                 fontWeight="600"
+                style={{ fill: pColor }}
               >
-                {formatProgressLabel(skill)}
+                {formatProgressLabel(skill, notStarted)}
               </text>
             )}
           </g>

@@ -6,6 +6,7 @@ import {
   GenerateFormValues,
 } from "../ai.controller";
 import { AiDraftEntityType } from "../../../../models/aiDraftModel";
+import { usePreferences } from "../../../../context/PreferencesContext";
 
 interface AiGenerateFormProps {
   form: GenerateFormValues;
@@ -29,6 +30,7 @@ export default function AiGenerateForm({
   onChange,
   onSubmit,
 }: AiGenerateFormProps) {
+  const { t } = usePreferences();
   const isExercise = form.entityType === "exercise";
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -41,7 +43,7 @@ export default function AiGenerateForm({
       <form onSubmit={handleSubmit}>
         <div className="ad-field-row">
           <div className="ad-field">
-            <label className="ad-label">สิ่งที่ต้องการให้สร้าง</label>
+            <label className="ad-label">{t("admin.ai.form.what")}</label>
             <select
               className="ad-select"
               value={form.entityType}
@@ -50,14 +52,14 @@ export default function AiGenerateForm({
               }
               disabled={isGenerating}
             >
-              <option value="exercise">Exercise (โจทย์)</option>
+              <option value="exercise">{t("admin.ai.form.entityExercise")}</option>
               <option value="skill">Skill</option>
               <option value="goal">Goal</option>
             </select>
           </div>
 
           <div className="ad-field">
-            <label className="ad-label">จำนวน (1-20)</label>
+            <label className="ad-label">{t("admin.ai.form.count")}</label>
             <input
               type="number"
               min={1}
@@ -83,7 +85,7 @@ export default function AiGenerateForm({
                 required
               >
                 <option value="" disabled>
-                  -- เลือก Skill --
+                  {t("admin.common.pickSkill")}
                 </option>
                 {activeSkills.map((s) => (
                   <option key={s.skillId} value={s.skillId}>
@@ -94,7 +96,7 @@ export default function AiGenerateForm({
             </div>
 
             <div className="ad-field">
-              <label className="ad-label">ระดับความยาก</label>
+              <label className="ad-label">{t("admin.ai.form.difficulty")}</label>
               <select
                 className="ad-select"
                 value={form.skillLevel}
@@ -110,7 +112,7 @@ export default function AiGenerateForm({
             </div>
 
             <div className="ad-field">
-              <label className="ad-label">ประเภทโจทย์</label>
+              <label className="ad-label">{t("admin.ai.form.qtype")}</label>
               <select
                 className="ad-select"
                 value={form.exerciseType}
@@ -122,38 +124,33 @@ export default function AiGenerateForm({
                 }
                 disabled={isGenerating}
               >
-                <option value="CHOICE">CHOICE (ตัวเลือก)</option>
-                <option value="FILL_IN_BLANK">FILL_IN_BLANK (เติมคำ)</option>
-                <option value="MIXED">ผสมทั้งสองแบบ</option>
+                <option value="CHOICE">{t("admin.exForm.type.choice")}</option>
+                <option value="FILL_IN_BLANK">{t("admin.exForm.type.fill")}</option>
+                <option value="MIXED">{t("admin.ai.form.mixed")}</option>
               </select>
             </div>
           </div>
         )}
 
         <div className="ad-field">
-          <label className="ad-label">คำอธิบายเพิ่มเติม</label>
+          <label className="ad-label">{t("admin.ai.form.instruction")}</label>
           <textarea
             className="ad-input"
             rows={3}
-            placeholder={
-              isExercise
-                ? 'เช่น "เน้นการ index และ slicing ของ list ในภาษา Python"'
-                : 'เช่น "ต่อยอดจาก skill พื้นฐานเรื่อง loop ในภาษา Python"'
-            }
+            placeholder={isExercise ? t("admin.ai.form.phExercise") : t("admin.ai.form.phOther")}
             value={form.instruction}
             onChange={(e) => onChange("instruction", e.target.value)}
             disabled={isGenerating}
           />
-          <span className="ad-hint-text">
-            ทุกรายการที่สร้างจะเข้ามาเป็นร่างรอตรวจ ไม่ถูกบันทึกลงระบบจนกว่าจะกดอนุมัติ
-          </span>
+          <span className="ad-hint-text">{t("admin.ai.form.hint")}</span>
         </div>
 
         {generateError && <div className="ad-ai-alert-error">{generateError}</div>}
 
         {rejectedReasons.length > 0 && (
           <div className="ad-ai-alert-warn">
-            <strong>คัดออก {rejectedReasons.length} รายการ</strong> เพราะไม่ผ่านการตรวจ:
+            <strong>{t("admin.ai.form.rejected", { count: rejectedReasons.length })}</strong>{" "}
+            {t("admin.ai.form.rejectedWhy")}
             <ul className="ad-ai-reason-list">
               {rejectedReasons.map((reason, index) => (
                 <li key={index}>{reason}</li>
@@ -169,7 +166,7 @@ export default function AiGenerateForm({
             disabled={isGenerating}
           >
             <FaWandMagicSparkles />{" "}
-            {isGenerating ? "กำลังให้ AI ร่าง..." : "ให้ AI ร่างให้"}
+            {isGenerating ? t("admin.ai.form.generating") : t("admin.ai.form.generate")}
           </button>
         </div>
       </form>

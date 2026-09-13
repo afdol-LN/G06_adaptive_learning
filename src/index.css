@@ -14,7 +14,7 @@ svg {
 *,
 *::before,
 *::after {
-  font-family: 'DM Sans', sans-serif;
+  font-family: var(--font-sans);
   scrollbar-width: thin;
   scrollbar-color: rgba(100, 116, 139, 0.35) transparent;
 }
@@ -39,7 +39,10 @@ svg {
 }
 
 :root {
-  font-family: 'DM Sans', sans-serif;
+  /* ฟอนต์หลักทั้งแอป — Noto Sans (ละติน) + IBM Plex Sans Thai Looped (ภาษาไทย), โหลดจาก index.html
+     Noto Serif Thai เป็นตัวสำรองเผื่อ IBM Plex โหลดไม่ขึ้น */
+  --font-sans: 'Noto Sans', 'IBM Plex Sans Thai Looped', 'Noto Serif Thai', system-ui, sans-serif;
+  font-family: var(--font-sans);
   font-size: 21px;
   line-height: 1.5;
   font-weight: 500;

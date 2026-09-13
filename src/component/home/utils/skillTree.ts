@@ -102,25 +102,36 @@ export function canUnlockSkill(skillId: number, skills: BranchSkill[], unlockedS
   });
 }
 
+// สีคืนค่าเป็น CSS variable (ประกาศใน Home.css พร้อมค่าของธีมมืด)
+// ใช้ได้ผ่าน style={{ ... }} เท่านั้น — var() ใช้ไม่ได้ใน presentation attribute ของ SVG
 export function getProgressColor(p: number): string {
-  if (p === 100) return '#0047AB';
-  if (p >= 75) return '#3b82f6';
-  if (p >= 20) return '#60a5fa';
-  if (p > 0) return '#93c5fd';
-  return '#cbd5e1';
+  if (p === 100) return 'var(--prog-100)';
+  if (p >= 75) return 'var(--prog-75)';
+  if (p >= 20) return 'var(--prog-20)';
+  if (p > 0) return 'var(--prog-1)';
+  return 'var(--prog-0)';
 }
 
+type NodeState = 'done' | 'open' | 'ready' | 'locked';
+const nodePalette = (state: NodeState) => ({
+  bg: `var(--node-${state}-bg)`,
+  border: `var(--node-${state}-border)`,
+  text: `var(--node-${state}-text)`,
+  bar: `var(--node-${state}-bar)`,
+});
+
 export function getNodeColors(isUnlocked: boolean, canUnlockThis: boolean, progress: number) {
-  if (progress === 100) return { bg: '#ecfdf5', border: '#10b981', text: '#047857', bar: '#f0fdf4' };
-  if (isUnlocked) return { bg: '#ffffff', border: '#0047AB', text: '#0047AB', bar: '#f0f4ff' };
-  if (canUnlockThis) return { bg: '#f0f9ff', border: '#60a5fa', text: '#1d4ed8', bar: '#e0f2fe' };
-  return { bg: '#f8fafc', border: '#cbd5e1', text: '#94a3b8', bar: '#f1f5f9' };
+  if (progress === 100) return nodePalette('done');
+  if (isUnlocked) return nodePalette('open');
+  if (canUnlockThis) return nodePalette('ready');
+  return nodePalette('locked');
 }
 
 export function displayProgressPercent(skill: BranchSkill): number {
   return skill.attemptCount > 0 ? skill.progressPercent : 0;
 }
 
-export function formatProgressLabel(skill: BranchSkill): string {
-  return skill.attemptCount > 0 ? `${skill.progressPercent}%` : 'ยังไม่เริ่ม';
+// notStartedLabel มาจาก t("skill.notStarted") ของ component ที่เรียก
+export function formatProgressLabel(skill: BranchSkill, notStartedLabel: string): string {
+  return skill.attemptCount > 0 ? `${skill.progressPercent}%` : notStartedLabel;
 }

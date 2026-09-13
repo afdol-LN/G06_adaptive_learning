@@ -28,7 +28,7 @@ export const SkillTreeTab: React.FC<SkillTreeTabProps> = ({
 }) => {
   return (
     <div className="tab-skill-tree">
-      <div className="tree-main">
+      <div className="tree-main" data-tour="tour-tree-canvas">
         <SkillTreeSVG
           skills={treeSkills}
           unlocked={unlocked}

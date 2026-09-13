@@ -7,12 +7,14 @@ import ExerciseViewModal from "./component/ExerciseViewModal";
 import { exerciseController } from "./exercise.controller";
 import { ActionButtons } from "../../common/ActionButtons";
 import { StatusSwitch } from "../../common/StatusSwitch";
+import { usePreferences } from "../../../context/PreferencesContext";
 
 interface ExerciseTabProps {
   icon?: React.ReactNode;
 }
 
 export default function ExerciseTab({ icon }: ExerciseTabProps) {
+  const { t } = usePreferences();
   const {
     exercises,
     activeSkills,
@@ -49,8 +51,8 @@ export default function ExerciseTab({ icon }: ExerciseTabProps) {
   return (
     <div className="ad-tab-skills">
       <div className="ad-page-header">
-        <h1 className="ad-page-title">{icon} จัดการ Exercise</h1>
-        <span className="ad-page-sub">Exercise ทั้งหมด {exercises.length} รายการ</span>
+        <h1 className="ad-page-title">{icon} {t("admin.exercises.title")}</h1>
+        <span className="ad-page-sub">{t("admin.exercises.count", { count: exercises.length })}</span>
       </div>
 
       <div className="ad-toolbar">
@@ -58,7 +60,7 @@ export default function ExerciseTab({ icon }: ExerciseTabProps) {
           <span className="ad-search-icon"><FaMagnifyingGlass /></span>
           <input
             className="ad-search"
-            placeholder="ค้นหาคำอธิบายโจทย์..."
+            placeholder={t("admin.exercises.search")}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
@@ -69,7 +71,7 @@ export default function ExerciseTab({ icon }: ExerciseTabProps) {
           value={skillFilter}
           onChange={(e) => setSkillFilter(e.target.value === "all" ? "all" : Number(e.target.value))}
         >
-          <option value="all">ทุก Skill</option>
+          <option value="all">{t("admin.exercises.allSkills")}</option>
           {activeSkills.map((s) => (
             <option key={s.skillId} value={s.skillId}>
               {s.skillsName}
@@ -82,7 +84,7 @@ export default function ExerciseTab({ icon }: ExerciseTabProps) {
           value={typeFilter}
           onChange={(e) => setTypeFilter(e.target.value as any)}
         >
-          <option value="all">ทุกประเภท</option>
+          <option value="all">{t("admin.common.allTypes")}</option>
           <option value="CHOICE">CHOICE</option>
           <option value="FILL_IN_BLANK">FILL_IN_BLANK</option>
         </select>
@@ -92,45 +94,41 @@ export default function ExerciseTab({ icon }: ExerciseTabProps) {
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value as any)}
         >
-          <option value="all">ทุกสถานะ</option>
-          <option value="active">active</option>
-          <option value="inactive">inactive</option>
+          <option value="all">{t("admin.common.allStatus")}</option>
+          <option value="active">{t("admin.status.active")}</option>
+          <option value="inactive">{t("admin.status.inactive")}</option>
         </select>
 
         <button className="ad-btn-primary ad-btn-add" onClick={openCreateForm}>
-          <FaPlus /> เพิ่ม Exercise ใหม่
+          <FaPlus /> {t("admin.exercises.add")}
         </button>
       </div>
 
-      {error && (
-        <div style={{ color: "#dc2626", fontSize: 13, fontWeight: 600, margin: "8px 0" }}>
-          {error}
-        </div>
-      )}
+      {error && <div className="ad-inline-error">{error}</div>}
 
       <div className="ad-card">
         <table className="ad-table">
           <thead>
             <tr>
-              <th>คำอธิบายโจทย์</th>
-              <th>Skill</th>
-              <th>Level</th>
-              <th>ประเภท</th>
-              <th>Actions</th>
-              <th>สถานะ</th>
+              <th>{t("admin.exercises.col.description")}</th>
+              <th>{t("admin.exercises.col.skill")}</th>
+              <th>{t("admin.exercises.col.level")}</th>
+              <th>{t("admin.exercises.col.type")}</th>
+              <th>{t("admin.common.actions")}</th>
+              <th>{t("admin.common.status")}</th>
             </tr>
           </thead>
           <tbody>
             {isLoading ? (
               <tr>
                 <td colSpan={6} style={{ textAlign: "center", padding: 24 }}>
-                  กำลังโหลด...
+                  {t("admin.common.loading")}
                 </td>
               </tr>
             ) : filteredExercises.length === 0 ? (
               <tr>
                 <td colSpan={6} style={{ textAlign: "center", padding: 24 }}>
-                  ไม่พบ Exercise ที่ตรงกับเงื่อนไข
+                  {t("admin.exercises.empty")}
                 </td>
               </tr>
             ) : (

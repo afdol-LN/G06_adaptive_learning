@@ -19,7 +19,7 @@
   flex-direction: column;
   background: var(--shell);
   color: var(--text);
-  font-family: 'DM Sans', sans-serif;
+  font-family: var(--font-sans);
   position: relative;
   transition: background 0.3s ease;
 }
@@ -258,7 +258,7 @@
   color: #ffffff;
   font-size: 15px;
   font-weight: 600;
-  font-family: 'DM Sans', sans-serif;
+  font-family: var(--font-sans);
   cursor: pointer;
   transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.25s;
 }
@@ -547,7 +547,7 @@
   border: 1.5px solid var(--text);
   background: var(--solid-btn-bg);
   color: var(--solid-btn-text);
-  font-family: 'DM Sans', sans-serif;
+  font-family: var(--font-sans);
   font-size: 13px;
   font-weight: 700;
   cursor: pointer;

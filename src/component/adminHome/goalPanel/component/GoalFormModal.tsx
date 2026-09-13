@@ -4,6 +4,7 @@ import { Goal } from "../../../../models/goalModel";
 import { Skill } from "../../../../models/skillModel";
 import { GoalFormValues, EMPTY_GOAL_FORM } from "../goal.controller";
 import SkillRequireEditor from "./SkillRequireEditor";
+import { usePreferences } from "../../../../context/PreferencesContext";
 
 interface GoalFormModalProps {
   isOpen: boolean;
@@ -30,6 +31,7 @@ export default function GoalFormModal({
   title,
   submitLabel,
 }: GoalFormModalProps) {
+  const { t } = usePreferences();
   const [goal, setGoal] = useState<string>("");
   const [goalDescription, setGoalDescription] = useState<string>("");
   const [skillRequires, setSkillRequires] = useState(EMPTY_GOAL_FORM.skillRequires);
@@ -72,11 +74,11 @@ export default function GoalFormModal({
           <span className="ad-modal-title">
             {isEdit ? (
               <>
-                <FaPen /> {title ?? "แก้ไข Goal"}
+                <FaPen /> {title ?? t("admin.goalForm.titleEdit")}
               </>
             ) : (
               <>
-                <FaPlus /> {title ?? "เพิ่ม Goal ใหม่"}
+                <FaPlus /> {title ?? t("admin.goalForm.titleCreate")}
               </>
             )}
           </span>
@@ -84,24 +86,10 @@ export default function GoalFormModal({
 
         <form onSubmit={handleSubmit}>
           <div className="ad-modal-body">
-            {formError && (
-              <div
-                style={{
-                  padding: "10px 14px",
-                  borderRadius: "8px",
-                  background: "#fef2f2",
-                  border: "1px solid #fecaca",
-                  color: "#dc2626",
-                  fontSize: "13px",
-                  fontWeight: 600,
-                }}
-              >
-                {formError}
-              </div>
-            )}
+            {formError && <div className="ad-form-error">{formError}</div>}
 
             <div className="ad-field">
-              <label className="ad-label">ชื่อ Goal</label>
+              <label className="ad-label">{t("admin.goalForm.name")}</label>
               <input
                 type="text"
                 className="ad-input"
@@ -112,7 +100,7 @@ export default function GoalFormModal({
             </div>
 
             <div className="ad-field">
-              <label className="ad-label">คำอธิบาย</label>
+              <label className="ad-label">{t("admin.goalForm.description")}</label>
               <textarea
                 className="ad-input"
                 value={goalDescription}
@@ -130,10 +118,10 @@ export default function GoalFormModal({
 
           <div className="ad-modal-footer">
             <button type="button" className="ad-btn-cancel" onClick={onClose} disabled={isSaving}>
-              ยกเลิก
+              {t("admin.common.cancel")}
             </button>
             <button type="submit" className="ad-btn-primary" disabled={isSaving}>
-              {isSaving ? "กำลังบันทึก..." : (submitLabel ?? "บันทึก")}
+              {isSaving ? t("admin.common.saving") : (submitLabel ?? t("admin.common.save"))}
             </button>
           </div>
         </form>

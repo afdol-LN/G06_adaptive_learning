@@ -15,7 +15,7 @@
 
 body {
   margin: 0;
-  font-family: 'DM Sans', sans-serif;
+  font-family: var(--font-sans);
   background-color: var(--navy);
   color: var(--text);
   overflow-x: hidden;
