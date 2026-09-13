@@ -58,6 +58,7 @@ export const en: Record<keyof typeof th, string> = {
   "skill.action.go": "Start exercise →",
   "skill.action.unlock": "Unlock + exercise →",
   "skill.action.disabled": "Not available yet",
+  "exercise.progress": "Progress",
   "common.close": "Close",
 
   // ── Next-exercise picker ──

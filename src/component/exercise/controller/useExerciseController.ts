@@ -3,6 +3,9 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useApp } from "../../../context/AppContext";
 import { SessionService } from "../../../services/sessionService";
 import { NextQuestion, SessionSummary } from "../../../models/sessionModel";
+import { SkillProgress } from "../../../models/branchSkillModel";
+
+const NOT_STARTED: SkillProgress = { progressPercent: 0, attemptCount: 0 };
 
 interface ExerciseLocationState {
   skillId: number;
@@ -19,8 +22,9 @@ export function useExerciseController() {
   const [isLoading, setIsLoading] = useState(true);
   const [sessionId, setSessionId] = useState<number | null>(null);
   const [question, setQuestion] = useState<NextQuestion | null>(null);
-  const [pL, setPL] = useState(0);
-  const [pLStart, setPLStart] = useState(0);
+  // Progress as the skill-tree node shows it (from the backend), not raw P(L)
+  const [progress, setProgress] = useState<SkillProgress>(NOT_STARTED);
+  const [progressStart, setProgressStart] = useState<SkillProgress>(NOT_STARTED);
   const [questionIndex, setQuestionIndex] = useState(0);
   const [selected, setSelected] = useState<number | null>(null);
   const [fillInBlankInput, setFillInBlankInput] = useState("");
@@ -46,8 +50,8 @@ export function useExerciseController() {
       );
       setSessionId(res.sessionId);
       setQuestion(res.question);
-      setPL(res.pL);
-      setPLStart(res.pL);
+      setProgress(res.progress);
+      setProgressStart(res.progress);
       setQuestionStartTime(new Date().toISOString());
       setIsLoading(false);
     }
@@ -82,7 +86,7 @@ export function useExerciseController() {
 
     setLastCorrect(res.isCorrect);
     if (res.isCorrect) setCorrectCount((c) => c + 1);
-    setPL(res.pL);
+    setProgress(res.progress);
 
     setTimeout(() => {
       if (res.sessionEnded) {
@@ -106,8 +110,8 @@ export function useExerciseController() {
     skillsName: state?.skillsName ?? "",
     question,
     questionIndex,
-    pL,
-    pLStart,
+    progress,
+    progressStart,
     selected,
     fillInBlankInput,
     setFillInBlankInput,

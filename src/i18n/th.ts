@@ -58,6 +58,7 @@ export const th = {
   "skill.action.go": "ไปทำ Exercise →",
   "skill.action.unlock": "ปลดล็อก + Exercise →",
   "skill.action.disabled": "ยังทำไม่ได้",
+  "exercise.progress": "ความคืบหน้า",
   "common.close": "ปิด",
 
   // ── Next-exercise picker ──

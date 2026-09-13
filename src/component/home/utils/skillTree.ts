@@ -1,4 +1,4 @@
-import { BranchSkill } from "../../../models/branchSkillModel";
+import { BranchSkill, SkillProgress } from "../../../models/branchSkillModel";
 
 export const NODE_W = 260;
 export const NODE_H = 120;
@@ -127,11 +127,12 @@ export function getNodeColors(isUnlocked: boolean, canUnlockThis: boolean, progr
   return nodePalette('locked');
 }
 
-export function displayProgressPercent(skill: BranchSkill): number {
+// ใช้ร่วมกันทั้ง skill tree และหน้า Exercise — ทุกหน้าต้องได้ตัวเลขเดียวกัน
+export function displayProgressPercent(skill: SkillProgress): number {
   return skill.attemptCount > 0 ? skill.progressPercent : 0;
 }
 
 // notStartedLabel มาจาก t("skill.notStarted") ของ component ที่เรียก
-export function formatProgressLabel(skill: BranchSkill, notStartedLabel: string): string {
+export function formatProgressLabel(skill: SkillProgress, notStartedLabel: string): string {
   return skill.attemptCount > 0 ? `${skill.progressPercent}%` : notStartedLabel;
 }

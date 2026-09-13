@@ -1,3 +1,5 @@
+import { SkillProgress } from "./branchSkillModel";
+
 export type ExerciseQuestionType = "CHOICE" | "FILL_IN_BLANK";
 
 export interface QuestionChoice {
@@ -19,6 +21,8 @@ export interface StartSessionResponse {
   sessionId: number;
   skillId: number;
   pL: number;
+  /** Same value the skill-tree node shows */
+  progress: SkillProgress;
   question: NextQuestion;
 }
 
@@ -40,6 +44,8 @@ export interface SessionSummary {
 export interface SubmitAnswerResponse {
   isCorrect: boolean;
   pL: number;
+  /** Progress after this answer — equals what the skill-tree node now shows */
+  progress: SkillProgress;
   nextQuestion: NextQuestion | null;
   sessionEnded: boolean;
   stopReason: "mastered" | "completed" | "exhausted" | null;

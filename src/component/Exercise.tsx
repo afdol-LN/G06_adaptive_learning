@@ -3,9 +3,14 @@ import './decorate/Exercise.css';
 import { useExerciseController } from './exercise/controller/useExerciseController';
 import CodeBlock from './common/CodeBlock';
 import AppLogo from './common/AppLogo';
+import { FaChartLine } from 'react-icons/fa6';
+import { usePreferences } from '../context/PreferencesContext';
+import { displayProgressPercent, formatProgressLabel } from './home/utils/skillTree';
 
 export default function Exercise() {
   const controller = useExerciseController();
+  const { t } = usePreferences();
+  const notStarted = t('skill.notStarted');
 
   if (controller.isLoading || !controller.question) {
     return (
@@ -20,7 +25,11 @@ export default function Exercise() {
     );
   }
 
-  const pct = Math.round(controller.pL * 100);
+  // Same number and "not started" rule as the skill-tree node (adt-learning/docs/adr/0001)
+  const pct = displayProgressPercent(controller.progress);
+  const answeredInSession = controller.progress.attemptCount > controller.progressStart.attemptCount;
+  const startLabel = formatProgressLabel(controller.progressStart, notStarted);
+  const nowLabel = formatProgressLabel(controller.progress, notStarted);
 
   return (
     <>
@@ -40,10 +49,10 @@ export default function Exercise() {
 
         <div className="prog-area">
           <div className="prog-row">
-            <span className="prog-label">P(L)</span>
-            <span className="prog-frac">{(controller.pLStart * 100).toFixed(0)}% → {pct}%</span>
+            <span className="prog-label">{t('exercise.progress')}</span>
+            {answeredInSession && <span className="prog-frac">{startLabel} → {nowLabel}</span>}
             <div className="prog-spacer"></div>
-            <span className="prog-pct">{pct}%</span>
+            <span className="prog-pct">{nowLabel}</span>
           </div>
           <div className="prog-track"><div className="prog-fill" style={{ width: `${pct}%` }}></div></div>
           <div className="prog-meta">
@@ -115,8 +124,9 @@ export default function Exercise() {
               <div className="spill sp-cor"><span>✓</span><span>{controller.correctCount} ถูก</span></div>
               {controller.summary && (
                 <div className="spill sp-ps">
-                  <span>📊</span>
-                  <span>P(L): {(controller.summary.pLBefore * 100).toFixed(0)}% → {(controller.summary.pLAfter * 100).toFixed(0)}%</span>
+                  <FaChartLine aria-hidden />
+                  {/* session start → end; summary.pLBefore is only "before the last answer" */}
+                  <span>{t('exercise.progress')}: {startLabel} → {nowLabel}</span>
                 </div>
               )}
             </div>
