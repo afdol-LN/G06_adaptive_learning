@@ -65,9 +65,9 @@ export const PretestQuiz: React.FC<PretestQuizProps> = ({ controller }) => {
           <span
             className="q-diff-tag"
             style={{
-              background: `${currentQuestion.diffColor || "#38b874"}18`,
-              border: `1px solid ${currentQuestion.diffColor || "#38b874"}44`,
-              color: currentQuestion.diffColor || "#38b874",
+              background: `${currentQuestion.diffColor || "#10b981"}18`,
+              border: `1px solid ${currentQuestion.diffColor || "#10b981"}44`,
+              color: currentQuestion.diffColor || "#10b981",
             }}
           >
             Level {currentQuestion.level || currentQuestion.diff || 1} •{" "}
@@ -172,7 +172,7 @@ export const PretestQuiz: React.FC<PretestQuizProps> = ({ controller }) => {
               >
                 <path
                   d="M3 8h10M9 4l4 4-4 4"
-                  stroke="#0b1120"
+                  stroke="currentColor"
                   strokeWidth="2"
                   strokeLinecap="round"
                   strokeLinejoin="round"

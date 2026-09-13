@@ -2,6 +2,8 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import { useToast } from '../context/ToastContext';
+import { FaFire, FaInbox, FaMoon, FaSun } from 'react-icons/fa6';
+import { usePreferences } from '../context/PreferencesContext';
 import '../component/decorate/SelectBranch.css';
 
 type RefMap = { [id: string]: React.RefObject<HTMLDivElement> };
@@ -14,7 +16,9 @@ export default function SelectBranch() {
   const toast = useToast();
 
   const [hasLoaded, setHasLoaded] = useState(false);
-  const [dark, setDark] = useState(() => localStorage.getItem('sb-theme') === 'dark');
+  // Theme is the app-wide one (same switch as the Topbar), not a screen-local toggle
+  const { theme, toggleTheme, t } = usePreferences();
+  const dark = theme === 'dark';
   const [rippleId, setRippleId] = useState<string | null>(null);
   const [ripplePos, setRipplePos] = useState({ x: 0, y: 0 });
 
@@ -58,13 +62,6 @@ export default function SelectBranch() {
 
   function sheenOut(sheenRef: React.RefObject<HTMLDivElement>) {
     if (sheenRef.current) sheenRef.current.style.opacity = '0';
-  }
-
-  function toggleTheme() {
-    setDark((d) => {
-      localStorage.setItem('sb-theme', d ? 'light' : 'dark');
-      return !d;
-    });
   }
 
   function handleLogout() {
@@ -117,7 +114,7 @@ export default function SelectBranch() {
   const initial = (userProfile?.fname || fullname || '?').charAt(0).toUpperCase();
 
   return (
-    <div className={`sb2-root${dark ? ' dark' : ''}`} data-screen-label="Select Branch v2">
+    <div className="sb2-root" data-screen-label="Select Branch v2">
       <div className="sb2-shell">
         <div className="sb2-topbar">
           <div className="sb2-pill sb2-titlepill">
@@ -134,8 +131,14 @@ export default function SelectBranch() {
           </div>
 
           <div className="sb2-topbar-actions">
-            <button type="button" className="sb2-theme-btn" onClick={toggleTheme}>
-              {dark ? 'Light ☀' : 'Dark ☾'}
+            <button
+              type="button"
+              className="sb2-theme-btn"
+              onClick={toggleTheme}
+              aria-label={dark ? t('topbar.toLight') : t('topbar.toDark')}
+              title={dark ? t('topbar.toLight') : t('topbar.toDark')}
+            >
+              {dark ? <FaSun aria-hidden /> : <FaMoon aria-hidden />}
             </button>
             <button type="button" className="sb2-logout-btn" onClick={handleLogout}>
               Log out
@@ -191,7 +194,7 @@ export default function SelectBranch() {
           </div>
         ) : branches.length === 0 ? (
           <div className="sb2-empty">
-            <div className="sb2-empty-icon">📭</div>
+            <div className="sb2-empty-icon"><FaInbox aria-hidden /></div>
             <p>ยังไม่มีสายการเรียน</p>
             <p className="sb2-empty-sub">กด "Add new branch" เพื่อเริ่มต้น</p>
           </div>
@@ -227,7 +230,7 @@ export default function SelectBranch() {
                         <span className="sb2-stat-value">{sessionsCount}</span>
                         <span>sessions ที่ทำ</span>
                       </div>
-                      <div className="sb2-stat sb2-streak">{b.streak ?? 0} 🔥</div>
+                      <div className="sb2-stat sb2-streak">{b.streak ?? 0} <FaFire aria-hidden /></div>
                     </div>
 
                     <div className="sb2-desc">{b.goalDesc || '—'}</div>

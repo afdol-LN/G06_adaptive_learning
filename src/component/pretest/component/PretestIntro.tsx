@@ -48,7 +48,7 @@ export const PretestIntro: React.FC<PretestIntroProps> = ({ controller }) => {
         >
           <path
             d="M3 9h12M11 5l4 4-4 4"
-            stroke="#0b1120"
+            stroke="currentColor"
             strokeWidth="2.2"
             strokeLinecap="round"
             strokeLinejoin="round"

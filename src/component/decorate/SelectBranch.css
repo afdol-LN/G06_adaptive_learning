@@ -1,18 +1,28 @@
 @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&display=swap');
 
+/* Palette = Adminhome.css (light here, dark below). The token names are this
+   screen's own: shell = page ground, card-glass = card surface, glass = inner
+   fill, glass-edge = border, brand = accent, brand-fill = solid accent fill. */
 .sb2-root {
-  --shell: #ffffff;
-  --text: #062a52;
-  --muted: #3f6a91;
-  --brand: #04387a;
-  --glass: rgba(255, 255, 255, 0.62);
-  --card-glass: rgba(255, 255, 255, 0.42);
-  --glass-edge: rgba(255, 255, 255, 0.75);
+  --shell: #f2f7fa;
+  --text: #000080;
+  --muted: #6D8196;
+  --brand: #0047AB;
+  --brand-fill: #0047AB;
+  --accent2: #82C8E5;
+  --tint: #e8f0fe;
+  --tint-2: #f0f9ff;
+  --glass: #f8fafc;
+  --card-glass: #ffffff;
+  --glass-edge: #c2d3e0;
   --glass-hi: rgba(255, 255, 255, 0.9);
-  --field: rgba(11, 26, 74, 0.06);
-  --sheen: rgba(255, 255, 255, 0.6);
-  --solid-btn-bg: #062a52;
+  --field: #e8f0fe;
+  --sheen: rgba(130, 200, 229, 0.18);
+  --solid-btn-bg: #0047AB;
   --solid-btn-text: #ffffff;
+  --red: #dc2626;
+  --bad-bg: #fef2f2;
+  --ok-bg: #ecfdf5; --ok-ink: #059669; --ok-border: #a7f3d0;
 
   min-height: 100vh;
   display: flex;
@@ -24,20 +34,32 @@
   transition: background 0.3s ease;
 }
 
-.sb2-root.dark {
-  --shell: #061a3d;
-  --text: #e8eefc;
-  --muted: #93a4c4;
-  --brand: #c9d8ff;
-  --glass: rgba(18, 48, 102, 0.5);
-  --card-glass: rgba(18, 48, 102, 0.34);
-  --glass-edge: rgba(255, 255, 255, 0.14);
-  --glass-hi: rgba(255, 255, 255, 0.18);
-  --field: rgba(255, 255, 255, 0.08);
-  --sheen: rgba(150, 180, 255, 0.2);
-  --solid-btn-bg: #e8eefc;
-  --solid-btn-text: #0b1a4a;
+/* Dark follows the global theme (PreferencesContext → <html data-theme>),
+   same values as :root[data-theme="dark"] .ad-app */
+:root[data-theme="dark"] .sb2-root {
+  color-scheme: dark;
+  --shell: #0b1220;
+  --text: #ffffff;
+  --muted: #a3b1cc;
+  --brand: #6b9bff;
+  --brand-fill: #2f5fd0;
+  --tint: #1a2a4a;
+  --tint-2: #142238;
+  --glass: #172238;
+  --card-glass: #121b2e;
+  --glass-edge: #26344f;
+  --glass-hi: rgba(255, 255, 255, 0.04);
+  --field: #1a2a4a;
+  --sheen: rgba(107, 155, 255, 0.12);
+  --solid-btn-bg: #2f5fd0;
+  --solid-btn-text: #ffffff;
+  --red: #f87171;
+  --bad-bg: rgba(248, 113, 113, 0.12);
+  --ok-bg: rgba(52, 211, 153, 0.12); --ok-ink: #34d399; --ok-border: rgba(52, 211, 153, 0.35);
 }
+
+/* Icon-only flex buttons: never let the svg shrink to 0 */
+.sb2-root svg { flex-shrink: 0; }
 
 .sb2-shell {
   position: relative;
@@ -93,7 +115,7 @@
   justify-content: center;
   font-size: 16px;
   color: #ffffff;
-  background: linear-gradient(135deg, #4d7bff, #0047ab);
+  background: linear-gradient(135deg, var(--accent2), var(--brand-fill));
   box-shadow: 0 8px 20px rgba(0, 71, 171, 0.32), inset 0 1px 0 rgba(255, 255, 255, 0.35);
   transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
@@ -153,8 +175,10 @@
 }
 
 .sb2-theme-btn {
-  font-family: 'DM Mono', monospace;
-  font-size: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
   padding: 12px 18px;
   border-radius: 99px;
   border: 1px solid var(--glass-edge);
@@ -180,9 +204,10 @@
   font-weight: 600;
   padding: 15px 30px;
   border-radius: 99px;
-  border: 1.5px solid var(--text);
-  background: var(--solid-btn-bg);
-  color: var(--solid-btn-text);
+  /* red outline, like .ad-sidebar-logout */
+  border: 1px solid color-mix(in srgb, var(--red) 25%, transparent);
+  background: var(--card-glass);
+  color: var(--red);
   cursor: pointer;
   white-space: nowrap;
   transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s, background 0.2s;
@@ -190,7 +215,8 @@
 
 .sb2-logout-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.22);
+  background: var(--bad-bg);
+  border-color: var(--red);
 }
 
 .sb2-logout-btn:active {
@@ -252,9 +278,9 @@
   gap: 10px;
   padding: 18px 28px;
   border-radius: 99px;
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  background: linear-gradient(135deg, #0b3a7a, #062a52);
-  box-shadow: 0 12px 30px rgba(6, 42, 82, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.22);
+  border: none;
+  background: linear-gradient(135deg, var(--brand-fill), var(--accent2));   /* = .ad-btn-primary */
+  box-shadow: 0 4px 14px rgba(0, 71, 171, 0.18);
   color: #ffffff;
   font-size: 15px;
   font-weight: 600;
@@ -396,7 +422,7 @@
 
 .sb2-card:hover {
   transform: translateY(-6px);
-  border-color: #0b3a7a;
+  border-color: var(--brand);
 }
 
 .sb2-card.active {
@@ -433,8 +459,8 @@
   right: 12px;
   font-size: 10.5px;
   font-weight: 700;
-  color: #ffffff;
-  background: var(--brand);
+  color: var(--solid-btn-text);
+  background: var(--brand-fill);
   padding: 4px 10px;
   border-radius: 99px;
   z-index: 1;
@@ -444,13 +470,13 @@
   position: relative;
   padding: 20px 18px;
   border-radius: 22px;
-  background: linear-gradient(135deg, #0b3a7a, #062a52);
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  box-shadow: 0 10px 24px rgba(6, 42, 82, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.22);
+  /* tinted header strip, like .ad-modal-header */
+  background: linear-gradient(135deg, var(--tint), var(--tint-2));
+  border: 1px solid var(--glass-edge);
   text-align: center;
   font-size: 17px;
   font-weight: 700;
-  color: #ffffff;
+  color: var(--brand);
 }
 
 .sb2-stats-row {
@@ -533,9 +559,9 @@
 }
 
 .sb2-status-badge.done {
-  background: rgba(22, 163, 74, 0.12);
-  border-color: rgba(22, 163, 74, 0.3);
-  color: #16a34a;
+  background: var(--ok-bg);
+  border-color: var(--ok-border);
+  color: var(--ok-ink);
 }
 
 .sb2-select-btn {
@@ -544,7 +570,7 @@
   gap: 8px;
   padding: 12px 20px;
   border-radius: 99px;
-  border: 1.5px solid var(--text);
+  border: 1.5px solid var(--solid-btn-bg);
   background: var(--solid-btn-bg);
   color: var(--solid-btn-text);
   font-family: var(--font-sans);

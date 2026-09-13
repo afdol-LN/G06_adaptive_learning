@@ -1,10 +1,11 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  /* Cobalt Sky Light Mode Palette */
+  /* Admin palette (Adminhome.css) under this screen's legacy names:
+     navy = page ground, navy2/navy3 = surfaces, gold = cobalt accent */
   --navy:    #f2f7fa; 
   --navy2:   #ffffff;
-  --navy3:   #e9f0f5;
+  --navy3:   #f8fafc;
   --border:  #c2d3e0;
   --border2: #6D8196;
   --gold:    #0047AB; /* Cobalt Blue */
@@ -12,9 +13,9 @@
   --gold3:   #000080; /* Navy Blue */
   --text:    #000080; /* Navy Text */
   --muted:   #6D8196; /* Slate Grey */
-  --muted2:  #8fa3b5;
-  --danger:  #e05c5c;
-  --success: #38b874;
+  --muted2:  #94a3b8;
+  --danger:  #dc2626;
+  --success: #10b981;
 }
 
 html, body { 
@@ -134,7 +135,7 @@ select:disabled { opacity:0.6; cursor:not-allowed; }
   padding: 14px 16px; border-radius: 10px;
   border: 1.5px solid var(--border);
   cursor: pointer; transition: all .2s;
-  background: #f4f8fb;
+  background: var(--navy3);
   position: relative; overflow: hidden;
 }
 .goal-card::before { content:''; position:absolute; inset:0; background:var(--gold); opacity:0; transition:opacity .2s; }
@@ -209,7 +210,7 @@ input[type="range"]::-moz-range-thumb {
 
 .btn-next {
   display:inline-flex; align-items:center; gap:10px;
-  padding:13px 28px; background:linear-gradient(135deg, #0056d6, var(--gold));
+  padding:13px 28px; background:linear-gradient(135deg, var(--gold), var(--gold2));
   border:none; border-radius:10px; color:#ffffff;
   font-family:var(--font-sans); font-size:14px; font-weight:600;
   letter-spacing:.06em; text-transform:uppercase;

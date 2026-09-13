@@ -3,6 +3,7 @@
    Light is the default. Dark re-declares the same tokens under
    :root[data-theme="dark"] .app — PreferencesContext puts data-theme on <html>.
    Rule: colour comes from a token here, never a hex that only works in one theme.
+   Palette values mirror Adminhome.css so both sides look the same — change them together.
 ══════════════════════════════════════ */
 
 /* Tokens live on .app as well as :root: Exercise.css / Pretest.css / Adminhome.css
@@ -27,9 +28,11 @@
   --on-accent: #ffffff;
   --tint:      #e8f0fe;   /* accent-tinted fill (active rows, hero) */
   --tint-2:    #f0f9ff;
-  --green:     #059669;
+  --green:     #10b981;
   --red:       #dc2626;
-  --purple:    #7c3aed;
+  --purple:    #8b5cf6;
+  --orange:    #f59e0b;
+  --blue:      #3b82f6;
   --gold:      #0047AB;
   --glass:     rgba(255, 255, 255, 0.97);
   --overlay:   rgba(0, 40, 120, 0.18);
@@ -70,8 +73,8 @@
   --card:      #121b2e;
   --text:      #ffffff;   /* dark mode: body text is pure white */
   --ink:       #ffffff;
-  --ink-soft:  #b3c0d8;
-  --muted:     #93a4c4;
+  --ink-soft:  #cbd5e1;
+  --muted:     #a3b1cc;
   --faint:     #6b7a96;
   --accent:    #6b9bff;
   --accent-fill: #2f5fd0;
@@ -82,6 +85,8 @@
   --green:     #34d399;
   --red:       #f87171;
   --purple:    #a78bfa;
+  --orange:    #fbbf24;
+  --blue:      #60a5fa;
   --gold:      #6b9bff;
   --glass:     rgba(18, 27, 46, 0.97);
   --overlay:   rgba(2, 6, 16, 0.6);
@@ -164,7 +169,7 @@ body {
   flex-direction: column;
   gap: 6px;
   padding: 14px 12px;
-  background: var(--glass);
+  background: var(--surface);   /* solid, like .ad-sidebar */
   border-right: 1px solid var(--border);
   box-shadow: 2px 0 12px rgba(0, 71, 171, 0.07);
   transition: width 0.2s ease, padding 0.2s ease;

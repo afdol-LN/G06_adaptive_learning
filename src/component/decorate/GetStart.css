@@ -1,8 +1,9 @@
 :root {
-  /* Cobalt Sky Light Mode Palette */
+  /* Admin palette (Adminhome.css) under this screen's legacy names:
+     navy = page ground, navy2/navy3 = surfaces, gold = cobalt accent */
   --navy:    #f2f7fa; 
   --navy2:   #ffffff;
-  --navy3:   #e9f0f5;
+  --navy3:   #f8fafc;
   --border:  #c2d3e0;
   --border2: #6D8196;
   --gold:    #0047AB; /* Cobalt Blue */
@@ -10,7 +11,7 @@
   --gold3:   #000080; /* Navy Blue */
   --text:    #000080; /* Navy Text */
   --muted:   #6D8196; /* Slate Grey */
-  --muted2:  #8fa3b5;
+  --muted2:  #94a3b8;
 }
 
 body {
@@ -154,7 +155,7 @@ body, #root {
   display: inline-flex;
   align-items: center;
   gap: 12px;
-  background: linear-gradient(135deg, var(--gold) 0%, var(--gold3) 100%);
+  background: linear-gradient(135deg, var(--gold) 0%, var(--gold2) 100%);   /* = .ad-btn-primary */
   color: #ffffff;
   padding: 16px 40px;
   border-radius: 100px;
