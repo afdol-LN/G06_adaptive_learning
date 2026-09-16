@@ -2,16 +2,12 @@ import React, { useState, useEffect, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import type { IconType } from "react-icons";
 import {
-  FaArrowLeft,
-  FaBullseye,
-  FaCheck,
   FaChevronDown,
   FaChevronLeft,
   FaChevronRight,
   FaCircleQuestion,
   FaClockRotateLeft,
   FaHouse,
-  FaPlus,
   FaSitemap,
   FaUser,
   FaUserGraduate,
@@ -32,6 +28,7 @@ import { ExerciseConfirmModal } from "./skillTree/ExerciseConfirmModal";
 import { Topbar } from "../common/Topbar";
 import CreateBranchModal from "../CreateBranchModal";
 import AppLogo from "../common/AppLogo";
+import { GoalSwitcher } from "./GoalSwitcher";
 import { LayoutSkill } from "./utils/skillTree";
 import "../decorate/Home.css";
 import "../decorate/Tour.css";
@@ -83,7 +80,6 @@ export const HomeShell: React.FC = () => {
   });
 
   // Dropdown States
-  const [showGoalMenu, setShowGoalMenu] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
 
   // Modal States
@@ -94,7 +90,6 @@ export const HomeShell: React.FC = () => {
   // Hover states
   const [hovered, setHovered] = useState<number | null>(null);
 
-  const goalMenuRef = useRef<HTMLDivElement>(null);
   const profileMenuRef = useRef<HTMLDivElement>(null);
 
   // Fetch branches on mount
@@ -106,13 +101,10 @@ export const HomeShell: React.FC = () => {
     localStorage.setItem(SIDEBAR_COLLAPSED_KEY, sidebarCollapsed ? "1" : "0");
   }, [sidebarCollapsed]);
 
-  // Close dropdowns on click outside
+  // Close profile dropdown on click outside
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
-      if (goalMenuRef.current && !goalMenuRef.current.contains(target) && !target.closest(".create-branch-modal")) {
-        setShowGoalMenu(false);
-      }
       if (profileMenuRef.current && !profileMenuRef.current.contains(target)) {
         setShowProfileMenu(false);
       }
@@ -123,23 +115,22 @@ export const HomeShell: React.FC = () => {
 
   // Each tab has its own tour: auto-start it the first time the user opens that tab,
   // and close whatever tour is running when they move to another tab
-  const hasBranch = Boolean(activeBranch);
-  const pageTourSeen = homeTour.hasSeenTour(activeTab);
-  useEffect(() => {
-    if (!hasBranch || pageTourSeen !== false) return;
-    homeTour.startTour(activeTab);
-    return () => homeTour.cancelTour();
-  }, [hasBranch, activeTab, pageTourSeen]);
+  // ปิด auto-start tour — tour จะขึ้นเฉพาะเมื่อกดปุ่ม "วิธีใช้งาน" เอง
+  // const hasBranch = Boolean(activeBranch);
+  // const pageTourSeen = homeTour.hasSeenTour(activeTab);
+  // useEffect(() => {
+  //   if (!hasBranch || pageTourSeen !== false) return;
+  //   homeTour.startTour(activeTab);
+  //   return () => homeTour.cancelTour();
+  // }, [hasBranch, activeTab, pageTourSeen]);
 
   // Help replays the tour of the tab the user is on — no jump back to Home
   const handleHelpClick = () => {
-    setShowGoalMenu(false);
     setShowProfileMenu(false);
     homeTour.startTour(activeTab, { force: true });
   };
 
   const toggleSidebar = () => {
-    setShowGoalMenu(false);
     setShowProfileMenu(false);
     setSidebarCollapsed((c) => !c);
   };
@@ -227,67 +218,6 @@ export const HomeShell: React.FC = () => {
           <span className="sb-brand sb-label">G06 · ALS</span>
         </div>
 
-        {/* Goal switcher dropdown */}
-        <div className="sb-goal" ref={goalMenuRef} data-tour="tour-goal-switcher">
-          <button
-            className="sb-goal-btn"
-            onClick={() => setShowGoalMenu(!showGoalMenu)}
-            title={sidebarCollapsed ? goalLabel : undefined}
-          >
-            <span className="sb-icon"><FaBullseye aria-hidden /></span>
-            <span className="sb-label sb-goal-name">{goalLabel}</span>
-            <span className="sb-label sb-caret"><FaChevronDown aria-hidden /></span>
-          </button>
-          {showGoalMenu && (
-            <div className="goal-dropdown">
-              <div className="goal-dropdown-list">
-                {branches.map((b) => {
-                  const isActive = String(b.id) === String(activeBranch.id);
-                  return (
-                    <button
-                      key={b.id}
-                      className={`goal-dropdown-item ${isActive ? "active" : ""}`}
-                      onClick={() => {
-                        switchBranch(b.id);
-                        setShowGoalMenu(false);
-                      }}
-                    >
-                      <div>
-                        <div className="goal-dropdown-name">{b.goalName}</div>
-                        <div className="goal-dropdown-meta">
-                          {b.campus} · {t("goal.year", { year: b.year || 1 })}
-                        </div>
-                      </div>
-                      {isActive && <span className="goal-dropdown-check"><FaCheck aria-hidden /></span>}
-                    </button>
-                  );
-                })}
-              </div>
-
-              <button
-                className="goal-dropdown-action primary"
-                onClick={() => {
-                  setShowCreateModal(true);
-                  setShowGoalMenu(false);
-                }}
-              >
-                <span className="goal-dropdown-action-icon"><FaPlus aria-hidden /></span>
-                <span>{t("goal.add")}</span>
-              </button>
-
-              <button
-                className="goal-dropdown-action"
-                onClick={() => {
-                  setShowGoalMenu(false);
-                  navigate("/selectbranch");
-                }}
-              >
-                <span className="goal-dropdown-action-icon"><FaArrowLeft aria-hidden /></span>
-                <span>{t("goal.backToSelect")}</span>
-              </button>
-            </div>
-          )}
-        </div>
 
         {/* Navigation Tabs */}
         <nav className="sb-nav" data-tour="tour-nav-tabs">
@@ -369,7 +299,10 @@ export const HomeShell: React.FC = () => {
 
       {/* Main column: topbar + tab content (sits beside the sidebar, never under it) */}
       <div className="app-main">
-        <Topbar title={t(activeNav.labelKey)} />
+        <Topbar
+          title={t(activeNav.labelKey)}
+          extra={<GoalSwitcher onCreateBranch={() => setShowCreateModal(true)} />}
+        />
 
         <div className="content">
           {activeTab === "Home" && (

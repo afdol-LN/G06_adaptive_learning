@@ -169,6 +169,24 @@ export const HomeTab: React.FC<HomeTabProps> = ({
 
         {/* Tree */}
         <div className="home-tree-wrap" data-tour="tour-skill-tree">
+          {/* Legend — มุมขวาบน อธิบายสี progress bar */}
+          <div className="tree-legend">
+            {[
+              { pct: 10,  label: "1–19%" },
+              { pct: 50,  label: "20–74%" },
+              { pct: 90,  label: "75–99%" },
+              { pct: 100, label: "100%" },
+            ].map(({ pct, label }) => (
+              <div key={pct} className="tree-legend-row">
+                <span
+                  className="tree-legend-dot"
+                  style={{ background: getProgressColor(pct) }}
+                />
+                <span className="tree-legend-label">{label}</span>
+              </div>
+            ))}
+          </div>
+
           <SkillTreeSVG
             skills={treeSkills}
             unlocked={unlocked}
