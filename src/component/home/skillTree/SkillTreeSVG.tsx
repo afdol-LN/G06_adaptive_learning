@@ -188,7 +188,7 @@ export const SkillTreeSVG: React.FC<SkillTreeSVGProps> = ({
           {g.isComplete ? t("goalNode.complete") : `${pct}%`}
         </text>
 
-        {/* Top right: the x/y count while in progress, the completion date once done */}
+        {/* Top right: count (in-progress) หรือ วันที่เสร็จ (complete) */}
         <text
           x={nx + NODE_W - 12}
           y={ny + 19}
@@ -210,12 +210,7 @@ export const SkillTreeSVG: React.FC<SkillTreeSVGProps> = ({
 
   const inner = (
     <>
-      <defs>
-        <pattern id="dots-cobalt" width="40" height="40" patternUnits="userSpaceOnUse">
-          <circle cx="1" cy="1" r="1" className="tree-dot" />
-        </pattern>
-      </defs>
-      <rect x={minX} y={minY} width={svgWidth} height={svgHeight} fill="url(#dots-cobalt)" />
+
 
       {/* Dim edges */}
       {skills.map((skill) =>
@@ -405,7 +400,9 @@ export const SkillTreeSVG: React.FC<SkillTreeSVGProps> = ({
               {truncateName(skill.skillsName)}
             </text>
 
+
             {/* Draft: an unfinished session the Exercise page will resume (adt-learning/docs/adr/0003) */}
+            {/* ถ้ามีทั้ง % และ draft ให้ draft ขยับลงมา 14px ไม่ทับกัน */}
             {getDraftCount(skill) > 0 && (
               <text
                 x={nx + NODE_W - 12}
