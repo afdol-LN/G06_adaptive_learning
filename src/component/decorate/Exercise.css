@@ -126,7 +126,6 @@ html, body {
 .prog-track{height:6px;background:var(--bdr);border-radius:3px;overflow:hidden}
 .prog-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--gold2),var(--gold));transition:width .7s cubic-bezier(.4,0,.2,1)}
 .prog-meta{display:flex;justify-content:space-between;align-items:center;margin-top:6px}
-.prog-exid{font-size:20px;font-weight:600;color:var(--text)}
 .prog-skill{font-size:20px;font-weight:600;color:var(--text)}
 .dot-row{display:flex;gap:8px;align-items:center;margin-top:12px}
 .sdot{width:8px;height:8px;border-radius:50%;background:var(--s2);border:1.5px solid var(--bdr2);transition:all .3s}
@@ -240,6 +239,9 @@ html, body {
 .sp-ps{border:1px solid var(--gold2);color:var(--gold)}
 .sp-str{border:1px solid var(--orange);color:var(--orange)}
 .sp-cor{border:1px solid var(--green);color:var(--green)}
+/* goal completed on this answer (adt-learning/docs/adr/0005) */
+.ph-goal{display:inline-flex;align-items:center;gap:8px;margin-top:16px;padding:8px 18px;border-radius:999px;border:1.5px solid var(--green);background:var(--s1);color:var(--green);font-size:14px;font-weight:700;animation:trophyIn .7s cubic-bezier(.34,1.5,.64,1) .3s both}
+.ph-goal svg{flex-shrink:0}
 .pb{padding:24px 28px}
 .pb-sec{font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);margin-bottom:16px;display:flex;align-items:center;gap:10px}
 .pb-sec::after{content:'';flex:1;height:1px;background:var(--bdr)}
@@ -315,6 +317,9 @@ html, body {
 .ex-tool-btn:hover,.ex-tool-btn.on{border-color:var(--gold);color:var(--gold)}
 .ex-tool-btn:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
 .ex-tool-btn:disabled{opacity:.5;cursor:not-allowed}
+.ex-tool-btn.danger{background:var(--red);border-color:var(--red);color:#fff}
+.ex-tool-btn.danger:hover{filter:brightness(.92);border-color:var(--red);color:#fff}
+.ex-tool-btn.danger:focus-visible{outline-color:var(--red)}
 .ex-exit-popup{max-width:440px}
 .ex-rules{position:relative}
 .ex-rules-card{position:absolute;top:calc(100% + 10px);right:0;z-index:120;width:min(360px,calc(100vw - 32px));padding:18px 20px;border-radius:16px;background:var(--s1);border:1px solid var(--bdr);box-shadow:0 12px 40px rgba(0,71,171,.18);animation:hintIn .2s ease}

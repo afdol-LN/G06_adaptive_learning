@@ -26,13 +26,17 @@ export const SessionCard: React.FC<SessionCardProps> = ({ session }) => {
       })
     : "—";
 
-  const title = session.isPretest ? t("session.type.pretest") : t("session.type.practice");
+  const skillNames = session.skillNames ?? [];
+  const title = session.isPretest
+    ? t("session.type.pretest")
+    : skillNames.length > 0
+      ? t("session.type.practiceSkill", { skill: skillNames.join(", ") })
+      : t("session.type.practice");
 
   return (
     <div className="session-card">
       <div className="session-head" onClick={() => setIsOpen(!isOpen)}>
         <div className="session-head-left">
-          <div className="session-num">#{session.sessionId}</div>
           <div>
             <div className="session-title">
               {title}

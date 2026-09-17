@@ -13,6 +13,7 @@ import {
   FaCheck,
   FaCircleQuestion,
   FaClipboardCheck,
+  FaFlagCheckered,
   FaHouse,
   FaPlay,
   FaSpinner,
@@ -76,7 +77,7 @@ export default function Exercise() {
           <div className="topbar-r">
             <button
               type="button"
-              className="ex-tool-btn"
+              className="ex-tool-btn danger"
               data-tour="ex-exit"
               onClick={controller.requestExit}
               disabled={controller.checking}
@@ -119,7 +120,6 @@ export default function Exercise() {
             <div className="prog-track"><div className="prog-fill" style={{ width: `${pct}%` }}></div></div>
           </div>
           <div className="prog-meta" data-tour="ex-meta">
-            <span className="prog-exid">{t('exercise.exerciseId', { id: question.exerciseId })}</span>
             <span className="prog-skill">{t('exercise.skill', { name: controller.skillsName })}</span>
           </div>
         </div>
@@ -251,17 +251,31 @@ export default function Exercise() {
                 </div>
               )}
             </div>
+            {/* This answer completed the branch's goal (adt-learning/docs/adr/0005) */}
+            {controller.summary?.goalCompleted && (
+              <div className="ph-goal" role="status">
+                <FaFlagCheckered aria-hidden />
+                <span>{t('exercise.goalDone.title', { name: controller.summary.goalCompleted.goalName })}</span>
+              </div>
+            )}
           </div>
           <div className="pf">
             <button className="btn-home" onClick={controller.goHome}>
               <FaHouse aria-hidden />
               <span>{t('exercise.done.home')}</span>
             </button>
-            {controller.summary?.nextRecommendation && (
-              <button className="btn-sess" onClick={controller.goHome}>
-                <FaPlay aria-hidden />
-                <span>{t('exercise.done.next', { name: controller.summary.nextRecommendation.skillsName })}</span>
+            {controller.summary?.goalCompleted ? (
+              <button className="btn-sess" onClick={controller.goToSkillTree}>
+                <FaFlagCheckered aria-hidden />
+                <span>{t('exercise.goalDone.cta')}</span>
               </button>
+            ) : (
+              controller.summary?.nextRecommendation && (
+                <button className="btn-sess" onClick={controller.goHome}>
+                  <FaPlay aria-hidden />
+                  <span>{t('exercise.done.next', { name: controller.summary.nextRecommendation.skillsName })}</span>
+                </button>
+              )
             )}
           </div>
         </div>

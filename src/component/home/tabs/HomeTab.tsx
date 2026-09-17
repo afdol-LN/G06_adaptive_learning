@@ -6,7 +6,8 @@ import { SessionHistoryItem } from "../../../models/sessionHistoryModel";
 import { usePreferences } from "../../../context/PreferencesContext";
 import { SkillTreeSVG } from "../skillTree/SkillTreeSVG";
 import { SkillSidePanel } from "../skillTree/SkillSidePanel";
-import { LayoutSkill, getProgressColor, displayProgressPercent } from "../utils/skillTree";
+import { GoalSidePanel } from "../skillTree/GoalSidePanel";
+import { LayoutGoalNode, LayoutSkill, getProgressColor, displayProgressPercent } from "../utils/skillTree";
 import { SessionCard } from "../../common/SessionCard";
 
 interface HomeTabProps {
@@ -34,6 +35,10 @@ interface HomeTabProps {
   setShowPicker: (show: boolean) => void;
   handleNodeClick: (skill: LayoutSkill) => void;
   switchTab: (tab: "Home" | "SkillTree" | "History" | "Profile") => void;
+  goal: LayoutGoalNode | null;
+  goalSelected: boolean;
+  onGoalClick: () => void;
+  setGoalSelected: (selected: boolean) => void;
 }
 
 export const HomeTab: React.FC<HomeTabProps> = ({
@@ -53,6 +58,10 @@ export const HomeTab: React.FC<HomeTabProps> = ({
   setShowPicker,
   handleNodeClick,
   switchTab,
+  goal,
+  goalSelected,
+  onGoalClick,
+  setGoalSelected,
 }) => {
   const { t } = usePreferences();
   const [twText, setTwText] = useState("");
@@ -82,7 +91,18 @@ export const HomeTab: React.FC<HomeTabProps> = ({
     { num: stats ? `${stats.skillsUnlockedCount}` : "0", label: t("home.stat.skills"), cls: "gold" },
     { num: stats ? `${stats.sessionsCount}` : "0", label: t("home.stat.sessions"), cls: "green" },
     { num: stats ? `${stats.dayStreak}` : "0", label: t("home.stat.streak"), cls: "blue" },
-    { num: stats ? `${stats.goalProgressPercent}%` : "0%", label: t("home.stat.progress"), cls: "purple" },
+    {
+      num: stats ? `${stats.goalProgressPercent}%` : "0%",
+      label: t("home.stat.progress"),
+      cls: "purple",
+      // the same numbers as the goal node at the end of the tree (adt-learning/docs/adr/0005)
+      sub:
+        !stats || stats.goalRequiredCount === 0
+          ? undefined
+          : stats.goalComplete
+            ? t("goalNode.complete")
+            : t("goalNode.count", { done: stats.goalMasteredCount, total: stats.goalRequiredCount }),
+    },
   ];
 
   return (
@@ -110,6 +130,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
               <div key={i} className={`stat-card ${s.cls}`}>
                 <div className="stat-num">{s.num}</div>
                 <div className="stat-label">{s.label}</div>
+                {s.sub && <div className="stat-sub">{s.sub}</div>}
               </div>
             ))}
           </div>
@@ -148,6 +169,24 @@ export const HomeTab: React.FC<HomeTabProps> = ({
 
         {/* Tree */}
         <div className="home-tree-wrap" data-tour="tour-skill-tree">
+          {/* Legend — มุมขวาบน อธิบายสี progress bar */}
+          <div className="tree-legend">
+            {[
+              { pct: 10,  label: "1–19%" },
+              { pct: 50,  label: "20–74%" },
+              { pct: 90,  label: "75–99%" },
+              { pct: 100, label: "100%" },
+            ].map(({ pct, label }) => (
+              <div key={pct} className="tree-legend-row">
+                <span
+                  className="tree-legend-dot"
+                  style={{ background: getProgressColor(pct) }}
+                />
+                <span className="tree-legend-label">{label}</span>
+              </div>
+            ))}
+          </div>
+
           <SkillTreeSVG
             skills={treeSkills}
             unlocked={unlocked}
@@ -157,6 +196,9 @@ export const HomeTab: React.FC<HomeTabProps> = ({
             hovered={hovered}
             setHovered={setHovered}
             zoomable={false}
+            goal={goal}
+            goalSelected={goalSelected}
+            onGoalClick={onGoalClick}
           />
           <button
             className="tree-expand-btn"
@@ -217,6 +259,13 @@ export const HomeTab: React.FC<HomeTabProps> = ({
         unlocked={unlocked}
         canUnlockFn={canUnlock}
         onStartExercise={onStartExercise}
+      />
+      <GoalSidePanel
+        goal={goal}
+        open={goalSelected}
+        onClose={() => setGoalSelected(false)}
+        skills={treeSkills}
+        onSelectSkill={setSelected}
       />
     </div>
   );

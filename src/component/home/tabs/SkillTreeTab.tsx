@@ -1,7 +1,8 @@
 import React from "react";
 import { SkillTreeSVG } from "../skillTree/SkillTreeSVG";
 import { SkillSidePanel } from "../skillTree/SkillSidePanel";
-import { LayoutSkill } from "../utils/skillTree";
+import { GoalSidePanel } from "../skillTree/GoalSidePanel";
+import { LayoutGoalNode, LayoutSkill } from "../utils/skillTree";
 
 interface SkillTreeTabProps {
   treeSkills: LayoutSkill[];
@@ -13,6 +14,10 @@ interface SkillTreeTabProps {
   hovered: number | null;
   setHovered: (id: number | null) => void;
   onStartExercise: (skill: LayoutSkill) => void;
+  goal: LayoutGoalNode | null;
+  goalSelected: boolean;
+  onGoalClick: () => void;
+  setGoalSelected: (selected: boolean) => void;
 }
 
 export const SkillTreeTab: React.FC<SkillTreeTabProps> = ({
@@ -25,6 +30,10 @@ export const SkillTreeTab: React.FC<SkillTreeTabProps> = ({
   hovered,
   setHovered,
   onStartExercise,
+  goal,
+  goalSelected,
+  onGoalClick,
+  setGoalSelected,
 }) => {
   return (
     <div className="tab-skill-tree">
@@ -38,6 +47,9 @@ export const SkillTreeTab: React.FC<SkillTreeTabProps> = ({
           hovered={hovered}
           setHovered={setHovered}
           zoomable={true}
+          goal={goal}
+          goalSelected={goalSelected}
+          onGoalClick={onGoalClick}
         />
       </div>
       <SkillSidePanel
@@ -47,6 +59,13 @@ export const SkillTreeTab: React.FC<SkillTreeTabProps> = ({
         unlocked={unlocked}
         canUnlockFn={canUnlockFn}
         onStartExercise={onStartExercise}
+      />
+      <GoalSidePanel
+        goal={goal}
+        open={goalSelected}
+        onClose={() => setGoalSelected(false)}
+        skills={treeSkills}
+        onSelectSkill={setSelected}
       />
     </div>
   );

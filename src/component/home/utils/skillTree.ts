@@ -1,11 +1,47 @@
-import { BranchSkill, SkillProgress } from "../../../models/branchSkillModel";
+import { BranchSkill, GoalNode, SkillProgress } from "../../../models/branchSkillModel";
 
 export const NODE_W = 260;
 export const NODE_H = 120;
+const ROW_GAP = 130;
 
 export interface LayoutSkill extends BranchSkill {
   x: number;
   y: number;
+}
+
+export interface LayoutGoalNode extends GoalNode {
+  x: number;
+  y: number;
+  /** the skills whose edges run into the goal node — the ends of the tree, see treeEndSkillIds */
+  fromSkillIds: number[];
+}
+
+// Ends of the tree: skills that no other skill in this tree lists as a prerequisite
+export function treeEndSkillIds(skills: BranchSkill[]): number[] {
+  const builtOn = new Set(
+    skills.flatMap((s) => (s.skillPrequisite || []).map((p) => p.prerequisiteSkillId))
+  );
+  return skills.filter((s) => !builtOn.has(s.skillId)).map((s) => s.skillId);
+}
+
+// The skill tree above stays exactly as it is; the goal node hangs one row below the deepest skill,
+// joined only to the ends of the tree and centred under them (adt-learning/docs/adr/0005)
+export function layoutGoalNode(goal: GoalNode | null, skills: LayoutSkill[]): LayoutGoalNode | null {
+  if (!goal || skills.length === 0) return null;
+  const fromSkillIds = treeEndSkillIds(skills);
+  const ends = skills.filter((s) => fromSkillIds.includes(s.skillId));
+  const anchor = ends.length > 0 ? ends : skills;
+  return {
+    ...goal,
+    fromSkillIds,
+    x: anchor.reduce((sum, s) => sum + s.x, 0) / anchor.length,
+    y: Math.max(...skills.map((s) => s.y)) + NODE_H + ROW_GAP,
+  };
+}
+
+// "13 Sep 2026" / "13 ก.ย. 2569" — the day the goal was first completed (adt-learning/docs/adr/0005)
+export function formatGoalCompletedOn(iso: string, locale: string): string {
+  return new Date(iso).toLocaleDateString(locale, { day: "numeric", month: "short", year: "numeric" });
 }
 
 export function layoutSkills(skills: BranchSkill[]): LayoutSkill[] {
@@ -53,7 +89,7 @@ export function layoutSkills(skills: BranchSkill[]): LayoutSkill[] {
     ids.forEach((id, i) => {
       positions[id] = {
         x: startX + i * (NODE_W + 50),
-        y: d * (NODE_H + 130),
+        y: d * (NODE_H + ROW_GAP),
       };
     });
   });
@@ -125,6 +161,11 @@ export function getNodeColors(isUnlocked: boolean, canUnlockThis: boolean, progr
   if (isUnlocked) return nodePalette('open');
   if (canUnlockThis) return nodePalette('ready');
   return nodePalette('locked');
+}
+
+// The goal node is a target, not a practisable skill: "open" colours with a dashed border until complete
+export function getGoalNodeColors(isComplete: boolean) {
+  return nodePalette(isComplete ? 'done' : 'open');
 }
 
 // ใช้ร่วมกันทั้ง skill tree และหน้า Exercise — ทุกหน้าต้องได้ตัวเลขเดียวกัน
