@@ -1,10 +1,13 @@
 import {
+  FaDiagramProject,
   FaMagnifyingGlass,
   FaPlus,
 } from "react-icons/fa6";
 import GoalFormModal from "./component/GoalFormModal";
 import GoalViewModal from "./component/GoalViewModal";
+import GoalWorkspace from "./workspace/GoalWorkspace";
 import { goalController } from "./goal.controller";
+import { goalTabController } from "./goalTab.controller";
 import { ActionButtons } from "../../common/ActionButtons";
 import { StatusSwitch } from "../../common/StatusSwitch";
 import { usePreferences } from "../../../context/PreferencesContext";
@@ -13,7 +16,21 @@ interface GoalTabProps {
   icon?: React.ReactNode;
 }
 
+/** สลับระหว่างรายการ goal กับ Goal Workspace ภายในแท็บเดียว (ไม่เพิ่มแท็บใหม่) */
 export default function GoalTab({ icon }: GoalTabProps) {
+  const view = goalTabController();
+
+  if (view.workspaceGoalId !== null) {
+    return <GoalWorkspace goalId={view.workspaceGoalId} onBack={view.closeWorkspace} />;
+  }
+
+  return <GoalList key={view.listVersion} icon={icon} onOpenWorkspace={view.openWorkspace} />;
+}
+
+function GoalList({
+  icon,
+  onOpenWorkspace,
+}: GoalTabProps & { onOpenWorkspace: (goalId: number) => void }) {
   const { t } = usePreferences();
   const {
     goals,
@@ -123,7 +140,12 @@ export default function GoalTab({ icon }: GoalTabProps) {
                       </div>
                     </td>
                     <td>
-                      <ActionButtons onView={() => openView(g)} onEdit={() => openEditForm(g)} />
+                      <div className="ad-ws-row-actions">
+                        <ActionButtons onView={() => openView(g)} onEdit={() => openEditForm(g)} />
+                        <button className="ad-btn-sm ad-btn-view" onClick={() => onOpenWorkspace(g.id)}>
+                          <FaDiagramProject aria-hidden /> {t("admin.workspace.open")}
+                        </button>
+                      </div>
                     </td>
                     <td>
                       <StatusSwitch status={g.status} onToggle={() => toggleGoalStatus(g)} />

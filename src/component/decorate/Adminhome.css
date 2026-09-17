@@ -32,6 +32,11 @@
   --faint: #94a3b8;
   --tint: #e8f0fe;
   --tint-2: #f0f9ff;
+  --node-bg: #dbeafe;       /* พื้นหลัง node ทุกตัวในแผนผังของ admin (ฟ้า) */
+  --node-border: #000080;   /* กรอบ node — navy สีเดียว */
+  --node-off-bg: #e5e7eb;   /* node ที่ inactive (เทา) */
+  --node-off-border: #9ca3af;
+  --node-off-ink: #4b5563;
   --accent-fill: #0047AB;   /* solid fills under white text */
   --on-accent: #ffffff;
   --overlay: rgba(0, 40, 120, 0.18);
@@ -67,6 +72,11 @@
   --blue: #60a5fa;
   --tint: #1a2a4a;
   --tint-2: #142238;
+  --node-bg: #1e3a5f;       /* ทึบ ไม่โปร่งแสง — เส้นของแผนผังจะได้ไม่ทะลุกล่อง */
+  --node-border: #8fb2ff;   /* navy บนพื้นมืดมองไม่เห็น — ใช้ฟ้าอ่อนแทน */
+  --node-off-bg: #2a2f3a;
+  --node-off-border: #6b7280;
+  --node-off-ink: #b6bcc8;
   --overlay: rgba(2, 6, 16, 0.6);
   --switch-off: #33415c;
   --ok-bg: rgba(52, 211, 153, 0.12);   --ok-ink: #34d399;   --ok-border: rgba(52, 211, 153, 0.35);
@@ -132,7 +142,7 @@
 /* Goal learning tree (GoalLearningTree.tsx) — colours via class, not SVG attributes */
 .ad-goal-tree-arrow { fill: var(--faint); }
 .ad-goal-tree-edge  { stroke: var(--faint); }
-.ad-goal-tree-node  { fill: var(--mid-bg); stroke: var(--mid-border); }
+.ad-goal-tree-node  { fill: var(--node-bg); stroke: var(--mid-border); }
 .ad-goal-tree-name  { fill: var(--ink); }
 .ad-goal-tree-level { fill: var(--ink-soft); }
 
@@ -1244,6 +1254,9 @@
   }
 }
 
+/* modal ดูรายละเอียด exercise — มีโค้ดยาว จึงกว้างกว่า modal ฟอร์มทั่วไป */
+.ad-modal.ad-modal--wide { max-width: 760px; }
+
 .ad-modal form {
   display: flex;
   flex-direction: column;
@@ -1929,3 +1942,198 @@
   overflow-x: auto;
   tab-size: 4;
 }
+
+/* ══ GOAL WORKSPACE (goalPanel/workspace) ══
+   สีทุกตัวมาจาก token ที่มีค่าธีมมืดอยู่แล้ว (--ok-*, --warn-*, --bad-*, --tint …)
+   node ของ React Flow เป็น HTML จึงใช้ var() ได้ตรง ๆ */
+.ad-ws-row-actions { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+
+.ad-ws { display: flex; flex-direction: column; gap: 16px; }
+.ad-ws-header { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 16px; }
+.ad-ws-title-wrap { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 12px; flex: 1 1 280px; min-width: 0; }
+.ad-ws-title-wrap .ad-page-title { margin: 0; overflow-wrap: anywhere; }
+.ad-ws-status { font-size: 12px; font-weight: 700; padding: 2px 10px; border-radius: 999px; border: 1px solid; }
+.ad-ws-status--draft { background: var(--warn-bg); color: var(--warn-ink); border-color: var(--warn-border); }
+.ad-ws-status--active { background: var(--ok-bg); color: var(--ok-ink); border-color: var(--ok-border); }
+.ad-ws-banner {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 14px; border-radius: 10px; font-size: 13px; font-weight: 600;
+  background: var(--warn-bg); color: var(--warn-ink); border: 1px solid var(--warn-border);
+}
+
+.ad-ws-grid { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(320px, 1fr); gap: 16px; align-items: start; }
+@media (max-width: 1100px) { .ad-ws-grid { grid-template-columns: minmax(0, 1fr); } }
+.ad-ws-main { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+
+/* ── tree (React Flow) ── */
+.ad-ws-tree-card { padding: 0; overflow: hidden; }
+.ad-ws-flow {
+  height: 480px;
+  width: 100%;
+  --xy-background-color: transparent;
+  --xy-edge-stroke: var(--muted);
+  --xy-edge-stroke-width: 2;
+  --xy-controls-button-background-color: var(--surface);
+  --xy-controls-button-background-color-hover: var(--tint);
+  --xy-controls-button-color: var(--text);
+  --xy-controls-button-color-hover: var(--text);
+  --xy-controls-button-border-color: var(--border);
+}
+/* หัวลูกศร: React Flow ใส่ stroke/fill "none" แบบ inline — ต้อง !important ถึงทับได้ */
+.ad-ws-flow .react-flow__arrowhead polyline { stroke: var(--muted) !important; fill: var(--muted) !important; }
+.ad-ws-flow .react-flow__handle { opacity: 0; pointer-events: none; }
+.ad-ws-flow .react-flow__node { cursor: pointer; }
+.ad-ws-tree-empty { padding: 48px 16px; text-align: center; }
+
+.ad-ws-node,
+.ad-ws-goal-node {
+  box-sizing: border-box;
+  color: var(--text);
+  font-family: var(--font-sans);
+  background: var(--surface);
+}
+/* ขนาดตรงกับ SKILL_NODE_* / GOAL_NODE_* ใน treeLayout.ts */
+.ad-ws-node {
+  width: 200px; min-height: 76px;
+  padding: 8px 12px; border-radius: 10px; border: 2px solid var(--border);
+  display: flex; flex-direction: column; gap: 2px;
+}
+/* ทุก node ใช้กรอบ navy สีเดียว (จำนวนข้อดูจากตัวเลขในกล่อง)
+   node ที่ inactive เป็นสีเทาทั้งกล่อง + มี tag "inactive" */
+.ad-ws-node { background: var(--node-bg); border-color: var(--node-border); }
+.ad-ws-node--pulled { border-style: dashed; }
+.ad-ws-node--inactive { background: var(--node-off-bg); border-color: var(--node-off-border); }
+.ad-ws-node--inactive .ad-ws-node-name,
+.ad-ws-node--inactive .ad-ws-node-sub { color: var(--node-off-ink); }
+.ad-ws-node.is-selected { box-shadow: 0 0 0 3px var(--accent); }
+.ad-ws-node-name { font-weight: 700; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ad-ws-node-sub { font-size: 12px; color: var(--ink-soft); }
+.ad-ws-node-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 2px; }
+.ad-ws-tag {
+  font-size: 11px; line-height: 18px; padding: 0 8px; border-radius: 999px;
+  border: 1px solid var(--border); color: var(--muted); background: var(--surface);
+}
+.ad-ws-tag--off { color: var(--node-off-ink); border-color: var(--node-off-border); background: var(--surface); }
+
+.ad-ws-goal-node {
+  width: 220px; min-height: 64px;
+  padding: 8px 12px; border-radius: 12px; border: 2px solid var(--node-border);
+  background: var(--node-bg);
+  display: flex; align-items: center; gap: 10px;
+}
+.ad-ws-goal-node > svg { color: var(--node-border); font-size: 18px; }
+.ad-ws-goal-node.is-selected { box-shadow: 0 0 0 3px var(--accent); }
+.ad-ws-goal-text { min-width: 0; }
+
+/* ── add skill ── */
+/* ปุ่ม "เพิ่ม skill" + รายการ skill แบบ dropdown ที่ชิดขวาใต้ปุ่ม */
+.ad-ws-add { position: relative; display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
+.ad-ws-add-btn { display: inline-flex; align-items: center; gap: 8px; white-space: nowrap; }
+.ad-ws-add-menu {
+  position: absolute; top: calc(100% + 4px); right: 0; z-index: 30;
+  width: 360px; max-width: calc(100vw - 32px); max-height: 420px;
+  display: flex; flex-direction: column;
+  background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+  box-shadow: 0 8px 24px var(--overlay);
+}
+/* สร้างใหม่ + ค้นหา อยู่นอกส่วนที่เลื่อน จึงเห็นตลอด */
+.ad-ws-add-top {
+  display: flex; flex-direction: column; gap: 6px;
+  padding: 6px; border-bottom: 1px solid var(--border-soft);
+}
+.ad-ws-add-top .ad-search-wrap { min-width: 0; }
+.ad-ws-add-top .ad-search { padding: 8px 0; font-size: 13px; }
+.ad-ws-add-results { list-style: none; margin: 0; padding: 6px; overflow-y: auto; min-height: 0; }
+.ad-ws-add-empty { padding: 14px 12px; font-size: 13px; text-align: center; }
+.ad-ws-add-item {
+  width: 100%; text-align: left; font: inherit; color: var(--text);
+  background: none; border: 0; border-radius: 8px; padding: 8px 10px; cursor: pointer;
+  display: flex; flex-direction: column; gap: 2px;
+}
+.ad-ws-add-item:hover:not(:disabled) { background: var(--tint); }
+.ad-ws-add-item:disabled { cursor: not-allowed; opacity: 0.55; }
+.ad-ws-add-name { font-weight: 600; font-size: 13px; }
+.ad-ws-add-meta { font-size: 12px; color: var(--muted); }
+.ad-ws-add-create { flex-direction: row; align-items: center; gap: 6px; color: var(--accent); font-weight: 600; font-size: 13px; }
+.ad-ws-add-error { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+
+/* ── skill panel ── */
+.ad-ws-panel { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.ad-ws-panel-empty { padding: 32px 16px; text-align: center; }
+.ad-ws-panel-head { display: flex; flex-direction: column; gap: 6px; }
+.ad-ws-panel-name { margin: 0; font-size: 18px; font-weight: 700; color: var(--text); overflow-wrap: anywhere; }
+.ad-ws-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; font-size: 12px; color: var(--muted); }
+.ad-ws-note {
+  display: flex; flex-direction: column; align-items: flex-start; gap: 8px;
+  padding: 8px 12px; border-radius: 8px; font-size: 13px;
+  background: var(--mid-bg); color: var(--mid-ink); border: 1px solid var(--mid-border);
+}
+.ad-ws-note--warn { background: var(--warn-bg); color: var(--warn-ink); border-color: var(--warn-border); }
+.ad-ws-section { display: flex; flex-direction: column; gap: 8px; padding-top: 12px; border-top: 1px solid var(--border-soft); }
+.ad-ws-section-title {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px;
+  font-size: 14px; font-weight: 700; color: var(--text);
+}
+.ad-ws-inline { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.ad-ws-inline .ad-select { flex: 1 1 160px; min-width: 0; }
+.ad-ws-chip-remove {
+  display: inline-flex; align-items: center; margin-left: 4px; padding: 0;
+  background: none; border: 0; color: inherit; cursor: pointer;
+}
+.ad-ws-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.ad-ws-ex-row {
+  width: 100%; text-align: left; font: inherit; color: var(--text); cursor: pointer;
+  background: var(--surface); border: 1px solid var(--border-soft); border-radius: 8px; padding: 8px 10px;
+  display: flex; flex-direction: column; gap: 2px;
+}
+.ad-ws-ex-row:hover { border-color: var(--accent); }
+.ad-ws-ex-row.is-inactive { opacity: 0.6; }
+/* ── pagination (common/Pagination.tsx) ── */
+.ad-pagination { display: flex; align-items: center; justify-content: center; gap: 10px; }
+.ad-pagination-label { font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+/* ตัวกรองสถานะ + ปุ่มเพิ่มข้อ บนหัวข้อรายการข้อสอบ */
+.ad-ws-ex-tools { display: flex; align-items: center; gap: 8px; }
+.ad-select.ad-select-sm { padding: 6px 30px 6px 10px; font-size: 13px; background-position: right 8px center; }
+
+/* แถวข้อสอบในแผง skill — ข้อความ + ปุ่มดู/แก้ไข + switch สถานะ */
+.ad-ws-ex-item {
+  display: flex; flex-direction: column; gap: 6px;
+  background: var(--surface); border: 1px solid var(--border-soft); border-radius: 8px; padding: 8px 10px;
+}
+/* จางเฉพาะข้อความ — ปุ่มกับ switch ต้องชัดเพราะยังกดได้ */
+.ad-ws-ex-item.is-inactive .ad-ws-ex-desc,
+.ad-ws-ex-item.is-inactive .ad-ws-meta { opacity: 0.6; }
+.ad-ws-ex-actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; }
+.ad-ws-ex-desc { font-size: 13px; color: var(--text); overflow-wrap: anywhere; }
+/* ── goal panel ── */
+.ad-ws-panel-title-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.ad-ws-panel-title-row .ad-ws-panel-name { min-width: 0; }
+.ad-ws-panel-title-row .ad-btn-sm { flex-shrink: 0; }
+.ad-ws-goal-panel .ad-ws-panel-name { display: flex; align-items: center; gap: 8px; }
+.ad-ws-goal-panel .ad-ws-panel-name > svg { color: var(--node-border); font-size: 16px; }
+.ad-ws-goal-desc { font-size: 13px; color: var(--ink-soft); overflow-wrap: anywhere; }
+/* ในแผง goal: ปุ่มชิดซ้าย รายการกว้างเต็มแผง */
+.ad-ws-goal-panel .ad-ws-add { align-items: flex-start; }
+.ad-ws-goal-panel .ad-ws-add-menu { left: 0; right: 0; width: auto; }
+.ad-ws-skill-row { display: flex; align-items: stretch; gap: 6px; }
+.ad-ws-skill-row .ad-ws-ex-row { flex: 1; min-width: 0; }
+.ad-ws-ex-row .ad-ws-tag { line-height: 16px; }
+
+.ad-ws-draft { display: flex; flex-direction: column; gap: 6px; padding: 8px 10px; border: 1px dashed var(--border); border-radius: 8px; }
+
+/* ── checklist ── */
+.ad-ws-checklist { display: flex; flex-direction: column; gap: 12px; }
+.ad-ws-checklist .ad-btn-primary { align-self: flex-start; }
+.ad-ws-rules { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.ad-ws-rule { display: flex; align-items: flex-start; gap: 8px; font-size: 13px; color: var(--text); }
+.ad-ws-rule > svg { margin-top: 3px; }
+.ad-ws-rule.is-pass > svg { color: var(--ok-ink); }
+.ad-ws-rule.is-fail > svg { color: var(--bad-ink); }
+.ad-ws-rule-body { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.ad-ws-rule-skill { font: inherit; cursor: pointer; }
+.ad-ws-msg-ok { color: var(--ok-ink); font-size: 13px; font-weight: 600; }
+
+/* ── confirm dialog ── */
+.ad-ws-confirm-msg { margin: 0 0 8px; color: var(--text); }
+.ad-ws-confirm-list { margin: 0; padding-left: 20px; color: var(--text); }

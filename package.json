@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.3.3",
+    "@xyflow/react": "^12.11.6",
     "axios": "^1.18.1",
     "dagre": "^0.8.5",
     "driver.js": "^1.8.0",

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { FaPen, FaPlus } from "react-icons/fa6";
 import { Skill } from "../../../../models/skillModel";
 import { Exercise, ExerciseType, IsCaseSensitive } from "../../../../models/exerciseModel";
@@ -18,6 +18,10 @@ interface ExerciseFormModalProps {
   title?: string;
   /** ทับข้อความปุ่มบันทึก */
   submitLabel?: string;
+  /** ล็อก skill (select ถูก disable) — ใช้ใน Goal Workspace ที่เลือก skill ไว้แล้ว */
+  lockedSkillId?: number;
+  /** ถ้าส่งมา จะมีปุ่ม "บันทึกและเพิ่มข้อถัดไป" ที่ล้างฟอร์ม (คง skill/ชนิด/ระดับ) โดยไม่ปิด modal */
+  onSaveAndNext?: (form: ExerciseFormValues) => Promise<boolean>;
 }
 
 export default function ExerciseFormModal({
@@ -30,6 +34,8 @@ export default function ExerciseFormModal({
   onClose,
   title,
   submitLabel,
+  lockedSkillId,
+  onSaveAndNext,
 }: ExerciseFormModalProps) {
   const { t } = usePreferences();
   const [description, setDescription] = useState<string>("");
@@ -45,6 +51,7 @@ export default function ExerciseFormModal({
   const [isCasesensitive, setIsCasesensitive] = useState<IsCaseSensitive>("NO");
   const [expectTimeValue, setExpectTimeValue] = useState<number>(EMPTY_EXERCISE_FORM.expectTimeValue);
   const [expectTimeUnit, setExpectTimeUnit] = useState<TimeUnit>(EMPTY_EXERCISE_FORM.expectTimeUnit);
+  const formRef = useRef<HTMLFormElement>(null);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -77,7 +84,7 @@ export default function ExerciseFormModal({
       setCode("");
       setLanguage(EMPTY_EXERCISE_FORM.language);
       setLevel(EMPTY_EXERCISE_FORM.level);
-      setSkillId(activeSkills[0]?.skillId ?? null);
+      setSkillId(lockedSkillId ?? activeSkills[0]?.skillId ?? null);
       setType(EMPTY_EXERCISE_FORM.type);
       setStatus(EMPTY_EXERCISE_FORM.status);
       setChoices(["", "", "", ""]);
@@ -87,7 +94,7 @@ export default function ExerciseFormModal({
       setExpectTimeValue(EMPTY_EXERCISE_FORM.expectTimeValue);
       setExpectTimeUnit(EMPTY_EXERCISE_FORM.expectTimeUnit);
     }
-  }, [isOpen, editingExercise, activeSkills]);
+  }, [isOpen, editingExercise, activeSkills, lockedSkillId]);
 
   if (!isOpen) return null;
 
@@ -101,23 +108,37 @@ export default function ExerciseFormModal({
     });
   };
 
+  const collectForm = (): ExerciseFormValues => ({
+    description,
+    code,
+    language,
+    level,
+    skillId,
+    type,
+    status,
+    choices,
+    correctChoiceIndex,
+    fillInBlank,
+    isCasesensitive,
+    expectTimeValue,
+    expectTimeUnit,
+  });
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await onSave({
-      description,
-      code,
-      language,
-      level,
-      skillId,
-      type,
-      status,
-      choices,
-      correctChoiceIndex,
-      fillInBlank,
-      isCasesensitive,
-      expectTimeValue,
-      expectTimeUnit,
-    });
+    await onSave(collectForm());
+  };
+
+  const handleSaveAndNext = async () => {
+    // ปุ่มนี้ไม่ใช่ submit — ต้องให้ browser ตรวจ required เอง
+    if (!onSaveAndNext || !formRef.current?.reportValidity()) return;
+    const saved = await onSaveAndNext(collectForm());
+    if (!saved) return;
+    setDescription("");
+    setCode("");
+    setChoices(["", "", "", ""]);
+    setCorrectChoiceIndex(0);
+    setFillInBlank("");
   };
 
   return (
@@ -137,7 +158,7 @@ export default function ExerciseFormModal({
           </span>
         </div>
 
-        <form onSubmit={handleSubmit}>
+        <form ref={formRef} onSubmit={handleSubmit}>
           <div className="ad-modal-body">
             {formError && <div className="ad-form-error">{formError}</div>}
 
@@ -201,8 +222,9 @@ export default function ExerciseFormModal({
                 <label className="ad-label">{t("admin.exercises.col.skill")}</label>
                 <select
                   className="ad-select"
-                  value={skillId ?? ""}
+                  value={lockedSkillId ?? skillId ?? ""}
                   onChange={(e) => setSkillId(Number(e.target.value))}
+                  disabled={lockedSkillId !== undefined}
                   required
                 >
                   <option value="" disabled>
@@ -327,6 +349,11 @@ export default function ExerciseFormModal({
             <button type="button" className="ad-btn-cancel" onClick={onClose} disabled={isSaving}>
               {t("admin.common.cancel")}
             </button>
+            {onSaveAndNext && !isEdit && (
+              <button type="button" className="ad-btn-cancel" onClick={handleSaveAndNext} disabled={isSaving}>
+                {t("admin.workspace.saveAndNext")}
+              </button>
+            )}
             <button type="submit" className="ad-btn-primary" disabled={isSaving}>
               {isSaving ? t("admin.common.saving") : (submitLabel ?? t("admin.common.save"))}
             </button>
