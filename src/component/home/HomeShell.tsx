@@ -19,6 +19,7 @@ import { useBranchSkillController } from "./controller/branchSkill.controller";
 import { useBranchStatsController } from "./controller/branchStats.controller";
 import { useSessionHistoryController } from "./controller/sessionHistory.controller";
 import { useHomeTourController } from "./controller/homeTour.controller";
+import { useUserProfileController } from "./controller/userProfile.controller";
 import { HomeTab } from "./tabs/HomeTab";
 import { SkillTreeTab } from "./tabs/SkillTreeTab";
 import { HistoryTab } from "./tabs/HistoryTab";
@@ -65,6 +66,7 @@ export const HomeShell: React.FC = () => {
   const statsController = useBranchStatsController(branchId);
   const historyController = useSessionHistoryController(branchId);
   const homeTour = useHomeTourController(t);
+  const profileController = useUserProfileController();
 
   // Tab State
   // Exercise's "View skill tree" (after completing the goal) opens a tab directly via router state
@@ -354,7 +356,10 @@ export const HomeShell: React.FC = () => {
             <ProfileTab
               unlocked={skillTreeController.unlockedSkills}
               sessions={historyController.sessions}
-              userProfile={userProfile}
+              profile={profileController.profile}
+              profileLoading={profileController.isLoading}
+              stats={statsController.stats}
+              goalsCount={branches?.length ?? 0}
               activeBranch={activeBranch}
             />
           )}

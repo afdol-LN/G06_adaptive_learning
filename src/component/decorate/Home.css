@@ -904,26 +904,85 @@ body {
   font-size: 32px; font-weight: 800; color: var(--on-accent); flex-shrink: 0;
   box-shadow: 0 6px 20px rgba(0, 71, 171, 0.2);
 }
-.profile-info-main         { flex: 1; }
-.profile-name              { font-size: 24px; font-weight: 800; color: var(--accent); }
-.profile-email             { font-size: 13px; color: var(--muted); margin-top: 4px; }
-.profile-goal              { margin-top: 8px; display: inline-flex; align-items: center; gap: 6px; background: rgba(130,200,229,0.18); border: 1px solid var(--accent2); border-radius: 8px; padding: 4px 12px; font-size: 13px; font-weight: 600; color: var(--accent); }
+.profile-info-main         { flex: 1; min-width: 0; }
+.profile-name              { font-size: 24px; font-weight: 800; color: var(--accent); overflow-wrap: anywhere; }
+.profile-username          { font-size: 13px; color: var(--muted); margin-top: 2px; font-weight: 600; }
+.profile-chips             { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.profile-goal,
+.profile-chip              { display: inline-flex; align-items: center; gap: 6px; border-radius: 999px; padding: 4px 12px; font-size: 13px; font-weight: 600; }
+.profile-goal              { background: rgba(130,200,229,0.18); border: 1px solid var(--accent2); color: var(--accent); }
+.profile-chip              { background: var(--surface); border: 1px solid var(--border); color: var(--ink-soft); }
+.profile-goal svg,
+.profile-chip svg          { font-size: 12px; flex-shrink: 0; }
 .profile-skill-count       { text-align: right; flex-shrink: 0; }
 .profile-skill-count-label { font-size: 13px; color: var(--muted); }
 .profile-skill-count-num   { font-size: 32px; font-weight: 800; color: var(--accent); }
-.profile-skill-count-sub   { font-size: 11px; color: var(--muted); }
-.profile-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-.profile-wrap{
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 20px;
+
+/* Info cards: personal + education side by side, summary spans both */
+.profile-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+.profile-card {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 18px;
+  padding: 22px 24px; box-shadow: 0 4px 18px rgba(0, 71, 171, 0.06);
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
 }
-.profile-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 22px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); width: 100% ; }
-.profile-card-title { font-size: 14px; font-weight: 800; color: var(--text); margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
-.profile-info-row { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--bg); }
+.profile-card:hover { box-shadow: 0 8px 26px rgba(0, 71, 171, 0.10); transform: translateY(-1px); }
+.profile-card-wide { grid-column: 1 / -1; }
+.profile-card-title {
+  margin: 0 0 14px; font-size: 15px; font-weight: 800; color: var(--text);
+  display: flex; align-items: center; gap: 10px;
+}
+.profile-card-icon {
+  width: 32px; height: 32px; border-radius: 10px; flex-shrink: 0;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: var(--tint); color: var(--accent); font-size: 14px;
+}
+
+.profile-info-list { margin: 0; display: flex; flex-direction: column; }
+.profile-info-row {
+  display: grid; grid-template-columns: 28px minmax(96px, auto) 1fr; align-items: center; gap: 10px;
+  padding: 11px 0; border-bottom: 1px dashed var(--border-soft);
+}
 .profile-info-row:last-child { border-bottom: none; }
-.profile-info-label { font-size: 12px; color: var(--muted); min-width: 90px; }
-.profile-info-value { font-size: 13px; font-weight: 600; color: var(--text); }
+.profile-info-icon  { color: var(--faint); font-size: 14px; display: inline-flex; justify-content: center; }
+.profile-info-label { margin: 0; font-size: 13px; color: var(--muted); }
+.profile-info-value {
+  margin: 0; font-size: 14px; font-weight: 700; color: var(--text); text-align: right;
+  overflow-wrap: anywhere; display: flex; flex-direction: column; align-items: flex-end;
+}
+.profile-info-sub   { font-size: 12px; font-weight: 500; color: var(--muted); }
+.profile-info-empty { color: var(--faint); font-weight: 500; }
+.profile-skeleton {
+  display: inline-block; width: 110px; height: 14px; border-radius: 6px;
+  background: linear-gradient(90deg, var(--surface-2) 25%, var(--border-soft) 50%, var(--surface-2) 75%);
+  background-size: 200% 100%; animation: profile-shimmer 1.2s linear infinite;
+}
+@keyframes profile-shimmer { from { background-position: 200% 0; } to { background-position: -200% 0; } }
+
+/* Learning summary */
+.profile-summary { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 24px; align-items: center; }
+.pgp-head  { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-bottom: 10px; }
+.pgp-name  { font-size: 14px; font-weight: 700; color: var(--text); overflow-wrap: anywhere; }
+.pgp-pct   { font-size: 22px; font-weight: 800; color: var(--accent); flex-shrink: 0; }
+.pgp-track { height: 10px; border-radius: 999px; background: var(--surface-2); border: 1px solid var(--border-soft); overflow: hidden; }
+.pgp-fill  { height: 100%; border-radius: 999px; background: linear-gradient(90deg, var(--accent2), var(--accent-fill)); transition: width 0.6s ease; }
+.pgp-sub   { margin-top: 8px; font-size: 12px; color: var(--muted); }
+.profile-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.profile-stat {
+  display: flex; flex-direction: column; align-items: center; gap: 2px; text-align: center;
+  padding: 12px 8px; border-radius: 14px; background: var(--tint-2); border: 1px solid var(--border-soft);
+}
+.profile-stat-icon  { color: var(--accent); font-size: 15px; }
+.profile-stat-num   { font-size: 22px; font-weight: 800; color: var(--text); line-height: 1.2; }
+.profile-stat-label { font-size: 11px; color: var(--muted); }
+
+@media (max-width: 760px) {
+  .tab-profile      { padding: 20px 16px 48px; }
+  .profile-hero     { flex-wrap: wrap; padding: 22px 20px; gap: 16px; }
+  .profile-avatar-lg { width: 64px; height: 64px; font-size: 26px; }
+  .profile-skill-count { text-align: left; width: 100%; display: flex; align-items: baseline; gap: 10px; }
+  .profile-grid     { grid-template-columns: 1fr; }
+  .profile-summary  { grid-template-columns: 1fr; }
+}
 .behavior-list { display: flex; flex-direction: column; gap: 10px; }
 .behavior-item { display: flex; align-items: center; gap: 12px; }
 .behavior-label { font-size: 12px; color: var(--muted); min-width: 110px; }
