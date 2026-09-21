@@ -1,6 +1,5 @@
 import { useState } from "react";
 import "../decorate/Adminhome.css";
-import { useNavigate } from "react-router-dom";
 import {
   FaArrowRightFromBracket,
   FaChevronLeft,
@@ -14,6 +13,7 @@ import ExerciseTab from "./exercisePanel/ExerciseTab";
 import HistoryTab from "./HistoryTab";
 import AiTab from "./aiPanel/AiTab";
 import AppLogo from "../common/AppLogo";
+import LogoutButton from "../common/LogoutButton";
 import { Topbar } from "../common/Topbar";
 import { usePreferences } from "../../context/PreferencesContext";
 import { summaryController } from "./summaryPanel/summary.controller";
@@ -22,7 +22,6 @@ import { getTierColor, getScoreColor, getStatusColor, gradeKey, TABS } from "../
 
 
 export default function AdminHome() {
-  const navigate = useNavigate();
   const { t } = usePreferences();
   const [activeTab, setActiveTab] = useState("summary");
   const [visitedTabs, setVisitedTabs] = useState<Set<string>>(new Set(["summary"]));
@@ -84,15 +83,10 @@ export default function AdminHome() {
         </div>
 
         <div className="ad-sidebar-foot">
-          <button
-            type="button"
-            className="ad-sidebar-logout"
-            onClick={() => navigate("/")}
-            title={t("admin.logout")}
-          >
+          <LogoutButton className="ad-sidebar-logout" title={t("admin.logout")}>
             <span className="ad-sidebar-tab-icon"><FaArrowRightFromBracket /></span>
             <span className="ad-sidebar-tab-label">{t("admin.logout")}</span>
-          </button>
+          </LogoutButton>
         </div>
       </aside>
 

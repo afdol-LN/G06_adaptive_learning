@@ -1,0 +1,253 @@
+/* ══════════════════════════════════════
+   DatePicker.css — PSU ALS · common/DatePicker.tsx
+   ยึดตาม DESIGN.md: มุม 8/12, พื้น --surface, ตัวอักษร 3 ระดับ, เงาเฉพาะ popup
+
+   ใช้ token ชุด --dd-* ร่วมกับ Dropdown.css (ประกาศไว้ที่นั่นบน :root)
+   เพราะปฏิทินก็ถูก portal ไป <body> เหมือนกัน จึงอยู่นอก scope ของหน้า
+══════════════════════════════════════ */
+
+/* ── ปุ่มที่กดเพื่อเปิดปฏิทิน ── */
+.dp-trigger {
+  width: 100%;
+  min-height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 14px;
+
+  background: var(--dd-surface);
+  border: 1px solid var(--dd-border);
+  border-radius: 8px;
+
+  font-family: var(--font-sans);
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--dd-ink);
+  text-align: left;
+
+  cursor: pointer;
+  transition: border-color .18s, box-shadow .18s;
+}
+
+.dp-trigger:hover:not(:disabled) { border-color: var(--dd-accent); }
+
+.dp-trigger:focus-visible,
+.dp-trigger[aria-expanded="true"] {
+  outline: none;
+  border-color: var(--dd-accent);
+  box-shadow: 0 0 0 3px var(--dd-tint);
+}
+
+.dp-trigger:disabled {
+  cursor: not-allowed;
+  color: var(--dd-muted);
+  background: var(--dd-surface-2);
+}
+
+.dp-value {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--dd-text);
+  font-weight: 600;
+}
+
+.dp-value.is-placeholder {
+  color: var(--dd-muted);
+  font-weight: 500;
+}
+
+.dp-icon {
+  flex-shrink: 0;
+  width: 15px;
+  height: 15px;
+  color: var(--dd-muted);
+}
+
+.dp-trigger[aria-expanded="true"] .dp-icon { color: var(--dd-accent); }
+
+/* ── ตัวปฏิทิน (portal → <body>) ── */
+.dp-popup {
+  position: fixed;
+  z-index: 1000;
+  padding: 12px;
+
+  background: var(--dd-surface);
+  border: 1px solid var(--dd-border);
+  border-radius: 12px;
+  box-shadow: var(--dd-shadow);
+
+  font-family: var(--font-sans);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  animation: dpIn .14s ease-out;
+}
+
+@keyframes dpIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* ── หัวปฏิทิน: ลูกศรเดือน + ตัวเลือกเดือน/ปี ── */
+.dp-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.dp-selects {
+  flex: 1;
+  display: flex;
+  gap: 6px;
+  min-width: 0;
+}
+
+/* Dropdown ในหัวปฏิทินเตี้ยกว่าปกติ ไม่งั้นหัวจะสูงเกินตัวปฏิทิน */
+.dp-selects .dd-trigger {
+  min-height: 34px;
+  padding: 6px 10px;
+  font-size: 14px;
+}
+.dp-selects .dd-trigger .dd-value { font-weight: 600; }
+.dp-select-month { flex: 1.5; }
+.dp-select-year  { flex: 1; }
+
+.dp-nav {
+  flex-shrink: 0;
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: var(--dd-surface);
+  border: 1px solid var(--dd-border);
+  border-radius: 8px;
+  color: var(--dd-muted);
+  cursor: pointer;
+  transition: border-color .18s, color .18s;
+}
+
+.dp-nav:hover { border-color: var(--dd-accent); color: var(--dd-accent); }
+.dp-nav svg { width: 12px; height: 12px; }
+
+/* ── แถวชื่อวัน ── */
+.dp-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+  margin-bottom: 4px;
+}
+
+.dp-weekdays span {
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--dd-muted);
+}
+
+.dp-weekdays .dp-weekend { color: var(--dd-accent); }
+
+/* ── ตารางวัน ── */
+.dp-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+
+.dp-day {
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 8px;
+
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--dd-ink);
+
+  cursor: pointer;
+  transition: background .12s, color .12s, border-color .12s;
+}
+
+.dp-day:hover:not(:disabled) { background: var(--dd-tint); color: var(--dd-text); }
+
+.dp-day:focus-visible {
+  outline: none;
+  border-color: var(--dd-accent);
+  box-shadow: 0 0 0 2px var(--dd-tint);
+}
+
+/* วันของเดือนอื่นที่ล้นเข้ามาเติมสัปดาห์ — จางแต่ยังอ่านออกและยังกดได้ */
+.dp-day.is-outside { color: var(--dd-muted); font-weight: 400; }
+
+.dp-day.is-today {
+  border-color: var(--dd-accent);
+  color: var(--dd-accent);
+  font-weight: 700;
+}
+
+.dp-day.is-selected {
+  background: var(--dd-accent);
+  border-color: var(--dd-accent);
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.dp-day.is-selected:hover { background: var(--dd-accent); color: #ffffff; }
+
+.dp-day:disabled {
+  color: var(--dd-muted);
+  opacity: .45;
+  cursor: not-allowed;
+}
+
+/* ── แถบล่าง ── */
+.dp-foot {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--dd-border);
+}
+
+.dp-foot-btn {
+  flex: 1;
+  padding: 8px 12px;
+  background: var(--dd-surface);
+  border: 1px solid var(--dd-border);
+  border-radius: 8px;
+
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--dd-ink);
+
+  cursor: pointer;
+  transition: border-color .18s, color .18s;
+}
+
+.dp-foot-btn:hover { border-color: var(--dd-accent); color: var(--dd-accent); }
+
+@media (prefers-reduced-motion: reduce) {
+  .dp-popup { animation: none; }
+}
+
+/* index.css ยังมีค่า default ของ Vite template ค้างอยู่ รวมถึง
+   `button { padding: 0.6em 1.2em }` ซึ่งกินทุกปุ่มในแอป
+   ช่องวันจึงมี min-width ~51px แล้วตาราง 7 ช่องดันจนทะลุความกว้าง popup
+   ปุ่มทุกตัวในปฏิทินจึงต้องรีเซ็ต padding เอง */
+.dp-popup button { padding: 0; }
+.dp-day { min-width: 0; }
+.dp-foot-btn { padding: 8px 12px; }

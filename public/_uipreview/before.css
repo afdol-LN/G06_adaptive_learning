@@ -1,4 +1,4 @@
-/* ══════════════════════════════════════
+﻿/* ══════════════════════════════════════
    AdminHome.css — PSU ALS · Admin Panel
 ══════════════════════════════════════ */
 
@@ -12,7 +12,7 @@
   --surface: #ffffff;
   --border: #c2d3e0;
   --text: #000080;
-  --muted: #475569;
+  --muted: #6D8196;
   --accent: #0047AB;
   --accent2: #82C8E5;
   --green: #10b981;
@@ -27,9 +27,9 @@
 .ad-app {
   --surface-2: #f8fafc;
   --border-soft: #e2e8f0;
-  --ink: #334155;
-  --ink-soft: var(--muted);
-  --faint: var(--muted);
+  --ink: #0f172a;
+  --ink-soft: #475569;
+  --faint: #94a3b8;
   --tint: #e8f0fe;
   --tint-2: #f0f9ff;
   --node-bg: #dbeafe;       /* พื้นหลัง node ทุกตัวในแผนผังของ admin (ฟ้า) */
@@ -58,10 +58,10 @@
   --border: #26344f;
   --border-soft: #1f2b42;
   --text: #ffffff;   /* body text is pure white */
-  --ink: #cbd5e1;
-  --ink-soft: var(--muted);
+  --ink: #ffffff;
+  --ink-soft: #cbd5e1;
   --muted: #a3b1cc;
-  --faint: var(--muted);
+  --faint: #6b7a96;
   --accent: #6b9bff;
   --accent-fill: #2f5fd0;
   --accent2: #82C8E5;
@@ -90,8 +90,7 @@
 :root[data-theme="dark"] .ad-app .ad-sidebar-logout:hover { background: var(--bad-bg); }
 :root[data-theme="dark"] .ad-app .ad-filter-btn.active,
 :root[data-theme="dark"] .ad-app .ad-checkbox:checked    { background: var(--accent-fill); border-color: var(--accent-fill); }
-:root[data-theme="dark"] .ad-app .ad-btn-primary         { background: var(--accent-fill); }
-:root[data-theme="dark"] .ad-app .ad-btn-primary:hover   { background: #3a6ad9; }
+:root[data-theme="dark"] .ad-app .ad-btn-primary         { background: linear-gradient(135deg, var(--accent-fill), var(--accent2)); }
 :root[data-theme="dark"] .ad-app .ad-btn-cancel:hover    { border-color: var(--faint); }
 :root[data-theme="dark"] .ad-app .ad-switch-slider       { background-color: var(--switch-off); }
 :root[data-theme="dark"] .ad-app .grade-great            { background: var(--ok-bg);  color: var(--ok-ink);  border-color: var(--ok-border); }
@@ -387,7 +386,7 @@
 
 .ad-page-title {
   font-size: 22px;
-  font-weight: 700;
+  font-weight: 800;
   color: var(--text);
 }
 
@@ -402,7 +401,7 @@
 .ad-card {
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 12px;
+  border-radius: 16px;
   padding: 22px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
@@ -432,7 +431,7 @@
   align-items: center;
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: 10px;
   padding: 0 14px;
   gap: 8px;
   min-width: 200px;
@@ -492,27 +491,28 @@
 /* ════ BUTTONS ════ */
 .ad-btn-primary {
   padding: 10px 20px;
-  border-radius: 8px;
+  border-radius: 10px;
   border: none;
-  background: var(--accent-fill);
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
   color: #fff;
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
   font-family: inherit;
   transition: all 0.18s;
   white-space: nowrap;
+  box-shadow: 0 4px 12px rgba(0, 71, 171, 0.18);
 }
 
 .ad-btn-primary:hover {
-  background: #003A8C;
+  opacity: 0.9;
+  transform: translateY(-1px);
 }
-.ad-btn-primary:active { background: #002F73; }
 
 .ad-btn-cancel {
   padding: 10px 20px;
-  border-radius: 8px;
-  border: 1px solid var(--border);
+  border-radius: 10px;
+  border: 1.5px solid var(--border);
   background: var(--bg);
   color: var(--muted);
   font-size: 14px;
@@ -763,16 +763,18 @@
 .ad-table th {
   text-align: left;
   padding: 10px 14px;
-  font-size: 14px;
-  font-weight: 600;
+  font-size: 13px;
+  font-weight: 700;
   color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
   background: var(--bg);
   border-bottom: 1px solid var(--border);
 }
 
 .ad-table td {
   padding: 12px 14px;
-  border-bottom: 1px solid var(--border-soft);
+  border-bottom: 1px solid var(--bg);
   vertical-align: middle;
 }
 
@@ -781,7 +783,7 @@
 }
 
 .ad-table tr:hover td {
-  background: var(--tint);
+  background: rgba(0, 71, 171, 0.02);
 }
 
 /* Table cells */
@@ -948,10 +950,10 @@
 
 /* Inactive Row fading */
 .ad-fade-cell {
-  color: var(--muted);
-  transition: color 0.22s ease;
+  opacity: 0.45;
+  filter: grayscale(40%);
+  transition: opacity 0.22s ease, filter 0.22s ease;
 }
-.ad-fade-cell *, .ad-fade-cell .ad-skill-name { color: var(--muted); }
 
 /* Custom Switch Toggle */
 .ad-switch {
@@ -1348,9 +1350,9 @@
   -webkit-appearance: none;
   -moz-appearance: none;
   padding: 9px 32px 9px 13px;
-  border-radius: 8px;
-  border: 1px solid var(--border);
-  background: var(--bg) url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23475569' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E") no-repeat right 10px center;
+  border-radius: 9px;
+  border: 1.5px solid var(--border);
+  background: var(--bg) url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236D8196' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E") no-repeat right 10px center;
   background-size: 14px;
   color: var(--text);
   font-size: 14px;

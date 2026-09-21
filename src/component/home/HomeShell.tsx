@@ -19,6 +19,7 @@ import {
 import { useApp } from "../../context/AppContext";
 import { usePreferences } from "../../context/PreferencesContext";
 import type { TKey } from "../../i18n";
+import LogoutButton from "../common/LogoutButton";
 import { useBranchSkillController } from "./controller/branchSkill.controller";
 import { useBranchStatsController } from "./controller/branchStats.controller";
 import { useSessionHistoryController } from "./controller/sessionHistory.controller";
@@ -350,17 +351,9 @@ export const HomeShell: React.FC = () => {
                   {t("menu.profile")}
                 </button>
                 <div className="dropdown-sep" />
-                <button
-                  className="dropdown-item danger"
-                  onClick={() => {
-                    localStorage.removeItem("access_token");
-                    localStorage.removeItem("userProfile");
-                    localStorage.removeItem("activeBranchId");
-                    navigate("/");
-                  }}
-                >
+                <LogoutButton className="dropdown-item danger">
                   {t("menu.logout")}
-                </button>
+                </LogoutButton>
               </div>
             )}
           </div>

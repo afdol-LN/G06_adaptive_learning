@@ -1,15 +1,14 @@
 import React from "react";
+import { FaCheck } from "react-icons/fa6";
 
 interface ProgressStepperProps {
   stepLabels: string[];
   step: number;
-  progressPct: number;
 }
 
 export const ProgressStepper: React.FC<ProgressStepperProps> = ({
   stepLabels,
   step,
-  progressPct,
 }) => {
   return (
     <div className="progress-wrap">
@@ -23,17 +22,11 @@ export const ProgressStepper: React.FC<ProgressStepperProps> = ({
               key={i}
               className={`step-node ${isActive ? "active" : ""} ${isDone ? "done" : ""}`}
             >
-              <div className="step-dot">{isDone ? "✓" : stepNum}</div>
+              <div className="step-dot">{isDone ? <FaCheck aria-hidden /> : stepNum}</div>
               <div className="step-label">{label}</div>
             </div>
           );
         })}
-      </div>
-      <div className="progress-bar-track">
-        <div
-          className="progress-bar-fill"
-          style={{ width: `${progressPct}%` }}
-        ></div>
       </div>
     </div>
   );

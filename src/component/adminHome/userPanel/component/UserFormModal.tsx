@@ -8,6 +8,7 @@ import {
   RoleOption,
   UserResponseAdmin,
 } from "../../../../models/userModel";
+import { DatePicker } from "../../../common/DatePicker";
 import { usePreferences } from "../../../../context/PreferencesContext";
 
 interface UserFormModalProps {
@@ -197,14 +198,15 @@ export default function UserFormModal({
 
           <div className="ad-create-user-row">
             <div className="ad-create-user-field">
-              <label className="ad-create-user-label">{t("admin.userForm.dob")}</label>
-              <input
-                type="date"
-                className="ad-create-user-input"
-                max="2026-12-31"
+              <label className="ad-create-user-label" htmlFor="ad-user-dob">
+                {t("admin.userForm.dob")}
+              </label>
+              {/* ไม่มี required เพราะไม่ใช่ input ของเบราว์เซอร์แล้ว — handleSubmit เช็ก !dob อยู่แล้ว */}
+              <DatePicker
+                id="ad-user-dob"
                 value={dob}
-                onChange={(e) => setDob(e.target.value)}
-                required
+                max="2026-12-31"
+                onChange={setDob}
               />
             </div>
             <div className="ad-create-user-field">

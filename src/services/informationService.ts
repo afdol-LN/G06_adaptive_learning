@@ -4,6 +4,7 @@ import {
   ExperienceData,
   GoalItem,
   GoalGroupMap,
+  GoalStatusMap,
   BranchCreationData,
 } from "../models/informationModel";
 import { AppClient } from "../API/appRestApi";
@@ -155,6 +156,21 @@ export class InformationService {
     }, {});
   }
 
+  // goalId → สถานะ จาก branch ของผู้ใช้ goal ที่ไม่มี branch จะไม่อยู่ใน map
+  // ถ้ามีหลาย branch ของ goal เดียวกัน ให้ "completed" ชนะ เพราะเคยเรียนจบจริง
+  static getGoalStatusMap(
+    branches: { goalId?: string | number; goalCompletedAt?: string | null }[]
+  ): GoalStatusMap {
+    const map: GoalStatusMap = {};
+    for (const b of branches ?? []) {
+      if (b.goalId === undefined || b.goalId === null) continue;
+      const key = String(b.goalId);
+      if (b.goalCompletedAt) map[key] = "completed";
+      else if (!map[key]) map[key] = "learning";
+    }
+    return map;
+  }
+
   // Persists Step 1 (campus/faculty/major/year) against the logged-in user.
   static async submitGeneralInfo(formData: InformationFormData): Promise<void> {
     const yearNumber = parseInt(formData.year.replace(/\D/g, ""), 10) || undefined;
@@ -176,6 +192,12 @@ export class InformationService {
       expForGoal: exp,
     });
     return String(created.id);
+  }
+
+  // กลับจากหน้าแนะนำ Pretest มาแก้ระดับประสบการณ์ — branch มีอยู่แล้ว จึงแก้ตัวเดิม
+  // ไม่สร้างใหม่ (backend ตรวจว่าเป็น branch ของผู้ใช้คนนี้เอง)
+  static async updateBranchExpOnServer(branchId: string, exp: number): Promise<void> {
+    await AppClient.patch(`branch/mine/${branchId}`, { expForGoal: exp });
   }
 
   static createBranchesForSelectedGoals(

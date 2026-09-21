@@ -4,6 +4,7 @@ import { useApp } from '../context/AppContext';
 import { useToast } from '../context/ToastContext';
 import { FaFire, FaInbox, FaMoon, FaSun } from 'react-icons/fa6';
 import { usePreferences } from '../context/PreferencesContext';
+import LogoutButton from './common/LogoutButton';
 import '../component/decorate/SelectBranch.css';
 
 type RefMap = { [id: string]: React.RefObject<HTMLDivElement> };
@@ -64,20 +65,11 @@ export default function SelectBranch() {
     if (sheenRef.current) sheenRef.current.style.opacity = '0';
   }
 
-  function handleLogout() {
-    toast.normal('ออกจากระบบแล้ว');
-    clearTimeout(navTimer.current);
-    navTimer.current = setTimeout(() => {
-      localStorage.clear();
-      navigate('/');
-    }, NAV_DELAY);
-  }
-
   function handleAddBranch() {
     toast.normal('เปิดหน้าสร้าง Branch ใหม่');
     clearTimeout(navTimer.current);
     navTimer.current = setTimeout(() => {
-      navigate('/information', { state: { skipGeneralInfo: true } });
+      navigate('/information', { state: { skipGeneralInfo: true, fromSelectBranch: true } });
     }, NAV_DELAY);
   }
 
@@ -98,7 +90,14 @@ export default function SelectBranch() {
     toast.success(`เข้าสู่ "${branch.goalName || 'สายการเรียน'}"`);
     clearTimeout(navTimer.current);
     navTimer.current = setTimeout(() => {
-      navigate(branch.isAlreadyPretest ? '/home' : '/pretest');
+      if (branch.isAlreadyPretest) {
+        navigate('/home');
+      } else {
+        // ยังไม่ทำ pretest → หน้าแนะนำ Pretest (step 4) ใน /information ไม่ใช่เข้าข้อสอบทันที
+        navigate('/information', {
+          state: { fromSelectBranch: true, pretestBranchId: String(branch.id) },
+        });
+      }
     }, NAV_DELAY);
   }
 
@@ -140,9 +139,7 @@ export default function SelectBranch() {
             >
               {dark ? <FaSun aria-hidden /> : <FaMoon aria-hidden />}
             </button>
-            <button type="button" className="sb2-logout-btn" onClick={handleLogout}>
-              Log out
-            </button>
+            <LogoutButton className="sb2-logout-btn" />
           </div>
         </div>
 

@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { FaEye, FaEyeSlash } from "react-icons/fa6";
 import {RegisterCredentials} from "../../models/userModel";
 import { usePreferences } from "../../context/PreferencesContext";
+import { DatePicker } from "../common/DatePicker";
 import type { TKey } from "../../i18n";
 
 
@@ -105,12 +106,12 @@ export default function RegisterPanel({ onSubmit, isLoading, onSwitchTab }: Regi
 
       <div className="field-row">
         <div>
-          <label>{t("auth.birthDate")}</label>
-          <input
-            type="date"
-            max="2010-12-31"
+          <label htmlFor="reg-dob">{t("auth.birthDate")}</label>
+          <DatePicker
+            id="reg-dob"
             value={dob}
-            onChange={(e) => setDob(e.target.value)}
+            max="2010-12-31"
+            onChange={setDob}
           />
         </div>
         <div>
