@@ -766,6 +766,62 @@ body {
 .confirm-btn-ok:hover   { opacity: 0.92; transform: translateY(-1px); }
 .confirm-btn-ok:active  { transform: translateY(0); }
 
+/* ════ PRETEST BREAKDOWN MODAL (home/component/branchBaseState.tsx) — ใช้ .confirm-overlay เป็นฉากหลัง ════ */
+.bbs-modal {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  width: 520px; max-width: calc(100vw - 32px); max-height: 85vh;
+  padding: 24px;
+  display: flex; flex-direction: column; gap: 14px;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, .12);
+  animation: modalPop 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.bbs-head { display: flex; align-items: center; gap: 10px; }
+.bbs-head-icon {
+  width: 36px; height: 36px; border-radius: var(--r-sm); flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--tint); border: 1px solid var(--accent2); color: var(--accent);
+}
+.bbs-title { flex: 1; font-size: 18px; font-weight: 700; color: var(--text); margin: 0; }
+.bbs-close {
+  width: 32px; height: 32px; border-radius: var(--r-sm); flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: none; border: 1px solid transparent; color: var(--muted);
+  cursor: pointer; transition: border-color .18s, color .18s;
+}
+.bbs-close:hover { border-color: var(--border); color: var(--text); }
+.bbs-close:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.bbs-lead { font-size: 14px; color: var(--muted); line-height: 1.6; margin: 0; }
+
+.bbs-list {
+  list-style: none; margin: 0; padding: 0;
+  display: flex; flex-direction: column; gap: 10px;
+  overflow-y: auto; min-height: 0;
+}
+.bbs-item {
+  border: 1px solid var(--border); border-radius: var(--r-md);
+  background: var(--bg); padding: 12px 14px;
+}
+.bbs-item-top { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.bbs-skill { font-size: 15px; font-weight: 700; color: var(--ink); }
+.bbs-total { font-size: 16px; font-weight: 700; color: var(--accent); font-variant-numeric: tabular-nums; }
+
+.bbs-parts {
+  list-style: none; margin: 8px 0 0; padding: 8px 0 0;
+  border-top: 1px solid var(--border-soft);
+  display: flex; flex-direction: column; gap: 4px;
+}
+.bbs-part { display: flex; justify-content: space-between; gap: 12px; font-size: 13px; color: var(--muted); }
+.bbs-part-val { font-weight: 600; color: var(--ink); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.bbs-part--note {
+  display: block; padding: 6px 10px; border-radius: var(--r-sm);
+  background: var(--info-bg); border: 1px solid var(--info-border); color: var(--info-ink);
+}
+.bbs-part--cap .bbs-part-val { color: var(--bad-ink); }
+
+.bbs-ok { flex: none; width: 100%; }
+
 /* ════ EXERCISE PICKER MODAL ════ */
 .ex-picker-overlay {
   position: fixed; inset: 0; z-index: 200;

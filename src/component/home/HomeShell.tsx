@@ -1,5 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import React from "react";
 import type { IconType } from "react-icons";
 import {
   FaChevronDown,
@@ -12,15 +11,10 @@ import {
   FaUser,
   FaUserGraduate,
 } from "react-icons/fa6";
-import { useApp } from "../../context/AppContext";
 import { usePreferences } from "../../context/PreferencesContext";
 import type { TKey } from "../../i18n";
 import LogoutButton from "../common/LogoutButton";
-import { useBranchSkillController } from "./controller/branchSkill.controller";
-import { useBranchStatsController } from "./controller/branchStats.controller";
-import { useSessionHistoryController } from "./controller/sessionHistory.controller";
-import { useHomeTourController } from "./controller/homeTour.controller";
-import { useUserProfileController } from "./controller/userProfile.controller";
+import { useHomeShellController, type HomeTabKey } from "./controller/homeShell.controller";
 import { HomeTab } from "./tabs/HomeTab";
 import { SkillTreeTab } from "./tabs/SkillTreeTab";
 import { HistoryTab } from "./tabs/HistoryTab";
@@ -31,11 +25,9 @@ import { Topbar } from "../common/Topbar";
 import CreateBranchModal from "../CreateBranchModal";
 import AppLogo from "../common/AppLogo";
 import { GoalSwitcher } from "./GoalSwitcher";
-import { LayoutSkill } from "./utils/skillTree";
+import { BranchBaseStateModal } from "./component/branchBaseState";
 import "../decorate/Home.css";
 import "../decorate/Tour.css";
-
-type HomeTabKey = "Home" | "SkillTree" | "History" | "Profile";
 
 const NAV_ITEMS: { key: HomeTabKey; labelKey: TKey; Icon: IconType }[] = [
   { key: "Home", labelKey: "nav.home", Icon: FaHouse },
@@ -44,143 +36,26 @@ const NAV_ITEMS: { key: HomeTabKey; labelKey: TKey; Icon: IconType }[] = [
   { key: "Profile", labelKey: "nav.profile", Icon: FaUser },
 ];
 
-// จำสถานะ sidebar (ย่อ/ขยาย) ไว้ข้าม session
-const SIDEBAR_COLLAPSED_KEY = "homeSidebarCollapsed";
-
 export const HomeShell: React.FC = () => {
+  const { t } = usePreferences();
+  const controller = useHomeShellController();
   const {
     userProfile,
     branches,
-    activeBranchId,
     activeBranch,
-    switchBranch,
-    fetchMyBranches,
-  } = useApp();
-  const { t } = usePreferences();
-
-  const navigate = useNavigate();
-
-  const branchId = activeBranchId ? Number(activeBranchId) : null;
-
-  // Controllers/Hooks
-  const skillTreeController = useBranchSkillController(branchId);
-  const statsController = useBranchStatsController(branchId);
-  const historyController = useSessionHistoryController(branchId);
-  const homeTour = useHomeTourController(t);
-  const profileController = useUserProfileController();
-
-  // Tab State
-  // Exercise's "View skill tree" (after completing the goal) opens a tab directly via router state
-  const location = useLocation();
-  const [activeTab, setActiveTab] = useState<HomeTabKey>(
-    () => (location.state as { tab?: HomeTabKey } | null)?.tab ?? "Home"
-  );
-
-  // Sidebar State — ครั้งแรกบนจอแคบให้เริ่มแบบย่อ
-  const [sidebarCollapsed, setSidebarCollapsed] = useState<boolean>(() => {
-    const stored = localStorage.getItem(SIDEBAR_COLLAPSED_KEY);
-    return stored !== null ? stored === "1" : window.innerWidth < 768;
-  });
-
-  // Dropdown States
-  const [showProfileMenu, setShowProfileMenu] = useState(false);
-
-  // Modal States
-  const [showPicker, setShowPicker] = useState(false);
-  const [confirmSkill, setConfirmSkill] = useState<LayoutSkill | null>(null);
-  const [showCreateModal, setShowCreateModal] = useState(false);
-
-  // Hover states
-  const [hovered, setHovered] = useState<number | null>(null);
-
-  const profileMenuRef = useRef<HTMLDivElement>(null);
-
-  // Fetch branches on mount
-  useEffect(() => {
-    fetchMyBranches();
-  }, []);
-
-  useEffect(() => {
-    localStorage.setItem(SIDEBAR_COLLAPSED_KEY, sidebarCollapsed ? "1" : "0");
-  }, [sidebarCollapsed]);
-
-  // Close profile dropdown on click outside
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      const target = e.target as HTMLElement;
-      if (profileMenuRef.current && !profileMenuRef.current.contains(target)) {
-        setShowProfileMenu(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
-  // Each tab has its own tour: auto-start it the first time the user opens that tab,
-  // and close whatever tour is running when they move to another tab
-  // ปิด auto-start tour — tour จะขึ้นเฉพาะเมื่อกดปุ่ม "วิธีใช้งาน" เอง
-  // const hasBranch = Boolean(activeBranch);
-  // const pageTourSeen = homeTour.hasSeenTour(activeTab);
-  // useEffect(() => {
-  //   if (!hasBranch || pageTourSeen !== false) return;
-  //   homeTour.startTour(activeTab);
-  //   return () => homeTour.cancelTour();
-  // }, [hasBranch, activeTab, pageTourSeen]);
-
-  // Help replays the tour of the tab the user is on — no jump back to Home
-  const handleHelpClick = () => {
-    setShowProfileMenu(false);
-    homeTour.startTour(activeTab, { force: true });
-  };
-
-  const toggleSidebar = () => {
-    setShowProfileMenu(false);
-    setSidebarCollapsed((c) => !c);
-  };
-
-  const switchTab = (tab: HomeTabKey) => {
-    setActiveTab(tab);
-    skillTreeController.setSelectedSkill(null);
-  };
-
-  const handleNodeClick = (skill: LayoutSkill) => {
-    skillTreeController.setSelectedSkill(
-      skillTreeController.selectedSkill?.skillId === skill.skillId ? null : skill
-    );
-  };
-
-  const handleGoalClick = () => {
-    skillTreeController.setGoalSelected(!skillTreeController.goalSelected);
-  };
-
-  const handleStartExercise = (skill: LayoutSkill) => {
-    setConfirmSkill(skill);
-  };
-
-  const handleConfirmExercise = () => {
-    if (!confirmSkill) return;
-    const targetSkill = confirmSkill;
-    setConfirmSkill(null);
-    // Navigate to gameplay with state
-    navigate("/exercise", {
-      state: {
-        skillId: targetSkill.skillId,
-        skillCode: targetSkill.skillCode,
-        skillsName: targetSkill.skillsName,
-      },
-    });
-  };
-
-  const handleCancelExercise = () => setConfirmSkill(null);
-
-  const handleGoPicker = (skill: LayoutSkill) => {
-    setShowPicker(false);
-    setConfirmSkill(skill);
-  };
+    skillTreeController,
+    statsController,
+    historyController,
+    profileController,
+    activeTab,
+    sidebarCollapsed,
+    showProfileMenu,
+    fullName,
+    hovered,
+    setHovered,
+  } = controller;
 
   const avatar = <FaUserGraduate aria-hidden />;
-  const profileFullName = [userProfile?.fname, userProfile?.lname].filter(Boolean).join(" ");
-  const fullName = profileFullName || localStorage.getItem("fullname") || t("user.fallbackName");
 
   // If no branch is selected or active, prompt user
   if (!activeBranch) {
@@ -189,7 +64,7 @@ export const HomeShell: React.FC = () => {
         <div className="no-branch-card">
           <h2 className="no-branch-title">{t("noBranch.title")}</h2>
           <p className="no-branch-desc">{t("noBranch.desc")}</p>
-          <button className="no-branch-cta" onClick={() => navigate("/selectbranch")}>
+          <button className="no-branch-cta" onClick={controller.goToSelectBranch}>
             {t("noBranch.cta")}
           </button>
         </div>
@@ -197,7 +72,6 @@ export const HomeShell: React.FC = () => {
     );
   }
 
-  const goalLabel = activeBranch.goalName || t("goal.placeholder");
   const activeNav = NAV_ITEMS.find((n) => n.key === activeTab) ?? NAV_ITEMS[0];
   const sidebarToggleLabel = sidebarCollapsed ? t("sidebar.show") : t("sidebar.hide");
 
@@ -208,7 +82,7 @@ export const HomeShell: React.FC = () => {
         <button
           type="button"
           className="sb-toggle"
-          onClick={toggleSidebar}
+          onClick={controller.toggleSidebar}
           aria-expanded={!sidebarCollapsed}
           aria-label={sidebarToggleLabel}
           title={sidebarToggleLabel}
@@ -230,7 +104,7 @@ export const HomeShell: React.FC = () => {
               <button
                 key={item.key}
                 className={`sb-nav-item ${activeTab === item.key ? "active" : ""}`}
-                onClick={() => switchTab(item.key)}
+                onClick={() => controller.switchTab(item.key)}
                 aria-current={activeTab === item.key ? "page" : undefined}
                 title={sidebarCollapsed ? label : undefined}
               >
@@ -245,7 +119,7 @@ export const HomeShell: React.FC = () => {
           <button
             className="sb-nav-item sb-help"
             data-tour="tour-help"
-            onClick={handleHelpClick}
+            onClick={controller.handleHelpClick}
             title={t("sidebar.helpHint")}
           >
             <span className="sb-icon"><FaCircleQuestion aria-hidden /></span>
@@ -253,10 +127,10 @@ export const HomeShell: React.FC = () => {
           </button>
 
           {/* User profile dropdown */}
-          <div className="sb-user-wrapper" ref={profileMenuRef} data-tour="tour-profile-menu">
+          <div className="sb-user-wrapper" ref={controller.profileMenuRef} data-tour="tour-profile-menu">
             <button
               className="sb-user"
-              onClick={() => setShowProfileMenu(!showProfileMenu)}
+              onClick={controller.toggleProfileMenu}
               title={sidebarCollapsed ? fullName : undefined}
             >
               <div className="nav-user-avatar">{avatar}</div>
@@ -273,13 +147,7 @@ export const HomeShell: React.FC = () => {
                   </div>
                 </div>
                 <div className="dropdown-sep" />
-                <button
-                  className="dropdown-item"
-                  onClick={() => {
-                    switchTab("Profile");
-                    setShowProfileMenu(false);
-                  }}
-                >
+                <button className="dropdown-item" onClick={controller.openProfileFromMenu}>
                   {t("menu.profile")}
                 </button>
                 <div className="dropdown-sep" />
@@ -296,7 +164,7 @@ export const HomeShell: React.FC = () => {
       <div className="app-main">
         <Topbar
           title={t(activeNav.labelKey)}
-          extra={<GoalSwitcher onCreateBranch={() => setShowCreateModal(true)} />}
+          extra={<GoalSwitcher onCreateBranch={() => controller.setShowCreateModal(true)} />}
         />
 
         <div className="content">
@@ -314,13 +182,13 @@ export const HomeShell: React.FC = () => {
               hovered={hovered}
               setHovered={setHovered}
               sessions={historyController.sessions}
-              onStartExercise={handleStartExercise}
-              setShowPicker={setShowPicker}
-              handleNodeClick={handleNodeClick}
-              switchTab={switchTab}
+              onStartExercise={controller.handleStartExercise}
+              setShowPicker={controller.setShowPicker}
+              handleNodeClick={controller.handleNodeClick}
+              switchTab={controller.switchTab}
               goal={skillTreeController.goalNode}
               goalSelected={skillTreeController.goalSelected}
-              onGoalClick={handleGoalClick}
+              onGoalClick={controller.handleGoalClick}
               setGoalSelected={skillTreeController.setGoalSelected}
             />
           )}
@@ -330,15 +198,15 @@ export const HomeShell: React.FC = () => {
               treeSkills={skillTreeController.treeSkills}
               unlocked={skillTreeController.unlockedSkills}
               canUnlockFn={skillTreeController.canUnlock}
-              onNodeClick={handleNodeClick}
+              onNodeClick={controller.handleNodeClick}
               selected={skillTreeController.selectedSkill}
               setSelected={skillTreeController.setSelectedSkill}
               hovered={hovered}
               setHovered={setHovered}
-              onStartExercise={handleStartExercise}
+              onStartExercise={controller.handleStartExercise}
               goal={skillTreeController.goalNode}
               goalSelected={skillTreeController.goalSelected}
-              onGoalClick={handleGoalClick}
+              onGoalClick={controller.handleGoalClick}
               setGoalSelected={skillTreeController.setGoalSelected}
             />
           )}
@@ -360,25 +228,31 @@ export const HomeShell: React.FC = () => {
       </div>
 
       {/* Modals */}
-      {showPicker && (
+      {controller.showPicker && (
         <NextExercisePicker
           skills={skillTreeController.treeSkills}
           unlocked={skillTreeController.unlockedSkills}
           canUnlockFn={skillTreeController.canUnlock}
-          onGo={handleGoPicker}
-          onClose={() => setShowPicker(false)}
+          onGo={controller.handleGoPicker}
+          onClose={() => controller.setShowPicker(false)}
         />
       )}
 
-      {confirmSkill && (
+      {controller.confirmSkill && (
         <ExerciseConfirmModal
-          skill={confirmSkill}
-          onConfirm={handleConfirmExercise}
-          onCancel={handleCancelExercise}
+          skill={controller.confirmSkill}
+          onConfirm={controller.handleConfirmExercise}
+          onCancel={controller.handleCancelExercise}
         />
       )}
 
-      {showCreateModal && <CreateBranchModal onClose={() => setShowCreateModal(false)} />}
+      {controller.showCreateModal && (
+        <CreateBranchModal onClose={() => controller.setShowCreateModal(false)} />
+      )}
+
+      {controller.baseState && (
+        <BranchBaseStateModal items={controller.baseState} onClose={controller.closeBreakdown} />
+      )}
     </div>
   );
 };

@@ -186,6 +186,7 @@ export function usePretestController() {
   }, [advanceToNextQuestion]);
 
   const navigateToDashboard = useCallback(async () => {
+    let submited = false;
     try {
       const branchId = Number(
         localStorage.getItem("activeBranchId") ||
@@ -194,11 +195,12 @@ export function usePretestController() {
       );
       await PretestService.submitPretest(branchId, resultsList);
       updateBranch(String(branchId), { isAlreadyPretest: true });
+      submited = true;
     } catch (e) {
       console.error(e);
       toast.error("บันทึกผล Pretest ไม่สำเร็จ", "กรุณาลองใหม่อีกครั้ง");
     }
-    navigate("/home");
+    navigate("/home", {state : {fromPretest : submited}});
   }, [navigate, resultsList, updateBranch, toast]);
 
   return {

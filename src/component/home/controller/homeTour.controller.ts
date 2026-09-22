@@ -15,7 +15,6 @@ const HELP_STEP: TourStep = { element: '[data-tour="tour-help"]', titleKey: "tou
 
 const TOURS: Record<TourPage, TourStep[]> = {
   Home: [
-    { element: '[data-tour="tour-page"]', titleKey: "tour.welcome.title", descKey: "tour.welcome.desc" },
     { element: '[data-tour="tour-goal-switcher"]', titleKey: "tour.goal.title", descKey: "tour.goal.desc" },
     { element: '[data-tour="tour-nav-tabs"]', titleKey: "tour.nav.title", descKey: "tour.nav.desc" },
     { element: '[data-tour="tour-topbar-prefs"]', titleKey: "tour.prefs.title", descKey: "tour.prefs.desc" },
@@ -27,19 +26,16 @@ const TOURS: Record<TourPage, TourStep[]> = {
     HELP_STEP,
   ],
   SkillTree: [
-    { titleKey: "tour.skillTree.intro.title", descKey: "tour.skillTree.intro.desc" },
     { element: '[data-tour="tour-tree-canvas"]', titleKey: "tour.skillTree.canvas.title", descKey: "tour.skillTree.canvas.desc" },
     { element: '[data-tour="tour-tree-canvas"] .tree-node.clickable', titleKey: "tour.skillTree.node.title", descKey: "tour.skillTree.node.desc" },
     HELP_STEP,
   ],
   History: [
-    { titleKey: "tour.history.intro.title", descKey: "tour.history.intro.desc" },
     { element: '[data-tour="tour-history-filter"]', titleKey: "tour.history.filter.title", descKey: "tour.history.filter.desc" },
     { element: '[data-tour="tour-history-list"]', titleKey: "tour.history.list.title", descKey: "tour.history.list.desc" },
     HELP_STEP,
   ],
   Profile: [
-    { titleKey: "tour.profilePage.intro.title", descKey: "tour.profilePage.intro.desc" },
     { element: '[data-tour="tour-profile-hero"]', titleKey: "tour.profilePage.hero.title", descKey: "tour.profilePage.hero.desc" },
     { element: '[data-tour="tour-behavior"]', titleKey: "tour.profilePage.behavior.title", descKey: "tour.profilePage.behavior.desc" },
     { element: '[data-tour="tour-behavior-dims"]', titleKey: "tour.profilePage.dims.title", descKey: "tour.profilePage.dims.desc" },

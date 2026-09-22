@@ -387,4 +387,15 @@ export const en: Record<keyof typeof th, string> = {
   "pretest.next": "Next",
   "pretest.submit": "Submit",
   "pretest.skillFallback": "Skill {id}",
+  // ── Where the starting score came from (home/component/branchBaseState.tsx) ──
+  "pretestBreakdown.title": "Where your starting progress came from",
+  "pretestBreakdown.lead": "Each skill's starting progress comes from the experience you entered, your pretest results and your profile.",
+  "pretestBreakdown.base": "Base from your experience",
+  "pretestBreakdown.pretest": "From the pretest ({correct}/{answered} correct)",
+  "pretestBreakdown.profile": "From your profile",
+  "pretestBreakdown.cap": "Starting progress limit",
+  "pretestBreakdown.notAnswered": "The pretest had no questions for this skill — it shows “Not started” until you practise it",
+  "pretestBreakdown.ok": "Got it",
+  "pretestBreakdown.close": "Close",
+  "pretestBreakdown.reopen": "Where did my starting progress come from?",
 };

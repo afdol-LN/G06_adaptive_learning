@@ -387,4 +387,15 @@ export const th = {
   "pretest.next": "ถัดไป",
   "pretest.submit": "ส่งคำตอบ",
   "pretest.skillFallback": "Skill {id}",
+  // ── ที่มาของคะแนนเริ่มต้นหลัง pretest (home/component/branchBaseState.tsx) ──
+  "pretestBreakdown.title": "คะแนนเริ่มต้นมาจากไหน",
+  "pretestBreakdown.lead": "ความคืบหน้าเริ่มต้นของแต่ละทักษะคิดจากประสบการณ์ที่คุณกรอก ผล pretest และข้อมูลโปรไฟล์ของคุณ",
+  "pretestBreakdown.base": "พื้นฐานจากประสบการณ์",
+  "pretestBreakdown.pretest": "จาก pretest (ถูก {correct}/{answered})",
+  "pretestBreakdown.profile": "จากโปรไฟล์",
+  "pretestBreakdown.cap": "จำกัดคะแนนเริ่มต้นสูงสุด",
+  "pretestBreakdown.notAnswered": "ไม่มีข้อของทักษะนี้ใน pretest — จะขึ้นว่า “ยังไม่เริ่ม” จนกว่าจะเริ่มฝึก",
+  "pretestBreakdown.ok": "เข้าใจแล้ว",
+  "pretestBreakdown.close": "ปิด",
+  "pretestBreakdown.reopen": "คะแนนเริ่มต้นมาจากไหน",
 };
