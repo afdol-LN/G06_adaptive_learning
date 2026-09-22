@@ -1,9 +1,17 @@
-import React, { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useId,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { createPortal } from "react-dom";
 import { FaCalendarDays, FaChevronLeft, FaChevronRight } from "react-icons/fa6";
 import { usePreferences } from "../../context/PreferencesContext";
-import { Dropdown, DropdownOption } from "./Dropdown";
 import "../decorate/DatePicker.css";
+import { Dropdown, DropdownOption } from "./Dropdown";
 
 interface DatePickerProps {
   /** ค่าเป็น ISO `yyyy-mm-dd` เท่านั้น (รูปแบบเดียวกับ <input type="date"> เดิม) */
@@ -55,7 +63,11 @@ function addDays(d: Date, n: number): Date {
 
 function addMonths(d: Date, n: number): Date {
   const target = new Date(d.getFullYear(), d.getMonth() + n, 1, 12);
-  const lastDay = new Date(target.getFullYear(), target.getMonth() + 1, 0).getDate();
+  const lastDay = new Date(
+    target.getFullYear(),
+    target.getMonth() + 1,
+    0,
+  ).getDate();
   target.setDate(Math.min(d.getDate(), lastDay));
   return target;
 }
@@ -100,7 +112,7 @@ export const DatePicker: React.FC<DatePickerProps> = ({
       if (maxDate && d > startOfDay(maxDate)) return startOfDay(maxDate);
       return d;
     },
-    [minDate, maxDate]
+    [minDate, maxDate],
   );
 
   const initialDate = () => selected ?? clampToRange(startOfDay(new Date()));
@@ -117,17 +129,24 @@ export const DatePicker: React.FC<DatePickerProps> = ({
   const reactId = useId();
   const gridId = `dp-grid-${reactId}`;
 
-  const dispYear = useCallback((y: number) => (lang === "th" ? y + 543 : y), [lang]);
+  const dispYear = useCallback(
+    (y: number) => (lang === "th" ? y + 543 : y),
+    [lang],
+  );
 
   const monthNames = useMemo(() => {
     const fmt = new Intl.DateTimeFormat(locale, { month: "long" });
-    return Array.from({ length: 12 }, (_, i) => fmt.format(new Date(2024, i, 1)));
+    return Array.from({ length: 12 }, (_, i) =>
+      fmt.format(new Date(2024, i, 1)),
+    );
   }, [locale]);
 
   const weekdayNames = useMemo(() => {
     const fmt = new Intl.DateTimeFormat(locale, { weekday: "narrow" });
     // 2024-01-07 เป็นวันอาทิตย์ — สัปดาห์เริ่มวันอาทิตย์ตามปฏิทินไทย
-    return Array.from({ length: 7 }, (_, i) => fmt.format(new Date(2024, 0, 7 + i)));
+    return Array.from({ length: 7 }, (_, i) =>
+      fmt.format(new Date(2024, 0, 7 + i)),
+    );
   }, [locale]);
 
   const label = useMemo(() => {
@@ -145,7 +164,7 @@ export const DatePicker: React.FC<DatePickerProps> = ({
       if (maxDate && d > startOfDay(maxDate)) return true;
       return false;
     },
-    [minDate, maxDate]
+    [minDate, maxDate],
   );
 
   /** ช่วงปีของตัวเลือกปี — กว้างพอสำหรับวันเกิด */
@@ -154,13 +173,14 @@ export const DatePicker: React.FC<DatePickerProps> = ({
     const from = minDate ? minDate.getFullYear() : thisYear - 100;
     const to = maxDate ? maxDate.getFullYear() : thisYear + 5;
     const out: DropdownOption[] = [];
-    for (let y = to; y >= from; y--) out.push({ value: String(y), label: String(dispYear(y)) });
+    for (let y = to; y >= from; y--)
+      out.push({ value: String(y), label: String(dispYear(y)) });
     return out;
   }, [minDate, maxDate, dispYear]);
 
   const monthOptions: DropdownOption[] = useMemo(
     () => monthNames.map((m, i) => ({ value: String(i), label: m })),
-    [monthNames]
+    [monthNames],
   );
 
   const updatePosition = useCallback(() => {
@@ -179,7 +199,10 @@ export const DatePicker: React.FC<DatePickerProps> = ({
       top = above >= EDGE ? above : Math.max(EDGE, vh - EDGE - maxHeight);
     }
 
-    const left = Math.min(Math.max(EDGE, r.left), window.innerWidth - POPUP_W - EDGE);
+    const left = Math.min(
+      Math.max(EDGE, r.left),
+      window.innerWidth - POPUP_W - EDGE,
+    );
     setPos({ left, top, maxHeight });
   }, []);
 
@@ -241,24 +264,57 @@ export const DatePicker: React.FC<DatePickerProps> = ({
 
   const moveFocus = (next: Date) => {
     setFocusDate(next);
-    if (next.getMonth() !== viewDate.getMonth() || next.getFullYear() !== viewDate.getFullYear()) {
+    if (
+      next.getMonth() !== viewDate.getMonth() ||
+      next.getFullYear() !== viewDate.getFullYear()
+    ) {
       setViewDate(next);
     }
   };
 
   const onGridKeyDown = (e: React.KeyboardEvent) => {
     switch (e.key) {
-      case "ArrowLeft":  e.preventDefault(); moveFocus(addDays(focusDate, -1)); break;
-      case "ArrowRight": e.preventDefault(); moveFocus(addDays(focusDate, 1)); break;
-      case "ArrowUp":    e.preventDefault(); moveFocus(addDays(focusDate, -7)); break;
-      case "ArrowDown":  e.preventDefault(); moveFocus(addDays(focusDate, 7)); break;
-      case "PageUp":     e.preventDefault(); moveFocus(addMonths(focusDate, e.shiftKey ? -12 : -1)); break;
-      case "PageDown":   e.preventDefault(); moveFocus(addMonths(focusDate, e.shiftKey ? 12 : 1)); break;
-      case "Home":       e.preventDefault(); moveFocus(addDays(focusDate, -focusDate.getDay())); break;
-      case "End":        e.preventDefault(); moveFocus(addDays(focusDate, 6 - focusDate.getDay())); break;
+      case "ArrowLeft":
+        e.preventDefault();
+        moveFocus(addDays(focusDate, -1));
+        break;
+      case "ArrowRight":
+        e.preventDefault();
+        moveFocus(addDays(focusDate, 1));
+        break;
+      case "ArrowUp":
+        e.preventDefault();
+        moveFocus(addDays(focusDate, -7));
+        break;
+      case "ArrowDown":
+        e.preventDefault();
+        moveFocus(addDays(focusDate, 7));
+        break;
+      case "PageUp":
+        e.preventDefault();
+        moveFocus(addMonths(focusDate, e.shiftKey ? -12 : -1));
+        break;
+      case "PageDown":
+        e.preventDefault();
+        moveFocus(addMonths(focusDate, e.shiftKey ? 12 : 1));
+        break;
+      case "Home":
+        e.preventDefault();
+        moveFocus(addDays(focusDate, -focusDate.getDay()));
+        break;
+      case "End":
+        e.preventDefault();
+        moveFocus(addDays(focusDate, 6 - focusDate.getDay()));
+        break;
       case "Enter":
-      case " ":          e.preventDefault(); pick(focusDate); break;
-      case "Escape":     e.preventDefault(); closeCal(); break;
+      case " ":
+        e.preventDefault();
+        pick(focusDate);
+        break;
+      case "Escape":
+        e.preventDefault();
+        closeCal();
+        break;
     }
   };
 
@@ -282,7 +338,12 @@ export const DatePicker: React.FC<DatePickerProps> = ({
             role="dialog"
             aria-modal="false"
             aria-label={ariaLabel ?? t("date.placeholder")}
-            style={{ left: pos.left, top: pos.top, width: POPUP_W, maxHeight: pos.maxHeight }}
+            style={{
+              left: pos.left,
+              top: pos.top,
+              width: POPUP_W,
+              maxHeight: pos.maxHeight,
+            }}
           >
             <div className="dp-head">
               <button
@@ -301,7 +362,9 @@ export const DatePicker: React.FC<DatePickerProps> = ({
                   options={monthOptions}
                   ariaLabel={t("date.month")}
                   onChange={(v) =>
-                    setViewDate(new Date(viewDate.getFullYear(), Number(v), 1, 12))
+                    setViewDate(
+                      new Date(viewDate.getFullYear(), Number(v), 1, 12),
+                    )
                   }
                 />
                 <Dropdown
@@ -309,7 +372,9 @@ export const DatePicker: React.FC<DatePickerProps> = ({
                   value={String(viewDate.getFullYear())}
                   options={yearOptions}
                   ariaLabel={t("date.year")}
-                  onChange={(v) => setViewDate(new Date(Number(v), viewDate.getMonth(), 1, 12))}
+                  onChange={(v) =>
+                    setViewDate(new Date(Number(v), viewDate.getMonth(), 1, 12))
+                  }
                 />
               </div>
 
@@ -325,7 +390,10 @@ export const DatePicker: React.FC<DatePickerProps> = ({
 
             <div className="dp-weekdays" aria-hidden>
               {weekdayNames.map((w, i) => (
-                <span key={i} className={i === 0 || i === 6 ? "dp-weekend" : undefined}>
+                <span
+                  key={i}
+                  className={i === 0 || i === 6 ? "dp-weekend" : undefined}
+                >
                   {w}
                 </span>
               ))}
@@ -392,7 +460,7 @@ export const DatePicker: React.FC<DatePickerProps> = ({
               )}
             </div>
           </div>,
-          document.body
+          document.body,
         )
       : null;
 
@@ -409,7 +477,10 @@ export const DatePicker: React.FC<DatePickerProps> = ({
         className={`dp-trigger ${className}`.trim()}
         onClick={() => (open ? closeCal() : openCal())}
         onKeyDown={(e) => {
-          if (!open && (e.key === "Enter" || e.key === " " || e.key === "ArrowDown")) {
+          if (
+            !open &&
+            (e.key === "Enter" || e.key === " " || e.key === "ArrowDown")
+          ) {
             e.preventDefault();
             openCal();
           }

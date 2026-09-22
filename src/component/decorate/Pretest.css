@@ -125,7 +125,7 @@
 /* ═══ หน้าทำข้อสอบ ═══ */
 .pt-root .quiz-progress-wrap { width: 100%; max-width: 660px; margin-bottom: 24px; opacity: 0; animation: ptFadeIn .5s ease .1s forwards; }
 .pt-root .quiz-progress-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-.pt-root .quiz-progress-label { font-size: 13px; color: var(--muted); }
+.pt-root .quiz-progress-label { font-size: 25px; color: var(--muted); }
 .pt-root .quiz-progress-pct { font-size: 18px; color: var(--accent); font-weight: 700; }
 .pt-root .progress-track { height: 6px; background: var(--border); border-radius: var(--r-full); overflow: visible; position: relative; }
 .pt-root .progress-fill {
@@ -139,8 +139,73 @@
   transition: opacity .3s;
 }
 
-/* ── การ์ดคำถาม (QuestionCard.css) — สูงคงที่ ทุกข้อจึงขนาดเท่ากัน ── */
-.pt-root .qc-card { height: 620px; }
+/* ── การ์ดคำถาม — สูงคงที่ ทุกข้อจึงขนาดเท่ากัน ── */
+.pt-root .q-card {
+  height: 620px; width: 100%; max-width: 660px;
+  display: flex; flex-direction: column;
+  background: var(--surface);
+  border: 1px solid var(--border); border-radius: var(--r-md); overflow: hidden;
+  animation: ptQSlideIn .35s cubic-bezier(.16, 1, .3, 1);
+}
+.pt-root .q-header {
+  flex-shrink: 0;
+  padding: 16px 24px;
+  background: var(--surface-2); border-bottom: 1px solid var(--border-soft);
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+}
+.pt-root .q-num-badge { display: flex; align-items: center; gap: 10px; }
+.pt-root .q-num { font-size: 13px; font-weight: 600; color: var(--muted); }
+.pt-root .q-num strong { color: var(--accent); }
+.pt-root .q-skill-tag {
+  font-size: 13px; padding: 4px 12px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r-full); color: var(--muted);
+}
+.pt-root .q-diff-tag { font-size: 13px; padding: 4px 12px; border-radius: var(--r-full); }
+
+.pt-root .q-body { flex: 1; overflow-y: auto; padding: 24px; background: var(--surface); }
+.pt-root .q-body::-webkit-scrollbar { width: 6px; }
+.pt-root .q-body::-webkit-scrollbar-track { background: transparent; }
+.pt-root .q-body::-webkit-scrollbar-thumb { background-color: var(--border); border-radius: var(--r-full); }
+
+.pt-root .q-card .q-text {
+  font-size: 18px; line-height: 1.6; color: var(--text); font-weight: 600;
+  background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--r-sm);
+  padding: 20px; margin-bottom: 24px;
+}
+.pt-root .q-card .q-text code {
+  font-family: 'DM Mono', ui-monospace, monospace; font-size: 16px; background: var(--surface);
+  padding: 2px 7px; border-radius: var(--r-xs); color: var(--accent); border: 1px solid var(--border);
+}
+
+.pt-root .choices { display: flex; flex-direction: column; gap: 8px; }
+.pt-root .choice {
+  display: flex; align-items: center; gap: 12px; padding: 14px 16px;
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-sm); cursor: pointer;
+  transition: border-color .2s, background .2s;
+  position: relative; user-select: none;
+}
+.pt-root .choice:hover { border-color: var(--accent); background: var(--surface-2); }
+.pt-root .choice.selected { border-color: var(--accent); background: var(--tint); }
+.pt-root .choice-letter {
+  width: 30px; height: 30px; border-radius: var(--r-sm); flex-shrink: 0;
+  background: var(--surface-2); border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 600; color: var(--muted);
+  transition: background .2s, border-color .2s, color .2s;
+}
+.pt-root .choice.selected .choice-letter { background: var(--accent-fill); border-color: var(--accent-fill); color: var(--on-accent); }
+.pt-root .choice-text { font-size: 15px; color: var(--ink); line-height: 1.5; }
+.pt-root .choice-text code { font-family: 'DM Mono', ui-monospace, monospace; font-size: 14px; background: var(--surface-2); padding: 1px 6px; border-radius: var(--r-xs); color: var(--accent); }
+
+.pt-root .q-footer {
+  flex-shrink: 0;
+  padding: 16px 24px;
+  border-top: 1px solid var(--border-soft);
+  display: flex; align-items: center; justify-content: space-between;
+  background: var(--surface-2);   /* เดิมเขียน #ffff ซึ่งเป็น hex 4 หลัก ไม่ถูกต้อง เบราว์เซอร์ข้ามไป */
+}
+.pt-root .q-footer-left { display: flex; align-items: center; gap: 8px; }
 .pt-root .dot-indicators { display: flex; gap: 4px; align-items: center; }
 .pt-root .dot-ind { width: 8px; height: 8px; border-radius: 50%; background: var(--border); transition: width .25s, background .25s; cursor: pointer; }
 .pt-root .dot-ind.answered { background: var(--accent); }
@@ -222,6 +287,19 @@
 .pt-root .btn-continue:active { background: #002F73; }
 :root[data-theme="dark"] .pt-root .btn-continue:hover { background: #3a6ad9; }
 
+/* ── ช่องเติมคำ ── */
+.pt-root .fill-blank-container { display: flex; flex-direction: column; gap: 12px; margin-top: 12px; width: 100%; }
+.pt-root .fill-blank-label { font-size: 15px; font-weight: 600; color: var(--muted); }
+.pt-root .fill-blank-container .fill-blank-input {
+  width: 100%; padding: 14px 16px;
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-sm);
+  color: var(--ink); font-family: var(--font-sans); font-size: 16px;
+  outline: none; transition: border-color .2s, box-shadow .2s;
+}
+.pt-root .fill-blank-container .fill-blank-input:focus {
+  border-color: var(--accent); box-shadow: 0 0 0 3px var(--tint);
+}
+.pt-root .fill-blank-input::placeholder { color: var(--muted); font-size: 15px; }
 
 /* ── รายการผลลัพธ์ทีละข้อ ── */
 .pt-root .results-list {
@@ -243,9 +321,11 @@
 /* ── Animations ── */
 @keyframes ptFadeIn   { to { opacity: 1; } }
 @keyframes ptFadeUp   { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: none; } }
+@keyframes ptQSlideIn { from { opacity: 0; transform: translateX(28px); } to { opacity: 1; transform: none; } }
 
 @media (max-width: 520px) {
-  .pt-root .qc-card { height: 580px; }
+  .pt-root .q-card { height: 580px; }
+  .pt-root .q-header, .pt-root .q-body, .pt-root .q-footer { padding-left: 16px; padding-right: 16px; }
   .pt-root .done-score-card { grid-template-columns: 1fr 1fr 1fr; }
 }
 

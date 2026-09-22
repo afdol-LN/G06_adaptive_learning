@@ -1,21 +1,23 @@
 import React, { useEffect, useState } from "react";
 import { FaPen, FaPlus } from "react-icons/fa6";
-import "../../../decorate/CreateUserModal.css";
+import { usePreferences } from "../../../../context/PreferencesContext";
 import {
   CreateUserByAdminRequest,
-  UpdateUserByAdminRequest,
   GenderOption,
   RoleOption,
+  UpdateUserByAdminRequest,
   UserResponseAdmin,
 } from "../../../../models/userModel";
 import { DatePicker } from "../../../common/DatePicker";
-import { usePreferences } from "../../../../context/PreferencesContext";
+import "../../../decorate/CreateUserModal.css";
 
 interface UserFormModalProps {
   isOpen: boolean;
   editingUser: UserResponseAdmin | null;
   onClose: () => void;
-  onSubmit: (data: CreateUserByAdminRequest | UpdateUserByAdminRequest) => Promise<void>;
+  onSubmit: (
+    data: CreateUserByAdminRequest | UpdateUserByAdminRequest,
+  ) => Promise<void>;
   isLoading: boolean;
   gendersList: GenderOption[];
   rolesList: RoleOption[];
@@ -125,7 +127,10 @@ export default function UserFormModal({
       await onSubmit(payload);
     } catch (err: any) {
       setFormError(
-        err.message || (isEdit ? t("admin.users.saveFailedUpdate") : t("admin.users.saveFailedCreate"))
+        err.message ||
+          (isEdit
+            ? t("admin.users.saveFailedUpdate")
+            : t("admin.users.saveFailedCreate")),
       );
     }
   };
@@ -173,7 +178,9 @@ export default function UserFormModal({
 
           <div className="ad-create-user-row">
             <div className="ad-create-user-field">
-              <label className="ad-create-user-label">{t("admin.userForm.firstName")}</label>
+              <label className="ad-create-user-label">
+                {t("admin.userForm.firstName")}
+              </label>
               <input
                 type="text"
                 className="ad-create-user-input"
@@ -184,7 +191,9 @@ export default function UserFormModal({
               />
             </div>
             <div className="ad-create-user-field">
-              <label className="ad-create-user-label">{t("admin.userForm.lastName")}</label>
+              <label className="ad-create-user-label">
+                {t("admin.userForm.lastName")}
+              </label>
               <input
                 type="text"
                 className="ad-create-user-input"
@@ -210,27 +219,29 @@ export default function UserFormModal({
               />
             </div>
             <div className="ad-create-user-field">
-              <label className="ad-create-user-label">{t("admin.userForm.gender")}</label>
+              <label className="ad-create-user-label">
+                {t("admin.userForm.gender")}
+              </label>
               <select
                 className="ad-create-user-select"
                 value={genderId}
                 onChange={(e) => setGenderId(Number(e.target.value))}
               >
-                {gendersList && gendersList.length > 0 ? (
-                  gendersList.map((g) => (
-                    <option key={g.id} value={g.id}>
-                      {g.gender}
-                    </option>
-                  ))
-                ) : (
-                  ''
-                )}
+                {gendersList && gendersList.length > 0
+                  ? gendersList.map((g) => (
+                      <option key={g.id} value={g.id}>
+                        {g.gender}
+                      </option>
+                    ))
+                  : ""}
               </select>
             </div>
           </div>
 
           <div className="ad-create-user-field">
-            <label className="ad-create-user-label">{t("admin.userForm.username")}</label>
+            <label className="ad-create-user-label">
+              {t("admin.userForm.username")}
+            </label>
             <input
               type="text"
               className={`ad-create-user-input ${
@@ -250,13 +261,16 @@ export default function UserFormModal({
 
           <div className="ad-create-user-field">
             <label className="ad-create-user-label">
-              {t("admin.userForm.password")}{isEdit ? t("admin.userForm.passwordKeep") : ""}
+              {t("admin.userForm.password")}
+              {isEdit ? t("admin.userForm.passwordKeep") : ""}
             </label>
             <div className="ad-pw-container">
               <input
                 type={showPassword ? "text" : "password"}
                 className="ad-create-user-input ad-pw-input"
-                placeholder={isEdit ? "••••••••" : t("admin.userForm.passwordHint")}
+                placeholder={
+                  isEdit ? "••••••••" : t("admin.userForm.passwordHint")
+                }
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required={!isEdit}
@@ -267,13 +281,17 @@ export default function UserFormModal({
                 onClick={() => setShowPassword(!showPassword)}
                 tabIndex={-1}
               >
-                {showPassword ? t("admin.userForm.hide") : t("admin.userForm.show")}
+                {showPassword
+                  ? t("admin.userForm.hide")
+                  : t("admin.userForm.show")}
               </button>
             </div>
           </div>
 
           <div className="ad-create-user-field">
-            <label className="ad-create-user-label">{t("admin.userForm.role")}</label>
+            <label className="ad-create-user-label">
+              {t("admin.userForm.role")}
+            </label>
             <select
               className="ad-create-user-select"
               value={role}
@@ -308,7 +326,9 @@ export default function UserFormModal({
               className="ad-btn-primary"
               disabled={isLoading}
             >
-              {isLoading ? t("admin.common.saving") : t("admin.common.saveData")}
+              {isLoading
+                ? t("admin.common.saving")
+                : t("admin.common.saveData")}
             </button>
           </div>
         </form>

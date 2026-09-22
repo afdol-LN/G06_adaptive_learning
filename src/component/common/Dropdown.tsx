@@ -1,6 +1,14 @@
-import React, { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useId,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { createPortal } from "react-dom";
-import { FaChevronDown, FaCheck } from "react-icons/fa6";
+import { FaCheck, FaChevronDown } from "react-icons/fa6";
 import "../decorate/Dropdown.css";
 
 export interface DropdownOption {
@@ -68,12 +76,12 @@ export const Dropdown: React.FC<DropdownProps> = ({
 
   const selected = useMemo(
     () => options.find((o) => o.value === value),
-    [options, value]
+    [options, value],
   );
 
   const firstEnabled = useCallback(
     () => options.findIndex((o) => !o.disabled),
-    [options]
+    [options],
   );
 
   const updatePosition = useCallback(() => {
@@ -89,7 +97,10 @@ export const Dropdown: React.FC<DropdownProps> = ({
       width: r.width,
       top: openUp ? undefined : r.bottom + GAP,
       bottom: openUp ? window.innerHeight - r.top + GAP : undefined,
-      maxHeight: Math.max(120, Math.min(MAX_POPUP_HEIGHT, openUp ? spaceAbove : spaceBelow)),
+      maxHeight: Math.max(
+        120,
+        Math.min(MAX_POPUP_HEIGHT, openUp ? spaceAbove : spaceBelow),
+      ),
     });
   }, []);
 
@@ -126,7 +137,9 @@ export const Dropdown: React.FC<DropdownProps> = ({
   // เลื่อนรายการที่กำลังชี้อยู่ให้เห็นเสมอเวลาใช้ลูกศร
   useEffect(() => {
     if (!open || activeIndex < 0) return;
-    const el = listRef.current?.querySelector<HTMLElement>(`[data-idx="${activeIndex}"]`);
+    const el = listRef.current?.querySelector<HTMLElement>(
+      `[data-idx="${activeIndex}"]`,
+    );
     el?.scrollIntoView({ block: "nearest" });
   }, [open, activeIndex]);
 
@@ -166,7 +179,12 @@ export const Dropdown: React.FC<DropdownProps> = ({
     if (disabled) return;
 
     if (!open) {
-      if (e.key === "ArrowDown" || e.key === "ArrowUp" || e.key === "Enter" || e.key === " ") {
+      if (
+        e.key === "ArrowDown" ||
+        e.key === "ArrowUp" ||
+        e.key === "Enter" ||
+        e.key === " "
+      ) {
         e.preventDefault();
         openList();
       }
@@ -219,7 +237,9 @@ export const Dropdown: React.FC<DropdownProps> = ({
             id={listId}
             role="listbox"
             className="dd-popup"
-            aria-activedescendant={activeIndex >= 0 ? `${listId}-${activeIndex}` : undefined}
+            aria-activedescendant={
+              activeIndex >= 0 ? `${listId}-${activeIndex}` : undefined
+            }
             style={{
               left: pos.left,
               width: pos.width,
@@ -250,12 +270,14 @@ export const Dropdown: React.FC<DropdownProps> = ({
                   onClick={() => pick(idx)}
                 >
                   <span className="dd-option-label">{opt.label}</span>
-                  {isSelected && <FaCheck className="dd-option-check" aria-hidden />}
+                  {isSelected && (
+                    <FaCheck className="dd-option-check" aria-hidden />
+                  )}
                 </li>
               );
             })}
           </ul>,
-          document.body
+          document.body,
         )
       : null;
 
