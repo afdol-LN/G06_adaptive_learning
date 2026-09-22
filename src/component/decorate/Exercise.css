@@ -304,10 +304,14 @@ html, body {
 .choices.locked .opt{cursor:default}
 .choices.locked .opt:hover{transform:none}
 .opt-ck{display:inline-flex}
-.wrap .fill-blank-input{width:100%;padding:14px 18px;border-radius:12px;border:1.5px solid var(--bdr);background:var(--s1);color:var(--text);font-family:var(--font-sans);font-size:15px;outline:none;transition:border-color .2s,box-shadow .2s}
+.wrap .fill-blank-input{width:100%;padding:14px 18px;padding-right:48px;border-radius:12px;border:1.5px solid var(--bdr);background:var(--s1);color:var(--text);font-family:var(--font-sans);font-size:15px;outline:none;transition:border-color .2s,box-shadow .2s}
 .wrap .fill-blank-input:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(0,71,171,.12)}
 .wrap .fill-blank-input.rev-ok{border-color:var(--green);box-shadow:0 0 0 3px rgba(16,185,129,.15)}
 .wrap .fill-blank-input.rev-no{border-color:var(--red);box-shadow:0 0 0 3px rgba(220,38,38,.15)}
+.wrap .fib-wrap{position:relative;width:100%}
+.wrap .fib-ck{position:absolute;right:14px;top:50%;transform:translateY(-50%);font-size:16px;line-height:1;pointer-events:none}
+.wrap .fill-blank-input.rev-ok~.fib-ck{color:var(--green)}
+.wrap .fill-blank-input.rev-no~.fib-ck{color:var(--red)}
 .btn-next.checking:disabled{opacity:.85;filter:none}
 .btn-next .spin{animation:exSpin .8s linear infinite}
 @keyframes exSpin{to{transform:rotate(360deg)}}

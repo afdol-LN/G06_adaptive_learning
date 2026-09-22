@@ -155,14 +155,21 @@ export default function Exercise() {
                   })}
                 </div>
               ) : (
-                <input
-                  className={outcomeClass ? `fill-blank-input ${outcomeClass}` : 'fill-blank-input'}
-                  data-tour="ex-answer"
-                  value={controller.fillInBlankInput}
-                  onChange={(e) => controller.setFillInBlankInput(e.target.value)}
-                  disabled={controller.locked}
-                  placeholder={t('exercise.fillPlaceholder')}
-                />
+                <div className="fib-wrap">
+                  <input
+                    className={outcomeClass ? `fill-blank-input ${outcomeClass}` : 'fill-blank-input'}
+                    data-tour="ex-answer"
+                    value={controller.fillInBlankInput}
+                    onChange={(e) => controller.setFillInBlankInput(e.target.value)}
+                    disabled={controller.locked}
+                    placeholder={t('exercise.fillPlaceholder')}
+                  />
+                  {outcomeClass && (
+                    <span className="fib-ck">
+                      {revealed?.isCorrect ? <FaCheck aria-hidden /> : <FaXmark aria-hidden />}
+                    </span>
+                  )}
+                </div>
               )}
             </div>
 
@@ -196,14 +203,8 @@ export default function Exercise() {
         style={{ color: revealed?.isCorrect ? 'var(--green)' : 'var(--red)' }}
         role="status"
         aria-live="polite"
-      >
-        {revealed &&
-          (revealed.isCorrect ? (
-            <FaCheck title={t('exercise.correct')} />
-          ) : (
-            <FaXmark title={t('exercise.incorrect')} />
-          ))}
-      </div>
+        aria-label={revealed ? (revealed.isCorrect ? t('exercise.correct') : t('exercise.incorrect')) : undefined}
+      />
 
       {controller.exitOpen && (
         <div className="overlay open" onClick={controller.cancelExit}>

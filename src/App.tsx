@@ -17,6 +17,7 @@ import { PreferencesProvider } from "./context/PreferencesContext";
 import { ToastProvider } from "./context/ToastContext";
 import GlobalLoader from "./component/common/GlobalLoader";
 import ToastContainer from "./component/common/ToastContainer";
+import RequireAdmin from "./component/common/RequireAdmin";
 
 function AppContent() {
   const { isLoading } = useApp();
@@ -35,7 +36,7 @@ function AppContent() {
           <Route path="/home" element={<HomeShell />}></Route>
           <Route path="/homenew" element={<HomeShell />}></Route>
           <Route path="/exercise" element={<Exercise />}></Route>
-          <Route path="/admin/home" element={<AdminHome />}></Route>
+          <Route path="/admin/home" element={<RequireAdmin><AdminHome /></RequireAdmin>}></Route>
           <Route path="/skilltree" element={<SkillTree />}></Route>
         </Routes>
       </Router>
