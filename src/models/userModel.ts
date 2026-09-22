@@ -13,6 +13,22 @@ export interface userprofile{
     status : string
 }
 
+// ข้อมูลโปรไฟล์ของผู้ใช้ที่ login อยู่ (GET /userprofile/:id + ชื่อ campus/faculty/major/gender)
+export interface UserProfileDetail {
+    id: number;
+    fullName: string;
+    username: string;
+    birthDate: string | null;
+    genderName: string | null;
+    campusName: string | null;
+    facultyName: string | null;
+    majorName: string | null;
+    year: number | null;
+    role: string;
+    status: string;
+    createdAt: string | null;
+}
+
 export interface UserAccountCreate {
     username : string,
     firstName : string,

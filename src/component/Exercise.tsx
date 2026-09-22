@@ -76,7 +76,7 @@ export default function Exercise() {
           <div className="topbar-r">
             <button
               type="button"
-              className="ex-tool-btn"
+              className="ex-tool-btn danger"
               data-tour="ex-exit"
               onClick={controller.requestExit}
               disabled={controller.checking}
@@ -119,7 +119,6 @@ export default function Exercise() {
             <div className="prog-track"><div className="prog-fill" style={{ width: `${pct}%` }}></div></div>
           </div>
           <div className="prog-meta" data-tour="ex-meta">
-            <span className="prog-exid">{t('exercise.exerciseId', { id: question.exerciseId })}</span>
             <span className="prog-skill">{t('exercise.skill', { name: controller.skillsName })}</span>
           </div>
         </div>
