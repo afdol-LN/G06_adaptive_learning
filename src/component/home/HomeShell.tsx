@@ -126,11 +126,11 @@ export const HomeShell: React.FC = () => {
   // and close whatever tour is running when they move to another tab
   const hasBranch = Boolean(activeBranch);
   const pageTourSeen = homeTour.hasSeenTour(activeTab);
-  useEffect(() => {
-    if (!hasBranch || pageTourSeen !== false) return;
-    homeTour.startTour(activeTab);
-    return () => homeTour.cancelTour();
-  }, [hasBranch, activeTab, pageTourSeen]);
+  // useEffect(() => {
+  //   if (!hasBranch || pageTourSeen !== false) return;
+  //   homeTour.startTour(activeTab);
+  //   return () => homeTour.cancelTour();
+  // }, [hasBranch, activeTab, pageTourSeen]);
 
   // Help replays the tour of the tab the user is on — no jump back to Home
   const handleHelpClick = () => {
