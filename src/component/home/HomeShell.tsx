@@ -190,6 +190,7 @@ export const HomeShell: React.FC = () => {
               goalSelected={skillTreeController.goalSelected}
               onGoalClick={controller.handleGoalClick}
               setGoalSelected={skillTreeController.setGoalSelected}
+              onShowBreakdown={activeBranch.isAlreadyPretest ? controller.openBreakdown : undefined}
             />
           )}
 
