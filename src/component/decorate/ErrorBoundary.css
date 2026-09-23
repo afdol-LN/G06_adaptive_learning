@@ -1,0 +1,94 @@
+/* ══════════════════════════════════════
+   ErrorBoundary.css — fallback shown in place of a region that failed to render
+   (common/ErrorBoundary). It appears on student and admin screens alike, whose
+   stylesheets name the same colours differently, so its palette is declared here
+   on .eb-fallback (light + dark) instead of borrowing either screen's tokens.
+   Prefix eb-
+══════════════════════════════════════ */
+
+.eb-fallback {
+  --eb-bg: #fff7ed;
+  --eb-border: #fdba74;
+  --eb-text: #0f172a;
+  --eb-muted: #475569;
+  --eb-icon: #c2410c;
+  --eb-btn-bg: #ffffff;
+  --eb-btn-border: #cbd5e1;
+  --eb-primary: #1e40af;
+  --eb-primary-text: #ffffff;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin: 16px 0;
+  padding: 28px 20px;
+  text-align: center;
+  font-family: var(--font-sans);
+  color: var(--eb-text);
+  background: var(--eb-bg);
+  border: 1px solid var(--eb-border);
+  border-radius: 12px;
+}
+
+:root[data-theme="dark"] .eb-fallback {
+  --eb-bg: #2a1a0e;
+  --eb-border: #9a3412;
+  --eb-text: #ffffff;
+  --eb-muted: #cbd5e1;
+  --eb-icon: #fb923c;
+  --eb-btn-bg: #1e293b;
+  --eb-btn-border: #475569;
+  --eb-primary: #3b82f6;
+  --eb-primary-text: #ffffff;
+}
+
+.eb-icon {
+  flex-shrink: 0;
+  font-size: 28px;
+  color: var(--eb-icon);
+}
+
+.eb-title {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.eb-body {
+  margin: 0;
+  max-width: 420px;
+  font-size: 14px;
+  color: var(--eb-muted);
+}
+
+.eb-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.eb-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  font: inherit;
+  font-size: 14px;
+  color: var(--eb-text);
+  background: var(--eb-btn-bg);
+  border: 1px solid var(--eb-btn-border);
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.eb-btn svg {
+  flex-shrink: 0;
+}
+
+.eb-btn--primary {
+  color: var(--eb-primary-text);
+  background: var(--eb-primary);
+  border-color: var(--eb-primary);
+}

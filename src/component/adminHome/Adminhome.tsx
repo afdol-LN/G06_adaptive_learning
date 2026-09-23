@@ -25,6 +25,7 @@ import SkillTab from "./skillPanel/SkillTab";
 import { summaryController } from "./summaryPanel/summary.controller";
 import SummaryTab from "./SummaryTab";
 import UsersTab from "./userPanel/UsersTab";
+import ErrorBoundary from "../common/ErrorBoundary";
 
 export default function AdminHome() {
   const { t } = usePreferences();
@@ -123,17 +124,19 @@ export default function AdminHome() {
             <div
               style={{ display: activeTab === "summary" ? undefined : "none" }}
             >
-              <SummaryTab
-                icon={tabIcon("summary")}
-                SUMMARY={summary}
-                skills={skillProgress}
-                users={userActivity}
-                getTierColor={getTierColor}
-                getScoreColor={getScoreColor}
-                getStatusColor={getStatusColor}
-                maxBar={maxBar}
-                dayLabels={dayLabels}
-              />
+              <ErrorBoundary>
+                <SummaryTab
+                  icon={tabIcon("summary")}
+                  SUMMARY={summary}
+                  skills={skillProgress}
+                  users={userActivity}
+                  getTierColor={getTierColor}
+                  getScoreColor={getScoreColor}
+                  getStatusColor={getStatusColor}
+                  maxBar={maxBar}
+                  dayLabels={dayLabels}
+                />
+              </ErrorBoundary>
             </div>
           )}
 
@@ -142,7 +145,9 @@ export default function AdminHome() {
             <div
               style={{ display: activeTab === "users" ? undefined : "none" }}
             >
-              <UsersTab icon={tabIcon("users")} />
+              <ErrorBoundary>
+                <UsersTab icon={tabIcon("users")} />
+              </ErrorBoundary>
             </div>
           )}
 
@@ -151,7 +156,9 @@ export default function AdminHome() {
             <div
               style={{ display: activeTab === "skills" ? undefined : "none" }}
             >
-              <SkillTab icon={tabIcon("skills")} />
+              <ErrorBoundary>
+                <SkillTab icon={tabIcon("skills")} />
+              </ErrorBoundary>
             </div>
           )}
 
@@ -160,7 +167,9 @@ export default function AdminHome() {
             <div
               style={{ display: activeTab === "goals" ? undefined : "none" }}
             >
-              <GoalTab icon={tabIcon("goals")} />
+              <ErrorBoundary>
+                <GoalTab icon={tabIcon("goals")} />
+              </ErrorBoundary>
             </div>
           )}
 
@@ -171,7 +180,9 @@ export default function AdminHome() {
                 display: activeTab === "exercises" ? undefined : "none",
               }}
             >
-              <ExerciseTab icon={tabIcon("exercises")} />
+              <ErrorBoundary>
+                <ExerciseTab icon={tabIcon("exercises")} />
+              </ErrorBoundary>
             </div>
           )}
 
@@ -180,23 +191,27 @@ export default function AdminHome() {
             <div
               style={{ display: activeTab === "history" ? undefined : "none" }}
             >
-              <HistoryTab
-                icon={tabIcon("history")}
-                filteredHistory={filteredHistory}
-                histSearch={histSearch}
-                setHistSearch={setHistSearch}
-                histGrade={histGrade}
-                setHistGrade={setHistGrade}
-                gradeLabel={(grade: string) => t(gradeKey(grade))}
-                getScoreColor={getScoreColor}
-              />
+              <ErrorBoundary>
+                <HistoryTab
+                  icon={tabIcon("history")}
+                  filteredHistory={filteredHistory}
+                  histSearch={histSearch}
+                  setHistSearch={setHistSearch}
+                  histGrade={histGrade}
+                  setHistGrade={setHistGrade}
+                  gradeLabel={(grade: string) => t(gradeKey(grade))}
+                  getScoreColor={getScoreColor}
+                />
+              </ErrorBoundary>
             </div>
           )}
 
           {/* ══ AI ผู้ช่วย ══ */}
           {visitedTabs.has("ai") && (
             <div style={{ display: activeTab === "ai" ? undefined : "none" }}>
-              <AiTab icon={tabIcon("ai")} />
+              <ErrorBoundary>
+                <AiTab icon={tabIcon("ai")} />
+              </ErrorBoundary>
             </div>
           )}
         </main>

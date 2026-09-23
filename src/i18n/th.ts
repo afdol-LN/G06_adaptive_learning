@@ -125,6 +125,8 @@ export const th = {
   "exercise.incorrect": "ไม่ถูกต้อง",
   "exercise.submitError": "ส่งคำตอบไม่สำเร็จ",
   "exercise.submitErrorBody": "คำตอบของคุณยังอยู่ ลองกดส่งอีกครั้ง",
+  "exercise.changed": "โจทย์ข้อนี้เพิ่งถูกแก้ไข",
+  "exercise.changedBody": "โหลดโจทย์ล่าสุดให้แล้ว คำตอบเมื่อครู่ไม่ถูกนับ ลองตอบใหม่อีกครั้ง",
   "exercise.done.title": "Session เสร็จแล้ว!",
   "exercise.done.correct": "ถูก {count} ข้อ",
   "exercise.done.home": "กลับ Home",
@@ -188,6 +190,10 @@ export const th = {
   "picker.resume": "ทำต่อ: {name} →",
   "session.inProgress": "ทำค้างอยู่",
   "common.close": "ปิด",
+  "error.title": "ส่วนนี้แสดงผลไม่ได้",
+  "error.body": "เกิดข้อผิดพลาดขณะแสดงส่วนนี้ ส่วนอื่นของหน้ายังใช้งานได้ตามปกติ",
+  "error.retry": "ลองใหม่",
+  "error.reload": "โหลดหน้าใหม่",
 
   // ── Next-exercise picker ──
   "picker.title": "เลือกเรื่องที่จะทำ Exercise",

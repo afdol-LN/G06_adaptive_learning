@@ -125,6 +125,8 @@ export const en: Record<keyof typeof th, string> = {
   "exercise.incorrect": "Incorrect",
   "exercise.submitError": "Couldn't submit your answer",
   "exercise.submitErrorBody": "Your answer is still here — try submitting again.",
+  "exercise.changed": "This question was just updated",
+  "exercise.changedBody": "We loaded the latest version. Your last answer wasn't counted — please answer again.",
   "exercise.done.title": "Session complete!",
   "exercise.done.correct": "{count} correct",
   "exercise.done.home": "Back to Home",
@@ -188,6 +190,10 @@ export const en: Record<keyof typeof th, string> = {
   "picker.resume": "Continue: {name} →",
   "session.inProgress": "In progress",
   "common.close": "Close",
+  "error.title": "This section couldn't be displayed",
+  "error.body": "Something went wrong while showing this part. The rest of the page still works.",
+  "error.retry": "Try again",
+  "error.reload": "Reload page",
 
   // ── Next-exercise picker ──
   "picker.title": "Choose a topic to practise",

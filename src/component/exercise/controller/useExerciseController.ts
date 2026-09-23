@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useApp } from "../../../context/AppContext";
 import { useToast } from "../../../context/ToastContext";
 import { usePreferences } from "../../../context/PreferencesContext";
-import { SessionService } from "../../../services/sessionService";
+import { SessionService, isExerciseChangedError } from "../../../services/sessionService";
 import { NextQuestion, SessionSummary, SubmitAnswerResponse } from "../../../models/sessionModel";
 import { SkillProgress } from "../../../models/branchSkillModel";
 import { exerciseDraftService } from "../exerciseDraft.service";
@@ -77,8 +77,10 @@ export function useExerciseController() {
     pausedAtRef.current = null;
   }, []);
 
-  useEffect(() => {
-    async function start() {
+  // `afterEdit`: reloading because an admin edited the question on screen — the draft is resumed
+  // the same way, so the student gets the current version of the same question
+  const loadSession = useCallback(
+    async (afterEdit = false) => {
       if (!activeBranchId || !state?.skillId) {
         navigate("/home");
         return;
@@ -92,28 +94,37 @@ export function useExerciseController() {
       setQuestion(res.question);
       setQuestionLimit(res.questionLimit ?? null);
       setProgress(res.progress);
-      setProgressStart(res.progress);
+      if (!afterEdit) setProgressStart(res.progress);
 
       // A resumed draft continues its counter and its "N correct" (adt-learning/docs/adr/0003)
       const answeredCount = res.answeredCount ?? 0;
       setQuestionIndex(answeredCount);
       setCorrectCount(res.correctCount ?? 0);
-      // ...and gets back the pick that wasn't submitted, if it was for this same question
+      // ...and gets back the pick that wasn't submitted, if it was for this same question.
+      // An edit replaces every choice, so after one the old pick matches nothing and is dropped.
+      setSelected(null);
+      setFillInBlankInput("");
       const unsent = exerciseDraftService.load(res.sessionId);
       if (unsent?.exerciseId === res.question.exerciseId) {
         const stillAChoice = res.question.choices?.some((c) => c.id === unsent.choiceId);
         setSelected(stillAChoice ? unsent.choiceId : null);
         setFillInBlankInput(unsent.text ?? "");
       }
-      if (res.resumed) {
+      if (afterEdit) {
+        toast.normal(t("exercise.changed"), t("exercise.changedBody"));
+      } else if (res.resumed) {
         toast.normal(t("exercise.resumed"), t("exercise.resumedBody", { count: answeredCount }));
       }
 
       startQuestionClock();
       setIsLoading(false);
-    }
-    start();
-  }, [activeBranchId, state?.skillId]);
+    },
+    [activeBranchId, state?.skillId],
+  );
+
+  useEffect(() => {
+    loadSession();
+  }, [loadSession]);
 
   // Once submitted, an answer can't change — while it is checked and while its result shows
   const locked = checking || result !== null;
@@ -172,13 +183,19 @@ export function useExerciseController() {
     try {
       res = await SessionService.submitAnswer(sessionId, {
         exerciseId: question.exerciseId,
+        choiceId: choiceId ?? undefined,
         chosenAnswer,
         startTime: new Date(questionStartRef.current).toISOString(),
         endTime: new Date(endMs).toISOString(),
       });
-    } catch {
-      // back to answering — the same answer can be sent again
+    } catch (err) {
       setChecking(false);
+      // the question changed under the student: nothing was graded — show the current version
+      if (isExerciseChangedError(err)) {
+        loadSession(true);
+        return;
+      }
+      // back to answering — the same answer can be sent again
       toast.error(t("exercise.submitError"), t("exercise.submitErrorBody"));
       return;
     }
@@ -189,7 +206,7 @@ export function useExerciseController() {
     if (res.isCorrect) setCorrectCount((c) => c + 1);
     setProgress(res.progress);
     setTimeout(() => showNext(res), REVEAL_MS);
-  }, [sessionId, question, locked, selected, fillInBlankInput, toast, t, showNext]);
+  }, [sessionId, question, locked, selected, fillInBlankInput, toast, t, showNext, loadSession]);
 
   const goHome = useCallback(() => navigate("/home"), [navigate]);
   // after completing the goal: open Home straight on the Skill Tree tab, where the goal node is

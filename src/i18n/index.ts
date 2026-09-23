@@ -16,9 +16,19 @@ const DICTIONARIES: Record<Lang, Record<TKey, string>> = {
   en: { ...en, ...adminEn },
 };
 
+const warnedMissing = new Set<string>();
+
 // แทนที่ {name} ด้วยค่าจาก vars — ตัวที่ไม่มีใน vars (เช่น {{current}} ของ driver.js) ปล่อยไว้ตามเดิม
+// key ที่ไม่มีในพจนานุกรมไหนเลยจะแสดงเป็นชื่อ key แทน — ข้อความผิดดีกว่าทั้งหน้าขาว
 export function translate(lang: Lang, key: TKey, vars?: TVars): string {
-  const template = DICTIONARIES[lang][key] ?? thAll[key];
+  let template: string | undefined = DICTIONARIES[lang][key] ?? thAll[key];
+  if (template === undefined) {
+    if (import.meta.env.DEV && !warnedMissing.has(key)) {
+      warnedMissing.add(key);
+      console.warn(`[i18n] missing key "${key}"`);
+    }
+    template = key;
+  }
   if (!vars) return template;
   return template.replace(/\{(\w+)\}/g, (match, name: string) =>
     name in vars ? String(vars[name]) : match

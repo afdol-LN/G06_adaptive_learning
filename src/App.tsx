@@ -2,8 +2,9 @@
 // import reactLogo from './assets/react.svg'
 // import viteLogo from '/vite.svg'
 import "./App.css";
+import type { ReactNode } from "react";
 import SignInAndUp from "./component/SignInAndUp";
-import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import { BrowserRouter as Router, Route, Routes, useLocation } from "react-router-dom";
 import GetStart from "./component/GetStart";
 import Pretest from "./component/Pretest";
 import InformationForm from "./component/information/InformationForm";
@@ -17,6 +18,13 @@ import { PreferencesProvider } from "./context/PreferencesContext";
 import { ToastProvider } from "./context/ToastContext";
 import GlobalLoader from "./component/common/GlobalLoader";
 import ToastContainer from "./component/common/ToastContainer";
+import ErrorBoundary from "./component/common/ErrorBoundary";
+
+// a page that fails to render shows a fallback instead of blanking the app; navigating away clears it
+function RouteBoundary({ children }: { children: ReactNode }) {
+  const { pathname } = useLocation();
+  return <ErrorBoundary resetKey={pathname}>{children}</ErrorBoundary>;
+}
 
 function AppContent() {
   const { isLoading } = useApp();
@@ -26,18 +34,20 @@ function AppContent() {
       <GlobalLoader isLoading={isLoading} />
       <ToastContainer />
       <Router>
-        <Routes>
-          <Route path="/" element={<SignInAndUp />}></Route>
-          <Route path="/getstart" element={<GetStart />}></Route>
-          <Route path="/pretest" element={<Pretest />}></Route>
-          <Route path="/information" element={<InformationForm />}></Route>
-          <Route path="/selectbranch" element={<SelectBranch />}></Route>
-          <Route path="/home" element={<HomeShell />}></Route>
-          <Route path="/homenew" element={<HomeShell />}></Route>
-          <Route path="/exercise" element={<Exercise />}></Route>
-          <Route path="/admin/home" element={<AdminHome />}></Route>
-          <Route path="/skilltree" element={<SkillTree />}></Route>
-        </Routes>
+        <RouteBoundary>
+          <Routes>
+            <Route path="/" element={<SignInAndUp />}></Route>
+            <Route path="/getstart" element={<GetStart />}></Route>
+            <Route path="/pretest" element={<Pretest />}></Route>
+            <Route path="/information" element={<InformationForm />}></Route>
+            <Route path="/selectbranch" element={<SelectBranch />}></Route>
+            <Route path="/home" element={<HomeShell />}></Route>
+            <Route path="/homenew" element={<HomeShell />}></Route>
+            <Route path="/exercise" element={<Exercise />}></Route>
+            <Route path="/admin/home" element={<AdminHome />}></Route>
+            <Route path="/skilltree" element={<SkillTree />}></Route>
+          </Routes>
+        </RouteBoundary>
       </Router>
     </>
   );
