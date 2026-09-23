@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   FaClock,
   FaBullseye,
@@ -18,7 +18,10 @@ import {
   FaFire,
   FaListCheck,
   FaFlagCheckered,
+  FaDownload,
 } from "react-icons/fa6";
+import { BranchSkill } from "../../../models/branchSkillModel";
+import { downloadProgressReport } from "./ProgressReportPdf";
 import { SessionHistoryItem } from "../../../models/sessionHistoryModel";
 import { UserProfileDetail } from "../../../models/userModel";
 import { BranchStats } from "../../../models/branchStatsModel";
@@ -51,6 +54,8 @@ interface ProfileTabProps {
   activeBranch: {
     goalName?: string;
   } | null;
+  /** รายการ skill พร้อม progressPercent — ส่งมาจาก HomeShell */
+  skills: BranchSkill[];
 }
 
 interface InfoRow {
@@ -94,6 +99,7 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({
   stats,
   goalsCount,
   activeBranch,
+  skills,
 }) => {
   const { t, locale } = usePreferences();
   const behavior = computeBehavior(sessions);
@@ -101,6 +107,27 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({
 
   const fullName = profile?.fullName || localStorage.getItem("fullname") || t("user.fallbackName");
   const initial = fullName.trim().charAt(0).toUpperCase();
+
+  const [downloading, setDownloading] = useState(false);
+
+  const handleDownloadPdf = async () => {
+    if (downloading) return;
+    setDownloading(true);
+    try {
+      await downloadProgressReport({
+        fullName,
+        username: profile?.username,
+        goalName: activeBranch?.goalName,
+        stats,
+        unlockedCount: unlocked.size,
+        behavior,
+        skills,
+        profile,
+      });
+    } finally {
+      setDownloading(false);
+    }
+  };
   const loading = profileLoading && !profile;
   const dash = <span className="profile-info-empty">—</span>;
 
@@ -280,6 +307,16 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({
                 ))}
               </div>
             </div>
+            <button
+              type="button"
+              className="profile-pdf-btn"
+              onClick={handleDownloadPdf}
+              disabled={downloading}
+              aria-busy={downloading}
+            >
+              <FaDownload aria-hidden />
+              <span>{downloading ? "กำลังสร้าง PDF..." : "ดาวน์โหลดสรุปผลการเรียน (PDF)"}</span>
+            </button>
           </section>
         </div>
       </div>
