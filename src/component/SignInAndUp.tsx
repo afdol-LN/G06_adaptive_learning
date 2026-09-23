@@ -35,7 +35,7 @@ export default function SignInAndUp() {
     if (accessToken && accessToken !== "") {
       const userRole = localStorage.getItem("userRole") || localStorage.getItem("user_role");
       if (userRole === "admin") {
-        navigate("/admin/home");
+        navigate("/admin/summary");
       } else {
         const fetchedBranches = await fetchMyBranches();
         if (!fetchedBranches || fetchedBranches.length === 0) {

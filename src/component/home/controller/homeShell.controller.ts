@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { useApp } from "../../../context/AppContext";
 import { usePreferences } from "../../../context/PreferencesContext";
 import type { BranchBaseState } from "../../../models/branchStatsModel";
@@ -12,6 +12,20 @@ import { useHomeTourController } from "./homeTour.controller";
 import { useUserProfileController } from "./userProfile.controller";
 
 export type HomeTabKey = "Home" | "SkillTree" | "History" | "Profile";
+
+// path ของแต่ละเมนู — แท็บ Home อยู่ที่ /home เฉย ๆ
+export const HOME_TAB_PATHS: Record<HomeTabKey, string> = {
+  Home: "/home",
+  SkillTree: "/home/skill-tree",
+  History: "/home/history",
+  Profile: "/home/profile",
+};
+
+const HOME_TAB_BY_SLUG: Record<string, HomeTabKey> = {
+  "skill-tree": "SkillTree",
+  history: "History",
+  profile: "Profile",
+};
 
 // จำสถานะ sidebar (ย่อ/ขยาย) ไว้ข้าม session
 const SIDEBAR_COLLAPSED_KEY = "homeSidebarCollapsed";
@@ -31,12 +45,15 @@ export function useHomeShellController() {
   const homeTour = useHomeTourController(t);
   const profileController = useUserProfileController();
 
-  // Tab State
-  // Exercise's "View skill tree" (after completing the goal) opens a tab directly via router state
+  // Tab State — แท็บที่เปิดอยู่มาจาก URL (/home/:tab) จึง refresh / back / แชร์ลิงก์ได้
   const location = useLocation();
-  const [activeTab, setActiveTab] = useState<HomeTabKey>(
-    () => (location.state as { tab?: HomeTabKey } | null)?.tab ?? "Home"
-  );
+  const { tab: tabSlug } = useParams<{ tab?: string }>();
+  const activeTab: HomeTabKey = (tabSlug && HOME_TAB_BY_SLUG[tabSlug]) || "Home";
+  // slug ที่ไม่รู้จัก (เช่น /home/xyz) → กลับไป /home
+  const isUnknownTab = !!tabSlug && !HOME_TAB_BY_SLUG[tabSlug];
+  useEffect(() => {
+    if (isUnknownTab) navigate(HOME_TAB_PATHS.Home, { replace: true });
+  }, [isUnknownTab]);
 
   // Sidebar State — ครั้งแรกบนจอแคบให้เริ่มแบบย่อ
   const [sidebarCollapsed, setSidebarCollapsed] = useState<boolean>(() => {
@@ -116,7 +133,7 @@ export function useHomeShellController() {
   const toggleProfileMenu = () => setShowProfileMenu((open) => !open);
 
   const switchTab = (tab: HomeTabKey) => {
-    setActiveTab(tab);
+    if (tab !== activeTab) navigate(HOME_TAB_PATHS[tab]);
     skillTreeController.setSelectedSkill(null);
   };
 

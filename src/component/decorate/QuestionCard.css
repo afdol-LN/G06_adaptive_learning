@@ -21,12 +21,16 @@
   --qc-ok-bg:       #ecfdf5;
   --qc-no:          #dc2626;
   --qc-no-bg:       #fef2f2;
+  /* ชิปชื่อ skill พื้นทึบ — สีเทา slate ไม่ชนกับสีของป้าย Level */
+  --qc-chip-bg:     #475569;
+  --qc-chip-ink:    #ffffff;
 
-  --qc-l1-ink: #059669; --qc-l1-bg: #ecfdf5; --qc-l1-bd: #a7f3d0;
-  --qc-l2-ink: #4d7c0f; --qc-l2-bg: #f7fee7; --qc-l2-bd: #d9f99d;
-  --qc-l3-ink: #0047AB; --qc-l3-bg: #e8f0fe; --qc-l3-bd: #bfd3f5;
-  --qc-l4-ink: #b45309; --qc-l4-bg: #fffbeb; --qc-l4-bd: #fde68a;
-  --qc-l5-ink: #dc2626; --qc-l5-bg: #fef2f2; --qc-l5-bd: #fecaca;
+  /* ป้าย Level พื้นทึบ + ตัวอักษรขาว — ทุกสีผ่าน contrast 4.5:1 กับสีขาว */
+  --qc-l1-ink: #ffffff; --qc-l1-bg: #047857; --qc-l1-bd: #047857;
+  --qc-l2-ink: #ffffff; --qc-l2-bg: #4d7c0f; --qc-l2-bd: #4d7c0f;
+  --qc-l3-ink: #ffffff; --qc-l3-bg: #0047AB; --qc-l3-bd: #0047AB;
+  --qc-l4-ink: #ffffff; --qc-l4-bg: #b45309; --qc-l4-bd: #b45309;
+  --qc-l5-ink: #ffffff; --qc-l5-bg: #dc2626; --qc-l5-bd: #dc2626;
 
   width: 100%;
   max-width: 700px;
@@ -57,12 +61,14 @@
   --qc-ok-bg:       rgba(52, 211, 153, .12);
   --qc-no:          #f87171;
   --qc-no-bg:       rgba(248, 113, 113, .12);
+  --qc-chip-bg:     #3b4a66;
+  --qc-chip-ink:    #ffffff;
 
-  --qc-l1-ink: #34d399; --qc-l1-bg: rgba(52, 211, 153, .12);  --qc-l1-bd: rgba(52, 211, 153, .35);
-  --qc-l2-ink: #a3e635; --qc-l2-bg: rgba(163, 230, 53, .12);  --qc-l2-bd: rgba(163, 230, 53, .35);
-  --qc-l3-ink: #6b9bff; --qc-l3-bg: rgba(107, 155, 255, .14); --qc-l3-bd: rgba(107, 155, 255, .4);
-  --qc-l4-ink: #fbbf24; --qc-l4-bg: rgba(251, 191, 36, .12);  --qc-l4-bd: rgba(251, 191, 36, .35);
-  --qc-l5-ink: #f87171; --qc-l5-bg: rgba(248, 113, 113, .12); --qc-l5-bd: rgba(248, 113, 113, .35);
+  --qc-l1-ink: #ffffff; --qc-l1-bg: #047857; --qc-l1-bd: #047857;
+  --qc-l2-ink: #ffffff; --qc-l2-bg: #4d7c0f; --qc-l2-bd: #4d7c0f;
+  --qc-l3-ink: #ffffff; --qc-l3-bg: #2f5fd0; --qc-l3-bd: #2f5fd0;
+  --qc-l4-ink: #ffffff; --qc-l4-bg: #b45309; --qc-l4-bd: #b45309;
+  --qc-l5-ink: #ffffff; --qc-l5-bg: #dc2626; --qc-l5-bd: #dc2626;
 }
 
 .qc-card *, .qc-card *::before, .qc-card *::after { box-sizing: border-box; }
@@ -81,8 +87,8 @@
 .qc-num strong { color: var(--qc-accent); }
 .qc-skill {
   font-size: 13px; padding: 4px 12px;
-  background: var(--qc-surface); border: 1px solid var(--qc-border);
-  border-radius: 9999px; color: var(--qc-muted);
+  background: var(--qc-chip-bg); border: 1px solid var(--qc-chip-bg);
+  border-radius: 9999px; color: var(--qc-chip-ink);
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 .qc-level { font-size: 13px; padding: 4px 12px; border-radius: 9999px; border: 1px solid; white-space: nowrap; }
@@ -148,6 +154,14 @@
 .qc-fill-input:disabled { cursor: default; }
 .qc-fill--ok { border-color: var(--qc-ok); box-shadow: 0 0 0 3px var(--qc-ok-bg); }
 .qc-fill--no { border-color: var(--qc-no); box-shadow: 0 0 0 3px var(--qc-no-bg); }
+.qc-fill-field { position: relative; }
+.qc-fill-field .qc-fill-input { padding-right: 44px; }
+.qc-fill-mark {
+  position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
+  line-height: 1; pointer-events: none;
+}
+.qc-fill-mark--ok { color: var(--qc-ok); }
+.qc-fill-mark--no { color: var(--qc-no); }
 
 /* ── Footer (เนื้อหามาจากแต่ละหน้า) ── */
 .qc-foot {

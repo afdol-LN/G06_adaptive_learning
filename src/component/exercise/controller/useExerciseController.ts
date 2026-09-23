@@ -193,7 +193,7 @@ export function useExerciseController() {
 
   const goHome = useCallback(() => navigate("/home"), [navigate]);
   // after completing the goal: open Home straight on the Skill Tree tab, where the goal node is
-  const goToSkillTree = useCallback(() => navigate("/home", { state: { tab: "SkillTree" } }), [navigate]);
+  const goToSkillTree = useCallback(() => navigate("/home/skill-tree"), [navigate]);
 
   // Leaving keeps the draft: answers are already saved server-side, the pick in localStorage
   const requestExit = useCallback(() => setExitOpen(true), []);

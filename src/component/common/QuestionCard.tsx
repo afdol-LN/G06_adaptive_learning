@@ -134,19 +134,30 @@ export default function QuestionCard({
             <label className="qc-fill-label" htmlFor="qc-fill-input">
               <FaPenToSquare aria-hidden /> {t("question.fillLabel")}
             </label>
-            <input
-              id="qc-fill-input"
-              type="text"
-              className={outcome ? `qc-fill-input qc-fill--${outcome}` : "qc-fill-input"}
-              placeholder={t("question.fillPlaceholder")}
-              value={fillValue}
-              onChange={(e) => onFillChange(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && onFillEnter) onFillEnter();
-              }}
-              disabled={locked}
-              autoFocus
-            />
+            {/* ✓/✗ วางทับขอบขวาของช่องกรอก เหมือนเครื่องหมายบนตัวเลือก */}
+            <div className="qc-fill-field">
+              <input
+                id="qc-fill-input"
+                type="text"
+                className={outcome ? `qc-fill-input qc-fill--${outcome}` : "qc-fill-input"}
+                placeholder={t("question.fillPlaceholder")}
+                value={fillValue}
+                onChange={(e) => onFillChange(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && onFillEnter) onFillEnter();
+                }}
+                disabled={locked}
+                autoFocus
+              />
+              {outcome && (
+                <span
+                  className={`qc-mark qc-fill-mark qc-fill-mark--${outcome}`}
+                  title={outcome === "ok" ? t("question.correct") : t("question.incorrect")}
+                >
+                  {outcome === "ok" ? <FaCheck aria-hidden /> : <FaXmark aria-hidden />}
+                </span>
+              )}
+            </div>
           </div>
         )}
       </div>

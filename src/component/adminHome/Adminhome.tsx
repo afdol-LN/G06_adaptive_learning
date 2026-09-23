@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import {
   FaArrowRightFromBracket,
   FaChevronLeft,
@@ -28,15 +29,40 @@ import UsersTab from "./userPanel/UsersTab";
 
 export default function AdminHome() {
   const { t } = usePreferences();
-  const [activeTab, setActiveTab] = useState("summary");
+  const navigate = useNavigate();
+  // แท็บที่เปิดอยู่มาจาก URL (/admin/:tab) — key ใน TABS ใช้เป็น path ตรง ๆ
+  // path ย่อยมีเฉพาะแท็บ goals: /admin/goals/:goalId = Goal Workspace
+  const { tab: tabParam, goalId: goalIdParam } = useParams<{ tab: string; goalId?: string }>();
+  const location = useLocation();
+  const isKnownTab = TABS.some((tab) => tab.key === tabParam);
+  const activeTab = isKnownTab && tabParam ? tabParam : "summary";
   const [visitedTabs, setVisitedTabs] = useState<Set<string>>(
-    new Set(["summary"]),
+    () => new Set([activeTab]),
   );
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  // path ล่าสุดของแต่ละแท็บ — กดเมนูกลับมาแล้วเจอหน้าเดิม (เช่น workspace ของ goal ที่เปิดค้างไว้)
+  const lastPathByTab = useRef<Record<string, string>>({});
+
+  // path ที่ไม่รู้จัก (เช่น /admin/xyz หรือ /admin/users/5) → กลับไปหน้าที่ถูกต้อง
+  const hasStraySubPath = isKnownTab && goalIdParam !== undefined && activeTab !== "goals";
+  useEffect(() => {
+    if (!isKnownTab) navigate("/admin/summary", { replace: true });
+    else if (hasStraySubPath) navigate(`/admin/${activeTab}`, { replace: true });
+  }, [isKnownTab, hasStraySubPath]);
+
+  useEffect(() => {
+    if (isKnownTab && !hasStraySubPath) lastPathByTab.current[activeTab] = location.pathname;
+  }, [location.pathname]);
+
+  // mount แท็บครั้งแรกที่ถูกเปิด (ทั้งจากการคลิก, back/forward และลิงก์ตรง) แล้วเก็บไว้ ไม่ unmount
+  useEffect(() => {
+    setVisitedTabs((prev) =>
+      prev.has(activeTab) ? prev : new Set(prev).add(activeTab),
+    );
+  }, [activeTab]);
 
   const handleTabClick = (key: string) => {
-    setActiveTab(key);
-    setVisitedTabs((prev) => (prev.has(key) ? prev : new Set(prev).add(key)));
+    if (key !== activeTab) navigate(lastPathByTab.current[key] ?? `/admin/${key}`);
   };
 
   const { summary, skillProgress, userActivity, maxBar, dayLabels } =

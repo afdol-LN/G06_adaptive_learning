@@ -3,7 +3,7 @@
 // import viteLogo from '/vite.svg'
 import "./App.css";
 import SignInAndUp from "./component/SignInAndUp";
-import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import { BrowserRouter as Router, Navigate, Route, Routes } from "react-router-dom";
 import GetStart from "./component/GetStart";
 import Pretest from "./component/Pretest";
 import InformationForm from "./component/information/InformationForm";
@@ -33,10 +33,15 @@ function AppContent() {
           <Route path="/pretest" element={<Pretest />}></Route>
           <Route path="/information" element={<InformationForm />}></Route>
           <Route path="/selectbranch" element={<SelectBranch />}></Route>
-          <Route path="/home" element={<HomeShell />}></Route>
+          {/* เมนูฝั่งผู้เรียน: /home, /home/skill-tree, /home/history, /home/profile */}
+          <Route path="/home/:tab?" element={<HomeShell />}></Route>
           <Route path="/homenew" element={<HomeShell />}></Route>
           <Route path="/exercise" element={<Exercise />}></Route>
-          <Route path="/admin/home" element={<RequireAdmin><AdminHome /></RequireAdmin>}></Route>
+          {/* เมนู admin แต่ละแท็บมี path ของตัวเอง (/admin/summary, /admin/users, …) — /admin และ /admin/home เดิมพาไปหน้าสรุป */}
+          <Route path="/admin" element={<Navigate to="/admin/summary" replace />}></Route>
+          <Route path="/admin/home" element={<Navigate to="/admin/summary" replace />}></Route>
+          {/* :goalId ใช้เฉพาะ /admin/goals/:goalId (Goal Workspace) — route เดียวกันเพื่อไม่ให้ AdminHome remount */}
+          <Route path="/admin/:tab/:goalId?" element={<RequireAdmin><AdminHome /></RequireAdmin>}></Route>
           <Route path="/skilltree" element={<SkillTree />}></Route>
         </Routes>
       </Router>
