@@ -55,3 +55,7 @@ export interface BranchCreationData {
 }
 
 export type GoalGroupMap = Record<string, GoalItem[]>;
+
+/** learning = มี branch แต่ goal ยังไม่ครบ, completed = branch.goalCompletedAt ถูกตั้งแล้ว */
+export type GoalStatus = "learning" | "completed";
+export type GoalStatusMap = Record<string, GoalStatus>;

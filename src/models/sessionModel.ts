@@ -11,6 +11,8 @@ export interface NextQuestion {
   exerciseId: number;
   description: string;
   type: ExerciseQuestionType;
+  /** 1–5, shown on the question card */
+  skillLevel: number;
   expectTime: number | null;
   code?: string | null;
   language?: string | null;

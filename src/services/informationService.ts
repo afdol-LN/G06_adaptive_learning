@@ -1,18 +1,19 @@
-import {
-  InformationFormData,
-  StepDefinition,
-  ExperienceData,
-  GoalItem,
-  GoalGroupMap,
-  BranchCreationData,
-} from "../models/informationModel";
 import { AppClient } from "../API/appRestApi";
 import {
+  BranchCreationData,
+  ExperienceData,
+  GoalGroupMap,
+  GoalItem,
+  GoalStatusMap,
+  InformationFormData,
+  StepDefinition,
+} from "../models/informationModel";
+import {
   CampusDTO,
-  FacultyDTO,
-  MajorDTO,
   CampusResponse,
+  FacultyDTO,
   FacultyResponse,
+  MajorDTO,
   MajorResponse,
 } from "../models/universityModel";
 
@@ -125,12 +126,16 @@ export class InformationService {
   }
 
   static async getFacultiesByCampus(campusId: number): Promise<FacultyDTO[]> {
-    const res = await AppClient.get<FacultyResponse>(`faculty/Bycampus/${campusId}`);
+    const res = await AppClient.get<FacultyResponse>(
+      `faculty/Bycampus/${campusId}`,
+    );
     return res?.isError === false && Array.isArray(res?.data) ? res.data : [];
   }
 
   static async getMajorsByFacultyId(facultyId: number): Promise<MajorDTO[]> {
-    const res = await AppClient.get<MajorResponse>(`major/facultyId/${facultyId}`);
+    const res = await AppClient.get<MajorResponse>(
+      `major/facultyId/${facultyId}`,
+    );
     return res?.isError === false && Array.isArray(res?.data) ? res.data : [];
   }
 
@@ -155,9 +160,25 @@ export class InformationService {
     }, {});
   }
 
+  // goalId → สถานะ จาก branch ของผู้ใช้ goal ที่ไม่มี branch จะไม่อยู่ใน map
+  // ถ้ามีหลาย branch ของ goal เดียวกัน ให้ "completed" ชนะ เพราะเคยเรียนจบจริง
+  static getGoalStatusMap(
+    branches: { goalId?: string | number; goalCompletedAt?: string | null }[],
+  ): GoalStatusMap {
+    const map: GoalStatusMap = {};
+    for (const b of branches ?? []) {
+      if (b.goalId === undefined || b.goalId === null) continue;
+      const key = String(b.goalId);
+      if (b.goalCompletedAt) map[key] = "completed";
+      else if (!map[key]) map[key] = "learning";
+    }
+    return map;
+  }
+
   // Persists Step 1 (campus/faculty/major/year) against the logged-in user.
   static async submitGeneralInfo(formData: InformationFormData): Promise<void> {
-    const yearNumber = parseInt(formData.year.replace(/\D/g, ""), 10) || undefined;
+    const yearNumber =
+      parseInt(formData.year.replace(/\D/g, ""), 10) || undefined;
     await AppClient.patch("userprofile/me", {
       campusId: formData.campusId ? Number(formData.campusId) : undefined,
       facultyId: formData.facultyId ? Number(formData.facultyId) : undefined,
@@ -170,12 +191,24 @@ export class InformationService {
   // and returns its real (numeric) id — callers must use this id, not a
   // client-generated one, since later calls (e.g. pretest submit) look the
   // branch up by id server-side.
-  static async createBranchOnServer(goalId: string, exp: number): Promise<string> {
+  static async createBranchOnServer(
+    goalId: string,
+    exp: number,
+  ): Promise<string> {
     const created = await AppClient.post<{ id: number }>("branch/mine", {
       goalId: Number(goalId),
       expForGoal: exp,
     });
     return String(created.id);
+  }
+
+  // กลับจากหน้าแนะนำ Pretest มาแก้ระดับประสบการณ์ — branch มีอยู่แล้ว จึงแก้ตัวเดิม
+  // ไม่สร้างใหม่ (backend ตรวจว่าเป็น branch ของผู้ใช้คนนี้เอง)
+  static async updateBranchExpOnServer(
+    branchId: string,
+    exp: number,
+  ): Promise<void> {
+    await AppClient.patch(`branch/mine/${branchId}`, { expForGoal: exp });
   }
 
   static createBranchesForSelectedGoals(
@@ -184,7 +217,7 @@ export class InformationService {
     serverBranchIds: string[],
     allGoals: GoalItem[],
     exp: number,
-    addBranchFn: (branchData: BranchCreationData) => string
+    addBranchFn: (branchData: BranchCreationData) => string,
   ): string[] {
     const createdIds: string[] = [];
     selectedGoalIds.forEach((goalId, index) => {

@@ -6,6 +6,8 @@ export interface BranchDTO {
   goalId: number;
   expForGoal: number;
   isAlreadyPretest: boolean;
+  /** ตั้งครั้งแรกที่ goal ของ branch นี้ครบ แล้วไม่ถูกลบอีก (ADR 0005) */
+  goalCompletedAt: string | null;
   goal: {
     id: number;
     goal: string;

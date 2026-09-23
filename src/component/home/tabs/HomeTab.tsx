@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { FaClipboardList, FaUserGraduate } from "react-icons/fa6";
+import { FaChartSimple, FaClipboardList, FaUserGraduate } from "react-icons/fa6";
 import { BranchSkill } from "../../../models/branchSkillModel";
 import { BranchStats } from "../../../models/branchStatsModel";
 import { SessionHistoryItem } from "../../../models/sessionHistoryModel";
@@ -39,6 +39,8 @@ interface HomeTabProps {
   goalSelected: boolean;
   onGoalClick: () => void;
   setGoalSelected: (selected: boolean) => void;
+  /** เปิด modal ที่มาของคะแนนเริ่มต้นจาก pretest — ไม่ส่งมา = ยังไม่ได้ทำ pretest ไม่ต้องแสดงปุ่ม */
+  onShowBreakdown?: () => void;
 }
 
 export const HomeTab: React.FC<HomeTabProps> = ({
@@ -62,6 +64,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
   goalSelected,
   onGoalClick,
   setGoalSelected,
+  onShowBreakdown,
 }) => {
   const { t } = usePreferences();
   const [twText, setTwText] = useState("");
@@ -162,6 +165,12 @@ export const HomeTab: React.FC<HomeTabProps> = ({
                   </div>
                 );
               })}
+            {onShowBreakdown && (
+              <button type="button" className="progress-summary-breakdown" onClick={onShowBreakdown}>
+                <FaChartSimple aria-hidden />
+                <span>{t("pretestBreakdown.reopen")}</span>
+              </button>
+            )}
           </div>
 
           <div className="section-label">{t("home.treeLabel")}</div>

@@ -4,7 +4,7 @@ import './decorate/Tour.css';
 import { useExerciseController } from './exercise/controller/useExerciseController';
 import { useExerciseGuideController } from './exercise/controller/useExerciseGuideController';
 import ExerciseRules from './exercise/component/ExerciseRules';
-import CodeBlock from './common/CodeBlock';
+import QuestionCard from './common/QuestionCard';
 import AppLogo from './common/AppLogo';
 import {
   FaArrowRight,
@@ -43,7 +43,7 @@ export default function Exercise() {
         <div className="glow-bg"><div className="g1"></div><div className="g2"></div><div className="g3"></div></div>
         <div className="wrap">
           <div className="stage">
-            <div className="qcard">{t('exercise.loading')}</div>
+            <div className="qc-card ex-loading-card">{t('exercise.loading')}</div>
           </div>
         </div>
       </>
@@ -60,7 +60,6 @@ export default function Exercise() {
 
   // Only a result given for *this* exercise is shown — never while the answer is still being checked
   const revealed = controller.result?.exerciseId === question.exerciseId ? controller.result : null;
-  const outcomeClass = revealed ? (revealed.isCorrect ? 'rev-ok' : 'rev-no') : '';
   const canSubmit = question.type === 'CHOICE' ? controller.selected !== null : controller.fillInBlankInput !== '';
 
   return (
@@ -193,8 +192,8 @@ export default function Exercise() {
                   </>
                 )}
               </button>
-            </div>
-          </div>
+            }
+          />
         </div>
       </div>
 

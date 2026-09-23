@@ -1,0 +1,56 @@
+<!doctype html><html lang="th"><head><meta charset="utf-8"><title>Dropdown</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;700&family=IBM+Plex+Sans+Thai+Looped:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="Dropdown.css">
+<style>
+:root{--font-sans:'Noto Sans','IBM Plex Sans Thai Looped',system-ui,sans-serif}
+*{box-sizing:border-box}
+body{margin:0;font-family:var(--font-sans);background:#f2f7fa;padding:24px;display:flex;gap:28px;align-items:flex-start}
+.pane{width:360px;flex:none;background:#f2f7fa;padding:24px;border-radius:12px;border:1px solid #c2d3e0}
+.pane.dark{background:#0b1220;border-color:#26344f}
+h2{font-size:15px;font-weight:700;color:#475569;margin:0 0 14px}
+.pane.dark h2{color:#a3b1cc}
+label{display:block;font-size:14px;font-weight:600;color:#475569;margin-bottom:8px}
+.pane.dark label{color:#a3b1cc}
+.demo{margin-bottom:26px}
+/* popup ในหน้าจริงถูก portal ไป body และเป็น position:fixed — ที่นี่แสดงแบบ static เพื่อให้เห็นหน้าตา */
+.dd-popup{position:static;margin-top:4px;width:100%}
+</style></head><body>
+<div class="pane" id="light">
+ <h2>Light</h2>
+ <div class="demo">
+  <label>วิทยาเขต — ปิดอยู่ (ยังไม่เลือก)</label>
+  <button class="dd-trigger" aria-expanded="false"><span class="dd-value is-placeholder">เลือกวิทยาเขต...</span><svg class="dd-caret" viewBox="0 0 512 512" fill="currentColor"><path d="M233.4 406.6c12.5 12.5 32.8 12.5 45.3 0l192-192c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L256 338.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l192 192z"/></svg></button>
+ </div>
+ <div class="demo">
+  <label>วิทยาเขต — กางอยู่</label>
+  <button class="dd-trigger" aria-expanded="true"><span class="dd-value">หาดใหญ่</span><svg class="dd-caret" viewBox="0 0 512 512" fill="currentColor"><path d="M233.4 406.6c12.5 12.5 32.8 12.5 45.3 0l192-192c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L256 338.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l192 192z"/></svg></button>
+  <ul class="dd-popup" role="listbox">
+   <li class="dd-option is-selected is-active" role="option"><span class="dd-option-label">หาดใหญ่</span><svg class="dd-option-check" viewBox="0 0 448 512" fill="currentColor"><path d="M438.6 105.4c12.5 12.5 12.5 32.8 0 45.3l-256 256c-12.5 12.5-32.8 12.5-45.3 0l-128-128c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0L160 338.7 393.4 105.4c12.5-12.5 32.8-12.5 45.3 0z"/></svg></li>
+   <li class="dd-option" role="option"><span class="dd-option-label">ปัตตานี</span></li>
+   <li class="dd-option" role="option"><span class="dd-option-label">ภูเก็ต</span></li>
+   <li class="dd-option" role="option"><span class="dd-option-label">สุราษฎร์ธานี</span></li>
+   <li class="dd-option" role="option"><span class="dd-option-label">ตรัง</span></li>
+  </ul>
+ </div>
+ <div class="demo">
+  <label>สาขาวิชา — ปิดใช้งาน</label>
+  <button class="dd-trigger" disabled><span class="dd-value is-placeholder">เลือกคณะก่อน</span><svg class="dd-caret" viewBox="0 0 512 512" fill="currentColor"><path d="M233.4 406.6c12.5 12.5 32.8 12.5 45.3 0l192-192c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L256 338.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l192 192z"/></svg></button>
+ </div>
+</div>
+<div class="pane dark" id="darkpane"><h2>Dark</h2><div id="darkmount"></div></div>
+<script>
+// โคลนฝั่ง light มาใส่ฝั่ง dark แล้วบังคับ token ชุดมืดเฉพาะกล่องนั้น
+const src = document.querySelectorAll('#light .demo');
+const mount = document.getElementById('darkmount');
+src.forEach(d => mount.appendChild(d.cloneNode(true)));
+const dk = document.getElementById('darkpane');
+dk.style.setProperty('--dd-surface','#121b2e');
+dk.style.setProperty('--dd-surface-2','#172238');
+dk.style.setProperty('--dd-border','#26344f');
+dk.style.setProperty('--dd-text','#ffffff');
+dk.style.setProperty('--dd-ink','#cbd5e1');
+dk.style.setProperty('--dd-muted','#a3b1cc');
+dk.style.setProperty('--dd-accent','#6b9bff');
+dk.style.setProperty('--dd-tint','#1a2a4a');
+dk.style.setProperty('--dd-shadow','0 8px 24px rgba(2,6,16,.5)');
+</script></body></html>

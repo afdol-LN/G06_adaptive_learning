@@ -29,7 +29,7 @@ export const StepExperience: React.FC<StepExperienceProps> = ({
               max="5"
               value={exp}
               onChange={(e) => setExp(Number(e.target.value))}
-              style={{ "--pct": `${((exp - 1) / 4) * 100}%` as any }}
+              style={{ "--pct": `${((exp - 1) / 4) * 100}%` } as React.CSSProperties}
             />
           </div>
           <div className="slider-labels">
