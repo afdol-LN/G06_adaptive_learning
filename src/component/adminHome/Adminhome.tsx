@@ -1,31 +1,37 @@
 import { useState } from "react";
-import "../decorate/Adminhome.css";
-import { useNavigate } from "react-router-dom";
 import {
   FaArrowRightFromBracket,
   FaChevronLeft,
   FaChevronRight,
 } from "react-icons/fa6";
+import { usePreferences } from "../../context/PreferencesContext";
+import {
+  getScoreColor,
+  getStatusColor,
+  getTierColor,
+  gradeKey,
+  TABS,
+} from "../../utils/adminUi";
+import AppLogo from "../common/AppLogo";
+import LogoutButton from "../common/LogoutButton";
+import { Topbar } from "../common/Topbar";
+import "../decorate/Adminhome.css";
+import AiTab from "./aiPanel/AiTab";
+import ExerciseTab from "./exercisePanel/ExerciseTab";
+import GoalTab from "./goalPanel/GoalTab";
+import { historyController } from "./historyPanel/history.controller";
+import HistoryTab from "./HistoryTab";
+import SkillTab from "./skillPanel/SkillTab";
+import { summaryController } from "./summaryPanel/summary.controller";
 import SummaryTab from "./SummaryTab";
 import UsersTab from "./userPanel/UsersTab";
-import SkillTab from "./skillPanel/SkillTab";
-import GoalTab from "./goalPanel/GoalTab";
-import ExerciseTab from "./exercisePanel/ExerciseTab";
-import HistoryTab from "./HistoryTab";
-import AiTab from "./aiPanel/AiTab";
-import AppLogo from "../common/AppLogo";
-import { Topbar } from "../common/Topbar";
-import { usePreferences } from "../../context/PreferencesContext";
-import { summaryController } from "./summaryPanel/summary.controller";
-import { historyController } from "./historyPanel/history.controller";
-import { getTierColor, getScoreColor, getStatusColor, gradeKey, TABS } from "../../utils/adminUi";
-
 
 export default function AdminHome() {
-  const navigate = useNavigate();
   const { t } = usePreferences();
   const [activeTab, setActiveTab] = useState("summary");
-  const [visitedTabs, setVisitedTabs] = useState<Set<string>>(new Set(["summary"]));
+  const [visitedTabs, setVisitedTabs] = useState<Set<string>>(
+    new Set(["summary"]),
+  );
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
   const handleTabClick = (key: string) => {
@@ -33,13 +39,21 @@ export default function AdminHome() {
     setVisitedTabs((prev) => (prev.has(key) ? prev : new Set(prev).add(key)));
   };
 
-  const { summary, skillProgress, userActivity, maxBar, dayLabels } = summaryController();
-  const { filteredHistory, histSearch, setHistSearch, histGrade, setHistGrade } =
-    historyController();
+  const { summary, skillProgress, userActivity, maxBar, dayLabels } =
+    summaryController();
+  const {
+    filteredHistory,
+    histSearch,
+    setHistSearch,
+    histGrade,
+    setHistGrade,
+  } = historyController();
 
   const tabIcon = (key: string) => TABS.find((tab) => tab.key === key)?.icon;
   const activeTabDef = TABS.find((tab) => tab.key === activeTab) ?? TABS[0];
-  const toggleLabel = sidebarOpen ? t("admin.sidebar.collapse") : t("admin.sidebar.expand");
+  const toggleLabel = sidebarOpen
+    ? t("admin.sidebar.collapse")
+    : t("admin.sidebar.expand");
 
   return (
     <div className="ad-app">
@@ -53,11 +67,17 @@ export default function AdminHome() {
           aria-label={toggleLabel}
           aria-expanded={sidebarOpen}
         >
-          {sidebarOpen ? <FaChevronLeft aria-hidden /> : <FaChevronRight aria-hidden />}
+          {sidebarOpen ? (
+            <FaChevronLeft aria-hidden />
+          ) : (
+            <FaChevronRight aria-hidden />
+          )}
         </button>
 
         <div className="ad-sidebar-head">
-          <div className="ad-nav-icon"><AppLogo /></div>
+          <div className="ad-nav-icon">
+            <AppLogo />
+          </div>
           <div className="ad-sidebar-brand-text">
             <span className="ad-nav-brand">G06 · ALS</span>
             <span className="ad-nav-badge">{t("admin.badge")}</span>
@@ -84,15 +104,12 @@ export default function AdminHome() {
         </div>
 
         <div className="ad-sidebar-foot">
-          <button
-            type="button"
-            className="ad-sidebar-logout"
-            onClick={() => navigate("/")}
-            title={t("admin.logout")}
-          >
-            <span className="ad-sidebar-tab-icon"><FaArrowRightFromBracket /></span>
+          <LogoutButton className="ad-sidebar-logout" title={t("admin.logout")}>
+            <span className="ad-sidebar-tab-icon">
+              <FaArrowRightFromBracket />
+            </span>
             <span className="ad-sidebar-tab-label">{t("admin.logout")}</span>
-          </button>
+          </LogoutButton>
         </div>
       </aside>
 
@@ -103,7 +120,9 @@ export default function AdminHome() {
         <main className="ad-main">
           {/* ══ SUMMARY ══ */}
           {visitedTabs.has("summary") && (
-            <div style={{ display: activeTab === "summary" ? undefined : "none" }}>
+            <div
+              style={{ display: activeTab === "summary" ? undefined : "none" }}
+            >
               <SummaryTab
                 icon={tabIcon("summary")}
                 SUMMARY={summary}
@@ -120,35 +139,47 @@ export default function AdminHome() {
 
           {/* ══ USERS ══ */}
           {visitedTabs.has("users") && (
-            <div style={{ display: activeTab === "users" ? undefined : "none" }}>
+            <div
+              style={{ display: activeTab === "users" ? undefined : "none" }}
+            >
               <UsersTab icon={tabIcon("users")} />
             </div>
           )}
 
           {/* ══ SKILLS ══ */}
           {visitedTabs.has("skills") && (
-            <div style={{ display: activeTab === "skills" ? undefined : "none" }}>
+            <div
+              style={{ display: activeTab === "skills" ? undefined : "none" }}
+            >
               <SkillTab icon={tabIcon("skills")} />
             </div>
           )}
 
           {/* ══ GOALS ══ */}
           {visitedTabs.has("goals") && (
-            <div style={{ display: activeTab === "goals" ? undefined : "none" }}>
+            <div
+              style={{ display: activeTab === "goals" ? undefined : "none" }}
+            >
               <GoalTab icon={tabIcon("goals")} />
             </div>
           )}
 
           {/* ══ EXERCISES ══ */}
           {visitedTabs.has("exercises") && (
-            <div style={{ display: activeTab === "exercises" ? undefined : "none" }}>
+            <div
+              style={{
+                display: activeTab === "exercises" ? undefined : "none",
+              }}
+            >
               <ExerciseTab icon={tabIcon("exercises")} />
             </div>
           )}
 
           {/* ══ HISTORY ══ */}
           {visitedTabs.has("history") && (
-            <div style={{ display: activeTab === "history" ? undefined : "none" }}>
+            <div
+              style={{ display: activeTab === "history" ? undefined : "none" }}
+            >
               <HistoryTab
                 icon={tabIcon("history")}
                 filteredHistory={filteredHistory}

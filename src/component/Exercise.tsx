@@ -4,7 +4,7 @@ import './decorate/Tour.css';
 import { useExerciseController } from './exercise/controller/useExerciseController';
 import { useExerciseGuideController } from './exercise/controller/useExerciseGuideController';
 import ExerciseRules from './exercise/component/ExerciseRules';
-import CodeBlock from './common/CodeBlock';
+import QuestionCard from './common/QuestionCard';
 import AppLogo from './common/AppLogo';
 import {
   FaArrowRight,
@@ -43,7 +43,7 @@ export default function Exercise() {
         <div className="glow-bg"><div className="g1"></div><div className="g2"></div><div className="g3"></div></div>
         <div className="wrap">
           <div className="stage">
-            <div className="qcard">{t('exercise.loading')}</div>
+            <div className="qc-card ex-loading-card">{t('exercise.loading')}</div>
           </div>
         </div>
       </>
@@ -60,7 +60,6 @@ export default function Exercise() {
 
   // Only a result given for *this* exercise is shown — never while the answer is still being checked
   const revealed = controller.result?.exerciseId === question.exerciseId ? controller.result : null;
-  const outcomeClass = revealed ? (revealed.isCorrect ? 'rev-ok' : 'rev-no') : '';
   const canSubmit = question.type === 'CHOICE' ? controller.selected !== null : controller.fillInBlankInput !== '';
 
   return (
@@ -125,48 +124,25 @@ export default function Exercise() {
         </div>
 
         <div className="stage">
-          <div className="qcard" key={question.exerciseId}>
-            <div className="card-ribbon"></div>
-            <div className="card-body">
-              <div className="q-question" data-tour="ex-question">{question.description}</div>
-
-              <CodeBlock code={question.code} language={question.language} />
-
-              {question.type === 'CHOICE' ? (
-                <div className={`choices${controller.locked ? ' locked' : ''}`} data-tour="ex-answer">
-                  {(question.choices || []).map((choice) => {
-                    const outcome = revealed?.choiceId === choice.id ? outcomeClass : '';
-                    const stateClass = outcome || (controller.selected === choice.id ? 'sel' : '');
-                    return (
-                      <div
-                        key={choice.id}
-                        className={stateClass ? `opt ${stateClass}` : 'opt'}
-                        onClick={() => controller.pick(choice.id)}
-                        aria-disabled={controller.locked}
-                      >
-                        <div className="opt-text">{choice.script}</div>
-                        {outcome && (
-                          <span className="opt-ck">
-                            {revealed?.isCorrect ? <FaCheck aria-hidden /> : <FaXmark aria-hidden />}
-                          </span>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              ) : (
-                <input
-                  className={outcomeClass ? `fill-blank-input ${outcomeClass}` : 'fill-blank-input'}
-                  data-tour="ex-answer"
-                  value={controller.fillInBlankInput}
-                  onChange={(e) => controller.setFillInBlankInput(e.target.value)}
-                  disabled={controller.locked}
-                  placeholder={t('exercise.fillPlaceholder')}
-                />
-              )}
-            </div>
-
-            <div className="card-foot">
+          <QuestionCard
+            key={question.exerciseId}
+            index={controller.questionIndex}
+            total={controller.questionLimit}
+            skillName={controller.skillsName}
+            level={question.skillLevel}
+            type={question.type}
+            description={question.description}
+            code={question.code}
+            language={question.language}
+            choices={(question.choices || []).map((c) => ({ key: c.id, script: c.script }))}
+            selectedKey={controller.selected}
+            onPick={controller.pick}
+            fillValue={controller.fillInBlankInput}
+            onFillChange={controller.setFillInBlankInput}
+            locked={controller.locked}
+            reveal={revealed ? { key: revealed.choiceId, isCorrect: revealed.isCorrect } : null}
+            tourAttrs={{ question: 'ex-question', answer: 'ex-answer' }}
+            footer={
               <button
                 className={controller.checking ? 'btn-next checking' : 'btn-next'}
                 data-tour="ex-submit"
@@ -186,8 +162,8 @@ export default function Exercise() {
                   </>
                 )}
               </button>
-            </div>
-          </div>
+            }
+          />
         </div>
       </div>
 

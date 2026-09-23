@@ -1,4 +1,5 @@
 import React from "react";
+import { FaCheck, FaXmark } from "react-icons/fa6";
 import { PretestControllerType } from "../controller/usePretestController";
 
 interface PretestDoneProps {
@@ -10,7 +11,7 @@ export const PretestDone: React.FC<PretestDoneProps> = ({ controller }) => {
 
   return (
     <div id="screenDone" className="screen-active show" style={{ maxWidth: "660px" }}>
-      <div className="done-ring">✓</div>
+      <div className="done-ring"><FaCheck aria-hidden /></div>
       <h2 className="done-title">เสร็จสิ้น!</h2>
       <p className="done-sub">
         ระบบวิเคราะห์ผลลัพธ์การทำแบบทดสอบของคุณเรียบร้อยแล้ว
@@ -54,9 +55,9 @@ export const PretestDone: React.FC<PretestDoneProps> = ({ controller }) => {
             </div>
             <div>
               {resultItem.isCorrect ? (
-                <span className="result-badge correct">✓ ถูกต้อง</span>
+                <span className="result-badge correct"><FaCheck aria-hidden /> ถูกต้อง</span>
               ) : (
-                <span className="result-badge incorrect">✗ ผิด</span>
+                <span className="result-badge incorrect"><FaXmark aria-hidden /> ผิด</span>
               )}
             </div>
           </div>

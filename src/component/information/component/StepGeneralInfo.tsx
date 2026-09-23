@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { InformationFormData } from "../../../models/informationModel";
 import { InformationService } from "../../../services/informationService";
 import { CampusDTO, FacultyDTO, MajorDTO } from "../../../models/universityModel";
+import { Dropdown, DropdownOption } from "../../common/Dropdown";
 
 interface StepGeneralInfoProps {
   formData: InformationFormData;
@@ -79,121 +80,94 @@ export const StepGeneralInfo: React.FC<StepGeneralInfoProps> = ({
     }
   }, [formData.faculty, faculties]);
 
+  const campusOptions: DropdownOption[] = campuses.map((c) => ({
+    value: c.campus,
+    label: c.campus,
+  }));
+
+  const facultyOptions: DropdownOption[] = faculties.map((f) => ({
+    value: f.facultyName ?? f.faculty,
+    label: f.facultyName ?? f.faculty,
+  }));
+
+  const majorOptions: DropdownOption[] = formData.faculty
+    ? majors.map((m) => ({
+        value: m.majorName ?? m.major,
+        label: m.majorName ?? m.major,
+      }))
+    : [];
+
+  const yearOptions: DropdownOption[] = years.map((y) => ({ value: y, label: y }));
+
   return (
     <div className="panel active">
-      {loadError && (
-        <p style={{ color: "#f87171", fontSize: "13px", textAlign: "center", marginBottom: "12px" }}>
-          {loadError}
-        </p>
-      )}
+      {loadError && <p className="form-error">{loadError}</p>}
+
       <div className="field">
-        <label>วิทยาเขต</label>
-        <div className="select-wrap">
-          <select
-            value={formData.campus}
-            onChange={(e) => {
-              const val = e.target.value;
-              setFormDataField("campus", val);
-              const selected = campuses.find((c) => c.campus === val);
-              setFormDataField("campusId", selected ? String(selected.id) : "");
-            }}
-          >
-            <option value="" disabled>
-              เลือกวิทยาเขต...
-            </option>
-            {campuses.map((c) => (
-              <option key={c.id} value={c.campus}>
-                {c.campus}
-              </option>
-            ))}
-          </select>
-        </div>
+        <label htmlFor="info-campus">วิทยาเขต</label>
+        <Dropdown
+          id="info-campus"
+          value={formData.campus}
+          options={campusOptions}
+          placeholder="เลือกวิทยาเขต..."
+          emptyText="ยังไม่มีข้อมูลวิทยาเขต"
+          onChange={(val) => {
+            setFormDataField("campus", val);
+            const selected = campuses.find((c) => c.campus === val);
+            setFormDataField("campusId", selected ? String(selected.id) : "");
+          }}
+        />
       </div>
 
       <div className="field-row">
         <div>
-          <label>คณะ</label>
-          <div className="select-wrap">
-            <select
-              value={formData.faculty}
-              onChange={(e) => {
-                const val = e.target.value;
-                setFormDataField("faculty", val);
-                const selected = faculties.find(
-                  (f) => (f.facultyName ?? f.faculty) === val
-                );
-                const fId = selected ? (selected.facultyId ?? selected.id) : "";
-                setFormDataField("facultyId", fId !== "" ? String(fId) : "");
-              }}
-              disabled={!formData.campus}
-            >
-              <option value="" disabled>
-                เลือกคณะ...
-              </option>
-              {faculties.map((f) => {
-                const fName = f.facultyName ?? f.faculty;
-                const fKey = f.facultyId ?? f.id ?? fName;
-                return (
-                  <option key={fKey} value={fName}>
-                    {fName}
-                  </option>
-                );
-              })}
-            </select>
-          </div>
+          <label htmlFor="info-faculty">คณะ</label>
+          <Dropdown
+            id="info-faculty"
+            value={formData.faculty}
+            options={facultyOptions}
+            placeholder="เลือกคณะ..."
+            emptyText="เลือกวิทยาเขตก่อน"
+            disabled={!formData.campus}
+            onChange={(val) => {
+              setFormDataField("faculty", val);
+              const selected = faculties.find(
+                (f) => (f.facultyName ?? f.faculty) === val
+              );
+              const fId = selected ? (selected.facultyId ?? selected.id) : "";
+              setFormDataField("facultyId", fId !== "" ? String(fId) : "");
+            }}
+          />
         </div>
         <div>
-          <label>สาขาวิชา</label>
-          <div className="select-wrap">
-            <select
-              value={formData.major}
-              onChange={(e) => {
-                const val = e.target.value;
-                setFormDataField("major", val);
-                const selected = majors.find(
-                  (m) => (m.majorName ?? m.major) === val
-                );
-                const mId = selected ? (selected.majorId ?? selected.id) : "";
-                setFormDataField("majorId", mId !== "" ? String(mId) : "");
-              }}
-              disabled={!formData.faculty}
-            >
-              <option value="" disabled>
-                เลือกสาขา...
-              </option>
-              {formData.faculty &&
-                majors.map((m) => {
-                  const mName = m.majorName ?? m.major;
-                  const mKey = m.majorId ?? m.id ?? mName;
-                  return (
-                    <option key={mKey} value={mName}>
-                      {mName}
-                    </option>
-                  );
-                })}
-            </select>
-          </div>
+          <label htmlFor="info-major">สาขาวิชา</label>
+          <Dropdown
+            id="info-major"
+            value={formData.major}
+            options={majorOptions}
+            placeholder="เลือกสาขา..."
+            emptyText="เลือกคณะก่อน"
+            disabled={!formData.faculty}
+            onChange={(val) => {
+              setFormDataField("major", val);
+              const selected = majors.find((m) => (m.majorName ?? m.major) === val);
+              const mId = selected ? (selected.majorId ?? selected.id) : "";
+              setFormDataField("majorId", mId !== "" ? String(mId) : "");
+            }}
+          />
         </div>
       </div>
 
       <div className="field-row" style={{ justifyContent: "center" }}>
         <div>
-          <label>ชั้นปี / ปีการศึกษา</label>
-          <div className="select-wrap">
-            <select
-              value={formData.year}
-              onChange={(e) => setFormDataField("year", e.target.value)}
-            >
-              <option value="" disabled>
-                เลือกชั้นปี...
-              </option>
-              {years.map((y) => (
-                <option key={y} value={y}>
-                  {y}
-                </option>
-              ))}
-            </select>
-          </div>
+          <label htmlFor="info-year">ชั้นปี / ปีการศึกษา</label>
+          <Dropdown
+            id="info-year"
+            value={formData.year}
+            options={yearOptions}
+            placeholder="เลือกชั้นปี..."
+            onChange={(val) => setFormDataField("year", val)}
+          />
         </div>
       </div>
     </div>

@@ -43,3 +43,55 @@ export interface UpdateGoalWithSkillRequireRequest extends UpdateGoalRequest {
 
 export type GetGoalsResponse = ApiResponse<Goal[]>;
 export type GetGoalResponse = ApiResponse<Goal>;
+
+// ── Goal Workspace — ตรงกับ GoalWorkspaceDto / goalReadiness.ts ฝั่ง backend ──
+
+export type SkillReadiness = "empty" | "partial" | "ready";
+
+export type ReadinessRule =
+  | "HAS_REQUIRED_SKILL"
+  | "MIN_EXERCISES"
+  | "LEVEL_COVERAGE"
+  | "NO_PREREQ_CYCLE";
+
+export interface ReadinessCheck {
+  rule: ReadinessRule;
+  passed: boolean;
+  /** skill ที่ทำให้กฎนี้ไม่ผ่าน */
+  skillIds: number[];
+}
+
+export interface ReadinessResult {
+  ready: boolean;
+  checks: ReadinessCheck[];
+}
+
+export interface WorkspaceSkill {
+  skillId: number;
+  skillCode: string;
+  skillsName: string;
+  tier: string | null;
+  status: string;
+  /** false = ถูกดึงเข้ามาเพราะเป็น prerequisite ของ required skill */
+  required: boolean;
+  levelRequire: number | null;
+  prerequisiteSkillIds: number[];
+  goalCount: number;
+  activeExerciseCount: number;
+  activeExerciseLevels: number[];
+  pendingDraftCount: number;
+  readiness: SkillReadiness;
+}
+
+export interface GoalWorkspace {
+  goal: { id: number; goal: string; goalDescription: string | null; status: string };
+  branchCount: number;
+  minExercisesPerSkill: number;
+  skills: WorkspaceSkill[];
+  readiness: ReadinessResult;
+}
+
+export interface PublishGoalResult {
+  activatedGoal: boolean;
+  activatedSkillIds: number[];
+}

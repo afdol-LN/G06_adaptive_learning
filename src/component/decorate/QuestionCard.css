@@ -1,0 +1,166 @@
+/* ══════════════════════════════════════
+   QuestionCard.css — การ์ดคำถามที่ใช้ร่วมกันระหว่าง Pretest และ Exercise
+   token ประกาศบน .qc-card ไม่ใช่ :root (เหตุผลเดียวกับ .ctp-code ของ CodeBlock):
+   Exercise.css / Pretest.css ต่างประกาศ :root ของตัวเองด้วยชื่อ token ต่างกัน
+   ถ้าอ้างของพวกนั้น สีจะเปลี่ยนตามไฟล์ที่โหลดทีหลัง
+══════════════════════════════════════ */
+
+.qc-card {
+  --qc-surface:     #ffffff;
+  --qc-surface-2:   #f8fafc;
+  --qc-border:      #c2d3e0;
+  --qc-border-soft: #e2e8f0;
+  --qc-text:        #000080;
+  --qc-ink:         #334155;
+  --qc-muted:       #475569;
+  --qc-accent:      #0047AB;
+  --qc-accent-fill: #0047AB;
+  --qc-on-accent:   #ffffff;
+  --qc-tint:        #e8f0fe;
+  --qc-ok:          #059669;
+  --qc-ok-bg:       #ecfdf5;
+  --qc-no:          #dc2626;
+  --qc-no-bg:       #fef2f2;
+
+  --qc-l1-ink: #059669; --qc-l1-bg: #ecfdf5; --qc-l1-bd: #a7f3d0;
+  --qc-l2-ink: #4d7c0f; --qc-l2-bg: #f7fee7; --qc-l2-bd: #d9f99d;
+  --qc-l3-ink: #0047AB; --qc-l3-bg: #e8f0fe; --qc-l3-bd: #bfd3f5;
+  --qc-l4-ink: #b45309; --qc-l4-bg: #fffbeb; --qc-l4-bd: #fde68a;
+  --qc-l5-ink: #dc2626; --qc-l5-bg: #fef2f2; --qc-l5-bd: #fecaca;
+
+  width: 100%;
+  max-width: 700px;
+  display: flex;
+  flex-direction: column;
+  background: var(--qc-surface);
+  border: 1px solid var(--qc-border);
+  border-radius: 12px;
+  overflow: hidden;
+  font-family: var(--font-sans);
+  color: var(--qc-ink);
+  animation: qcSlideIn .35s cubic-bezier(.16, 1, .3, 1);
+}
+
+:root[data-theme="dark"] .qc-card {
+  --qc-surface:     #121b2e;
+  --qc-surface-2:   #172238;
+  --qc-border:      #26344f;
+  --qc-border-soft: #1f2b42;
+  --qc-text:        #ffffff;
+  --qc-ink:         #ffffff;
+  --qc-muted:       #a3b1cc;
+  --qc-accent:      #6b9bff;
+  --qc-accent-fill: #2f5fd0;
+  --qc-on-accent:   #ffffff;
+  --qc-tint:        #1a2a4a;
+  --qc-ok:          #34d399;
+  --qc-ok-bg:       rgba(52, 211, 153, .12);
+  --qc-no:          #f87171;
+  --qc-no-bg:       rgba(248, 113, 113, .12);
+
+  --qc-l1-ink: #34d399; --qc-l1-bg: rgba(52, 211, 153, .12);  --qc-l1-bd: rgba(52, 211, 153, .35);
+  --qc-l2-ink: #a3e635; --qc-l2-bg: rgba(163, 230, 53, .12);  --qc-l2-bd: rgba(163, 230, 53, .35);
+  --qc-l3-ink: #6b9bff; --qc-l3-bg: rgba(107, 155, 255, .14); --qc-l3-bd: rgba(107, 155, 255, .4);
+  --qc-l4-ink: #fbbf24; --qc-l4-bg: rgba(251, 191, 36, .12);  --qc-l4-bd: rgba(251, 191, 36, .35);
+  --qc-l5-ink: #f87171; --qc-l5-bg: rgba(248, 113, 113, .12); --qc-l5-bd: rgba(248, 113, 113, .35);
+}
+
+.qc-card *, .qc-card *::before, .qc-card *::after { box-sizing: border-box; }
+.qc-card svg { flex-shrink: 0; }
+
+/* ── Header ── */
+.qc-head {
+  flex-shrink: 0;
+  padding: 16px 24px;
+  background: var(--qc-surface-2);
+  border-bottom: 1px solid var(--qc-border-soft);
+  display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+}
+.qc-head-l { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.qc-num { font-size: 13px; font-weight: 600; color: var(--qc-muted); white-space: nowrap; }
+.qc-num strong { color: var(--qc-accent); }
+.qc-skill {
+  font-size: 13px; padding: 4px 12px;
+  background: var(--qc-surface); border: 1px solid var(--qc-border);
+  border-radius: 9999px; color: var(--qc-muted);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.qc-level { font-size: 13px; padding: 4px 12px; border-radius: 9999px; border: 1px solid; white-space: nowrap; }
+.qc-level-1 { color: var(--qc-l1-ink); background: var(--qc-l1-bg); border-color: var(--qc-l1-bd); }
+.qc-level-2 { color: var(--qc-l2-ink); background: var(--qc-l2-bg); border-color: var(--qc-l2-bd); }
+.qc-level-3 { color: var(--qc-l3-ink); background: var(--qc-l3-bg); border-color: var(--qc-l3-bd); }
+.qc-level-4 { color: var(--qc-l4-ink); background: var(--qc-l4-bg); border-color: var(--qc-l4-bd); }
+.qc-level-5 { color: var(--qc-l5-ink); background: var(--qc-l5-bg); border-color: var(--qc-l5-bd); }
+
+/* ── Body ── */
+.qc-body { flex: 1; overflow-y: auto; padding: 24px; background: var(--qc-surface); }
+.qc-question {
+  font-size: 18px; line-height: 1.6; font-weight: 600; color: var(--qc-text);
+  background: var(--qc-surface-2); border: 1px solid var(--qc-border); border-radius: 8px;
+  padding: 20px; margin-bottom: 24px; text-align: center;
+}
+
+/* ── Choices ── */
+.qc-choices { display: flex; flex-direction: column; gap: 8px; margin-top: 16px; }
+.qc-choice {
+  display: flex; align-items: center; gap: 12px; width: 100%;
+  padding: 14px 16px; margin: 0; text-align: left;
+  font: inherit; color: inherit;
+  background: var(--qc-surface); border: 1px solid var(--qc-border); border-radius: 8px;
+  cursor: pointer; user-select: none;
+  transition: border-color .2s, background .2s;
+}
+.qc-choice:hover:not(:disabled) { border-color: var(--qc-accent); background: var(--qc-surface-2); }
+.qc-choice:focus-visible { outline: 2px solid var(--qc-accent); outline-offset: 2px; }
+.qc-choice:disabled { cursor: default; }
+.qc-choice--selected { border-color: var(--qc-accent); background: var(--qc-tint); }
+.qc-choice--ok { border-color: var(--qc-ok); background: var(--qc-ok-bg); }
+.qc-choice--no { border-color: var(--qc-no); background: var(--qc-no-bg); }
+.qc-letter {
+  width: 30px; height: 30px; border-radius: 8px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 600;
+  background: var(--qc-surface-2); border: 1px solid var(--qc-border); color: var(--qc-muted);
+  transition: background .2s, border-color .2s, color .2s;
+}
+.qc-choice--selected .qc-letter { background: var(--qc-accent-fill); border-color: var(--qc-accent-fill); color: var(--qc-on-accent); }
+.qc-choice--ok .qc-letter { background: var(--qc-ok); border-color: var(--qc-ok); color: var(--qc-on-accent); }
+.qc-choice--no .qc-letter { background: var(--qc-no); border-color: var(--qc-no); color: var(--qc-on-accent); }
+.qc-choice-text { flex: 1; font-size: 15px; line-height: 1.5; color: var(--qc-ink); }
+.qc-mark { display: inline-flex; font-size: 16px; }
+.qc-choice--ok .qc-mark { color: var(--qc-ok); }
+.qc-choice--no .qc-mark { color: var(--qc-no); }
+
+/* ── Fill in the blank ── */
+.qc-fill { display: flex; flex-direction: column; gap: 12px; margin-top: 16px; }
+.qc-fill-label {
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  font-size: 15px; font-weight: 600; color: var(--qc-muted);
+}
+.qc-fill-input {
+  width: 100%; padding: 14px 16px;
+  background: var(--qc-surface); border: 1px solid var(--qc-border); border-radius: 8px;
+  color: var(--qc-ink); font-family: var(--font-sans); font-size: 16px;
+  outline: none; transition: border-color .2s, box-shadow .2s;
+}
+.qc-fill-input::placeholder { color: var(--qc-muted); font-size: 15px; }
+.qc-fill-input:focus { border-color: var(--qc-accent); box-shadow: 0 0 0 3px var(--qc-tint); }
+.qc-fill-input:disabled { cursor: default; }
+.qc-fill--ok { border-color: var(--qc-ok); box-shadow: 0 0 0 3px var(--qc-ok-bg); }
+.qc-fill--no { border-color: var(--qc-no); box-shadow: 0 0 0 3px var(--qc-no-bg); }
+
+/* ── Footer (เนื้อหามาจากแต่ละหน้า) ── */
+.qc-foot {
+  flex-shrink: 0;
+  padding: 16px 24px;
+  border-top: 1px solid var(--qc-border-soft);
+  background: var(--qc-surface-2);
+  display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+}
+
+@keyframes qcSlideIn { from { opacity: 0; transform: translateX(28px); } to { opacity: 1; transform: none; } }
+
+@media (max-width: 520px) {
+  .qc-head, .qc-body, .qc-foot { padding-left: 16px; padding-right: 16px; }
+  .qc-question { font-size: 16px; }
+}

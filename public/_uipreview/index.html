@@ -1,0 +1,36 @@
+<!doctype html><html lang="th"><head><meta charset="utf-8"><title>เทียบ ก่อน/หลัง</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;600;700&family=IBM+Plex+Sans+Thai+Looped:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:'Noto Sans','IBM Plex Sans Thai Looped',system-ui,sans-serif;background:#0b1220;color:#fff}
+.bar{display:flex;align-items:center;gap:12px;padding:10px 16px;background:#121b2e;border-bottom:1px solid #26344f}
+.bar b{font-size:14px}
+.bar button{font:inherit;font-size:13px;padding:6px 14px;border-radius:8px;border:1px solid #3a4a6b;background:#1a2540;color:#fff;cursor:pointer}
+.bar button.on{background:#2f5fd0;border-color:#2f5fd0}
+.wrap{display:grid;grid-template-rows:1fr 1fr;height:calc(100vh - 43px)}
+.col{display:flex;flex-direction:column;min-width:0;border-bottom:1px solid #26344f}
+.lbl{padding:6px 14px;font-size:12px;font-weight:700;letter-spacing:.04em;background:#121b2e;border-bottom:1px solid #26344f}
+.lbl.b{color:#f87171}.lbl.a{color:#34d399}
+iframe{flex:1;width:100%;border:0;background:#fff}
+</style></head><body>
+<div class="bar"><b>หน้า admin · แท็บแบบฝึกหัด</b>
+ <button id="lt" class="on">Light</button><button id="dk">Dark</button>
+ <span style="font-size:12px;color:#a3b1cc">markup จริงจาก ExerciseTab.tsx · stylesheet จริงทั้งสองฝั่ง</span></div>
+<div class="wrap">
+ <div class="col"><div class="lbl b">ก่อน (HEAD)</div><iframe id="f1" src="before.html"></iframe></div>
+ <div class="col"><div class="lbl a">หลัง (feat/ui-standard)</div><iframe id="f2" src="after.html"></iframe></div>
+</div>
+<script>
+function setTheme(t){
+ for (const id of ['f1','f2']) {
+   const d = document.getElementById(id).contentDocument;
+   if (!d) continue;
+   if (t === 'dark') d.documentElement.setAttribute('data-theme','dark');
+   else d.documentElement.removeAttribute('data-theme');
+ }
+ document.getElementById('lt').classList.toggle('on', t !== 'dark');
+ document.getElementById('dk').classList.toggle('on', t === 'dark');
+}
+document.getElementById('lt').onclick = () => setTheme('light');
+document.getElementById('dk').onclick = () => setTheme('dark');
+</script></body></html>

@@ -17,9 +17,8 @@ export function usePretestController() {
 
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [questions, setQuestions] = useState<PretestQuestion[]>([]);
-  const [currentScreen, setCurrentScreen] = useState<"intro" | "quiz" | "done">(
-    "intro",
-  );
+  // ไม่มีหน้า intro แล้ว — กติกาย้ายไปอยู่ step 4 ของ /information จึงเริ่มที่ข้อแรกทันที
+  const [currentScreen, setCurrentScreen] = useState<"quiz" | "done">("quiz");
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState<number>(0);
   const [answers, setAnswers] = useState<PretestAnswer[]>([]);
   const [fillInBlankInput, setFillInBlankInput] = useState<string>("");
@@ -82,12 +81,12 @@ export function usePretestController() {
     diff: 1,
   };
 
-  const answeredCount = answers.filter(
-    (answer) => answer !== null && answer !== "" && answer !== undefined,
-  ).length;
+  // ความคืบหน้านับจากข้อที่กด Next ผ่านไปแล้ว (รวมข้อที่ข้าม) ไม่ใช่ข้อที่เลือกคำตอบไว้
+  // ข้อสอบย้อนกลับไม่ได้ ข้อก่อนหน้า currentQuestionIndex จึงเสร็จแล้วทั้งหมด
+  const completedCount = currentQuestionIndex;
   const progressPercentage =
     questions.length > 0
-      ? Math.round((answeredCount / questions.length) * 100)
+      ? Math.round((completedCount / questions.length) * 100)
       : 0;
 
   // Sync fillInBlankInput when question index changes or when an answer is selected
@@ -104,10 +103,6 @@ export function usePretestController() {
       setFillInBlankInput("");
     }
   }, [currentQuestionIndex, questions, currentQuestion.type]);
-
-  const startQuiz = useCallback(() => {
-    setCurrentScreen("quiz");
-  }, []);
 
   const selectChoiceAnswer = useCallback(
     (choiceIndex: number) => {
@@ -191,6 +186,7 @@ export function usePretestController() {
   }, [advanceToNextQuestion]);
 
   const navigateToDashboard = useCallback(async () => {
+    let submited = false;
     try {
       const branchId = Number(
         localStorage.getItem("activeBranchId") ||
@@ -199,11 +195,12 @@ export function usePretestController() {
       );
       await PretestService.submitPretest(branchId, resultsList);
       updateBranch(String(branchId), { isAlreadyPretest: true });
+      submited = true;
     } catch (e) {
       console.error(e);
       toast.error("บันทึกผล Pretest ไม่สำเร็จ", "กรุณาลองใหม่อีกครั้ง");
     }
-    navigate("/home");
+    navigate("/home", {state : {fromPretest : submited}});
   }, [navigate, resultsList, updateBranch, toast]);
 
   return {
@@ -219,7 +216,6 @@ export function usePretestController() {
     resultsList,
     scoreSummary,
     progressPercentage,
-    startQuiz,
     selectChoiceAnswer,
     handleFillInBlankInputChange,
     handleNextQuestion,

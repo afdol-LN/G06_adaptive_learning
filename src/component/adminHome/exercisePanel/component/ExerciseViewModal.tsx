@@ -8,9 +8,22 @@ interface ExerciseViewModalProps {
   exercise: Exercise | null;
   onClose: () => void;
   onEdit: (exercise: Exercise) => void;
+  /** ทับหัวข้อ modal — ใช้ตอน reuse กับร่างจาก AI */
+  title?: string;
+  /** ชื่อ skill เมื่อ exercise ไม่มี object skill ติดมา (เช่น ร่างจาก AI) */
+  skillName?: string;
+  /** ร่างยังไม่มีสถานะจริง — ซ่อนช่องสถานะ */
+  hideStatus?: boolean;
 }
 
-export default function ExerciseViewModal({ exercise, onClose, onEdit }: ExerciseViewModalProps) {
+export default function ExerciseViewModal({
+  exercise,
+  onClose,
+  onEdit,
+  title,
+  skillName,
+  hideStatus = false,
+}: ExerciseViewModalProps) {
   const { t } = usePreferences();
   if (!exercise) return null;
 
@@ -19,9 +32,9 @@ export default function ExerciseViewModal({ exercise, onClose, onEdit }: Exercis
 
   return (
     <div className="ad-overlay" onClick={onClose}>
-      <div className="ad-modal" onClick={(e) => e.stopPropagation()}>
+      <div className="ad-modal ad-modal--wide" onClick={(e) => e.stopPropagation()}>
         <div className="ad-modal-header">
-          <span className="ad-modal-title"><FaMagnifyingGlass /> {t("admin.exView.title")}</span>
+          <span className="ad-modal-title"><FaMagnifyingGlass /> {title ?? t("admin.exView.title")}</span>
         </div>
 
         <div className="ad-modal-body">
@@ -44,7 +57,7 @@ export default function ExerciseViewModal({ exercise, onClose, onEdit }: Exercis
             </div>
             <div className="ad-field">
               <label className="ad-label">{t("admin.exercises.col.skill")}</label>
-              <div>{exercise.skill?.skillsName || `#${exercise.skillId}`}</div>
+              <div>{exercise.skill?.skillsName || skillName || `#${exercise.skillId}`}</div>
             </div>
           </div>
 
@@ -53,13 +66,15 @@ export default function ExerciseViewModal({ exercise, onClose, onEdit }: Exercis
               <label className="ad-label">{t("admin.exercises.col.type")}</label>
               <div>{exercise.type}</div>
             </div>
-            <div className="ad-field">
-              <label className="ad-label">{t("admin.common.status")}</label>
-              <div>
-                <span className="ad-status-dot" style={{ background: getStatusColor(exercise.status) }} />
-                <span className="ad-muted">{sk ? t(sk) : exercise.status}</span>
+            {!hideStatus && (
+              <div className="ad-field">
+                <label className="ad-label">{t("admin.common.status")}</label>
+                <div>
+                  <span className="ad-status-dot" style={{ background: getStatusColor(exercise.status) }} />
+                  <span className="ad-muted">{sk ? t(sk) : exercise.status}</span>
+                </div>
               </div>
-            </div>
+            )}
           </div>
 
           {exercise.type === "CHOICE" ? (

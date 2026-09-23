@@ -1,29 +1,38 @@
 import React from "react";
+import { FaArrowLeft, FaArrowRight } from "react-icons/fa6";
 import "../decorate/InformationForm.css";
-import { useInformationController } from "./controller/useInformationController";
 import { ProgressStepper } from "./component/ProgressStepper";
+import LogoutButton from "../common/LogoutButton";
+import { useInformationController } from "./controller/useInformationController";
 import { StepGeneralInfo } from "./component/StepGeneralInfo";
 import { StepSelectGoal } from "./component/StepSelectGoal";
 import { StepExperience } from "./component/StepExperience";
-import { StepReady } from "./component/StepReady";
+import { StepPretestIntro } from "./component/StepPretestIntro";
+import { usePreferences } from "../../context/PreferencesContext";
 
 export default function InformationForm() {
   const ctrl = useInformationController();
+  const { t } = usePreferences();
 
   return (
-    <div style={{ position: "relative" }}>
+    <div className="info-root">
       <div className="bg"></div>
       <div className="bg-grid"></div>
       <div className="orb orb-1"></div>
       <div className="orb orb-2"></div>
 
+      {/* มาจาก login ครั้งแรก = ยังไม่มีหน้า Select Branch ให้กลับ จึงแสดงเฉพาะเมื่อมาจากหน้านั้น */}
+      {ctrl.fromSelectBranch && (
+        <button type="button" className="info-back-link" onClick={ctrl.handleBackToSelectBranch}>
+          <FaArrowLeft aria-hidden />
+          <span>{t("info.backToSelectBranch")}</span>
+        </button>
+      )}
+
+      <LogoutButton className="info-logout" />
+
       <main className="page">
-        {/* Progress Bar */}
-        <ProgressStepper
-          stepLabels={ctrl.stepLabels}
-          step={ctrl.step}
-          progressPct={ctrl.progressPct}
-        />
+        <ProgressStepper stepLabels={ctrl.stepLabels} step={ctrl.step} />
 
         {/* Card */}
         <div className={`card ${ctrl.isShaking ? "shake" : ""}`}>
@@ -37,7 +46,7 @@ export default function InformationForm() {
             </div>
             <div className="step-sub">
               {ctrl.step === 4
-                ? "กดปุ่มด้านล่างเมื่อพร้อมเริ่มทำ Pretest"
+                ? "อ่านรายละเอียดด้านล่าง แล้วกดเริ่ม Pretest เมื่อพร้อม"
                 : ctrl.steps[ctrl.step - 1].sub}
             </div>
           </div>
@@ -53,6 +62,7 @@ export default function InformationForm() {
           {ctrl.step === 2 && (
             <StepSelectGoal
               goalsByGroup={ctrl.goalsByGroup}
+              goalStatus={ctrl.goalStatus}
               selectedGoal={ctrl.selectedGoal}
               isLoadingGoals={ctrl.isLoadingGoals}
               toggleGoal={ctrl.toggleGoal}
@@ -68,14 +78,16 @@ export default function InformationForm() {
             />
           )}
 
-          {ctrl.step === 4 && <StepReady />}
+          {ctrl.step === 4 && <StepPretestIntro />}
 
           {/* Footer Navigation */}
           <div className="card-footer-btns">
             <button
-              className="btn-back"
+              type="button"
+              className={`btn-back${ctrl.step === 3 && !ctrl.canGoBack ? " is-hidden" : ""}`}
               onClick={ctrl.handlePrev}
-              disabled={ctrl.step === 1}
+              disabled={!ctrl.canGoBack}
+              aria-hidden={ctrl.step === 3 && !ctrl.canGoBack ? true : undefined}
             >
               ← Back
             </button>
@@ -83,52 +95,19 @@ export default function InformationForm() {
               {ctrl.step} / {ctrl.totalSteps}
             </span>
             {ctrl.step === 4 ? (
-              <button className="btn-next" onClick={ctrl.handleStartPretestDirect}>
-                <span>เริ่ม Pretest</span>
-                <svg
-                  className="btn-next-arrow"
-                  width="16"
-                  height="16"
-                  viewBox="0 0 16 16"
-                  fill="none"
-                >
-                  <path
-                    d="M3 8h10M9 4l4 4-4 4"
-                    stroke="#ffffff"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
+              <button type="button" className="btn-next" onClick={ctrl.handleStartPretest}>
+                <span>{t("pretestIntro.start")}</span>
+                <FaArrowRight className="btn-next-arrow" aria-hidden />
               </button>
             ) : (
               <button
+                type="button"
                 className="btn-next"
                 onClick={ctrl.handleNext}
                 disabled={ctrl.isSubmitting}
               >
-                <span>
-                  {ctrl.isSubmitting
-                    ? "กำลังบันทึก..."
-                    : ctrl.step === 3
-                      ? "เริ่ม Pretest"
-                      : "Next"}
-                </span>
-                <svg
-                  className="btn-next-arrow"
-                  width="16"
-                  height="16"
-                  viewBox="0 0 16 16"
-                  fill="none"
-                >
-                  <path
-                    d="M3 8h10M9 4l4 4-4 4"
-                    stroke="#ffffff"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
+                <span>{ctrl.isSubmitting ? "กำลังบันทึก..." : "Next"}</span>
+                <FaArrowRight className="btn-next-arrow" aria-hidden />
               </button>
             )}
           </div>

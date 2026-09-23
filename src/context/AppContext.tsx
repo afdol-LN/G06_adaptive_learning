@@ -112,6 +112,7 @@ function addBranch(branchData) {
           goalName: sb.goal?.goal || "",
           goalDesc: sb.goal?.goalDescription || "",
           isAlreadyPretest: sb.isAlreadyPretest,
+          goalCompletedAt: sb.goalCompletedAt ?? null,
           exp: sb.expForGoal,
         };
         if (existingBranch) {
