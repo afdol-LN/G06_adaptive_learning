@@ -1,0 +1,218 @@
+/* ══════════════════════════════════════
+   Dropdown.css — PSU ALS · common/Dropdown.tsx
+   ยึดตาม DESIGN.md: มุม 8/12, พื้น --surface, ตัวอักษร 3 ระดับ, เงาเฉพาะ dropdown
+
+   รายการถูก render ผ่าน portal ไปที่ <body> ซึ่งอยู่นอก scope ของหน้า
+   (.app / .ad-app / .pt-root / .info-root / .sb2-root) จึงประกาศ token ชุดของ
+   ตัวเองไว้บน :root เพื่อให้สีถูกต้องเสมอ ไม่ว่าจะถูกเรียกจากหน้าไหน
+   ค่าทั้งหมดตรงกับ palette กลางใน DESIGN.md §1
+══════════════════════════════════════ */
+
+:root {
+  --dd-surface:   #ffffff;
+  --dd-surface-2: #f8fafc;
+  --dd-border:    #c2d3e0;
+  --dd-text:      #000080;
+  --dd-ink:       #334155;
+  --dd-muted:     #475569;
+  --dd-accent:    #0047AB;
+  --dd-tint:      #e8f0fe;
+  --dd-shadow:    0 8px 24px rgba(15, 23, 42, .12);
+  --dd-disabled-bg:     #eceff3;
+  --dd-disabled-border: #dde3ea;
+  --dd-disabled-ink:    #a0aab8;
+}
+
+:root[data-theme="dark"] {
+  --dd-surface:   #121b2e;
+  --dd-surface-2: #172238;
+  --dd-border:    #26344f;
+  --dd-text:      #ffffff;
+  --dd-ink:       #cbd5e1;
+  --dd-muted:     #a3b1cc;
+  --dd-accent:    #6b9bff;
+  --dd-tint:      #1a2a4a;
+  --dd-shadow:    0 8px 24px rgba(2, 6, 16, .5);
+  --dd-disabled-bg:     #0d1422;
+  --dd-disabled-border: #1c2638;
+  --dd-disabled-ink:    #56647d;
+}
+
+/* ── ปุ่มที่กดเพื่อกางรายการ ── */
+.dd-trigger {
+  width: 100%;
+  min-height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 14px;
+
+  background: var(--dd-surface);
+  border: 1px solid var(--dd-border);
+  border-radius: 8px;
+
+  font-family: var(--font-sans);
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--dd-ink);
+  text-align: left;
+
+  cursor: pointer;
+  transition: border-color .18s, box-shadow .18s;
+}
+
+.dd-trigger:hover:not(:disabled) { border-color: var(--dd-accent); }
+
+.dd-trigger:focus-visible,
+.dd-trigger[aria-expanded="true"] {
+  outline: none;
+  border-color: var(--dd-accent);
+  box-shadow: 0 0 0 3px var(--dd-tint);
+}
+
+.dd-trigger:disabled {
+  cursor: not-allowed;
+  color: var(--dd-disabled-ink);
+  background: var(--dd-disabled-bg);
+  border-color: var(--dd-disabled-border);
+}
+
+.dd-trigger:disabled .dd-value,
+.dd-trigger:disabled .dd-caret {
+  color: var(--dd-disabled-ink);
+}
+
+.dd-value {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--dd-text);
+  font-weight: 600;
+}
+
+.dd-value.is-placeholder {
+  color: var(--dd-muted);
+  font-weight: 500;
+}
+
+.dd-caret {
+  flex-shrink: 0;
+  width: 13px;
+  height: 13px;
+  color: var(--dd-muted);
+  transition: transform .18s;
+}
+
+.dd-trigger[aria-expanded="true"] .dd-caret {
+  transform: rotate(180deg);
+  color: var(--dd-accent);
+}
+
+/* ── รายการที่กางออกมา (portal → <body>) ── */
+.dd-popup {
+  position: fixed;
+  z-index: 1000;
+  margin: 0;
+  padding: 6px;
+  list-style: none;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+
+  background: var(--dd-surface);
+  border: 1px solid var(--dd-border);
+  border-radius: 12px;
+  box-shadow: var(--dd-shadow);
+
+  font-family: var(--font-sans);
+  animation: ddIn .14s ease-out;
+}
+
+@keyframes ddIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: none; }
+}
+
+.dd-popup::-webkit-scrollbar { width: 6px; }
+.dd-popup::-webkit-scrollbar-track { background: transparent; }
+.dd-popup::-webkit-scrollbar-thumb { background: var(--dd-border); border-radius: 9999px; }
+
+.dd-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 8px;
+
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--dd-ink);
+  cursor: pointer;
+  transition: background .12s, color .12s;
+}
+
+.dd-option + .dd-option { margin-top: 2px; }
+
+/* is-active = ตัวที่เมาส์ชี้อยู่หรือลูกศรเลื่อนมาถึง — ต้องเป็นตัวเดียวกันเสมอ
+   ไม่งั้นคีย์บอร์ดกับเมาส์จะไฮไลต์คนละแถว */
+.dd-option.is-active {
+  background: var(--dd-tint);
+  color: var(--dd-text);
+}
+
+.dd-option.is-selected {
+  color: var(--dd-accent);
+  font-weight: 700;
+}
+
+.dd-option.is-disabled {
+  color: var(--dd-muted);
+  cursor: not-allowed;
+  background: none;
+}
+
+.dd-option-label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dd-option-check {
+  flex-shrink: 0;
+  width: 12px;
+  height: 12px;
+  color: var(--dd-accent);
+}
+
+.dd-empty {
+  padding: 14px 12px;
+  text-align: center;
+  font-size: 14px;
+  color: var(--dd-muted);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dd-popup { animation: none; }
+  .dd-caret { transition: none; }
+}
+
+/* ── กฎที่ต้องประกาศเองเพราะ popup ถูก portal ไป <body> ซึ่งอยู่นอก scope ของหน้า ──
+   1) box-sizing: หน้าอื่นตั้ง border-box บน `.info-root *` / `.pt-root *` ฯลฯ
+      popup ไม่ได้รับมรดกนั้น ความกว้างจึงบวก padding เกินจนมี scrollbar แนวนอน
+   2) flex-shrink: <svg> ที่สูง/กว้าง 1em จะยุบเหลือ 0px เมื่อเป็น flex item ใน Chrome
+      (กับดักเดียวกับที่ .app svg / .ad-app svg กันไว้ — ดู CLAUDE.md) */
+.dd-popup, .dd-popup *,
+.dp-popup, .dp-popup * { box-sizing: border-box; }
+
+.dd-popup svg,
+.dp-popup svg { flex-shrink: 0; }
+
+/* เหตุผลเดียวกับ .dp-popup button — กัน padding ของ Vite template ใน index.css
+   ใช้ button.dd-trigger (0,1,1) ให้ชนะ reset `.info-root * { padding: 0 }` /
+   `.pt-root *` (0,1,0) ที่โหลดทีหลัง ไม่งั้นข้อความชิดขอบซ้ายติดเส้นกรอบ */
+button.dd-trigger { padding: 10px 14px 10px 18px; }

@@ -1,0 +1,49 @@
+export interface SkillPrerequisite {
+  skillId: number;
+  prerequisiteSkillId: number;
+  prerequisiteLevel: number;
+}
+
+/** What the student sees for a skill: the skill-tree node, the Exercise progress bar
+ *  and the session popup all render this pair (adt-learning/docs/adr/0001).
+ *  attemptCount 0 = "not started", otherwise progressPercent. Never show raw P(L). */
+export interface SkillProgress {
+  progressPercent: number;
+  attemptCount: number;
+}
+
+export interface BranchSkill extends SkillProgress {
+  skillId: number;
+  skillCode: string;
+  skillsName: string;
+  tier: string;
+  status: string;
+  /** questions answered in this skill's unfinished session (its draft); 0 / missing = none (adt-learning/docs/adr/0003) */
+  draftAnsweredCount?: number;
+  skillPrequisite: SkillPrerequisite[];
+}
+
+/** The goal node that ends every branch's skill tree. The backend derives it on every read and
+ *  never stores it, so every branch has one (adt-learning/docs/adr/0005). Complete when every
+ *  required skill is at Progress 100% — counted by the backend, the frontend only draws it. */
+export interface GoalNode {
+  goalId: number;
+  goalName: string;
+  /** the skills whose mastery decides completion — not the edges: the tree joins the goal node to its end skills only */
+  requiredSkillIds: number[];
+  masteredCount: number;
+  requiredCount: number;
+  /** goal progress: average Progress of the required skills (not started = 0); 100 once complete */
+  progressPercent: number;
+  /** sticky — stays true after the first completion, even if a required skill drops later */
+  isComplete: boolean;
+  /** ISO time of the first completion; null if not complete, or completed before it was recorded */
+  completedAt: string | null;
+}
+
+/** GET /branch/:branchId/skills */
+export interface BranchSkillTree {
+  skills: BranchSkill[];
+  /** null when the goal requires no skills */
+  goal: GoalNode | null;
+}

@@ -1,0 +1,654 @@
+/* ══════════════════════════════════════
+   SelectBranch.css — PSU ALS · หน้าเลือกเป้าหมาย (goal)
+   ยึดตาม DESIGN.md: token ชุดกลาง, ตัวอักษร 3 ระดับ, รัศมี 8/12, ปุ่มสีทึบ
+   ชื่อ token เดิมของหน้านี้ (--shell/--card-glass/--glass/--glass-edge/--brand/
+   --brand-fill/--field/--solid-btn-*) ถูกแปลงเป็นชื่อกลางแล้ว
+   ฟอนต์ DM Mono ย้ายไปโหลดที่ index.html แทน @import ในไฟล์นี้
+══════════════════════════════════════ */
+.sb2-root {
+  --bg: #f2f7fa;
+  --text: #000080;
+  --ink: #334155;
+  --border-soft: #e2e8f0;
+  --r-sm: 8px;
+  --r-md: 12px;
+  --r-full: 9999px;
+  --muted: #475569;
+  --accent: #0047AB;
+  --accent-fill: #0047AB;
+  --accent2: #82C8E5;
+  --tint: #e8f0fe;
+  --tint-2: #f0f9ff;
+  --surface-2: #f8fafc;
+  --surface: #ffffff;
+  --border: #c2d3e0;
+  --hi-line: rgba(255, 255, 255, 0.9);
+  --sheen: rgba(130, 200, 229, 0.18);
+  --on-accent: #ffffff;
+  --red: #dc2626;
+  --bad-bg: #fef2f2;
+  --ok-bg: #ecfdf5; --ok-ink: #059669; --ok-border: #a7f3d0;
+
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+  position: relative;
+  transition: background 0.3s ease;
+}
+
+/* Dark follows the global theme (PreferencesContext → <html data-theme>),
+   same values as :root[data-theme="dark"] .ad-app */
+:root[data-theme="dark"] .sb2-root {
+  color-scheme: dark;
+  --bg: #0b1220;
+  --ink: #cbd5e1;
+  --border-soft: #1f2b42;
+  --text: #ffffff;
+  --muted: #a3b1cc;
+  --accent: #6b9bff;
+  --accent-fill: #2f5fd0;
+  --tint: #1a2a4a;
+  --tint-2: #142238;
+  --surface-2: #172238;
+  --surface: #121b2e;
+  --border: #26344f;
+  --hi-line: rgba(255, 255, 255, 0.04);
+  --sheen: rgba(107, 155, 255, 0.12);
+  --on-accent: #ffffff;
+  --red: #f87171;
+  --bad-bg: rgba(248, 113, 113, 0.12);
+  --ok-bg: rgba(52, 211, 153, 0.12); --ok-ink: #34d399; --ok-border: rgba(52, 211, 153, 0.35);
+}
+
+/* Icon-only flex buttons: never let the svg shrink to 0 */
+.sb2-root svg { flex-shrink: 0; }
+
+.sb2-shell {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  width: 100%;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: clamp(20px, 3.5vh, 40px) 24px 80px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.sb2-topbar {
+  display: flex;
+  align-items: stretch;
+  gap: 14px;
+  flex-wrap: wrap;
+  animation: sb2FadeDown 0.55s ease both;
+}
+
+.sb2-pill {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px 34px;
+  border-radius: var(--r-full);
+  background: var(--surface);
+  backdrop-filter: blur(24px) saturate(1.6);
+  -webkit-backdrop-filter: blur(24px) saturate(1.6);
+  border: 1px solid var(--border);
+  transition: background .18s, border-color .18s;
+}
+
+.sb2-pill:hover {
+  border-color: var(--accent);
+}
+
+.sb2-userpill {
+  padding: 18px 30px;
+  gap: 12px;
+}
+
+.sb2-badge-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: var(--r-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  color: var(--on-accent);
+  background: var(--accent-fill);
+  transition: background .18s, border-color .18s;
+}
+
+.sb2-badge-icon:hover {
+  background: #003A8C;
+}
+
+.sb2-title {
+  font-size: clamp(20px, 2.4vw, 26px);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--text);
+  white-space: nowrap;
+}
+
+.sb2-avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--accent);
+  background: var(--tint);
+  animation: sb2Bob 5s ease-in-out infinite;
+  flex-shrink: 0;
+}
+
+.sb2-usertext {
+  min-width: 0;
+}
+
+.sb2-fullname {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sb2-username {
+  font-family: 'DM Mono', monospace;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.sb2-topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: auto;
+}
+
+.sb2-theme-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  padding: 12px 18px;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  color: var(--text);
+  cursor: pointer;
+  transition: background .18s, border-color .18s;
+}
+
+.sb2-theme-btn:hover {
+  border-color: var(--accent);
+}
+
+.sb2-theme-btn:active {
+  background: var(--tint);
+}
+
+.sb2-logout-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 600;
+  padding: 15px 30px;
+  border-radius: var(--r-sm);
+  /* red outline, like .ad-sidebar-logout */
+  border: 1px solid color-mix(in srgb, var(--red) 25%, transparent);
+  background: var(--surface);
+  color: var(--red);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background .18s, border-color .18s;
+}
+
+.sb2-logout-btn:hover {
+  border-color: var(--accent);
+  background: var(--bad-bg);
+  border-color: var(--red);
+}
+
+.sb2-logout-btn:active {
+  background: var(--tint);
+}
+
+.sb2-hero {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+  padding: 28px 30px;
+  border-radius: var(--r-md);
+  background: var(--surface);
+  backdrop-filter: blur(26px) saturate(1.6);
+  -webkit-backdrop-filter: blur(26px) saturate(1.6);
+  border: 1px solid var(--border);
+  animation: sb2FadeUp 0.6s ease both 0.06s;
+}
+
+.sb2-sheen {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 460px;
+  height: 460px;
+  margin: -230px 0 0 -230px;
+  border-radius: 50%;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.35s;
+  background: radial-gradient(circle, var(--sheen) 0%, transparent 68%);
+}
+
+.sb2-card .sb2-sheen {
+  width: 340px;
+  height: 340px;
+  margin: -170px 0 0 -170px;
+  background: radial-gradient(circle, var(--sheen) 0%, transparent 66%);
+}
+
+.sb2-hero-text {
+  position: relative;
+  font-size: clamp(22px, 2.8vw, 30px);
+  font-weight: 700;
+  line-height: 1.35;
+  color: var(--text);
+  max-width: 620px;
+}
+
+.sb2-add-btn {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 18px 28px;
+  border-radius: var(--r-sm);
+  border: none;
+  background: var(--accent-fill);
+  color: var(--on-accent);
+  font-size: 15px;
+  font-weight: 600;
+  font-family: var(--font-sans);
+  cursor: pointer;
+  transition: background .18s, border-color .18s;
+}
+
+.sb2-add-btn:hover {
+  background: #003A8C;
+}
+
+.sb2-add-btn:active {
+  background: #002F73;
+}
+
+.sb2-add-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  font-size: 20px;
+  color: var(--on-accent);
+  transition: background .18s, border-color .18s;
+}
+
+.sb2-add-btn:hover .sb2-add-icon {
+  transform: rotate(90deg);
+}
+
+.sb2-listbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 0 6px;
+  animation: sb2FadeUp 0.6s ease both 0.1s;
+}
+
+.sb2-listbar-label {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.sb2-listbar-count {
+  font-family: 'DM Mono', monospace;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.sb2-scrollbtns {
+  display: flex;
+  gap: 8px;
+}
+
+.sb2-scrollbtn {
+  width: 34px;
+  height: 34px;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  color: var(--text);
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background .18s, border-color .18s;
+}
+
+.sb2-scrollbtn:hover {
+  border-color: var(--accent);
+}
+
+.sb2-scrollbtn:active {
+  background: var(--tint);
+}
+
+.sb2-empty {
+  text-align: center;
+  padding: 48px 24px;
+  color: var(--muted);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.sb2-empty-icon {
+  font-size: 40px;
+  margin-bottom: 12px;
+}
+
+.sb2-empty-sub {
+  font-size: 13px;
+  margin-top: 4px;
+}
+
+.sb2-rail {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(300px, 1fr);
+  gap: 18px;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+  padding: 6px 6px 14px;
+  animation: sb2FadeUp 0.6s ease both 0.14s;
+}
+
+.sb2-rail::-webkit-scrollbar {
+  height: 0;
+}
+
+/* เดิม .sb2-card มี border + radius แบบ pill ครอบการ์ดอีกชั้น จึงเห็นเป็นวงรีด้านหลัง
+   ตอนนี้เป็นแค่ตัวห่อ ขอบ/ไฮไลต์ย้ายไปอยู่ที่ .sb2-card-inner แทน */
+.sb2-card {
+  position: relative;
+  display: flex;
+}
+
+.sb2-card:hover .sb2-card-inner,
+.sb2-card.active .sb2-card-inner {
+  border-color: var(--accent);
+}
+
+.sb2-card-inner {
+  position: relative;
+  overflow: hidden;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  border-radius: var(--r-md);
+  border: 1px solid var(--border);
+  transition: border-color .18s;
+  background: var(--surface);
+  backdrop-filter: blur(26px) saturate(1.6);
+  -webkit-backdrop-filter: blur(26px) saturate(1.6);
+}
+
+.sb2-ripple {
+  position: absolute;
+  width: 320px;
+  height: 320px;
+  border-radius: 50%;
+  background: var(--accent);
+  pointer-events: none;
+  animation: sb2Ripple 0.6s ease-out forwards;
+}
+
+.sb2-active-badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--on-accent);
+  background: var(--accent-fill);
+  padding: 4px 10px;
+  border-radius: var(--r-full);
+  z-index: 1;
+}
+
+.sb2-goalname {
+  position: relative;
+  padding: 20px 18px;
+  border-radius: var(--r-md);
+  /* tinted header strip, like .ad-modal-header */
+  background: var(--tint);
+  border: 1px solid var(--border);
+  text-align: center;
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.sb2-stats-row {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+}
+
+.sb2-stat {
+  padding: 11px 14px;
+  border-radius: var(--r-md);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  font-size: 13px;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: background .18s, border-color .18s;
+}
+
+.sb2-stat:hover {
+  border-color: var(--accent);
+}
+
+.sb2-stat-value {
+  font-weight: 700;
+  color: var(--text);
+}
+
+.sb2-streak {
+  font-size: 13px;
+  color: var(--text);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.sb2-desc {
+  position: relative;
+  padding: 18px;
+  border-radius: var(--r-md);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--muted);
+  min-height: 84px;
+}
+
+.sb2-footer-row {
+  position: relative;
+  margin-top: auto;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+  align-items: center;
+}
+
+.sb2-status-badge {
+  padding: 11px 14px;
+  border-radius: var(--r-md);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sb2-status-badge.done {
+  background: var(--ok-bg);
+  border-color: var(--ok-border);
+  color: var(--ok-ink);
+}
+
+.sb2-select-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--accent-fill);
+  background: var(--accent-fill);
+  color: var(--on-accent);
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background .18s, border-color .18s;
+}
+
+.sb2-select-btn:hover {
+  background: #003A8C;
+  box-shadow: 0 12px 26px rgba(0, 0, 0, 0.24);
+}
+
+.sb2-select-btn:active {
+  background: #002F73;
+}
+
+.sb2-select-arrow {
+  display: inline-block;
+  transition: background .18s, border-color .18s;
+}
+
+.sb2-select-btn:hover .sb2-select-arrow {
+  transform: translateX(4px);
+}
+
+@keyframes sb2FadeDown {
+  from {
+    opacity: 0;
+    transform: translateY(-14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes sb2FadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes sb2Bob {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+@keyframes sb2Ripple {
+  from {
+    transform: translate(-50%, -50%) scale(0);
+    opacity: 0.4;
+  }
+  to {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0;
+  }
+}
+
+@media (max-width: 720px) {
+  .sb2-topbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .sb2-topbar-actions {
+    margin-left: 0;
+    justify-content: flex-end;
+  }
+
+  .sb2-hero {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 24px;
+  }
+
+  .sb2-rail {
+    grid-auto-columns: minmax(78vw, 1fr);
+  }
+}
+
+/* ── Dark: ปุ่มพื้นทึบต้องสว่างขึ้นตอน hover ไม่ใช่เข้มลงแบบธีมสว่าง ── */
+:root[data-theme="dark"] .sb2-root .sb2-add-btn:hover,
+:root[data-theme="dark"] .sb2-root .sb2-select-btn:hover,
+:root[data-theme="dark"] .sb2-root .sb2-badge-icon:hover  { background: #3a6ad9; }
+:root[data-theme="dark"] .sb2-root .sb2-add-btn:active,
+:root[data-theme="dark"] .sb2-root .sb2-select-btn:active { background: #2f5fd0; }

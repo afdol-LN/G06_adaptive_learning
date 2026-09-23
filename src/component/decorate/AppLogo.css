@@ -1,0 +1,12 @@
+/* ══════════════════════════════════════
+   AppLogo.css — project logo (src/assets/logo-adt-learning.png)
+   Fills whatever box wraps it; the box decides the size.
+══════════════════════════════════════ */
+
+.app-logo {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  user-select: none;
+}

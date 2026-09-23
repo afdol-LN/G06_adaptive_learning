@@ -1,0 +1,72 @@
+/* ==========================================================================
+   GlobalLoader - Clean Minimal Blue Progress Bar
+   ========================================================================== */
+
+.global-loader-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 999999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  animation: fadeIn 0.2s ease-in-out forwards;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.global-loader-card {
+  background: #ffffff;
+  padding: 24px 32px;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 220px;
+}
+
+.global-loader-text {
+  font-family: var(--font-sans);
+  font-size: 15px;
+  font-weight: 500;
+  color: #334155;
+  margin-bottom: 14px;
+  letter-spacing: 0.3px;
+}
+
+/* ── Wave Loading Animation ───────────────────────────────────────────────── */
+
+.wave-loader-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  height: 32px;
+  margin-top: 6px;
+}
+
+.wave-bar {
+  width: 4px;
+  height: 20px;
+  background-color: #3b82f6; /* Clean Blue */
+  border-radius: 9999px;
+  animation: wave 1.2s ease-in-out infinite;
+}
+
+@keyframes wave {
+  0%, 100% {
+    transform: scaleY(0.4);
+  }
+  50% {
+    transform: scaleY(1.3);
+  }
+}

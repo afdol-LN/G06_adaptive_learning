@@ -1,0 +1,179 @@
+/* ══════════════════ CodeBlock — Catppuccin Mocha ══════════════════
+ *
+ * สีทั้งหมดประกาศบน .ctp-code ไม่ใช่ :root โดยตั้งใจ
+ * เพราะ Exercise.css / Pretest.css / Adminhome.css ต่างประกาศ :root
+ * ด้วยชื่อ token คนละชุดแต่ทับกันเอง (--text, --border, --green ...)
+ * ถ้าไปอ้าง token กลางสีจะเพี้ยนตามว่าหน้านั้น import CSS ตัวไหนหลังสุด
+ */
+
+.ctp-code {
+  --ctp-base: #1e1e2e;
+  --ctp-mantle: #181825;
+  --ctp-surface0: #313244;
+  --ctp-surface1: #45475a;
+  --ctp-overlay0: #6c7086;
+  --ctp-subtext0: #a6adc8;
+  --ctp-text: #cdd6f4;
+  --ctp-mauve: #cba6f7;
+  --ctp-blue: #89b4fa;
+  --ctp-sapphire: #74c7ec;
+  --ctp-teal: #94e2d5;
+  --ctp-green: #a6e3a1;
+  --ctp-yellow: #f9e2af;
+  --ctp-peach: #fab387;
+  --ctp-red: #f38ba8;
+  --ctp-pink: #f5c2e7;
+
+  background: var(--ctp-base);
+  border: 1px solid var(--ctp-surface0);
+  border-radius: 12px;
+  overflow: hidden;
+  margin: 0 0 22px;
+  box-shadow: 0 6px 20px rgba(30, 30, 46, 0.18);
+  text-align: left;
+}
+
+/* แถบหัวแบบ Notion: ชื่อภาษาซ้าย ปุ่มคัดลอกขวา */
+.ctp-code-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 7px 12px 7px 14px;
+  background: var(--ctp-mantle);
+  border-bottom: 1px solid var(--ctp-surface0);
+}
+
+.ctp-code-lang {
+  font-family: ui-monospace, "DM Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ctp-overlay0);
+}
+
+.ctp-code-copy {
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--ctp-surface1);
+  background: transparent;
+  color: var(--ctp-subtext0);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.ctp-code-copy:hover {
+  background: var(--ctp-surface0);
+  color: var(--ctp-text);
+}
+
+.ctp-code-pre {
+  margin: 0;
+  padding: 16px 18px;
+  overflow-x: auto;
+  background: var(--ctp-base);
+}
+
+.ctp-code-pre code {
+  font-family: ui-monospace, "DM Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+  font-size: 13px;
+  line-height: 1.75;
+  color: var(--ctp-text);
+  white-space: pre;
+  background: none;
+  border: none;
+  padding: 0;
+  display: block;
+  tab-size: 4;
+}
+
+/* ── token ของ highlight.js -> Catppuccin Mocha ── */
+.ctp-code .hljs-keyword,
+.ctp-code .hljs-selector-tag,
+.ctp-code .hljs-literal,
+.ctp-code .hljs-doctag {
+  color: var(--ctp-mauve);
+}
+
+.ctp-code .hljs-title,
+.ctp-code .hljs-title.function_,
+.ctp-code .hljs-section {
+  color: var(--ctp-blue);
+}
+
+.ctp-code .hljs-title.class_,
+.ctp-code .hljs-type,
+.ctp-code .hljs-built_in {
+  color: var(--ctp-yellow);
+}
+
+.ctp-code .hljs-string,
+.ctp-code .hljs-meta .hljs-string,
+.ctp-code .hljs-regexp {
+  color: var(--ctp-green);
+}
+
+.ctp-code .hljs-number,
+.ctp-code .hljs-symbol,
+.ctp-code .hljs-link {
+  color: var(--ctp-peach);
+}
+
+.ctp-code .hljs-comment,
+.ctp-code .hljs-quote {
+  color: var(--ctp-overlay0);
+  font-style: italic;
+}
+
+.ctp-code .hljs-variable,
+.ctp-code .hljs-template-variable,
+.ctp-code .hljs-attr,
+.ctp-code .hljs-attribute,
+.ctp-code .hljs-property {
+  color: var(--ctp-text);
+}
+
+.ctp-code .hljs-params {
+  color: var(--ctp-peach);
+}
+
+.ctp-code .hljs-operator,
+.ctp-code .hljs-punctuation {
+  color: var(--ctp-sapphire);
+}
+
+.ctp-code .hljs-meta,
+.ctp-code .hljs-selector-attr,
+.ctp-code .hljs-selector-pseudo {
+  color: var(--ctp-teal);
+}
+
+.ctp-code .hljs-deletion {
+  color: var(--ctp-red);
+}
+
+.ctp-code .hljs-addition {
+  color: var(--ctp-green);
+}
+
+.ctp-code .hljs-emphasis {
+  font-style: italic;
+}
+
+.ctp-code .hljs-strong {
+  font-weight: 700;
+}
+
+@media (max-width: 600px) {
+  .ctp-code-pre code {
+    font-size: 11.5px;
+  }
+  .ctp-code-pre {
+    padding: 13px 14px;
+  }
+}

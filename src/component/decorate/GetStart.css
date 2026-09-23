@@ -1,8 +1,9 @@
-:root {
-  /* Cobalt Sky Light Mode Palette */
+﻿:root {
+  /* Admin palette (Adminhome.css) under this screen's legacy names:
+     navy = page ground, navy2/navy3 = surfaces, gold = cobalt accent */
   --navy:    #f2f7fa; 
   --navy2:   #ffffff;
-  --navy3:   #e9f0f5;
+  --navy3:   #f8fafc;
   --border:  #c2d3e0;
   --border2: #6D8196;
   --gold:    #0047AB; /* Cobalt Blue */
@@ -10,12 +11,12 @@
   --gold3:   #000080; /* Navy Blue */
   --text:    #000080; /* Navy Text */
   --muted:   #6D8196; /* Slate Grey */
-  --muted2:  #8fa3b5;
+  --muted2:  #94a3b8;
 }
 
 body {
   margin: 0;
-  font-family: 'DM Sans', sans-serif;
+  font-family: var(--font-sans);
   background-color: var(--navy);
   color: var(--text);
   overflow-x: hidden;
@@ -36,6 +37,13 @@ body, #root {
     radial-gradient(ellipse 60% 80% at 85% 90%, rgba(0, 71, 171, 0.08) 0%, transparent 60%),
     var(--navy);
   z-index: -2;
+}
+
+:root[data-theme="dark"] .bg {
+  background:
+    radial-gradient(ellipse 80% 60% at 20% 10%, rgba(110, 168, 255, 0.14) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 80% at 85% 90%, rgba(130, 200, 229, 0.08) 0%, transparent 60%),
+    #0b1220;
 }
 
 .bg-grid {
@@ -99,67 +107,262 @@ body, #root {
   padding: 2rem;
   position: relative;
   z-index: 1;
+  box-sizing: border-box;
 }
 
-.icon-ring {
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
-  background: #ffffff;
-  border: 1.5px solid var(--gold);
+/* ── Layout ตาม wireframe: header (logo + ชื่อระบบ) → carousel → ปุ่ม Exit / Start ──
+   token ของหน้านี้ประกาศบน .gs-shell (prefix gs-) เพื่อไม่ชนกับ :root ของ stylesheet อื่น */
+.gs-shell {
+  --gs-surface:   rgba(255, 255, 255, 0.82);
+  --gs-border:    #c2d3e0;
+  --gs-title:     #000080;
+  --gs-text:      #1e293b;
+  --gs-muted:     #6D8196;
+  --gs-accent:    #0047AB;
+  --gs-accent-2:  #82C8E5;
+  --gs-accent-bg: rgba(0, 71, 171, 0.08);
+  --gs-dot:       #c2d3e0;
+  --gs-shadow:    0 10px 40px rgba(0, 71, 171, 0.10);
+  --gs-header-bg:     #000080; /* Navy Blue */
+  --gs-header-border: #000080;
+  --gs-header-title:  #ffffff;
+  --gs-header-muted:  #b9dcf0;
+
+  width: 100%;
+  max-width: 760px;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+:root[data-theme="dark"] .gs-shell {
+  --gs-surface:   rgba(15, 23, 42, 0.85);
+  --gs-border:    #334155;
+  --gs-title:     #ffffff;
+  --gs-text:      #ffffff;
+  --gs-muted:     #94a3b8;
+  --gs-accent:    #6ea8ff;
+  --gs-accent-2:  #82C8E5;
+  --gs-accent-bg: rgba(110, 168, 255, 0.14);
+  --gs-dot:       #475569;
+  --gs-shadow:    0 10px 40px rgba(0, 0, 0, 0.45);
+  --gs-header-bg:     #0a1f6e;
+  --gs-header-border: #334155;
+  --gs-header-title:  #ffffff;
+  --gs-header-muted:  #b9dcf0;
+}
+
+.gs-shell svg { flex-shrink: 0; }
+
+/* Header: icon and system name */
+.gs-header {
+  align-self: center;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.9rem 1.75rem;
+  background: var(--gs-header-bg);
+  border: 1.5px solid var(--gs-header-border);
+  border-radius: 18px;
+  box-shadow: var(--gs-shadow);
+  backdrop-filter: blur(8px);
+  text-align: left;
+}
+
+.gs-logo {
+  display: block;
+  flex-shrink: 0;
+  width: 52px;
+  height: 52px;
+}
+
+.gs-title {
+  margin: 0;
+  font-size: 1.35rem;
+  line-height: 1.25;
+  font-weight: 800;
+  color: var(--gs-header-title);
+}
+
+.gs-tagline {
+  margin: 0.2rem 0 0;
+  font-size: 0.9rem;
+  color: var(--gs-header-muted);
+}
+
+/* Carousel */
+.gs-carousel {
+  position: relative;
+  padding: 2.25rem 4rem 1.25rem;
+  background: var(--gs-surface);
+  border: 1.5px solid var(--gs-border);
+  border-radius: 24px;
+  box-shadow: var(--gs-shadow);
+  backdrop-filter: blur(8px);
+  outline: none;
+}
+
+.gs-carousel:focus-visible { border-color: var(--gs-accent); }
+
+.gs-viewport { overflow: hidden; }
+
+.gs-track {
+  display: flex;
+  transition: transform 0.4s ease;
+}
+
+.gs-slide {
+  flex: 0 0 100%;
+  min-height: 220px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0 0.5rem;
+  box-sizing: border-box;
+}
+
+.gs-slide-icon {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 2.5rem;
-  color: var(--gold3);
-  box-shadow: 0 0 30px rgba(130, 200, 229, 0.4);
-  margin-bottom: 2rem;
-}
-
-.eyebrow {
-  font-size: 0.875rem;
-  text-transform: uppercase;
-  letter-spacing: 0.2em;
-  color: var(--gold);
+  width: 64px;
+  height: 64px;
   margin-bottom: 1rem;
-  font-weight: 600;
+  border-radius: 50%;
+  background: var(--gs-accent-bg);
+  color: var(--gs-accent);
+  font-size: 1.6rem;
 }
 
-.title {
-  font-size: 3.5rem;
-  line-height: 1.1;
-  font-weight: 800;
-  margin: 0 0 1rem 0;
-  color: var(--gold3);
-  background: none;
-  -webkit-text-fill-color: initial;
+/* รูปประกอบสไลด์ — กล่องสูงคงที่ รูปทุกขนาด/สัดส่วนย่อให้พอดีโดยไม่ถูกตัดหรือยืด */
+.gs-slide-media {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 420px;
+  height: 200px;
+  margin-bottom: 1.25rem;
 }
 
-.subtitle-line { font-size: 1.25rem; color: var(--muted); margin-bottom: 2rem; }
-.sep { width: 60px; height: 4px; background: var(--gold); margin: 0 auto 2rem auto; border-radius: 2px; }
-.desc { font-size: 1.1rem; color: var(--muted); max-width: 600px; margin: 0 auto 3rem auto; line-height: 1.6; }
-
-.btn-wrap {
-  margin-top: 1rem;
+.gs-slide-media img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  border-radius: 12px;
+  user-select: none;
 }
 
-.btn-start {
+.gs-slide-title {
+  margin: 0 0 0.75rem;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--gs-title);
+}
+
+.gs-slide-desc {
+  margin: 0;
+  max-width: 520px;
+  font-size: 1.05rem;
+  line-height: 1.7;
+  color: var(--gs-muted);
+}
+
+.gs-nav {
+  position: absolute;
+  top: calc(50% - 1rem);
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;            /* กัน padding ของ button global (index.css) ดันให้กว้างกว่าสูงจนเป็นวงรี */
+  border-radius: 50%;
+  border: 1.5px solid var(--gs-border);
+  background: transparent;
+  color: var(--gs-accent);
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.gs-nav:hover { background: var(--gs-accent-bg); border-color: var(--gs-accent); }
+.gs-nav-prev { left: 1rem; }
+.gs-nav-next { right: 1rem; }
+
+.gs-dots {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 1.5rem;
+}
+
+.gs-dot {
+  width: 8px;
+  height: 8px;
+  padding: 0;
+  border: none;
+  border-radius: 100px;
+  background: var(--gs-dot);
+  cursor: pointer;
+  transition: width 0.3s ease, background 0.3s ease;
+}
+
+.gs-dot.is-active { width: 24px; background: var(--gs-accent); }
+
+/* Exit / Start */
+.gs-actions {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.gs-btn {
   display: inline-flex;
   align-items: center;
-  gap: 12px;
-  background: linear-gradient(135deg, var(--gold) 0%, var(--gold3) 100%);
-  color: #ffffff;
-  padding: 16px 40px;
-  border-radius: 100px;
-  text-decoration: none;
+  justify-content: center;
+  gap: 10px;
+  min-width: 160px;
+  padding: 14px 32px;
+  border-radius: 14px;
+  font-family: inherit;
+  font-size: 1.05rem;
   font-weight: 700;
-  font-size: 1.125rem;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 20px rgba(0, 71, 171, 0.25);
-  border: none;
+  cursor: pointer;
+  transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.2s ease;
 }
 
-.btn-start:hover { transform: translateY(-2px) scale(1.02); box-shadow: 0 8px 30px rgba(0, 71, 171, 0.4); }
-.btn-start:active { transform: translateY(0) scale(0.98); }
-.btn-arrow { transition: transform 0.3s ease; }
-.btn-start:hover .btn-arrow { transform: translateX(4px); }
+.gs-btn-exit {
+  background: var(--gs-surface);
+  color: var(--gs-muted);
+  border: 1.5px solid var(--gs-border);
+}
+
+.gs-btn-exit:hover { color: var(--gs-text); border-color: var(--gs-muted); }
+
+.gs-btn-start {
+  background: var(--gs-header-bg);   /* navy เดียวกับกล่องชื่อระบบ */
+  color: var(--gs-header-title);
+  border: 1.5px solid var(--gs-header-border);
+  box-shadow: 0 4px 20px rgba(0, 0, 128, 0.25);
+}
+
+.gs-btn-start:hover { transform: translateY(-2px) scale(1.02); box-shadow: 0 8px 30px rgba(0, 0, 128, 0.4); }
+.gs-btn-start:active,
+.gs-btn-start.is-starting { transform: scale(0.98); }
+.gs-btn-arrow { transition: transform 0.3s ease; }
+.gs-btn-start:hover .gs-btn-arrow { transform: translateX(4px); }
+
+@media (max-width: 600px) {
+  .page { padding: 1.5rem 16px; }
+  .gs-header { padding: 0.75rem 1rem; }
+  .gs-logo { width: 40px; height: 40px; }
+  .gs-title { font-size: 1.05rem; }
+  .gs-carousel { padding: 1.75rem 1rem 1rem; }
+  .gs-nav { display: none; }
+  .gs-slide { min-height: 260px; }
+  .gs-slide-media { height: 150px; }
+  .gs-actions { flex-direction: column-reverse; }
+  .gs-btn { width: 100%; }
+}
