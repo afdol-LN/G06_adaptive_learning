@@ -22,6 +22,7 @@ import {
 } from 'react-icons/fa6';
 import { usePreferences } from '../context/PreferencesContext';
 import { displayProgressPercent, formatProgressLabel } from './home/utils/skillTree';
+import { ANIMATIONS } from '../utils/animations';
 
 export default function Exercise() {
   const controller = useExerciseController();
@@ -208,11 +209,39 @@ export default function Exercise() {
       )}
 
       <div className={`overlay ${controller.sessionEnded ? 'open' : ''}`}>
+        {/* พลุเต็มจอ: อยู่บนพื้นหลังเบลอของ overlay แต่หลังการ์ด — mount ตอนจบ session จึงเล่นตั้งแต่ต้นทุกครั้ง */}
+        {controller.sessionEnded && (
+          <div className="session-end-layer" aria-hidden>
+            <iframe
+              className="session-end-anim"
+              src={ANIMATIONS.sessionEnd}
+              title="session complete animation"
+              tabIndex={-1}
+              sandbox="allow-scripts allow-same-origin"
+            />
+          </div>
+        )}
         <div className="popup">
           <div className="ph">
-            <span className="ph-trophy">
-              {controller.stopReason === 'mastered' ? <FaTrophy aria-hidden /> : <FaClipboardCheck aria-hidden />}
-            </span>
+            {controller.stopReason === 'mastered' ? (
+              <>
+                {/* ถ้วยแบบ animation — mount ตอนจบ session จึงเล่นตั้งแต่ต้น */}
+                {controller.sessionEnded && (
+                  <iframe
+                    className="ph-trophy-anim"
+                    src={ANIMATIONS.trophy}
+                    title="trophy animation"
+                    aria-hidden
+                    tabIndex={-1}
+                    sandbox="allow-scripts allow-same-origin"
+                  />
+                )}
+                {/* ผู้ใช้ที่ตั้ง "ลดการเคลื่อนไหว" เห็นไอคอนถ้วยเดิมแทน (สลับด้วย CSS) */}
+                <span className="ph-trophy ph-trophy-fallback"><FaTrophy aria-hidden /></span>
+              </>
+            ) : (
+              <span className="ph-trophy"><FaClipboardCheck aria-hidden /></span>
+            )}
             <div className="ph-title">{t('exercise.done.title')}</div>
             <div className="score-pills">
               <div className="spill sp-cor">
