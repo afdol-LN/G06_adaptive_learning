@@ -124,25 +124,55 @@ export default function Exercise() {
         </div>
 
         <div className="stage">
-          <QuestionCard
-            key={question.exerciseId}
-            index={controller.questionIndex}
-            total={controller.questionLimit}
-            skillName={controller.skillsName}
-            level={question.skillLevel}
-            type={question.type}
-            description={question.description}
-            code={question.code}
-            language={question.language}
-            choices={(question.choices || []).map((c) => ({ key: c.id, script: c.script }))}
-            selectedKey={controller.selected}
-            onPick={controller.pick}
-            fillValue={controller.fillInBlankInput}
-            onFillChange={controller.setFillInBlankInput}
-            locked={controller.locked}
-            reveal={revealed ? { key: revealed.choiceId, isCorrect: revealed.isCorrect } : null}
-            tourAttrs={{ question: 'ex-question', answer: 'ex-answer' }}
-            footer={
+          <div className="qcard" key={question.exerciseId}>
+            <div className="card-ribbon"></div>
+            <div className="card-body">
+              <div className="q-question" data-tour="ex-question">{question.description}</div>
+
+              <CodeBlock code={question.code} language={question.language} />
+
+              {question.type === 'CHOICE' ? (
+                <div className={`choices${controller.locked ? ' locked' : ''}`} data-tour="ex-answer">
+                  {(question.choices || []).map((choice) => {
+                    const outcome = revealed?.choiceId === choice.id ? outcomeClass : '';
+                    const stateClass = outcome || (controller.selected === choice.id ? 'sel' : '');
+                    return (
+                      <div
+                        key={choice.id}
+                        className={stateClass ? `opt ${stateClass}` : 'opt'}
+                        onClick={() => controller.pick(choice.id)}
+                        aria-disabled={controller.locked}
+                      >
+                        <div className="opt-text">{choice.script}</div>
+                        {outcome && (
+                          <span className="opt-ck">
+                            {revealed?.isCorrect ? <FaCheck aria-hidden /> : <FaXmark aria-hidden />}
+                          </span>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="fib-wrap">
+                  <input
+                    className={outcomeClass ? `fill-blank-input ${outcomeClass}` : 'fill-blank-input'}
+                    data-tour="ex-answer"
+                    value={controller.fillInBlankInput}
+                    onChange={(e) => controller.setFillInBlankInput(e.target.value)}
+                    disabled={controller.locked}
+                    placeholder={t('exercise.fillPlaceholder')}
+                  />
+                  {outcomeClass && (
+                    <span className="fib-ck">
+                      {revealed?.isCorrect ? <FaCheck aria-hidden /> : <FaXmark aria-hidden />}
+                    </span>
+                  )}
+                </div>
+              )}
+            </div>
+
+            <div className="card-foot">
               <button
                 className={controller.checking ? 'btn-next checking' : 'btn-next'}
                 data-tour="ex-submit"
@@ -172,14 +202,8 @@ export default function Exercise() {
         style={{ color: revealed?.isCorrect ? 'var(--green)' : 'var(--red)' }}
         role="status"
         aria-live="polite"
-      >
-        {revealed &&
-          (revealed.isCorrect ? (
-            <FaCheck title={t('exercise.correct')} />
-          ) : (
-            <FaXmark title={t('exercise.incorrect')} />
-          ))}
-      </div>
+        aria-label={revealed ? (revealed.isCorrect ? t('exercise.correct') : t('exercise.incorrect')) : undefined}
+      />
 
       {controller.exitOpen && (
         <div className="overlay open" onClick={controller.cancelExit}>

@@ -223,6 +223,7 @@ export const HomeShell: React.FC = () => {
               stats={statsController.stats}
               goalsCount={branches?.length ?? 0}
               activeBranch={activeBranch}
+              skills={skillTreeController.skills}
             />
           )}
         </div>
