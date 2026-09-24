@@ -98,6 +98,7 @@ export const th = {
   "home.profile.collapse": "ซ่อนข้อมูลของฉัน",
   "home.start": "เริ่มเลย",
   "home.startAria": "เริ่มฝึก {name}",
+  "home.nextExerciseShort": "แบบฝึกหัดถัดไป",
 
   // ── Skill tree / side panel ──
   "skill.notStarted": "ยังไม่เริ่ม",

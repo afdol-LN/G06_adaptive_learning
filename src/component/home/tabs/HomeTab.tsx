@@ -1,13 +1,12 @@
 import React from "react";
-import { FaPlay } from "react-icons/fa6";
 import { BranchStats } from "../../../models/branchStatsModel";
-import { usePreferences } from "../../../context/PreferencesContext";
 import { SkillTreeSVG } from "../skillTree/SkillTreeSVG";
 import { SkillSidePanel } from "../skillTree/SkillSidePanel";
 import { GoalSidePanel } from "../skillTree/GoalSidePanel";
 import { LayoutGoalNode, LayoutSkill, getProgressColor } from "../utils/skillTree";
 import { HomeProfileStrip } from "../component/HomeProfileStrip";
 import { HomeProgressPanel } from "../component/HomeProgressPanel";
+import { HomeGoalBar } from "../component/HomeGoalBar";
 
 interface HomeTabProps {
   fullName: string;
@@ -73,8 +72,6 @@ export const HomeTab: React.FC<HomeTabProps> = ({
   onShowBreakdown,
   recommendedSkillId,
 }) => {
-  const { t } = usePreferences();
-
   return (
     <div className="tab-home">
       <div className="home-canvas" data-tour="tour-skill-tree">
@@ -102,16 +99,9 @@ export const HomeTab: React.FC<HomeTabProps> = ({
             onToggle={onToggleProfileStrip}
             onShowBreakdown={onShowBreakdown}
           />
-          {/* Legend — อธิบายสี progress bar */}
-          <div className="tree-legend">
-            {LEGEND.map(({ pct, label }) => (
-              <div key={pct} className="tree-legend-row">
-                <span className="tree-legend-dot" style={{ background: getProgressColor(pct) }} />
-                <span className="tree-legend-label">{label}</span>
-              </div>
-            ))}
-          </div>
         </div>
+
+        <HomeGoalBar goalName={activeBranch?.goalName} onNextExercise={() => setShowPicker(true)} />
 
         <HomeProgressPanel
           skills={treeSkills}
@@ -122,10 +112,15 @@ export const HomeTab: React.FC<HomeTabProps> = ({
           onSkillClick={handleNodeClick}
         />
 
-        <button type="button" className="btn-next-exercise home-fab" onClick={() => setShowPicker(true)}>
-          <FaPlay aria-hidden />
-          <span>{t("home.nextExercise")}</span>
-        </button>
+        {/* Legend — อธิบายสี progress bar — มุมล่างขวา (เดิมอยู่ใน .home-overlay-top) */}
+        <div className="tree-legend home-legend">
+          {LEGEND.map(({ pct, label }) => (
+            <div key={pct} className="tree-legend-row">
+              <span className="tree-legend-dot" style={{ background: getProgressColor(pct) }} />
+              <span className="tree-legend-label">{label}</span>
+            </div>
+          ))}
+        </div>
       </div>
 
       <SkillSidePanel

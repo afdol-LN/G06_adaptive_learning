@@ -659,7 +659,6 @@ body {
 }
 .home-overlay-top > * { pointer-events: auto; }
 .home-overlay-top .hps { flex: 1 1 640px; max-width: 1100px; }
-.home-overlay-top .tree-legend { margin-left: auto; pointer-events: none; }
 
 .hpp {
   position: absolute; left: 12px; bottom: 12px; z-index: 20;
@@ -677,19 +676,35 @@ body {
 .hpp .progress-summary-list { flex-direction: column; flex-wrap: nowrap; overflow-y: auto; min-height: 0; }
 .hpp .progress-summary-item { width: 100%; }
 
-.home-fab {
-  position: absolute; right: 16px; bottom: 16px; z-index: 20;
-  width: auto; padding: 14px 22px;
-  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-  box-shadow: var(--card-shadow-hover);
+/* แถบ goal ลอยกลางด้านบน — ต่ำกว่า strip (z 20) เพื่อให้ strip ที่กางลอยทับได้ */
+.home-goal-bar {
+  position: absolute; top: 12px; left: 50%; transform: translateX(-50%); z-index: 19;
+  width: min(640px, calc(100% - 160px));
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  padding: 10px 10px 10px 18px;
+  background: var(--accent-fill); color: var(--on-accent);
+  border-radius: var(--r-md); box-shadow: var(--card-shadow-hover);
 }
+.hgb-goal  { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.hgb-icon  { font-size: 20px; }
+.hgb-text  { display: flex; flex-direction: column; min-width: 0; }
+.hgb-label { font-size: 12px; color: color-mix(in srgb, var(--on-accent) 80%, transparent); }
+.hgb-name  { font-size: 17px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.hgb-next {
+  width: auto; flex-shrink: 0; padding: 10px 18px;
+  display: inline-flex; align-items: center; gap: 8px;
+  background: var(--surface); color: var(--accent);
+}
+.home-legend { position: absolute; right: 12px; bottom: 12px; z-index: 20; }
 
 @media (max-width: 1024px) {
   .hpp { width: min(300px, calc(100% - 24px)); max-height: 40%; }
 }
 @media (max-width: 600px) {
-  .home-fab { left: 12px; right: 12px; }
-  .hpp { bottom: 76px; }
+  .home-goal-bar { left: 68px; right: 12px; width: auto; transform: none; }
+  .hgb-label { display: none; }
+  .home-legend { bottom: 12px; }
+  .hpp { bottom: 64px; }
 }
 
 /* ════ HISTORY TAB ════ */

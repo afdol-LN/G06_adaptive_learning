@@ -98,6 +98,7 @@ export const en: Record<keyof typeof th, string> = {
   "home.profile.collapse": "Hide my info",
   "home.start": "Start",
   "home.startAria": "Start practising {name}",
+  "home.nextExerciseShort": "Next exercise",
 
   // ── Skill tree / side panel ──
   "skill.notStarted": "Not started",
