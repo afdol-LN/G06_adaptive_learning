@@ -7,7 +7,6 @@ import {
   FaCircleQuestion,
   FaClockRotateLeft,
   FaHouse,
-  FaSitemap,
   FaUser,
   FaUserGraduate,
 } from "react-icons/fa6";
@@ -16,7 +15,6 @@ import type { TKey } from "../../i18n";
 import LogoutButton from "../common/LogoutButton";
 import { useHomeShellController, type HomeTabKey } from "./controller/homeShell.controller";
 import { HomeTab } from "./tabs/HomeTab";
-import { SkillTreeTab } from "./tabs/SkillTreeTab";
 import { HistoryTab } from "./tabs/HistoryTab";
 import { ProfileTab } from "./tabs/ProfileTab";
 import { NextExercisePicker } from "./skillTree/NextExercisePicker";
@@ -31,7 +29,6 @@ import "../decorate/Tour.css";
 
 const NAV_ITEMS: { key: HomeTabKey; labelKey: TKey; Icon: IconType }[] = [
   { key: "Home", labelKey: "nav.home", Icon: FaHouse },
-  { key: "SkillTree", labelKey: "nav.skillTree", Icon: FaSitemap },
   { key: "History", labelKey: "nav.history", Icon: FaClockRotateLeft },
   { key: "Profile", labelKey: "nav.profile", Icon: FaUser },
 ];
@@ -191,24 +188,6 @@ export const HomeShell: React.FC = () => {
               onGoalClick={controller.handleGoalClick}
               setGoalSelected={skillTreeController.setGoalSelected}
               onShowBreakdown={activeBranch.isAlreadyPretest ? controller.openBreakdown : undefined}
-            />
-          )}
-
-          {activeTab === "SkillTree" && (
-            <SkillTreeTab
-              treeSkills={skillTreeController.treeSkills}
-              unlocked={skillTreeController.unlockedSkills}
-              canUnlockFn={skillTreeController.canUnlock}
-              onNodeClick={controller.handleNodeClick}
-              selected={skillTreeController.selectedSkill}
-              setSelected={skillTreeController.setSelectedSkill}
-              hovered={hovered}
-              setHovered={setHovered}
-              onStartExercise={controller.handleStartExercise}
-              goal={skillTreeController.goalNode}
-              goalSelected={skillTreeController.goalSelected}
-              onGoalClick={controller.handleGoalClick}
-              setGoalSelected={skillTreeController.setGoalSelected}
             />
           )}
 

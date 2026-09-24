@@ -4,7 +4,6 @@ import type { th } from "./th";
 export const en: Record<keyof typeof th, string> = {
   // ── Sidebar / shell ──
   "nav.home": "Home",
-  "nav.skillTree": "Skill Tree",
   "nav.history": "History",
   "nav.profile": "Profile",
   "sidebar.show": "Show sidebar",
@@ -95,7 +94,6 @@ export const en: Record<keyof typeof th, string> = {
   "home.progressSummary": "Overall progress",
   "home.progressTooltip": "Skill: {name}\nProgress: {pct}%",
   "home.treeLabel": "Skill tree — click a node for details",
-  "home.expandTree": "Open full view",
   "home.nextExercise": "Next exercise — pick a topic",
   "home.recentSessions": "Recent sessions",
   "home.noSessions": "No sessions yet — start an exercise!",
@@ -283,10 +281,6 @@ export const en: Record<keyof typeof th, string> = {
   "tour.help.title": "A guide for every page",
   "tour.help.desc": "Each page has its own guide. Press here any time to replay the guide for the page you're on.",
   // Skill Tree
-  "tour.skillTree.intro.title": "Skill Tree",
-  "tour.skillTree.intro.desc": "The full map of every skill in your current learning goal and how they connect.",
-  "tour.skillTree.canvas.title": "Explore the tree",
-  "tour.skillTree.canvas.desc": "Scroll to zoom in and out, and drag to move around. Lines show which skills come first.",
   "tour.skillTree.node.title": "Skill nodes",
   "tour.skillTree.node.desc": "Click a skill to see its progress, its prerequisites and what it unlocks, then start practising. A locked skill opens once all of its prerequisite skills are complete.",
   // History

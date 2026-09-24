@@ -602,14 +602,6 @@ body {
   box-shadow: 0 4px 18px rgba(0, 71, 171, 0.10);
 }
 .skill-tree-svg { width: 100%; height: 100%; display: block; }
-.tree-expand-btn {
-  position: absolute; bottom: 16px; right: 16px; z-index: 10;
-  width: 36px; height: 36px; border-radius: var(--r-sm);
-  display: flex; align-items: center; justify-content: center;
-  background: var(--surface); border: 1px solid var(--border); color: var(--accent);
-  cursor: pointer; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-.tree-expand-btn:hover { border-color: var(--accent); }
 
 /* Legend — กล่องอธิบายสี progress bar มุมขวาบนของแผนผัง */
 .tree-legend {
@@ -652,10 +644,6 @@ body {
 
 .home-sessions { padding: 20px 32px 40px; }
 .session-list  { display: flex; flex-direction: column; gap: 10px; }
-
-/* ════ SKILL TREE TAB ════ */
-.tab-skill-tree { flex: 1; display: flex; overflow: hidden; min-height: 0; }
-.tree-main { flex: 1; overflow: hidden; background: var(--bg); position: relative; }
 
 /* ════ HISTORY TAB ════ */
 .tab-history {

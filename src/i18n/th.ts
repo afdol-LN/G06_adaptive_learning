@@ -4,7 +4,6 @@
 export const th = {
   // ── Sidebar / shell ──
   "nav.home": "หน้าหลัก",
-  "nav.skillTree": "แผนผังทักษะ",
   "nav.history": "ประวัติการเรียน",
   "nav.profile": "โปรไฟล์",
   "sidebar.show": "แสดงแถบเมนู",
@@ -95,7 +94,6 @@ export const th = {
   "home.progressSummary": "ความคืบหน้าโดยรวม",
   "home.progressTooltip": "ทักษะ: {name}\nความคืบหน้า: {pct}%",
   "home.treeLabel": "แผนผังทักษะ — คลิกที่โหนดเพื่อดูรายละเอียด",
-  "home.expandTree": "ขยายเต็มจอ",
   "home.nextExercise": "แบบฝึกหัดถัดไป — เลือกเรื่องที่จะทำ",
   "home.recentSessions": "Session ล่าสุด",
   "home.noSessions": "ยังไม่มี session — เริ่มทำ Exercise ได้เลย!",
@@ -283,10 +281,6 @@ export const th = {
   "tour.help.title": "คำแนะนำประจำแต่ละหน้า",
   "tour.help.desc": "ทุกหน้ามีคำแนะนำของตัวเอง กดที่นี่เมื่อไหร่ก็ได้เพื่อดูวิธีใช้งานของหน้าที่คุณอยู่ตอนนี้",
   // Skill Tree
-  "tour.skillTree.intro.title": "แผนผังทักษะ",
-  "tour.skillTree.intro.desc": "แผนที่รวมทุกทักษะในเป้าหมายการเรียนรู้ปัจจุบัน และความเชื่อมโยงระหว่างทักษะ",
-  "tour.skillTree.canvas.title": "สำรวจแผนผัง",
-  "tour.skillTree.canvas.desc": "เลื่อนลูกกลิ้งเมาส์เพื่อซูมเข้า-ออก และคลิกค้างแล้วลากเพื่อเลื่อนดู เส้นเชื่อมบอกว่าทักษะไหนต้องทำก่อน",
   "tour.skillTree.node.title": "โหนดทักษะ",
   "tour.skillTree.node.desc": "คลิกที่ทักษะเพื่อดูความคืบหน้า ทักษะที่ต้องผ่านก่อน และทักษะที่จะปลดล็อกต่อ แล้วเริ่มฝึกได้ทันที ทักษะที่ล็อกอยู่จะเปิดเมื่อทำทักษะที่ต้องผ่านก่อนครบทุกตัว",
   // History

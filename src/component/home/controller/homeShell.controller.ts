@@ -11,7 +11,8 @@ import { useSessionHistoryController } from "./sessionHistory.controller";
 import { useHomeTourController } from "./homeTour.controller";
 import { useUserProfileController } from "./userProfile.controller";
 
-export type HomeTabKey = "Home" | "SkillTree" | "History" | "Profile";
+export type HomeTabKey = "Home" | "History" | "Profile";
+const HOME_TABS: HomeTabKey[] = ["Home", "History", "Profile"];
 
 // จำสถานะ sidebar (ย่อ/ขยาย) ไว้ข้าม session
 const SIDEBAR_COLLAPSED_KEY = "homeSidebarCollapsed";
@@ -31,12 +32,13 @@ export function useHomeShellController() {
   const homeTour = useHomeTourController(t);
   const profileController = useUserProfileController();
 
-  // Tab State
-  // Exercise's "View skill tree" (after completing the goal) opens a tab directly via router state
+  // Tab State — เปิดแท็บตรงได้ผ่าน router state { tab }
+  // ชื่อแท็บที่ไม่มีแล้ว (เช่น "SkillTree" เดิม ที่รวมเข้า Home) → Home
   const location = useLocation();
-  const [activeTab, setActiveTab] = useState<HomeTabKey>(
-    () => (location.state as { tab?: HomeTabKey } | null)?.tab ?? "Home"
-  );
+  const [activeTab, setActiveTab] = useState<HomeTabKey>(() => {
+    const tab = (location.state as { tab?: string } | null)?.tab;
+    return HOME_TABS.includes(tab as HomeTabKey) ? (tab as HomeTabKey) : "Home";
+  });
 
   // Sidebar State — ครั้งแรกบนจอแคบให้เริ่มแบบย่อ
   const [sidebarCollapsed, setSidebarCollapsed] = useState<boolean>(() => {
