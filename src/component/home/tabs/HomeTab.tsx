@@ -1,4 +1,4 @@
-import React, { useLayoutEffect, useRef, useState } from "react";
+import React from "react";
 import { FaPlay } from "react-icons/fa6";
 import { BranchStats } from "../../../models/branchStatsModel";
 import { usePreferences } from "../../../context/PreferencesContext";
@@ -75,27 +75,9 @@ export const HomeTab: React.FC<HomeTabProps> = ({
 }) => {
   const { t } = usePreferences();
 
-  // ความสูงของแถวลอยด้านบน (strip + legend) — ใช้เว้นที่ด้านบนของ tree ไม่ให้โหนดแถวแรกถูกบัง
-  // strip พับ/กาง หรือขึ้นบรรทัดใหม่บนจอแคบ ความสูงเปลี่ยน จึงวัดด้วย ResizeObserver
-  const overlayTopRef = useRef<HTMLDivElement>(null);
-  const [overlayTop, setOverlayTop] = useState(0);
-  useLayoutEffect(() => {
-    const el = overlayTopRef.current;
-    if (!el) return;
-    const update = () => setOverlayTop(el.offsetHeight);
-    update();
-    const ro = new ResizeObserver(update);
-    ro.observe(el);
-    return () => ro.disconnect();
-  }, []);
-
   return (
     <div className="tab-home">
-      <div
-        className="home-canvas"
-        data-tour="tour-skill-tree"
-        style={{ "--overlay-top": `${overlayTop}px` } as React.CSSProperties}
-      >
+      <div className="home-canvas" data-tour="tour-skill-tree">
         <SkillTreeSVG
           skills={treeSkills}
           unlocked={unlocked}
@@ -111,7 +93,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
           onRecommendedClick={onStartExercise}
         />
 
-        <div className="home-overlay-top" ref={overlayTopRef}>
+        <div className="home-overlay-top">
           <HomeProfileStrip
             fullName={fullName}
             goalName={activeBranch?.goalName}

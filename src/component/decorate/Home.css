@@ -495,13 +495,17 @@ body {
    พื้น --accent-fill (ไม่ใช่ --accent: dark mode --accent สว่างเกินจนตัวอักษรขาวอ่านไม่ออก) */
 .hps {
   position: relative; flex-shrink: 0;
-  display: flex; align-items: center; gap: 24px;
-  margin: 0; padding: 18px 60px 18px 24px;
+  display: flex; align-items: stretch;
+  margin: 0; padding: 0;
   background: var(--accent-fill); color: var(--on-accent);
   border-radius: 0 var(--r-md) var(--r-md) 0;
   box-shadow: var(--card-shadow);
+  transition: transform .3s ease;
   animation: homeRise .45s ease-out backwards;
 }
+/* พับ: เลื่อนออกซ้าย เหลือเฉพาะคอลัมน์ปุ่ม 56px ติดขอบ sidebar — ความสูงเท่าตอนกาง */
+.hps.is-collapsed { transform: translateX(calc(-100% + 56px)); }
+.hps-body { flex: 1; min-width: 0; display: flex; align-items: center; gap: 24px; padding: 18px 16px 18px 24px; }
 .hps-hero  { display: flex; align-items: center; gap: 16px; min-width: 0; flex: 0 1 auto; }
 .hps-info  { min-width: 0; }
 .hps-stats { flex: 1; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; min-width: 0; }
@@ -517,25 +521,20 @@ body {
   transition: background-color .2s;
 }
 .hps-breakdown { margin-top: 8px; display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; font-size: 12px; font-weight: 600; }
-.hps-toggle    { position: absolute; top: 10px; right: 10px; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; }
 .hps-breakdown:hover,
 .hps-toggle:hover { background: color-mix(in srgb, var(--on-accent) 28%, transparent); }
-
-.hps-collapsed { flex-shrink: 0; margin-top: 0; }
-.hps-toggle-mini {
-  display: inline-flex; align-items: center; gap: 8px;
-  padding: 8px 14px 8px 18px; font-size: 16px;
-  border: none; border-radius: 0 var(--r-full) var(--r-full) 0;
-  background: var(--accent-fill); color: var(--on-accent);
-  box-shadow: var(--card-shadow); cursor: pointer;
+.hps-toggle {
+  flex-shrink: 0; align-self: stretch; width: 56px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;
+  font-size: 18px;
+  border: none; border-left: 1px solid color-mix(in srgb, var(--on-accent) 25%, transparent);
+  border-radius: 0 var(--r-md) var(--r-md) 0;
 }
-.hps-toggle-mini:hover { opacity: .92; }
 .hps-breakdown:focus-visible,
-.hps-toggle:focus-visible,
-.hps-toggle-mini:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.hps-toggle:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
 @media (max-width: 1024px) {
-  .hps { flex-direction: column; align-items: stretch; }
+  .hps-body { flex-direction: column; align-items: stretch; }
   .hps-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
@@ -584,6 +583,7 @@ body {
   .node-row-progress:hover, .node-row-progress:active,
   .stat-card:hover,
   .progress-summary-item:hover, .progress-summary-item:active { transform: none; }
+  .hps { transition: none; }
 }
 
 .empty-note    { color: var(--faint); text-align: center; padding: 24px; }
@@ -647,10 +647,10 @@ body {
   position: relative; flex: 1; min-width: 0; min-height: 0;
   overflow: hidden; background: var(--bg);
 }
-/* เว้นที่บน = แถวลอยด้านบน (วัดจริงจาก HomeTab → --overlay-top) + ระยะห่าง; ล่าง = ปุ่มลอย */
-.home-canvas .skill-tree-scroll { padding: calc(var(--overlay-top, 0px) + 28px) 0 96px; }
+/* เว้นที่บนคงที่ = แค่แถว strip/legend ตอนพับ (collapsed); ตอนกาง (expanded) strip จะลอยทับ tree โดยตั้งใจ (ตามคำขอผู้ใช้) ไม่ผลักลงมา; ล่าง = ปุ่มลอย */
+.home-canvas .skill-tree-scroll { padding: 72px 0 96px; }
 /* empty-tree message is a direct child of .home-canvas (not inside .skill-tree-scroll), so it needs its own top padding to clear .home-overlay-top */
-.home-canvas > .side-panel-empty { padding: calc(var(--overlay-top, 0px) + 28px) 24px 0; text-align: center; }
+.home-canvas > .side-panel-empty { padding: 72px 24px 0; text-align: center; }
 
 .home-overlay-top {
   position: absolute; top: 12px; left: 0; right: 12px; z-index: 20;
