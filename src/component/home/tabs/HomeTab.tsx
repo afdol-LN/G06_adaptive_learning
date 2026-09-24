@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { FaChartSimple, FaClipboardList, FaUserGraduate } from "react-icons/fa6";
+import { FaChartSimple, FaClipboardList, FaLock, FaUserGraduate } from "react-icons/fa6";
 import { BranchSkill } from "../../../models/branchSkillModel";
 import { BranchStats } from "../../../models/branchStatsModel";
 import { SessionHistoryItem } from "../../../models/sessionHistoryModel";
@@ -7,7 +7,14 @@ import { usePreferences } from "../../../context/PreferencesContext";
 import { SkillTreeSVG } from "../skillTree/SkillTreeSVG";
 import { SkillSidePanel } from "../skillTree/SkillSidePanel";
 import { GoalSidePanel } from "../skillTree/GoalSidePanel";
-import { LayoutGoalNode, LayoutSkill, getProgressColor, displayProgressPercent } from "../utils/skillTree";
+import {
+  LayoutGoalNode,
+  LayoutSkill,
+  getProgressColor,
+  getNodeColors,
+  displayProgressPercent,
+  formatProgressLabel,
+} from "../utils/skillTree";
 import { SessionCard } from "../../common/SessionCard";
 
 interface HomeTabProps {
@@ -47,7 +54,6 @@ export const HomeTab: React.FC<HomeTabProps> = ({
   userProfile,
   activeBranch,
   stats,
-  skills,
   treeSkills,
   unlocked,
   canUnlock,
@@ -140,40 +146,52 @@ export const HomeTab: React.FC<HomeTabProps> = ({
 
           {/* Progress summary */}
           <div className="progress-summary">
-            <span className="progress-summary-label">{t("home.progressSummary")}</span>
-            {skills
-              .filter((s) => s.attemptCount > 0)
-              .map((s) => {
-                const positionedSkill = treeSkills.find((ts) => ts.skillId === s.skillId);
+            <div className="progress-summary-head">
+              <span className="progress-summary-label">{t("home.progressSummary")}</span>
+              {onShowBreakdown && (
+                <button type="button" className="progress-summary-breakdown" onClick={onShowBreakdown}>
+                  <FaChartSimple aria-hidden />
+                  <span>{t("pretestBreakdown.reopen")}</span>
+                </button>
+              )}
+            </div>
+            {/* ทุก skill ใน tree เป็น block เรียงต่อกัน — สีเดียวกับโหนดใน skill tree (getNodeColors)
+                ครบ 100% เขียว · ปลดล็อกแล้ว น้ำเงิน · ปลดล็อกได้ ฟ้า · ล็อก เทา */}
+            <div className="progress-summary-list">
+              {treeSkills.map((s) => {
                 const pct = displayProgressPercent(s);
+                const isUnlocked = unlocked.has(s.skillId);
+                const isLocked = !isUnlocked && !canUnlock(s.skillId);
+                const { bg, border, text, bar } = getNodeColors(isUnlocked, !isLocked, pct);
                 return (
-                  <div
+                  <button
+                    type="button"
                     key={s.skillId}
-                    className="progress-summary-item"
-                    onClick={() => positionedSkill && handleNodeClick(positionedSkill)}
+                    className={`progress-summary-item${isLocked ? " locked" : ""}`}
+                    // ล็อก: พื้น/ขอบเทาจาก tree แต่ตัวอักษรใช้ --muted (ผ่าน CSS) — --node-locked-text จางเกินสำหรับข้อความ 12px
+                    style={{ background: bg, borderColor: border, color: isLocked ? undefined : text }}
+                    onClick={() => handleNodeClick(s)}
                     title={t("home.progressTooltip", { name: s.skillsName, pct })}
                   >
-                    <span className="progress-summary-name">
-                      {s.skillsName.length > 12 ? s.skillsName.substring(0, 10) + "…" : s.skillsName}
+                    <span className="progress-summary-row">
+                      <span className="progress-summary-name">{s.skillsName}</span>
+                      <span className="progress-summary-pct">
+                        {isLocked ? <FaLock aria-label={t("skill.locked")} /> : formatProgressLabel(s, t("skill.notStarted"))}
+                      </span>
                     </span>
-                    <div className="progress-summary-track">
-                      <div
+                    <span className="progress-summary-track" style={{ background: bar }}>
+                      <span
                         className="progress-summary-fill"
                         style={{ width: `${pct}%`, background: getProgressColor(pct) }}
                       />
-                    </div>
-                  </div>
+                    </span>
+                  </button>
                 );
               })}
-            {onShowBreakdown && (
-              <button type="button" className="progress-summary-breakdown" onClick={onShowBreakdown}>
-                <FaChartSimple aria-hidden />
-                <span>{t("pretestBreakdown.reopen")}</span>
-              </button>
-            )}
+            </div>
           </div>
 
-          <div className="section-label">{t("home.treeLabel")}</div>
+          <div className="section-label section-label-tree">{t("home.treeLabel")}</div>
         </div>
 
         {/* Tree */}
@@ -274,6 +292,8 @@ export const HomeTab: React.FC<HomeTabProps> = ({
         open={goalSelected}
         onClose={() => setGoalSelected(false)}
         skills={treeSkills}
+        unlocked={unlocked}
+        canUnlockFn={canUnlock}
         onSelectSkill={setSelected}
       />
     </div>

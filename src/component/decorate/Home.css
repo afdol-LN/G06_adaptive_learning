@@ -40,8 +40,19 @@
   --glass:     rgba(255, 255, 255, 0.97);
   --overlay:   rgba(0, 40, 120, 0.18);
 
+  /* stat cards บนหน้า Home — พื้นขาว, hover เป็นน้ำเงินอ่อน */
+  --stat-bg: var(--surface); --stat-bg-hover: var(--tint);
+  --stat-ink: var(--text);
+
+  /* การ์ดบนหน้า Home (hero, stat cards, ความคืบหน้าโดยรวม) — ไม่มีขอบ ใช้เงาแยกจากพื้นแทน */
+  --card-shadow:       0 4px 12px rgba(0, 0, 128, 0.18), 0 1px 3px rgba(0, 0, 128, 0.12);
+  --card-shadow-hover: 0 6px 16px rgba(0, 0, 128, 0.26), 0 2px 4px rgba(0, 0, 128, 0.16);
+  /* side panel (skill/goal) อยู่ขวาของ tree — เงาทอดไปทางซ้าย */
+  --panel-shadow: -6px 0 16px rgba(0, 0, 128, 0.14), -1px 0 3px rgba(0, 0, 128, 0.1);
+
   /* info strip (overall progress on Home) */
   --info-bg: #f0f9ff; --info-border: #bae6fd; --info-ink: #0369a1; --info-track: #e0f2fe;
+  --info-title: #000000;   /* หัวข้อ "ความคืบหน้าโดยรวม" */
 
   /* status badges (session score, answer icons) */
   --ok-bg:  #ecfdf5; --ok-ink:  #059669; --ok-border:  #a7f3d0;
@@ -52,6 +63,7 @@
 
   /* progress ramp — utils/skillTree.getProgressColor */
   --prog-100: #10b981; --prog-75: #3b82f6; --prog-20: #eab308; --prog-1: #f97316; --prog-0: #cbd5e1;
+  --on-prog: #00004d;   /* ตัวอักษรบนแถบ --prog-* ทึบ — navy เข้มกว่า --text เพราะ #000080 บน --prog-75 ได้แค่ 4.35:1 */
 
   /* skill-tree nodes — utils/skillTree.getNodeColors — and edges */
   --node-done-bg: #ecfdf5;   --node-done-border: #10b981;   --node-done-text: #047857;   --node-done-bar: #f0fdf4;
@@ -97,7 +109,17 @@
   --glass:     rgba(18, 27, 46, 0.97);
   --overlay:   rgba(2, 6, 16, 0.6);
 
+  /* พื้นมืดใกล้ --bg แล้ว — hover จึงเพิ่มความอิ่มของสีน้ำเงินแทนการทำให้ดำลง ไม่งั้น card กลืนกับพื้น */
+  --stat-bg: var(--surface); --stat-bg-hover: var(--tint);
+  --stat-ink: var(--text);
+
+  /* navy (#000080) มองไม่เห็นบนพื้นมืด — ใช้น้ำเงิน --accent-fill (#2f5fd0) ให้เป็นแสงน้ำเงินจาง ๆ แทน */
+  --card-shadow:       0 4px 12px rgba(47, 95, 208, 0.28), 0 1px 3px rgba(47, 95, 208, 0.2);
+  --card-shadow-hover: 0 6px 16px rgba(47, 95, 208, 0.4), 0 2px 4px rgba(47, 95, 208, 0.26);
+  --panel-shadow: -6px 0 16px rgba(47, 95, 208, 0.22), -1px 0 3px rgba(47, 95, 208, 0.16);
+
   --info-bg: #0f1d33; --info-border: #1f3a5c; --info-ink: #7cc4f0; --info-track: #1a2c47;
+  --info-title: #ffffff;
 
   --ok-bg:  rgba(52, 211, 153, 0.12); --ok-ink:  #34d399; --ok-border:  rgba(52, 211, 153, 0.35);
   --mid-bg: rgba(96, 165, 250, 0.12); --mid-ink: #93c5fd; --mid-border: rgba(96, 165, 250, 0.35);
@@ -105,6 +127,7 @@
   --draft-bg: rgba(251, 191, 36, 0.12); --draft-ink: #fbbf24; --draft-border: rgba(251, 191, 36, 0.35);
 
   --prog-100: #34d399; --prog-75: #60a5fa; --prog-20: #facc15; --prog-1: #fb923c; --prog-0: #33415c;
+  --on-prog: #0b1220;
 
   --node-done-bg: #0f2a24;   --node-done-border: #34d399;   --node-done-text: #6ee7b7;   --node-done-bar: #12352c;
   --node-open-bg: #121b2e;   --node-open-border: #6b9bff;   --node-open-text: #9dbcff;   --node-open-bar: #1b2742;
@@ -197,7 +220,7 @@ body {
 }
 .sb-brand {
   flex: 1; min-width: 0; white-space: nowrap;
-  font-size: 15px; font-weight: 700; color: var(--accent2); 
+  font-size: 15px; font-weight: 700; color: var(--text);
 }
 
 /* Show/hide toggle — round chevron sitting on the sidebar's right edge */
@@ -244,6 +267,7 @@ body {
   flex: 1; min-height: 0; overflow-y: auto;
   display: flex; flex-direction: column; gap: 4px; padding-top: 6px;
 }
+.sb-nav .sb-nav-item { font-size: 16px; }   /* เมนูหลัก — ใหญ่กว่าแถวอื่นใน sidebar (13px) ~25% */
 .sb-nav-item:hover  { color: var(--text); background: var(--bg); }
 .sb-nav-item.active {
   color: #ffffff;
@@ -430,77 +454,141 @@ body {
 
 .home-top { padding: 22px 32px 0; flex-shrink: 0; }
 
+/* พื้น navy เดียวกับปุ่มเปลี่ยน branch (.gs-btn) — ใช้ --accent-fill ไม่ใช่ --accent เพราะ dark mode
+   --accent (#6b9bff) สว่างเกินจนตัวอักษรขาวอ่านไม่ออก; light mode ทั้งสองคือ #0047AB เท่ากัน */
 .home-hero {
-  background: var(--tint);
-  border: 1px solid var(--border); border-radius: var(--r-md);
+  background: var(--accent-fill);
+  border-radius: var(--r-md);
+  box-shadow: var(--card-shadow);
   padding: 20px 24px; margin-bottom: 16px;
   display: flex; align-items: center; gap: 20px;
+  color: var(--on-accent);
+  animation: homeRise .45s ease-out backwards;
 }
 .home-hero-avatar {
   width: 60px; height: 60px; border-radius: 50%;
-  background: var(--accent-fill);
+  background: var(--on-accent);
   display: flex; align-items: center; justify-content: center;
-  font-size: 26px; font-weight: 700; color: var(--on-accent);
+  font-size: 26px; font-weight: 700; color: var(--accent-fill);
   flex-shrink: 0;
+  transition: transform .3s cubic-bezier(.34, 1.56, .64, 1);
 }
+.home-hero:hover .home-hero-avatar { transform: rotate(-8deg) scale(1.06); }
 .home-hero-info { flex: 1; }
-.home-greeting  { font-size: 13px; color: var(--muted); margin-bottom: 2px; }
-.home-username  { font-size: 26px; font-weight: 700; color: var(--accent); letter-spacing: -0.01em; line-height: 1.2; }
+.home-greeting  { font-size: 13px; color: color-mix(in srgb, var(--on-accent) 85%, transparent); margin-bottom: 2px; }
+.home-username  { font-size: 26px; font-weight: 700; color: var(--on-accent); letter-spacing: -0.01em; line-height: 1.2; }
 
 .cursor {
-  display: inline-block; border-right: 2px solid var(--accent);
+  display: inline-block; border-right: 2px solid var(--on-accent);
   margin-left: 2px; animation: blink 1s step-end infinite;
 }
 @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
 
-.home-goal  { margin-top: 6px; font-size: 13px; color: var(--muted); }
+.home-goal  { margin-top: 6px; font-size: 13px; color: color-mix(in srgb, var(--on-accent) 85%, transparent); }
 .goal-badge {
-  background: rgba(130, 200, 229, 0.18); border: 1px solid var(--accent2);
-  border-radius: var(--r-sm); padding: 2px 10px; color: var(--accent); font-weight: 600;
+  background: color-mix(in srgb, var(--on-accent) 15%, transparent);
+  border: 1px solid color-mix(in srgb, var(--on-accent) 40%, transparent);
+  border-radius: var(--r-sm); padding: 2px 10px; color: var(--on-accent); font-weight: 600;
 }
 
 .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 16px; }
 .stat-card {
-  background: var(--surface); border: 1px solid var(--border);
+  background: var(--stat-bg);
   border-radius: var(--r-md); padding: 14px 18px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+  /* grid ยืดทุกการ์ดให้สูงเท่าการ์ดที่มี .stat-sub — จัดเนื้อหาให้อยู่กลางแนวตั้ง */
+  display: flex; flex-direction: column; justify-content: center;
+  box-shadow: var(--card-shadow);
+  color: var(--stat-ink);
+  transition: background-color .2s, box-shadow .2s, transform .2s ease-out;
+  /* backwards ไม่ใช่ both — fill หลังจบจะทับ transform ของ :hover */
+  animation: homeRise .45s ease-out backwards;
 }
-.stat-num   { font-size: 22px; font-weight: 800; }
-.stat-label { font-size: 11px; color: var(--muted); margin-top: 2px; }
-.stat-sub   { font-size: 11px; font-weight: 600; color: var(--purple); margin-top: 2px; }
-.stat-card.gold   .stat-num { color: var(--accent); }
-.stat-card.green  .stat-num { color: var(--accent); }
-.stat-card.blue   .stat-num { color: var(--accent); }
-.stat-card.purple .stat-num { color: var(--accent); }
+.stat-card:nth-child(1) { animation-delay: .06s; }
+.stat-card:nth-child(2) { animation-delay: .12s; }
+.stat-card:nth-child(3) { animation-delay: .18s; }
+.stat-card:nth-child(4) { animation-delay: .24s; }
+.stat-card:hover { background: var(--stat-bg-hover); box-shadow: var(--card-shadow-hover); transform: translateY(-3px); }
+.stat-num   { font-size: 34px; font-weight: 800; color: var(--stat-ink); line-height: 1.1; letter-spacing: -0.02em; }
+.stat-label { font-size: 14px; color: var(--stat-ink); margin-top: 2px; }
+.stat-sub   { font-size: 14px; font-weight: 600; color: var(--stat-ink); margin-top: 2px; }
 
 
 /* Overall-progress strip */
 .progress-summary {
-  background: var(--info-bg); border: 1px solid var(--info-border);
+  background: var(--surface);
   border-radius: var(--r-md); padding: 12px 16px; margin-bottom: 16px;
-  display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+  box-shadow: var(--card-shadow);
+  display: flex; flex-direction: column; gap: 10px;
+  animation: homeRise .45s ease-out .3s backwards;
 }
-.progress-summary-label { font-size: 13px; font-weight: 700; color: var(--info-ink); }
-.progress-summary-item  { display: flex; align-items: center; gap: 6px; cursor: pointer; }
-.progress-summary-name  { font-size: 13px; font-weight: 600; color: var(--ink-soft); }
-.progress-summary-track { width: 40px; height: 6px; background: var(--info-track); border-radius: var(--r-full); overflow: hidden; }
-.progress-summary-fill  { height: 100%; border-radius: var(--r-full); }
-/* ปุ่มเปิดที่มาของคะแนนเริ่มต้น — ชิดขวาสุดของแถบ */
+/* แถวหัวข้อ: "ความคืบหน้าโดยรวม" + ปุ่มที่มาของคะแนน */
+.progress-summary-head  { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; min-height: 32px; }
+.progress-summary-label { font-size: 20px; font-weight: 600; color: var(--info-title); }
+
+/* block ของแต่ละ skill เรียงต่อกัน — พื้น/ขอบ/ตัวอักษรมาจาก getNodeColors (inline style) เหมือนโหนดใน skill tree */
+.progress-summary-list  { display: flex; flex-wrap: wrap; gap: 8px; }
+.progress-summary-item  {
+  display: flex; flex-direction: column; gap: 6px;
+  width: 168px; padding: 8px 10px;
+  border: 1.5px solid; border-radius: var(--r-sm);
+  font-family: inherit; text-align: left; cursor: pointer;
+  transition: transform .15s, box-shadow .15s;
+}
+.progress-summary-item:hover { transform: translateY(-1px); box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08); }
+.progress-summary-item:active { transform: translateY(0) scale(.98); }
+/* --node-locked-text (#94a3b8) ได้แค่ 2.45:1 บนพื้นเทา — ข้อความใน block ใช้ --muted ให้ผ่าน 4.5:1 */
+.progress-summary-item.locked { color: var(--muted); }
+.progress-summary-item:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.progress-summary-row   { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.progress-summary-name  {
+  flex: 1; min-width: 0; font-size: 12px; font-weight: 700; color: inherit;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.progress-summary-pct   { flex-shrink: 0; display: inline-flex; font-size: 11px; font-weight: 700; color: inherit; font-variant-numeric: tabular-nums; }
+.progress-summary-track { display: block; height: 5px; border-radius: var(--r-full); overflow: hidden; }
+.progress-summary-fill  {
+  display: block; height: 100%; border-radius: var(--r-full);
+  transform-origin: left; animation: homeFillGrow .8s cubic-bezier(.22, 1, .36, 1) .45s backwards;
+}
+/* ปุ่มเปิดที่มาของคะแนนเริ่มต้น — ชิดขวาสุดของแถวหัวข้อ */
 .progress-summary-breakdown {
   margin-left: auto;
   display: inline-flex; align-items: center; gap: 6px;
   padding: 6px 12px; border-radius: var(--r-sm);
-  background: var(--surface); border: 1px solid var(--info-border); color: var(--info-ink);
+  background: var(--accent-fill); border: 1px solid var(--accent-fill); color: var(--on-accent);
   font-family: inherit; font-size: 13px; font-weight: 600;
-  cursor: pointer; transition: border-color .18s, background .18s;
+  cursor: pointer; transition: border-color .18s, background .18s, transform .18s ease-out, box-shadow .18s;
 }
-.progress-summary-breakdown:hover { border-color: var(--info-ink); background: var(--info-bg); }
+.progress-summary-breakdown svg { transition: transform .3s cubic-bezier(.34, 1.56, .64, 1); }
+.progress-summary-breakdown:hover {
+  background: color-mix(in srgb, var(--accent-fill) 80%, black);
+  border-color: color-mix(in srgb, var(--accent-fill) 80%, black);
+  transform: translateY(-1px);
+  box-shadow: var(--card-shadow);
+}
+.progress-summary-breakdown:hover svg { transform: scale(1.2); }
+.progress-summary-breakdown:active { transform: translateY(0) scale(.97); box-shadow: none; }
 .progress-summary-breakdown:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+@keyframes homeRise     { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+@keyframes homeFillGrow { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .home-hero, .stat-card, .progress-summary, .progress-summary-fill, .node-row-fill { animation: none; }
+  .node-row-progress:hover, .node-row-progress:active,
+  .home-hero:hover .home-hero-avatar,
+  .stat-card:hover,
+  .progress-summary-item:hover, .progress-summary-item:active,
+  .progress-summary-breakdown:hover, .progress-summary-breakdown:active,
+  .progress-summary-breakdown:hover svg { transform: none; }
+}
 
 .section-label {
   font-size: 13px; font-weight: 700; color: var(--muted);
 }
-.section-label-icon { display: flex; align-items: center; gap: 6px; }
+.section-label-icon { display: flex; align-items: center; gap: 6px; font-size: 18px; margin-bottom: 14px; }
+/* หัวข้อเหนือ skill tree — ใหญ่และดำกว่า section-label ปกติ */
+.section-label-tree { font-size: 20px; color: var(--info-title); }
 
 .empty-note    { color: var(--faint); text-align: center; padding: 24px; }
 .empty-note.lg { padding: 48px; }
@@ -511,6 +599,7 @@ body {
   background: var(--surface); border: 1px solid var(--border);
   border-radius: var(--r-md); height: 640px; flex-shrink: 0;
   overflow: hidden;
+  box-shadow: 0 4px 18px rgba(0, 71, 171, 0.10);
 }
 .skill-tree-svg { width: 100%; height: 100%; display: block; }
 .tree-expand-btn {
@@ -540,7 +629,7 @@ body {
   width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0;
 }
 .tree-legend-label {
-  font-size: 11px; font-weight: 600; color: var(--ink-soft);
+  font-size: 14px; font-weight: 600; color: var(--ink-soft);
   white-space: nowrap;
 }
 
@@ -640,10 +729,13 @@ body {
 
 /* ════ SIDE PANEL ════ */
 .side-panel {
-  width: 280px; flex-shrink: 0; display: flex; flex-direction: column;
+  width: min(360px, 90vw); flex-shrink: 0; display: flex; flex-direction: column;
   overflow-y: auto; border-left: 1px solid var(--border); background: var(--surface);
+  /* relative + z-index ให้เงาทับ skill tree ด้านซ้าย ไม่ถูก canvas ของ tree บัง */
+  position: relative; z-index: 1;
+  box-shadow: var(--panel-shadow);
 }
-.side-panel-section { padding: 16px; border-bottom: 1px solid var(--border); }
+.side-panel-section { padding: 20px 28px; border-bottom: 1px solid var(--border); }
 .side-panel-top-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
 .side-panel-icon   { font-size: 24px; display: flex; align-items: center; color: var(--accent); }
 .btn-close {
@@ -651,7 +743,9 @@ body {
   display: inline-flex; align-items: center; transition: color 0.2s;
 }
 .btn-close:hover   { color: var(--text); }
-.side-panel-title  { font-size: 15px; font-weight: 700; color: var(--text); }
+.side-panel-title  { font-size: 22px; font-weight: 700; color: var(--text); line-height: 1.3; }
+/* หัวข้อ section ("มาจาก", "ต่อไป") — เดิมไม่มี rule จึงได้ 21px จาก root */
+.side-panel-label  { font-size: 14px; font-weight: 700; color: var(--text); margin: 0 0 8px; }
 .side-panel-sub    { font-size: 13px; color: var(--muted); margin-top: 2px; }
 .side-panel-status { font-size: 13px; color: var(--muted); margin-top: 6px; }
 .side-panel-empty  { font-size: 13px; color: var(--faint); }
@@ -666,6 +760,33 @@ body {
 }
 .node-row:hover    { background: var(--tint); }
 .node-row-name { font-size: 13px; font-weight: 600; color: var(--text); flex: 1; }
+/* แถวที่พื้นเป็น progress bar — inline style ทับ background ของ :hover จึงใช้ยก+เงาแทน */
+.node-row-progress {
+  position: relative; overflow: hidden;
+  transition: transform .15s, box-shadow .15s;
+}
+.node-row-progress:hover { transform: translateY(-1px); box-shadow: var(--card-shadow); }
+.node-row-progress:active { transform: translateY(0) scale(.98); }
+.node-row-progress .node-row-name { color: inherit; }
+/* --node-locked-text จางเกินสำหรับข้อความ — ใช้ --muted เหมือน .progress-summary-item.locked */
+.node-row-progress.locked { color: var(--muted); }
+/* แถบทึบเต็มแถว (layout เดียวกับ .node-row) ตัดด้วย clip-path ให้เหลือเท่า pct —
+   สีเดียวกับตัวเลข % (getProgressColor) ตัวอักษรบนแถบใช้ --on-prog สีเข้ม เพราะขาวบนเขียว/เหลืองได้ไม่ถึง 3:1 */
+.node-row-fill {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; gap: 8px; padding: 8px 10px;
+  background: var(--fill);
+  color: var(--on-prog);
+  clip-path: inset(0 var(--clip) 0 0);
+  pointer-events: none;
+  animation: nodeRowFillGrow .7s cubic-bezier(.22, 1, .36, 1) backwards;
+}
+.node-row-fill .node-row-pct { color: var(--on-prog); }
+@keyframes nodeRowFillGrow { from { clip-path: inset(0 100% 0 0); } }
+
+/* แถวแทนรายการว่าง — หน้าตาเหมือน node-row แต่กดไม่ได้ */
+.node-row-empty, .node-row-empty:hover { cursor: default; background: var(--bg); }
+.node-row-empty .node-row-name { color: var(--muted); font-weight: 500; }
 .node-row-pct  { font-size: 13px; font-weight: 700; }
 .btn-exercise {
   width: 100%; padding: 12px 0; border-radius: var(--r-md);
@@ -782,7 +903,7 @@ body {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--r-md);
-  width: 520px; max-width: calc(100vw - 32px); max-height: 85vh;
+  width: 720px; max-width: calc(100vw - 32px); max-height: 85vh;
   padding: 24px;
   display: flex; flex-direction: column; gap: 14px;
   box-shadow: 0 8px 24px rgba(15, 23, 42, .12);
@@ -805,17 +926,33 @@ body {
 .bbs-close:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .bbs-lead { font-size: 14px; color: var(--muted); line-height: 1.6; margin: 0; }
 
+/* การ์ดสรุปบนสุด — โปรไฟล์/ประสบการณ์ที่ user เลือกในสาขานี้ + คะแนนเฉลี่ยที่ได้จากแต่ละอย่าง */
+.bbs-summary {
+  background: var(--tint); border: 1px solid var(--accent-fill); border-radius: var(--r-md);
+  padding: 14px 16px; display: flex; flex-direction: column; gap: 10px;
+}
+.bbs-summary-facts { display: flex; flex-wrap: wrap; gap: 8px 18px; }
+.bbs-summary-fact  { font-size: 14px; font-weight: 600; color: var(--info-title); }
+.bbs-summary-scores {
+  display: flex; flex-wrap: wrap; gap: 8px 18px;
+  padding-top: 8px; border-top: 1px solid var(--border-soft);
+}
+.bbs-summary-score { font-size: 13px; color: var(--muted); }
+.bbs-summary-score b { color: var(--accent-fill); font-weight: 700; }
+
 .bbs-list {
   list-style: none; margin: 0; padding: 0;
   display: flex; flex-direction: column; gap: 10px;
   overflow-y: auto; min-height: 0;
 }
 .bbs-item {
-  border: 1px solid var(--border); border-radius: var(--r-md);
-  background: var(--bg); padding: 12px 14px;
+  border: 2px solid var(--accent-fill); border-radius: var(--r-md);
+  background: var(--surface); padding: 12px 14px;
 }
 .bbs-item-top { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
-.bbs-skill { font-size: 15px; font-weight: 700; color: var(--ink); }
+.bbs-skill { font-size: 19px; font-weight: 700; color: var(--info-title); }
+.bbs-track { margin-top: 8px; }
+.bbs-track .progress-fill { background: var(--accent-fill); }   /* ทุกแท่งใน modal นี้เป็น navy สีเดียว */
 .bbs-total { font-size: 16px; font-weight: 700; color: var(--accent); font-variant-numeric: tabular-nums; }
 
 .bbs-parts {
@@ -823,11 +960,11 @@ body {
   border-top: 1px solid var(--border-soft);
   display: flex; flex-direction: column; gap: 4px;
 }
-.bbs-part { display: flex; justify-content: space-between; gap: 12px; font-size: 13px; color: var(--muted); }
-.bbs-part-val { font-weight: 600; color: var(--ink); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.bbs-part { display: flex; justify-content: space-between; gap: 12px; font-size: 16px; color: var(--text); }
+.bbs-part-val { font-weight: 700; color: var(--text); font-variant-numeric: tabular-nums; white-space: nowrap; }
 .bbs-part--note {
   display: block; padding: 6px 10px; border-radius: var(--r-sm);
-  background: var(--info-bg); border: 1px solid var(--info-border); color: var(--info-ink);
+  background: #fbc760; border: 1px solid #fbc760; color: #000000; font-weight: 600; font-size: 15px;
 }
 .bbs-part--cap .bbs-part-val { color: var(--bad-ink); }
 

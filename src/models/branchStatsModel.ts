@@ -24,4 +24,10 @@ export interface BranchBaseState{
   capPercent: number;
   correct: number;
   answered: number;
+  /** ระดับประสบการณ์ที่ user เลือกตอนสร้าง branch นี้ (1–5) — เหมือนกันทุกแถว */
+  expForGoal: number;
+  /** โปรไฟล์ user ตอนนี้ — เหมือนกันทุกแถว, ใช้ทำสรุปด้านบนของ modal */
+  facultyName: string | null;
+  majorName: string | null;
+  year: number | null;
 }

@@ -42,11 +42,21 @@ interface CodeBlockProps {
   label?: string;
 }
 
-function escapeHtml(text: string): string {
+export function escapeHtml(text: string): string {
   return text
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;");
+}
+
+// โจทย์ fill-in-blank เขียนช่องว่างเป็น "_____" ในเนื้อโค้ดเอง (ไม่ใช่ field แยก) —
+// เติมสีให้แค่ตอน "แสดงผล" เท่านั้น ไม่แตะเนื้อโค้ดจริงที่ยิงไปตรวจคำตอบ
+// เงื่อนไข: underscore ยาว 3 ตัวขึ้นไป และไม่ติดตัวอักษร/ตัวเลขข้างใดข้างหนึ่ง
+// กันไม่ให้ไปจับ dunder จริงในโค้ด เช่น __init__ (ซึ่งติดตัวอักษรทั้งสองข้าง)
+// export ไว้ให้ ExerciseFormModal ใช้ตัวเดียวกันวาด overlay ไฮไลต์ blank สดขณะ admin พิมพ์ (ไม่ใช่แค่ตอน render โค้ดจริง)
+export const BLANK_PATTERN = /(?<![A-Za-z0-9])_{3,}(?![A-Za-z0-9])/g;
+export function highlightBlanks(html: string): string {
+  return html.replace(BLANK_PATTERN, (match) => `<span class="ctp-code-blank">${match}</span>`);
 }
 
 /**
@@ -67,11 +77,11 @@ export default function CodeBlock({ code, language, label }: CodeBlockProps) {
     if (!trimmed) return "";
     ensureRegistered();
     // ภาษาที่ไม่รู้จักไม่ควรทำให้ทั้งหน้าพัง แค่แสดงเป็นข้อความธรรมดา
-    if (!hljs.getLanguage(lang)) return escapeHtml(trimmed);
+    if (!hljs.getLanguage(lang)) return highlightBlanks(escapeHtml(trimmed));
     try {
-      return hljs.highlight(trimmed, { language: lang }).value;
+      return highlightBlanks(hljs.highlight(trimmed, { language: lang }).value);
     } catch {
-      return escapeHtml(trimmed);
+      return highlightBlanks(escapeHtml(trimmed));
     }
   }, [trimmed, lang]);
 

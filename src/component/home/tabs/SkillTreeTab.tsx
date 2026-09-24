@@ -65,6 +65,8 @@ export const SkillTreeTab: React.FC<SkillTreeTabProps> = ({
         open={goalSelected}
         onClose={() => setGoalSelected(false)}
         skills={treeSkills}
+        unlocked={unlocked}
+        canUnlockFn={canUnlockFn}
         onSelectSkill={setSelected}
       />
     </div>

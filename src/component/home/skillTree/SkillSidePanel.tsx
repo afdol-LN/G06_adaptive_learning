@@ -2,6 +2,7 @@ import React from "react";
 import { FaBookOpen, FaXmark } from "react-icons/fa6";
 import { usePreferences } from "../../../context/PreferencesContext";
 import { LayoutSkill, getProgressColor, displayProgressPercent, formatProgressLabel, getDraftCount } from "../utils/skillTree";
+import { SkillProgressRow } from "./SkillProgressRow";
 
 interface SkillSidePanelProps {
   selected: LayoutSkill | null;
@@ -40,12 +41,14 @@ export const SkillSidePanel: React.FC<SkillSidePanelProps> = ({
   const draftCount = getDraftCount(skill);
 
   const nodeRow = (n: LayoutSkill) => (
-    <div key={n.skillId} className="node-row" onClick={() => setSelected(n)}>
-      <span className="node-row-name">{n.skillsName}</span>
-      <span className="node-row-pct" style={{ color: getProgressColor(displayProgressPercent(n)) }}>
-        {formatProgressLabel(n, notStarted)}
-      </span>
-    </div>
+    <SkillProgressRow
+      key={n.skillId}
+      skill={n}
+      isUnlocked={unlocked.has(n.skillId)}
+      canUnlock={canUnlockFn(n.skillId)}
+      notStartedLabel={notStarted}
+      onClick={setSelected}
+    />
   );
 
   return (
@@ -85,7 +88,9 @@ export const SkillSidePanel: React.FC<SkillSidePanelProps> = ({
       <div className="side-panel-section">
         <p className="side-panel-label">{t("skill.prereq")}</p>
         {prereqNodes.length === 0 ? (
-          <p className="side-panel-empty">{t("skill.prereqNone")}</p>
+          <div className="node-row node-row-empty">
+            <span className="node-row-name">{t("skill.prereqNone")}</span>
+          </div>
         ) : (
           prereqNodes.map(nodeRow)
         )}
@@ -94,7 +99,9 @@ export const SkillSidePanel: React.FC<SkillSidePanelProps> = ({
       <div className="side-panel-section">
         <p className="side-panel-label">{t("skill.unlocks")}</p>
         {nextNodes.length === 0 ? (
-          <p className="side-panel-empty">{t("skill.unlocksNone")}</p>
+          <div className="node-row node-row-empty">
+            <span className="node-row-name">{t("skill.unlocksNone")}</span>
+          </div>
         ) : (
           nextNodes.map(nodeRow)
         )}
