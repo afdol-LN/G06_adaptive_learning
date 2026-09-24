@@ -16,6 +16,7 @@ import {
   formatProgressLabel,
 } from "../utils/skillTree";
 import { SessionCard } from "../../common/SessionCard";
+import { StatCard } from "../../common/StatCard";
 
 interface HomeTabProps {
   userProfile: {
@@ -135,12 +136,8 @@ export const HomeTab: React.FC<HomeTabProps> = ({
 
           {/* Stats grid */}
           <div className="stats-grid" data-tour="tour-stats">
-            {statsList.map((s, i) => (
-              <div key={i} className={`stat-card ${s.cls}`}>
-                <div className="stat-num">{s.num}</div>
-                <div className="stat-label">{s.label}</div>
-                {s.sub && <div className="stat-sub">{s.sub}</div>}
-              </div>
+            {statsList.map((s) => (
+              <StatCard key={s.label} title={s.label} value={s.num} colorClass={s.cls} sub={s.sub} />
             ))}
           </div>
 

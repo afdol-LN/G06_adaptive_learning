@@ -511,7 +511,7 @@ body {
 .stat-num   { font-size: 34px; font-weight: 800; color: var(--stat-ink); line-height: 1.1; letter-spacing: -0.02em; }
 .stat-label { font-size: 14px; color: var(--stat-ink); margin-top: 2px; }
 .stat-sub   { font-size: 14px; font-weight: 600; color: var(--stat-ink); margin-top: 2px; }
-
+.stat-icon  { display: inline-flex; font-size: 18px; color: var(--accent); margin-bottom: 6px; }
 
 /* Overall-progress strip */
 .progress-summary {
