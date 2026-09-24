@@ -586,11 +586,6 @@ body {
   .progress-summary-item:hover, .progress-summary-item:active { transform: none; }
 }
 
-.section-label {
-  font-size: 13px; font-weight: 700; color: var(--muted);
-}
-.section-label-icon { display: flex; align-items: center; gap: 6px; font-size: 18px; margin-bottom: 14px; }
-
 .empty-note    { color: var(--faint); text-align: center; padding: 24px; }
 .empty-note.lg { padding: 48px; }
 
@@ -654,6 +649,8 @@ body {
 }
 /* เว้นที่บน = แถวลอยด้านบน (วัดจริงจาก HomeTab → --overlay-top) + ระยะห่าง; ล่าง = ปุ่มลอย */
 .home-canvas .skill-tree-scroll { padding: calc(var(--overlay-top, 0px) + 28px) 0 96px; }
+/* empty-tree message is a direct child of .home-canvas (not inside .skill-tree-scroll), so it needs its own top padding to clear .home-overlay-top */
+.home-canvas > .side-panel-empty { padding: calc(var(--overlay-top, 0px) + 28px) 24px 0; text-align: center; }
 
 .home-overlay-top {
   position: absolute; top: 12px; left: 0; right: 12px; z-index: 20;
@@ -662,7 +659,7 @@ body {
 }
 .home-overlay-top > * { pointer-events: auto; }
 .home-overlay-top .hps { flex: 1 1 640px; max-width: 1100px; }
-.home-overlay-top .tree-legend { margin-left: auto; }
+.home-overlay-top .tree-legend { margin-left: auto; pointer-events: none; }
 
 .hpp {
   position: absolute; left: 12px; bottom: 12px; z-index: 20;

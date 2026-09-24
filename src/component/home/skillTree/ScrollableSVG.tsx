@@ -40,7 +40,13 @@ export const ScrollableSVG: React.FC<ScrollableSVGProps> = ({ minX, minY, width,
     if (scrolledFor.current === key) return;
     scrolledFor.current = key;
     const left = focus ? (focus.x - minX) * scale - el.clientWidth / 2 : (width * scale - el.clientWidth) / 2;
-    const top = focus ? (focus.y - minY) * scale - el.clientHeight / 3 : 0;
+    // el.scrollTop=0 ก็ยังเห็น padTop ของ .skill-tree-scroll อยู่แล้ว ("แถบที่มองเห็นจริง" เริ่มต่ำกว่าขอบบนของ
+    // scroller ไปเท่า padTop) แต่เนื้อหา SVG ก็ถูกเลื่อนลงมาเท่า padTop เหมือนกัน (เพราะ padding อยู่เหนือ SVG)
+    // สอง padTop นี้จึงหักล้างกันในสูตร เหลือแค่หัก padTop+padBottom ออกจากความสูงแถบที่มองเห็นได้จริง
+    const cs = getComputedStyle(el);
+    const padTop = parseFloat(cs.paddingTop) || 0;
+    const padBottom = parseFloat(cs.paddingBottom) || 0;
+    const top = focus ? (focus.y - minY) * scale - (el.clientHeight - padTop - padBottom) / 3 : 0;
     el.scrollTo({ left: Math.max(0, left), top: Math.max(0, top) });
   }, [focus, hostWidth, scale, minX, minY, width]);
 

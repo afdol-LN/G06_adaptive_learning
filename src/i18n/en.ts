@@ -266,7 +266,7 @@ export const en: Record<keyof typeof th, string> = {
   "tour.goal.title": "Switch or add learning goals",
   "tour.goal.desc": "Click here to switch goals or add a new one at any time.",
   "tour.nav.title": "Menu",
-  "tour.nav.desc": "Use these tabs to open the skill tree, your exercise history and your profile.",
+  "tour.nav.desc": "Use these tabs to switch between Home (your skill tree), your exercise history and your profile.",
   "tour.prefs.title": "Language and theme",
   "tour.prefs.desc": "Switch between Thai and English, and between light and dark mode, here.",
   "tour.stats.title": "Progress summary",
