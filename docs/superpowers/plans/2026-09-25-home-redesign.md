@@ -1191,3 +1191,401 @@ Expected: จำนวน ≤ baseline และ Compare-Object ไม่มี�
 และแก้ bullet `src/component/common/` ให้ระบุว่า `StatCard` ใช้ class `.stat-card` + token ของ `Home.css` (ไม่ใช่ Tailwind)
 
 - [ ] **Step 4: สรุปงานทั้งหมดให้ผู้ใช้** — รายการไฟล์ที่แก้/สร้าง/ลบ, screenshot สุดท้าย, และถามว่าจะให้ commit ไหม (working tree มีงานค้างอื่นใน `Home.css` ต้องแยก hunk ตอน commit)
+
+
+---
+
+### Task 7: Tree เต็มหน้า + ของอื่นลอยทับ (แก้ layout ตาม feedback ผู้ใช้ 2026-09-25)
+
+ผู้ใช้เปลี่ยนใจจาก layout "tree + right rail" (Task 4): **skill tree ต้องกินพื้นที่ทั้งหน้า Home** ส่วนอื่นเป็นของตกแต่งที่ลอยทับ tree และ **ไม่เอา Sessions ล่าสุดในหน้า Home**
+
+```
+┌────────┬───────────────────────────────────────────────────────────┐
+│Sidebar │▐ Profile strip (ลอย, พับได้) ...................▌ ┌legend┐ │
+│        │                                                   └──────┘│
+│        │               S K I L L   T R E E  (เต็มหน้า, scroll)       │
+│        │ ┌ความคืบหน้าโดยรวม ▼┐                                         │
+│        │ │ list (scroll ใน)  │                     [▶ แบบฝึกหัดถัดไป]  │
+│        │ └──────────────────┘                                        │
+└────────┴───────────────────────────────────────────────────────────┘
+```
+
+**Files:**
+- Create: `src/component/home/component/HomeProgressPanel.tsx`
+- Modify: `src/component/home/tabs/HomeTab.tsx` (ทั้งไฟล์)
+- Modify: `src/component/home/controller/homeShell.controller.ts` (state พับการ์ดความคืบหน้า)
+- Modify: `src/component/home/HomeShell.tsx` (props ของ `HomeTab`)
+- Modify: `src/component/home/controller/homeTour.controller.ts` (ลบ step `tour-sessions`)
+- Modify: `src/component/decorate/Home.css`
+- Modify: `src/i18n/th.ts`, `src/i18n/en.ts`
+
+**Interfaces:**
+- Consumes: `HomeProfileStrip` (Task 3), `SkillTreeSVG` + `ScrollableSVG` (Task 4/5 — scroll container class `.skill-tree-scroll`), `recommendedSkillId` (Task 5)
+- Produces:
+  - `HomeProgressPanel` props `{ skills: LayoutSkill[]; unlocked: Set<number>; canUnlock: (skillId: number) => boolean; collapsed: boolean; onToggle: () => void; onSkillClick: (skill: LayoutSkill) => void }`
+  - controller คืนเพิ่ม `progressPanelCollapsed: boolean`, `toggleProgressPanel: () => void`
+  - `HomeTab` props: **ลบ** `sessions`, `switchTab`; **เพิ่ม** `progressPanelCollapsed: boolean`, `onToggleProgressPanel: () => void`
+  - DOM: `.tab-home > .home-canvas[data-tour=tour-skill-tree] > [.skill-tree-scroll (จาก ScrollableSVG), .home-overlay-top > [HomeProfileStrip, .tree-legend], section.progress-summary.hpp, button.btn-next-exercise.home-fab]` + side panels
+
+- [ ] **Step 1: i18n** — ลบ key ที่ไม่มีผู้ใช้แล้วในทั้ง `th.ts` และ `en.ts`: `home.seeAll`, `home.recentSessions`, `home.noSessions`, `tour.sessions.title`, `tour.sessions.desc` — grep ก่อนลบแต่ละตัวว่าไม่มีผู้ใช้นอก `HomeTab.tsx`/`homeTour.controller.ts`/i18n (ถ้ามีผู้ใช้อื่น ให้เก็บไว้และระบุใน report)
+
+- [ ] **Step 2: `homeTour.controller.ts`** — ลบบรรทัด step `{ element: '[data-tour="tour-sessions"]', … }` ออกจาก `TOURS.Home`
+
+- [ ] **Step 3: `homeShell.controller.ts`**
+
+ต่อจาก `const PROFILE_STRIP_COLLAPSED_KEY = "homeProfileCollapsed";`:
+```ts
+// จำสถานะการ์ด "ความคืบหน้าโดยรวม" ที่ลอยบน tree — ครั้งแรกบนจอแคบให้เริ่มแบบพับ
+const PROGRESS_PANEL_COLLAPSED_KEY = "homeProgressCollapsed";
+```
+ต่อจาก state `profileStripCollapsed`:
+```ts
+  const [progressPanelCollapsed, setProgressPanelCollapsed] = useState<boolean>(() => {
+    const stored = localStorage.getItem(PROGRESS_PANEL_COLLAPSED_KEY);
+    return stored !== null ? stored === "1" : window.innerWidth < 1024;
+  });
+```
+ต่อจาก effect ที่เขียน `PROFILE_STRIP_COLLAPSED_KEY`:
+```ts
+  useEffect(() => {
+    localStorage.setItem(PROGRESS_PANEL_COLLAPSED_KEY, progressPanelCollapsed ? "1" : "0");
+  }, [progressPanelCollapsed]);
+```
+ต่อจาก `const toggleProfileStrip = …`:
+```ts
+  const toggleProgressPanel = () => setProgressPanelCollapsed((c) => !c);
+```
+ใน object ที่ return ใต้ `toggleProfileStrip,`:
+```ts
+    progressPanelCollapsed,
+    toggleProgressPanel,
+```
+
+- [ ] **Step 4: สร้าง `HomeProgressPanel.tsx`** (ย้ายโค้ด list เดิมจาก `HomeTab` มาทั้งก้อน)
+
+```tsx
+import React from "react";
+import { FaChevronDown, FaChevronUp, FaLock } from "react-icons/fa6";
+import { usePreferences } from "../../../context/PreferencesContext";
+import {
+  LayoutSkill,
+  getProgressColor,
+  getNodeColors,
+  displayProgressPercent,
+  formatProgressLabel,
+} from "../utils/skillTree";
+
+interface HomeProgressPanelProps {
+  skills: LayoutSkill[];
+  unlocked: Set<number>;
+  canUnlock: (skillId: number) => boolean;
+  collapsed: boolean;
+  onToggle: () => void;
+  onSkillClick: (skill: LayoutSkill) => void;
+}
+
+// การ์ด "ความคืบหน้าโดยรวม" ลอยมุมซ้ายล่างของ tree — กดหัวการ์ดเพื่อพับ/กาง
+export const HomeProgressPanel: React.FC<HomeProgressPanelProps> = ({
+  skills,
+  unlocked,
+  canUnlock,
+  collapsed,
+  onToggle,
+  onSkillClick,
+}) => {
+  const { t } = usePreferences();
+
+  return (
+    <section className={`progress-summary hpp${collapsed ? " collapsed" : ""}`}>
+      <button type="button" className="hpp-head" onClick={onToggle} aria-expanded={!collapsed}>
+        <span className="progress-summary-label">{t("home.progressSummary")}</span>
+        {/* การ์ดชิดขอบล่าง: พับอยู่ = กางขึ้น (ลูกศรขึ้น), กางอยู่ = พับลง */}
+        {collapsed ? <FaChevronUp aria-hidden /> : <FaChevronDown aria-hidden />}
+      </button>
+      {!collapsed && (
+        // สีเดียวกับโหนดใน skill tree (getNodeColors)
+        // ครบ 100% เขียว · ปลดล็อกแล้ว น้ำเงิน · ปลดล็อกได้ ฟ้า · ล็อก เทา
+        <div className="progress-summary-list">
+          {skills.map((s) => {
+            const pct = displayProgressPercent(s);
+            const isUnlocked = unlocked.has(s.skillId);
+            const isLocked = !isUnlocked && !canUnlock(s.skillId);
+            const { bg, border, text, bar } = getNodeColors(isUnlocked, !isLocked, pct);
+            return (
+              <button
+                type="button"
+                key={s.skillId}
+                className={`progress-summary-item${isLocked ? " locked" : ""}`}
+                // ล็อก: พื้น/ขอบเทาจาก tree แต่ตัวอักษรใช้ --muted (ผ่าน CSS) — --node-locked-text จางเกินสำหรับข้อความ 12px
+                style={{ background: bg, borderColor: border, color: isLocked ? undefined : text }}
+                onClick={() => onSkillClick(s)}
+                title={t("home.progressTooltip", { name: s.skillsName, pct })}
+              >
+                <span className="progress-summary-row">
+                  <span className="progress-summary-name">{s.skillsName}</span>
+                  <span className="progress-summary-pct">
+                    {isLocked ? <FaLock aria-label={t("skill.locked")} /> : formatProgressLabel(s, t("skill.notStarted"))}
+                  </span>
+                </span>
+                <span className="progress-summary-track" style={{ background: bar }}>
+                  <span
+                    className="progress-summary-fill"
+                    style={{ width: `${pct}%`, background: getProgressColor(pct) }}
+                  />
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      )}
+    </section>
+  );
+};
+export default HomeProgressPanel;
+```
+
+- [ ] **Step 5: `HomeTab.tsx` — เขียนใหม่ทั้งไฟล์**
+
+```tsx
+import React, { useLayoutEffect, useRef, useState } from "react";
+import { FaPlay } from "react-icons/fa6";
+import { BranchStats } from "../../../models/branchStatsModel";
+import { usePreferences } from "../../../context/PreferencesContext";
+import { SkillTreeSVG } from "../skillTree/SkillTreeSVG";
+import { SkillSidePanel } from "../skillTree/SkillSidePanel";
+import { GoalSidePanel } from "../skillTree/GoalSidePanel";
+import { LayoutGoalNode, LayoutSkill, getProgressColor } from "../utils/skillTree";
+import { HomeProfileStrip } from "../component/HomeProfileStrip";
+import { HomeProgressPanel } from "../component/HomeProgressPanel";
+
+interface HomeTabProps {
+  fullName: string;
+  profileStripCollapsed: boolean;
+  onToggleProfileStrip: () => void;
+  progressPanelCollapsed: boolean;
+  onToggleProgressPanel: () => void;
+  activeBranch: {
+    goalId?: number;
+    goalName?: string;
+    exp?: number;
+  } | null;
+  stats: BranchStats | null;
+  treeSkills: LayoutSkill[];
+  unlocked: Set<number>;
+  canUnlock: (skillId: number) => boolean;
+  selected: LayoutSkill | null;
+  setSelected: (skill: LayoutSkill | null) => void;
+  hovered: number | null;
+  setHovered: (id: number | null) => void;
+  onStartExercise: (skill: LayoutSkill) => void;
+  setShowPicker: (show: boolean) => void;
+  handleNodeClick: (skill: LayoutSkill) => void;
+  goal: LayoutGoalNode | null;
+  goalSelected: boolean;
+  onGoalClick: () => void;
+  setGoalSelected: (selected: boolean) => void;
+  /** เปิด modal ที่มาของคะแนนเริ่มต้นจาก pretest — ไม่ส่งมา = ยังไม่ได้ทำ pretest ไม่ต้องแสดงปุ่ม */
+  onShowBreakdown?: () => void;
+  recommendedSkillId: number | null;
+}
+
+const LEGEND = [
+  { pct: 10, label: "1–19%" },
+  { pct: 50, label: "20–74%" },
+  { pct: 90, label: "75–99%" },
+  { pct: 100, label: "100%" },
+];
+
+// Home = skill tree เต็มพื้นที่ ส่วนอื่น (strip, legend, ความคืบหน้า, ปุ่มแบบฝึกหัด) ลอยทับ
+export const HomeTab: React.FC<HomeTabProps> = ({
+  fullName,
+  profileStripCollapsed,
+  onToggleProfileStrip,
+  progressPanelCollapsed,
+  onToggleProgressPanel,
+  activeBranch,
+  stats,
+  treeSkills,
+  unlocked,
+  canUnlock,
+  selected,
+  setSelected,
+  hovered,
+  setHovered,
+  onStartExercise,
+  setShowPicker,
+  handleNodeClick,
+  goal,
+  goalSelected,
+  onGoalClick,
+  setGoalSelected,
+  onShowBreakdown,
+  recommendedSkillId,
+}) => {
+  const { t } = usePreferences();
+
+  // ความสูงของแถวลอยด้านบน (strip + legend) — ใช้เว้นที่ด้านบนของ tree ไม่ให้โหนดแถวแรกถูกบัง
+  // strip พับ/กาง หรือขึ้นบรรทัดใหม่บนจอแคบ ความสูงเปลี่ยน จึงวัดด้วย ResizeObserver
+  const overlayTopRef = useRef<HTMLDivElement>(null);
+  const [overlayTop, setOverlayTop] = useState(0);
+  useLayoutEffect(() => {
+    const el = overlayTopRef.current;
+    if (!el) return;
+    const update = () => setOverlayTop(el.offsetHeight);
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
+  return (
+    <div className="tab-home">
+      <div
+        className="home-canvas"
+        data-tour="tour-skill-tree"
+        style={{ "--overlay-top": `${overlayTop}px` } as React.CSSProperties}
+      >
+        <SkillTreeSVG
+          skills={treeSkills}
+          unlocked={unlocked}
+          canUnlockFn={canUnlock}
+          onNodeClick={handleNodeClick}
+          selected={selected}
+          hovered={hovered}
+          setHovered={setHovered}
+          goal={goal}
+          goalSelected={goalSelected}
+          onGoalClick={onGoalClick}
+          recommendedSkillId={recommendedSkillId}
+          onRecommendedClick={onStartExercise}
+        />
+
+        <div className="home-overlay-top" ref={overlayTopRef}>
+          <HomeProfileStrip
+            fullName={fullName}
+            goalName={activeBranch?.goalName}
+            stats={stats}
+            collapsed={profileStripCollapsed}
+            onToggle={onToggleProfileStrip}
+            onShowBreakdown={onShowBreakdown}
+          />
+          {/* Legend — อธิบายสี progress bar */}
+          <div className="tree-legend">
+            {LEGEND.map(({ pct, label }) => (
+              <div key={pct} className="tree-legend-row">
+                <span className="tree-legend-dot" style={{ background: getProgressColor(pct) }} />
+                <span className="tree-legend-label">{label}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <HomeProgressPanel
+          skills={treeSkills}
+          unlocked={unlocked}
+          canUnlock={canUnlock}
+          collapsed={progressPanelCollapsed}
+          onToggle={onToggleProgressPanel}
+          onSkillClick={handleNodeClick}
+        />
+
+        <button type="button" className="btn-next-exercise home-fab" onClick={() => setShowPicker(true)}>
+          <FaPlay aria-hidden />
+          <span>{t("home.nextExercise")}</span>
+        </button>
+      </div>
+
+      <SkillSidePanel
+        selected={selected}
+        setSelected={setSelected}
+        skills={treeSkills}
+        unlocked={unlocked}
+        canUnlockFn={canUnlock}
+        onStartExercise={onStartExercise}
+      />
+      <GoalSidePanel
+        goal={goal}
+        open={goalSelected}
+        onClose={() => setGoalSelected(false)}
+        skills={treeSkills}
+        unlocked={unlocked}
+        canUnlockFn={canUnlock}
+        onSelectSkill={setSelected}
+      />
+    </div>
+  );
+};
+export default HomeTab;
+```
+
+- [ ] **Step 6: `HomeShell.tsx`** — ใน `<HomeTab …>` ลบ `sessions={historyController.sessions}` และ `switchTab={controller.switchTab}`; เพิ่ม:
+```tsx
+              progressPanelCollapsed={controller.progressPanelCollapsed}
+              onToggleProgressPanel={controller.toggleProgressPanel}
+```
+(`historyController.sessions` ยังใช้กับ `HistoryTab`/`ProfileTab` — อย่าลบ controller)
+
+- [ ] **Step 7: `Home.css`**
+
+7a. ลบ rule ที่ไม่มีผู้ใช้แล้ว (grep ยืนยันก่อน): `.tab-home-main`, `.home-body`, `.home-rail` และทุก `.home-rail …`, `.home-rail-head…`, `.home-see-all…`, `.home-sessions`, `.home-tree-wrap`, และ `@media (max-width: 1024px) { .home-body …; .home-tree-wrap …; .home-rail … }` ทั้งก้อน · **เก็บ** `.session-list` / `.empty-note` / `.section-label*` ถ้ายังมีผู้ใช้ที่อื่น (grep)
+
+7b. `.hps` — เปลี่ยน `margin: 16px 24px 0 0;` เป็น `margin: 0;` · `.hps-collapsed` — เปลี่ยน `margin-top: 12px;` เป็น `margin-top: 0;`
+
+7c. `.tree-legend` — ลบ `position: absolute; top: 12px; right: 12px; z-index: 10;` (ตอนนี้วางด้วย flex ใน `.home-overlay-top`) และเพิ่ม `flex-shrink: 0;`
+
+7d. เพิ่มต่อจากกลุ่ม `.btn-next-exercise:active { … }` (ต้องอยู่หลัง `.btn-next-exercise` เพื่อทับ `width: 100%`):
+```css
+/* ════ HOME CANVAS — tree เต็มหน้า ของอื่นลอยทับ ════ */
+.home-canvas {
+  position: relative; flex: 1; min-width: 0; min-height: 0;
+  overflow: hidden; background: var(--bg);
+}
+/* เว้นที่บน = แถวลอยด้านบน (วัดจริงจาก HomeTab → --overlay-top) + ระยะห่าง; ล่าง = ปุ่มลอย */
+.home-canvas .skill-tree-scroll { padding: calc(var(--overlay-top, 0px) + 28px) 0 96px; }
+
+.home-overlay-top {
+  position: absolute; top: 12px; left: 0; right: 12px; z-index: 20;
+  display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 12px;
+  pointer-events: none; /* พื้นที่ว่างระหว่างการ์ดยังคลิก/เลื่อน tree ได้ */
+}
+.home-overlay-top > * { pointer-events: auto; }
+.home-overlay-top .hps { flex: 1 1 640px; max-width: 1100px; }
+.home-overlay-top .tree-legend { margin-left: auto; }
+
+.hpp {
+  position: absolute; left: 12px; bottom: 12px; z-index: 20;
+  width: 300px; max-height: 45%; margin: 0;
+  display: flex; flex-direction: column;
+}
+.hpp.collapsed { gap: 0; }
+.hpp-head {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  width: 100%; padding: 0; background: none; border: none; cursor: pointer;
+  font-family: inherit; color: var(--info-title); text-align: left;
+}
+.hpp-head:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.hpp .progress-summary-label { font-size: 16px; }
+.hpp .progress-summary-list { flex-direction: column; flex-wrap: nowrap; overflow-y: auto; min-height: 0; }
+.hpp .progress-summary-item { width: 100%; }
+
+.home-fab {
+  position: absolute; right: 16px; bottom: 16px; z-index: 20;
+  width: auto; padding: 14px 22px;
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  box-shadow: var(--card-shadow-hover);
+}
+
+@media (max-width: 1024px) {
+  .hpp { width: min(300px, calc(100% - 24px)); max-height: 40%; }
+}
+@media (max-width: 600px) {
+  .home-fab { left: 12px; right: 12px; }
+  .hpp { bottom: 76px; }
+}
+```
+
+- [ ] **Step 8: Type-check** — `npx tsc -b 2>&1 | Select-String "HomeTab|HomeProgressPanel|HomeShell|homeShell|homeTour|i18n"` → ไม่มี error ใหม่ (baseline 135)
+
+- [ ] **Step 9: ตรวจใน browser** (controller ทำ): tree เต็มพื้นที่ใต้ topbar; strip + legend ลอยบน, การ์ดความคืบหน้าลอยซ้ายล่างพับ/กางได้และจำค่า, ปุ่มแบบฝึกหัดลอยขวาล่าง; ไม่มี Sessions; โหนดแถวแรกไม่ถูก strip บังทั้งตอนกาง/พับ; โหนดล่างสุด/goal node เลื่อนขึ้นพ้นปุ่มลอยได้; 375/768/1440; dark + en; Help tour เดินจบ
+
+- [ ] **Step 10: Commit** เฉพาะไฟล์ของ task: `feat(home): full-page skill tree with floating overlays`
