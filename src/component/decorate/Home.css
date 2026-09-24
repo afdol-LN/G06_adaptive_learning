@@ -701,7 +701,7 @@ body {
   .hpp { width: min(300px, calc(100% - 24px)); max-height: 40%; }
 }
 @media (max-width: 600px) {
-  .home-goal-bar { left: 68px; right: 12px; width: auto; transform: none; }
+  .home-goal-bar { left: 84px; right: 12px; width: auto; transform: none; }
   .hgb-label { display: none; }
   .home-legend { bottom: 12px; }
   .hpp { bottom: 64px; }
