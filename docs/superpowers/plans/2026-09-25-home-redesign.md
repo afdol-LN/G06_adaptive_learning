@@ -21,8 +21,8 @@
 - `font-family: inherit` / `var(--font-sans)` เท่านั้น
 - ห้ามคำนวณตัวเลขที่นักศึกษาเห็นจาก `pL` ฝั่ง frontend (ADR 0001) — recommendation ใช้แค่ `skillId`
 - **ห้าม auto-start tour** — tour เริ่มจากปุ่ม "วิธีใช้งาน" เท่านั้น (พฤติกรรมปัจจุบัน)
-- **Git:** working tree มีงานค้างที่ยังไม่ commit ของคนอื่นอยู่แล้ว (รวม `Home.css`) → **ห้าม commit เอง**; จบแต่ละ task ให้สรุปไฟล์ที่แก้ + snippet ที่เปลี่ยนให้ผู้ใช้ดู แล้วรอผู้ใช้สั่ง commit
-- หลังแก้ไฟล์ทุกครั้ง อธิบายสั้นๆ ว่าเปลี่ยนอะไรและทำไม (CLAUDE.md working convention)
+- **Git:** ทำงานบน branch `feat/home-skill-tree-redesign` (งานค้างเดิม commit แยกไว้แล้ว) — จบแต่ละ task ให้ commit เฉพาะไฟล์ของ task นั้น (`git add <files>`; ห้าม `git add -A`), message `feat(home): …` / `refactor(home): …` ลงท้ายด้วย `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>`; ห้าม commit `tsconfig.app.tsbuildinfo`; ห้าม push
+- ขั้น "สรุปให้ผู้ใช้" ในแต่ละ task = เขียนลง report file ของ task (ไฟล์ที่แก้ + เหตุผลของแต่ละการเปลี่ยนแปลง) — controller จะสรุปให้ผู้ใช้เอง
 
 ---
 
