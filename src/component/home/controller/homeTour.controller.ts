@@ -22,7 +22,6 @@ const TOURS: Record<TourPage, TourStep[]> = {
     { element: '[data-tour="tour-skill-tree"]', titleKey: "tour.tree.title", descKey: "tour.tree.desc" },
     { element: '[data-tour="tour-skill-tree"] .tree-node.clickable', titleKey: "tour.skillTree.node.title", descKey: "tour.skillTree.node.desc" },
     { element: ".btn-next-exercise", titleKey: "tour.next.title", descKey: "tour.next.desc" },
-    { element: '[data-tour="tour-sessions"]', titleKey: "tour.sessions.title", descKey: "tour.sessions.desc" },
     { element: '[data-tour="tour-profile-menu"]', titleKey: "tour.profile.title", descKey: "tour.profile.desc" },
     HELP_STEP,
   ],

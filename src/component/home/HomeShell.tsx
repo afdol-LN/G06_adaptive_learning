@@ -170,6 +170,8 @@ export const HomeShell: React.FC = () => {
               fullName={fullName}
               profileStripCollapsed={controller.profileStripCollapsed}
               onToggleProfileStrip={controller.toggleProfileStrip}
+              progressPanelCollapsed={controller.progressPanelCollapsed}
+              onToggleProgressPanel={controller.toggleProgressPanel}
               activeBranch={activeBranch}
               stats={statsController.stats}
               treeSkills={skillTreeController.treeSkills}
@@ -179,11 +181,9 @@ export const HomeShell: React.FC = () => {
               setSelected={skillTreeController.setSelectedSkill}
               hovered={hovered}
               setHovered={setHovered}
-              sessions={historyController.sessions}
               onStartExercise={controller.handleStartExercise}
               setShowPicker={controller.setShowPicker}
               handleNodeClick={controller.handleNodeClick}
-              switchTab={controller.switchTab}
               goal={skillTreeController.goalNode}
               goalSelected={skillTreeController.goalSelected}
               onGoalClick={controller.handleGoalClick}

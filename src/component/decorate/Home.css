@@ -450,29 +450,6 @@ body {
 
 /* ════ TAB HOME ════ */
 .tab-home { flex: 1; display: flex; overflow: hidden; min-height: 0; }
-.tab-home-main { flex: 1; overflow-y: auto; display: flex; flex-direction: column; }
-
-/* แถวล่างของ Home: tree กินที่ที่เหลือ | rail กว้างคงที่ */
-.home-body {
-  flex: 1; min-height: 0;
-  display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 16px;
-  padding: 16px 24px 24px;
-}
-.home-rail {
-  display: flex; flex-direction: column; gap: 14px;
-  min-height: 0; overflow-y: auto;
-}
-.home-rail .progress-summary { margin-bottom: 0; }
-.home-rail .progress-summary-list { flex-direction: column; flex-wrap: nowrap; }
-.home-rail .progress-summary-item { width: 100%; }
-.home-rail-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 10px; }
-.home-rail-head .section-label-icon { margin-bottom: 0; }
-.home-see-all {
-  font-family: inherit; font-size: 13px; font-weight: 700;
-  color: var(--accent); background: none; border: none; cursor: pointer; padding: 4px;
-}
-.home-see-all:hover { text-decoration: underline; }
-.home-see-all:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
 .home-hero-avatar {
   width: 60px; height: 60px; border-radius: 50%;
@@ -519,7 +496,7 @@ body {
 .hps {
   position: relative; flex-shrink: 0;
   display: flex; align-items: center; gap: 24px;
-  margin: 16px 24px 0 0; padding: 18px 60px 18px 24px;
+  margin: 0; padding: 18px 60px 18px 24px;
   background: var(--accent-fill); color: var(--on-accent);
   border-radius: 0 var(--r-md) var(--r-md) 0;
   box-shadow: var(--card-shadow);
@@ -544,7 +521,7 @@ body {
 .hps-breakdown:hover,
 .hps-toggle:hover { background: color-mix(in srgb, var(--on-accent) 28%, transparent); }
 
-.hps-collapsed { flex-shrink: 0; margin-top: 12px; }
+.hps-collapsed { flex-shrink: 0; margin-top: 0; }
 .hps-toggle-mini {
   display: inline-flex; align-items: center; gap: 8px;
   padding: 8px 14px 8px 18px; font-size: 16px;
@@ -617,27 +594,13 @@ body {
 .empty-note    { color: var(--faint); text-align: center; padding: 24px; }
 .empty-note.lg { padding: 48px; }
 
-.home-tree-wrap {
-  position: relative; min-width: 0; min-height: 480px;
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: var(--r-md); overflow: hidden;
-  box-shadow: 0 4px 18px rgba(0, 71, 171, 0.10);
-}
 /* scroll container ของแผนผัง (ScrollableSVG) — legend อยู่นอกกล่องนี้จึงไม่เลื่อนตาม */
 .skill-tree-scroll { position: absolute; inset: 0; overflow: auto; overscroll-behavior: contain; }
 /* ขนาดจริงกำหนดเป็น px จาก ScrollableSVG; margin auto จัดกลางเมื่อ tree แคบกว่ากรอบ */
 .skill-tree-svg { display: block; margin: 0 auto; }
 
-/* จอแคบ: rail ลงไปอยู่ใต้ tree แล้วทั้งหน้าเลื่อนแทน */
-@media (max-width: 1024px) {
-  .home-body { grid-template-columns: minmax(0, 1fr); padding: 12px 16px 24px; }
-  .home-tree-wrap { height: 70vh; min-height: 360px; }
-  .home-rail { overflow: visible; }
-}
-
-/* Legend — กล่องอธิบายสี progress bar มุมขวาบนของแผนผัง */
+/* Legend — อธิบายสี progress bar (ตอนนี้วางด้วย flex ใน .home-overlay-top) */
 .tree-legend {
-  position: absolute; top: 12px; right: 12px; z-index: 10;
   background: var(--glass, var(--surface));
   border: 1px solid var(--border);
   border-radius: 10px;
@@ -645,6 +608,7 @@ body {
   display: flex; flex-direction: row; gap: 10px;
   box-shadow: 0 2px 10px rgba(0, 71, 171, 0.10);
   pointer-events: none;
+  flex-shrink: 0;
 }
 .tree-legend-row {
   display: flex; align-items: center; gap: 6px;
@@ -683,11 +647,53 @@ body {
 .btn-next-exercise:hover  { opacity: 0.92; transform: translateY(-1px); }
 .btn-next-exercise:active { transform: translateY(0); }
 
-.home-sessions {
-  background: var(--surface); border-radius: var(--r-md);
-  box-shadow: var(--card-shadow); padding: 12px 16px;
+/* ════ HOME CANVAS — tree เต็มหน้า ของอื่นลอยทับ ════ */
+.home-canvas {
+  position: relative; flex: 1; min-width: 0; min-height: 0;
+  overflow: hidden; background: var(--bg);
 }
-.session-list  { display: flex; flex-direction: column; gap: 10px; }
+/* เว้นที่บน = แถวลอยด้านบน (วัดจริงจาก HomeTab → --overlay-top) + ระยะห่าง; ล่าง = ปุ่มลอย */
+.home-canvas .skill-tree-scroll { padding: calc(var(--overlay-top, 0px) + 28px) 0 96px; }
+
+.home-overlay-top {
+  position: absolute; top: 12px; left: 0; right: 12px; z-index: 20;
+  display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 12px;
+  pointer-events: none; /* พื้นที่ว่างระหว่างการ์ดยังคลิก/เลื่อน tree ได้ */
+}
+.home-overlay-top > * { pointer-events: auto; }
+.home-overlay-top .hps { flex: 1 1 640px; max-width: 1100px; }
+.home-overlay-top .tree-legend { margin-left: auto; }
+
+.hpp {
+  position: absolute; left: 12px; bottom: 12px; z-index: 20;
+  width: 300px; max-height: 45%; margin: 0;
+  display: flex; flex-direction: column;
+}
+.hpp.collapsed { gap: 0; }
+.hpp-head {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  width: 100%; padding: 0; background: none; border: none; cursor: pointer;
+  font-family: inherit; color: var(--info-title); text-align: left;
+}
+.hpp-head:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.hpp .progress-summary-label { font-size: 16px; }
+.hpp .progress-summary-list { flex-direction: column; flex-wrap: nowrap; overflow-y: auto; min-height: 0; }
+.hpp .progress-summary-item { width: 100%; }
+
+.home-fab {
+  position: absolute; right: 16px; bottom: 16px; z-index: 20;
+  width: auto; padding: 14px 22px;
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  box-shadow: var(--card-shadow-hover);
+}
+
+@media (max-width: 1024px) {
+  .hpp { width: min(300px, calc(100% - 24px)); max-height: 40%; }
+}
+@media (max-width: 600px) {
+  .home-fab { left: 12px; right: 12px; }
+  .hpp { bottom: 76px; }
+}
 
 /* ════ HISTORY TAB ════ */
 .tab-history {

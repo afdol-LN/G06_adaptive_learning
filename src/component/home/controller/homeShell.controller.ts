@@ -19,6 +19,8 @@ const HOME_TABS: HomeTabKey[] = ["Home", "History", "Profile"];
 const SIDEBAR_COLLAPSED_KEY = "homeSidebarCollapsed";
 // จำสถานะ Profile strip บนหน้า Home (พับ/กาง) — ค่าเริ่มต้นกาง
 const PROFILE_STRIP_COLLAPSED_KEY = "homeProfileCollapsed";
+// จำสถานะการ์ด "ความคืบหน้าโดยรวม" ที่ลอยบน tree — ครั้งแรกบนจอแคบให้เริ่มแบบพับ
+const PROGRESS_PANEL_COLLAPSED_KEY = "homeProgressCollapsed";
 
 // state + handler ทั้งหมดของ HomeShell — ตัว component เหลือแค่การจัดวาง UI
 export function useHomeShellController() {
@@ -58,6 +60,11 @@ export function useHomeShellController() {
     () => localStorage.getItem(PROFILE_STRIP_COLLAPSED_KEY) === "1"
   );
 
+  const [progressPanelCollapsed, setProgressPanelCollapsed] = useState<boolean>(() => {
+    const stored = localStorage.getItem(PROGRESS_PANEL_COLLAPSED_KEY);
+    return stored !== null ? stored === "1" : window.innerWidth < 1024;
+  });
+
   // Dropdown States
   const [showProfileMenu, setShowProfileMenu] = useState(false);
 
@@ -85,6 +92,10 @@ export function useHomeShellController() {
   useEffect(() => {
     localStorage.setItem(PROFILE_STRIP_COLLAPSED_KEY, profileStripCollapsed ? "1" : "0");
   }, [profileStripCollapsed]);
+
+  useEffect(() => {
+    localStorage.setItem(PROGRESS_PANEL_COLLAPSED_KEY, progressPanelCollapsed ? "1" : "0");
+  }, [progressPanelCollapsed]);
 
   // Close profile dropdown on click outside
   useEffect(() => {
@@ -133,6 +144,8 @@ export function useHomeShellController() {
   };
 
   const toggleProfileStrip = () => setProfileStripCollapsed((c) => !c);
+
+  const toggleProgressPanel = () => setProgressPanelCollapsed((c) => !c);
 
   const toggleSidebar = () => {
     setShowProfileMenu(false);
@@ -216,6 +229,8 @@ export function useHomeShellController() {
     // home profile strip
     profileStripCollapsed,
     toggleProfileStrip,
+    progressPanelCollapsed,
+    toggleProgressPanel,
     // skill tree interaction
     hovered,
     setHovered,
