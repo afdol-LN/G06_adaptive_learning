@@ -46,6 +46,7 @@ interface HomeTabProps {
   setGoalSelected: (selected: boolean) => void;
   /** เปิด modal ที่มาของคะแนนเริ่มต้นจาก pretest — ไม่ส่งมา = ยังไม่ได้ทำ pretest ไม่ต้องแสดงปุ่ม */
   onShowBreakdown?: () => void;
+  recommendedSkillId: number | null;
 }
 
 export const HomeTab: React.FC<HomeTabProps> = ({
@@ -71,6 +72,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
   onGoalClick,
   setGoalSelected,
   onShowBreakdown,
+  recommendedSkillId,
 }) => {
   const { t } = usePreferences();
 
@@ -115,6 +117,8 @@ export const HomeTab: React.FC<HomeTabProps> = ({
               goal={goal}
               goalSelected={goalSelected}
               onGoalClick={onGoalClick}
+              recommendedSkillId={recommendedSkillId}
+              onRecommendedClick={onStartExercise}
             />
           </div>
 

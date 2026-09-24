@@ -189,6 +189,7 @@ export const HomeShell: React.FC = () => {
               onGoalClick={controller.handleGoalClick}
               setGoalSelected={skillTreeController.setGoalSelected}
               onShowBreakdown={activeBranch.isAlreadyPretest ? controller.openBreakdown : undefined}
+              recommendedSkillId={controller.recommendedSkillId}
             />
           )}
 

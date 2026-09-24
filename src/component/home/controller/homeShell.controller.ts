@@ -10,6 +10,7 @@ import { useBranchStatsController } from "./branchStats.controller";
 import { useSessionHistoryController } from "./sessionHistory.controller";
 import { useHomeTourController } from "./homeTour.controller";
 import { useUserProfileController } from "./userProfile.controller";
+import { useRecommendationController } from "./recommendation.controller";
 
 export type HomeTabKey = "Home" | "History" | "Profile";
 const HOME_TABS: HomeTabKey[] = ["Home", "History", "Profile"];
@@ -33,6 +34,11 @@ export function useHomeShellController() {
   const historyController = useSessionHistoryController(branchId);
   const homeTour = useHomeTourController(t);
   const profileController = useUserProfileController();
+  const recommendationController = useRecommendationController(branchId);
+  // แสดงป้ายเฉพาะเมื่อ skill ที่แนะนำอยู่ใน tree ของ branch นี้จริง
+  const recommendedSkillId =
+    skillTreeController.treeSkills.find((s) => s.skillId === recommendationController.recommendedSkillId)
+      ?.skillId ?? null;
 
   // Tab State — เปิดแท็บตรงได้ผ่าน router state { tab }
   // ชื่อแท็บที่ไม่มีแล้ว (เช่น "SkillTree" เดิม ที่รวมเข้า Home) → Home
@@ -215,6 +221,7 @@ export function useHomeShellController() {
     setHovered,
     handleNodeClick,
     handleGoalClick,
+    recommendedSkillId,
     // exercise flow
     showPicker,
     setShowPicker,

@@ -31,9 +31,16 @@ interface SkillTreeSVGProps {
   goal?: LayoutGoalNode | null;
   goalSelected?: boolean;
   onGoalClick?: () => void;
+  /** โหนดที่ backend แนะนำให้ฝึกต่อ — วาดป้าย "เริ่มเลย" เหนือโหนดนั้น */
+  recommendedSkillId?: number | null;
+  onRecommendedClick?: (skill: LayoutSkill) => void;
 }
 
 const truncateName = (name: string) => (name.length > 20 ? name.slice(0, 19) + "…" : name);
+
+const BADGE_W = 120;
+const BADGE_H = 38;
+const BADGE_GAP = 14; // ระยะจากขอบบนโหนดถึงปลายหางป้าย
 
 export const SkillTreeSVG: React.FC<SkillTreeSVGProps> = ({
   skills,
@@ -46,6 +53,8 @@ export const SkillTreeSVG: React.FC<SkillTreeSVGProps> = ({
   goal = null,
   goalSelected = false,
   onGoalClick,
+  recommendedSkillId = null,
+  onRecommendedClick,
 }) => {
   const { t, locale } = usePreferences();
 
@@ -56,6 +65,14 @@ export const SkillTreeSVG: React.FC<SkillTreeSVGProps> = ({
   const notStarted = t("skill.notStarted");
   const getNodeById = (id: number) => skills.find((s) => s.skillId === id);
   const isGoalParent = (skillId: number) => !!goal && goal.fromSkillIds.includes(skillId);
+
+  // ป้ายแสดงเฉพาะโหนดที่เปิดได้จริง — กันกรณี backend กับ unlock rule ฝั่งนี้เห็นไม่ตรงกัน
+  const recommended =
+    recommendedSkillId != null && onRecommendedClick
+      ? skills.find(
+          (s) => s.skillId === recommendedSkillId && (unlocked.has(s.skillId) || canUnlockFn(s.skillId))
+        ) ?? null
+      : null;
 
   const getEdgeColor = (fromId: number, toId: number) => {
     if (unlocked.has(toId)) return "var(--edge-open)";
@@ -69,7 +86,9 @@ export const SkillTreeSVG: React.FC<SkillTreeSVGProps> = ({
   // the goal node sits below every skill, so it counts toward the canvas bounds too
   const placed: { x: number; y: number }[] = goal ? [...skills, goal] : skills;
   const minX = Math.min(...placed.map((s) => s.x || 0)) - NODE_W / 2 - 40;
-  const minY = Math.min(...placed.map((s) => s.y || 0)) - NODE_H / 2 - 40;
+  // เผื่อที่ด้านบนให้ป้าย "เริ่มเลย" เมื่อโหนดแนะนำอยู่แถวบนสุด
+  const badgePad = recommended ? BADGE_H + BADGE_GAP + 12 : 0;
+  const minY = Math.min(...placed.map((s) => s.y || 0)) - NODE_H / 2 - 40 - badgePad;
   const maxX = Math.max(...placed.map((s) => s.x || 0)) + NODE_W / 2 + 40;
   const maxY = Math.max(...placed.map((s) => s.y || 0)) + NODE_H / 2 + 40;
   const svgWidth = maxX - minX;
@@ -445,11 +464,61 @@ export const SkillTreeSVG: React.FC<SkillTreeSVGProps> = ({
 
       {/* Goal node — the end of every branch's tree (adt-learning/docs/adr/0005) */}
       {goal && renderGoalNode(goal)}
+
+      {/* ป้าย "เริ่มเลย" — วาดท้ายสุดให้อยู่บนทุกอย่าง; อยู่ใน SVG เดียวกันจึงซูม/เลื่อนตาม tree */}
+      {recommended && onRecommendedClick && (() => {
+        const bx = recommended.x - BADGE_W / 2;
+        const by = recommended.y - NODE_H / 2 - BADGE_GAP - BADGE_H;
+        const tailY = by + BADGE_H;
+        const start = () => onRecommendedClick(recommended);
+        return (
+          <g
+            className="tree-start-badge"
+            role="button"
+            tabIndex={0}
+            aria-label={t("home.startAria", { name: recommended.skillsName })}
+            onClick={(e) => {
+              e.stopPropagation();
+              start();
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                start();
+              }
+            }}
+          >
+            <rect x={bx} y={by} width={BADGE_W} height={BADGE_H} rx={10} className="tree-start-badge-bg" />
+            <path
+              d={`M${recommended.x - 8},${tailY} L${recommended.x},${tailY + 9} L${recommended.x + 8},${tailY} Z`}
+              className="tree-start-badge-bg"
+            />
+            <text
+              x={recommended.x}
+              y={by + BADGE_H / 2}
+              textAnchor="middle"
+              dominantBaseline="central"
+              fontSize={18}
+              fontWeight="800"
+              className="tree-start-badge-text"
+            >
+              {t("home.start")}
+            </text>
+          </g>
+        );
+      })()}
     </>
   );
 
   return (
-    <ScrollableSVG minX={minX} minY={minY} width={svgWidth} height={svgHeight} className="skill-tree-svg">
+    <ScrollableSVG
+      minX={minX}
+      minY={minY}
+      width={svgWidth}
+      height={svgHeight}
+      className="skill-tree-svg"
+      focus={recommended ? { x: recommended.x, y: recommended.y } : null}
+    >
       {inner}
     </ScrollableSVG>
   );

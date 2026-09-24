@@ -99,6 +99,8 @@ export const th = {
   "home.profile.expand": "แสดงข้อมูลของฉัน",
   "home.profile.collapse": "ซ่อนข้อมูลของฉัน",
   "home.seeAll": "ดูทั้งหมด",
+  "home.start": "เริ่มเลย",
+  "home.startAria": "เริ่มฝึก {name}",
 
   // ── Skill tree / side panel ──
   "skill.notStarted": "ยังไม่เริ่ม",

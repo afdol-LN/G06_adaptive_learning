@@ -663,6 +663,16 @@ body {
   .tree-legend-label { display: none; }
 }
 
+/* ป้าย "เริ่มเลย" เหนือโหนดที่ระบบแนะนำ — สีผ่าน class (var() ใช้ใน fill="" ไม่ได้) */
+.tree-start-badge { cursor: pointer; animation: startBob 1.6s ease-in-out infinite; }
+.tree-start-badge-bg { fill: var(--surface); stroke: var(--accent); stroke-width: 2.5; }
+.tree-start-badge-text { fill: var(--accent); }
+.tree-start-badge:hover .tree-start-badge-bg { fill: var(--tint); }
+.tree-start-badge:focus { outline: none; }
+.tree-start-badge:focus-visible .tree-start-badge-bg { stroke-width: 4; }
+@keyframes startBob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+@media (prefers-reduced-motion: reduce) { .tree-start-badge { animation: none; } }
+
 .btn-next-exercise {
   width: 100%; padding: 13px 0; border-radius: var(--r-md);
   font-size: 14px; font-weight: 700; 
