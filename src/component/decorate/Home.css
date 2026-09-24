@@ -474,13 +474,6 @@ body {
 .home-see-all:hover { text-decoration: underline; }
 .home-see-all:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
-/* จอแคบ: rail ลงไปอยู่ใต้ tree แล้วทั้งหน้าเลื่อนแทน */
-@media (max-width: 1024px) {
-  .home-body { grid-template-columns: minmax(0, 1fr); padding: 12px 16px 24px; }
-  .home-tree-wrap { height: 70vh; min-height: 360px; }
-  .home-rail { overflow: visible; }
-}
-
 .home-hero-avatar {
   width: 60px; height: 60px; border-radius: 50%;
   background: var(--on-accent);
@@ -634,6 +627,13 @@ body {
 .skill-tree-scroll { position: absolute; inset: 0; overflow: auto; overscroll-behavior: contain; }
 /* ขนาดจริงกำหนดเป็น px จาก ScrollableSVG; margin auto จัดกลางเมื่อ tree แคบกว่ากรอบ */
 .skill-tree-svg { display: block; margin: 0 auto; }
+
+/* จอแคบ: rail ลงไปอยู่ใต้ tree แล้วทั้งหน้าเลื่อนแทน */
+@media (max-width: 1024px) {
+  .home-body { grid-template-columns: minmax(0, 1fr); padding: 12px 16px 24px; }
+  .home-tree-wrap { height: 70vh; min-height: 360px; }
+  .home-rail { overflow: visible; }
+}
 
 /* Legend — กล่องอธิบายสี progress bar มุมขวาบนของแผนผัง */
 .tree-legend {
