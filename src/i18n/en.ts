@@ -97,6 +97,8 @@ export const en: Record<keyof typeof th, string> = {
   "home.nextExercise": "Next exercise — pick a topic",
   "home.recentSessions": "Recent sessions",
   "home.noSessions": "No sessions yet — start an exercise!",
+  "home.profile.expand": "Show my info",
+  "home.profile.collapse": "Hide my info",
 
   // ── Skill tree / side panel ──
   "skill.notStarted": "Not started",

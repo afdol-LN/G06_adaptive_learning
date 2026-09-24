@@ -513,6 +513,55 @@ body {
 .stat-sub   { font-size: 14px; font-weight: 600; color: var(--stat-ink); margin-top: 2px; }
 .stat-icon  { display: inline-flex; font-size: 18px; color: var(--accent); margin-bottom: 6px; }
 
+/* ════ PROFILE STRIP (hps-) ════ */
+/* ต่อจากขอบขวาของ sidebar — ไม่มีระยะซ้าย มุมโค้งเฉพาะด้านขวา
+   พื้น --accent-fill (ไม่ใช่ --accent: dark mode --accent สว่างเกินจนตัวอักษรขาวอ่านไม่ออก) */
+.hps {
+  position: relative; flex-shrink: 0;
+  display: flex; align-items: center; gap: 24px;
+  margin: 16px 24px 0 0; padding: 18px 60px 18px 24px;
+  background: var(--accent-fill); color: var(--on-accent);
+  border-radius: 0 var(--r-md) var(--r-md) 0;
+  box-shadow: var(--card-shadow);
+  animation: homeRise .45s ease-out backwards;
+}
+.hps-hero  { display: flex; align-items: center; gap: 16px; min-width: 0; flex: 0 1 auto; }
+.hps-info  { min-width: 0; }
+.hps-stats { flex: 1; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; min-width: 0; }
+.hps-stats .stat-card { padding: 10px 14px; }
+.hps-stats .stat-num  { font-size: 26px; }
+
+.hps-breakdown,
+.hps-toggle {
+  font-family: inherit; color: var(--on-accent); cursor: pointer;
+  background: color-mix(in srgb, var(--on-accent) 15%, transparent);
+  border: 1px solid color-mix(in srgb, var(--on-accent) 40%, transparent);
+  border-radius: var(--r-sm);
+  transition: background-color .2s;
+}
+.hps-breakdown { margin-top: 8px; display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; font-size: 12px; font-weight: 600; }
+.hps-toggle    { position: absolute; top: 10px; right: 10px; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; }
+.hps-breakdown:hover,
+.hps-toggle:hover { background: color-mix(in srgb, var(--on-accent) 28%, transparent); }
+
+.hps-collapsed { flex-shrink: 0; margin-top: 12px; }
+.hps-toggle-mini {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 8px 14px 8px 18px; font-size: 16px;
+  border: none; border-radius: 0 var(--r-full) var(--r-full) 0;
+  background: var(--accent-fill); color: var(--on-accent);
+  box-shadow: var(--card-shadow); cursor: pointer;
+}
+.hps-toggle-mini:hover { opacity: .92; }
+.hps-breakdown:focus-visible,
+.hps-toggle:focus-visible,
+.hps-toggle-mini:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+@media (max-width: 1024px) {
+  .hps { flex-direction: column; align-items: stretch; }
+  .hps-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
 /* Overall-progress strip */
 .progress-summary {
   background: var(--surface);

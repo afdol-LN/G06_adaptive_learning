@@ -1,6 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { FaChartSimple, FaClipboardList, FaLock, FaUserGraduate } from "react-icons/fa6";
-import { BranchSkill } from "../../../models/branchSkillModel";
+import React from "react";
+import { FaClipboardList, FaLock } from "react-icons/fa6";
 import { BranchStats } from "../../../models/branchStatsModel";
 import { SessionHistoryItem } from "../../../models/sessionHistoryModel";
 import { usePreferences } from "../../../context/PreferencesContext";
@@ -16,22 +15,19 @@ import {
   formatProgressLabel,
 } from "../utils/skillTree";
 import { SessionCard } from "../../common/SessionCard";
-import { StatCard } from "../../common/StatCard";
+import { HomeProfileStrip } from "../component/HomeProfileStrip";
 import type { HomeTabKey } from "../controller/homeShell.controller";
 
 interface HomeTabProps {
-  userProfile: {
-    fname?: string;
-    lname?: string;
-    gender?: string;
-  } | null;
+  fullName: string;
+  profileStripCollapsed: boolean;
+  onToggleProfileStrip: () => void;
   activeBranch: {
     goalId?: number;
     goalName?: string;
     exp?: number;
   } | null;
   stats: BranchStats | null;
-  skills: BranchSkill[];
   treeSkills: LayoutSkill[];
   unlocked: Set<number>;
   canUnlock: (skillId: number) => boolean;
@@ -53,7 +49,9 @@ interface HomeTabProps {
 }
 
 export const HomeTab: React.FC<HomeTabProps> = ({
-  userProfile,
+  fullName,
+  profileStripCollapsed,
+  onToggleProfileStrip,
   activeBranch,
   stats,
   treeSkills,
@@ -75,83 +73,24 @@ export const HomeTab: React.FC<HomeTabProps> = ({
   onShowBreakdown,
 }) => {
   const { t } = usePreferences();
-  const [twText, setTwText] = useState("");
-  const [showCursor, setShowCursor] = useState(true);
-
-  const profileFullName = [userProfile?.fname, userProfile?.lname].filter(Boolean).join(" ");
-  const fullName = profileFullName || localStorage.getItem("fullname") || t("user.fallbackName");
-
-  // Typewriter effect
-  useEffect(() => {
-    let i = 0;
-    setTwText("");
-    setShowCursor(true);
-    const timer = setInterval(() => {
-      setTwText(fullName.substring(0, i + 1));
-      i++;
-      if (i >= fullName.length) {
-        clearInterval(timer);
-        setTimeout(() => setShowCursor(false), 1500);
-      }
-    }, 70);
-    return () => clearInterval(timer);
-  }, [fullName]);
-
-  // Safe Stats mapping from backend API values
-  const statsList = [
-    { num: stats ? `${stats.skillsUnlockedCount}` : "0", label: t("home.stat.skills"), cls: "gold" },
-    { num: stats ? `${stats.sessionsCount}` : "0", label: t("home.stat.sessions"), cls: "green" },
-    { num: stats ? `${stats.dayStreak}` : "0", label: t("home.stat.streak"), cls: "blue" },
-    {
-      num: stats ? `${stats.goalProgressPercent}%` : "0%",
-      label: t("home.stat.progress"),
-      cls: "purple",
-      // the same numbers as the goal node at the end of the tree (adt-learning/docs/adr/0005)
-      sub:
-        !stats || stats.goalRequiredCount === 0
-          ? undefined
-          : stats.goalComplete
-            ? t("goalNode.complete")
-            : t("goalNode.count", { done: stats.goalMasteredCount, total: stats.goalRequiredCount }),
-    },
-  ];
 
   return (
     <div className="tab-home">
       <div className="tab-home-main">
         <div className="home-top">
-          {/* Hero */}
-          <div className="home-hero">
-            <div className="home-hero-avatar"><FaUserGraduate aria-hidden /></div>
-            <div className="home-hero-info">
-              <div className="home-greeting">{t("home.greeting")}</div>
-              <h1 className="home-username">
-                {twText}
-                {showCursor && <span className="cursor" />}
-              </h1>
-              <div className="home-goal">
-                {t("home.goal")} <span className="goal-badge">{activeBranch?.goalName || t("home.goalUnset")}</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Stats grid */}
-          <div className="stats-grid" data-tour="tour-stats">
-            {statsList.map((s) => (
-              <StatCard key={s.label} title={s.label} value={s.num} colorClass={s.cls} sub={s.sub} />
-            ))}
-          </div>
+          <HomeProfileStrip
+            fullName={fullName}
+            goalName={activeBranch?.goalName}
+            stats={stats}
+            collapsed={profileStripCollapsed}
+            onToggle={onToggleProfileStrip}
+            onShowBreakdown={onShowBreakdown}
+          />
 
           {/* Progress summary */}
           <div className="progress-summary">
             <div className="progress-summary-head">
               <span className="progress-summary-label">{t("home.progressSummary")}</span>
-              {onShowBreakdown && (
-                <button type="button" className="progress-summary-breakdown" onClick={onShowBreakdown}>
-                  <FaChartSimple aria-hidden />
-                  <span>{t("pretestBreakdown.reopen")}</span>
-                </button>
-              )}
             </div>
             {/* ทุก skill ใน tree เป็น block เรียงต่อกัน — สีเดียวกับโหนดใน skill tree (getNodeColors)
                 ครบ 100% เขียว · ปลดล็อกแล้ว น้ำเงิน · ปลดล็อกได้ ฟ้า · ล็อก เทา */}

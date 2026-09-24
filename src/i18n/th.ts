@@ -97,6 +97,8 @@ export const th = {
   "home.nextExercise": "แบบฝึกหัดถัดไป — เลือกเรื่องที่จะทำ",
   "home.recentSessions": "Session ล่าสุด",
   "home.noSessions": "ยังไม่มี session — เริ่มทำ Exercise ได้เลย!",
+  "home.profile.expand": "แสดงข้อมูลของฉัน",
+  "home.profile.collapse": "ซ่อนข้อมูลของฉัน",
 
   // ── Skill tree / side panel ──
   "skill.notStarted": "ยังไม่เริ่ม",

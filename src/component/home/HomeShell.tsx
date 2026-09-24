@@ -167,10 +167,11 @@ export const HomeShell: React.FC = () => {
         <div className="content">
           {activeTab === "Home" && (
             <HomeTab
-              userProfile={userProfile}
+              fullName={fullName}
+              profileStripCollapsed={controller.profileStripCollapsed}
+              onToggleProfileStrip={controller.toggleProfileStrip}
               activeBranch={activeBranch}
               stats={statsController.stats}
-              skills={skillTreeController.skills}
               treeSkills={skillTreeController.treeSkills}
               unlocked={skillTreeController.unlockedSkills}
               canUnlock={skillTreeController.canUnlock}

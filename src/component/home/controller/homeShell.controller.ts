@@ -16,6 +16,8 @@ const HOME_TABS: HomeTabKey[] = ["Home", "History", "Profile"];
 
 // จำสถานะ sidebar (ย่อ/ขยาย) ไว้ข้าม session
 const SIDEBAR_COLLAPSED_KEY = "homeSidebarCollapsed";
+// จำสถานะ Profile strip บนหน้า Home (พับ/กาง) — ค่าเริ่มต้นกาง
+const PROFILE_STRIP_COLLAPSED_KEY = "homeProfileCollapsed";
 
 // state + handler ทั้งหมดของ HomeShell — ตัว component เหลือแค่การจัดวาง UI
 export function useHomeShellController() {
@@ -46,6 +48,10 @@ export function useHomeShellController() {
     return stored !== null ? stored === "1" : window.innerWidth < 768;
   });
 
+  const [profileStripCollapsed, setProfileStripCollapsed] = useState<boolean>(
+    () => localStorage.getItem(PROFILE_STRIP_COLLAPSED_KEY) === "1"
+  );
+
   // Dropdown States
   const [showProfileMenu, setShowProfileMenu] = useState(false);
 
@@ -69,6 +75,10 @@ export function useHomeShellController() {
   useEffect(() => {
     localStorage.setItem(SIDEBAR_COLLAPSED_KEY, sidebarCollapsed ? "1" : "0");
   }, [sidebarCollapsed]);
+
+  useEffect(() => {
+    localStorage.setItem(PROFILE_STRIP_COLLAPSED_KEY, profileStripCollapsed ? "1" : "0");
+  }, [profileStripCollapsed]);
 
   // Close profile dropdown on click outside
   useEffect(() => {
@@ -107,8 +117,16 @@ export function useHomeShellController() {
   // Help replays the tour of the tab the user is on — no jump back to Home
   const handleHelpClick = () => {
     setShowProfileMenu(false);
+    // strip พับอยู่ → กางก่อน ไม่งั้น step tour-stats ไม่มี element ให้ชี้และถูกข้าม
+    if (activeTab === "Home" && profileStripCollapsed) {
+      setProfileStripCollapsed(false);
+      requestAnimationFrame(() => homeTour.startTour(activeTab, { force: true }));
+      return;
+    }
     homeTour.startTour(activeTab, { force: true });
   };
+
+  const toggleProfileStrip = () => setProfileStripCollapsed((c) => !c);
 
   const toggleSidebar = () => {
     setShowProfileMenu(false);
@@ -189,6 +207,9 @@ export function useHomeShellController() {
     profileMenuRef,
     fullName,
     handleHelpClick,
+    // home profile strip
+    profileStripCollapsed,
+    toggleProfileStrip,
     // skill tree interaction
     hovered,
     setHovered,
