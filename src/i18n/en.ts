@@ -93,12 +93,12 @@ export const en: Record<keyof typeof th, string> = {
   "home.stat.progress": "Goal Progress",
   "home.progressSummary": "Overall progress",
   "home.progressTooltip": "Skill: {name}\nProgress: {pct}%",
-  "home.treeLabel": "Skill tree — click a node for details",
   "home.nextExercise": "Next exercise — pick a topic",
   "home.recentSessions": "Recent sessions",
   "home.noSessions": "No sessions yet — start an exercise!",
   "home.profile.expand": "Show my info",
   "home.profile.collapse": "Hide my info",
+  "home.seeAll": "See all",
 
   // ── Skill tree / side panel ──
   "skill.notStarted": "Not started",

@@ -1,7 +1,7 @@
 import React from "react";
 import { FaFlagCheckered } from "react-icons/fa6";
 import { usePreferences } from "../../../context/PreferencesContext";
-import { ZoomableSVG } from "./ZoomableSVG";
+import { ScrollableSVG } from "./ScrollableSVG";
 import {
   NODE_W,
   NODE_H,
@@ -27,7 +27,6 @@ interface SkillTreeSVGProps {
   selected: LayoutSkill | null;
   hovered: number | null;
   setHovered: (id: number | null) => void;
-  zoomable?: boolean;
   /** goal node ท้าย tree (adt-learning/docs/adr/0005) — null เมื่อ goal ไม่มีทักษะที่ต้องการ */
   goal?: LayoutGoalNode | null;
   goalSelected?: boolean;
@@ -44,7 +43,6 @@ export const SkillTreeSVG: React.FC<SkillTreeSVGProps> = ({
   selected,
   hovered,
   setHovered,
-  zoomable = false,
   goal = null,
   goalSelected = false,
   onGoalClick,
@@ -450,19 +448,10 @@ export const SkillTreeSVG: React.FC<SkillTreeSVGProps> = ({
     </>
   );
 
-  const viewBox = `${minX} ${minY} ${svgWidth} ${svgHeight}`;
-  if (zoomable) {
-    return (
-      <ZoomableSVG viewBox={viewBox} className="skill-tree-svg">
-        {inner}
-      </ZoomableSVG>
-    );
-  }
-
   return (
-    <svg viewBox={viewBox} className="skill-tree-svg">
+    <ScrollableSVG minX={minX} minY={minY} width={svgWidth} height={svgHeight} className="skill-tree-svg">
       {inner}
-    </svg>
+    </ScrollableSVG>
   );
 };
 export default SkillTreeSVG;
