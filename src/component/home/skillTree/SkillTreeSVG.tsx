@@ -14,6 +14,7 @@ import {
   displayProgressPercent,
   formatProgressLabel,
   getDraftCount,
+  isMastered,
 } from "../utils/skillTree";
 
 // ทุกสีในแผนผังเป็น CSS variable จาก Home.css (มีค่าของธีมมืดแยก) และต้องใส่ผ่าน style
@@ -337,6 +338,10 @@ export const SkillTreeSVG: React.FC<SkillTreeSVGProps> = ({
         const nx = skill.x - NODE_W / 2;
         const ny = skill.y - NODE_H / 2;
         const pColor = getProgressColor(displayProgressPercent(skill));
+        // the pulse invites practice — a skill already at 100% has nothing left to invite
+        // (canUnlockFn is true for every open node, mastered ones included)
+        const mastered = isMastered(skill);
+        const pulses = canUnlockThis && !mastered;
 
         return (
           <g
@@ -353,7 +358,7 @@ export const SkillTreeSVG: React.FC<SkillTreeSVGProps> = ({
               transition: "opacity 300ms linear",
             }}
           >
-            {canUnlockThis && (
+            {pulses && (
               <rect
                 x={nx - 4}
                 y={ny - 4}
@@ -404,17 +409,21 @@ export const SkillTreeSVG: React.FC<SkillTreeSVGProps> = ({
               }}
             />
 
-            {/* Progress bar */}
-            <rect x={nx + BAR_INSET} y={ny + NODE_H - BAR_BOTTOM} width={BAR_W} height={7} rx={3.5} style={{ fill: bar }} />
-            <rect
-              x={nx + BAR_INSET}
-              y={ny + NODE_H - BAR_BOTTOM}
-              width={Math.max(0, (BAR_W * displayProgressPercent(skill)) / 100)}
-              height={7}
-              rx={3.5}
-              style={{ fill: pColor }}
-              opacity={0.9}
-            />
+            {/* Progress bar — a completed skill shows "completed" instead (adt-learning/docs/adr/0007) */}
+            {!mastered && (
+              <>
+                <rect x={nx + BAR_INSET} y={ny + NODE_H - BAR_BOTTOM} width={BAR_W} height={7} rx={3.5} style={{ fill: bar }} />
+                <rect
+                  x={nx + BAR_INSET}
+                  y={ny + NODE_H - BAR_BOTTOM}
+                  width={Math.max(0, (BAR_W * displayProgressPercent(skill)) / 100)}
+                  height={7}
+                  rx={3.5}
+                  style={{ fill: pColor }}
+                  opacity={0.9}
+                />
+              </>
+            )}
 
             {/* Name */}
             <text
@@ -456,6 +465,19 @@ export const SkillTreeSVG: React.FC<SkillTreeSVGProps> = ({
                 className="tree-node-locked"
               >
                 {t("skill.locked")}
+              </text>
+            ) : mastered ? (
+              // no bar below it, so the word sits lower and larger than the percentage did
+              <text
+                x={skill.x}
+                y={skill.y + 24}
+                textAnchor="middle"
+                dominantBaseline="central"
+                fontSize={17}
+                fontWeight="800"
+                style={{ fill: pColor }}
+              >
+                {t("skill.mastered")}
               </text>
             ) : (
               <text

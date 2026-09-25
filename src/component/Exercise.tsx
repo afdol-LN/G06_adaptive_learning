@@ -12,11 +12,12 @@ import AppBrand from './common/AppBrand';
 import {
   FaArrowRight,
   FaArrowRightFromBracket,
+  FaCircleCheck,
   FaCircleQuestion,
   FaSpinner,
 } from 'react-icons/fa6';
 import { usePreferences } from '../context/PreferencesContext';
-import { displayProgressPercent, formatProgressLabel } from './home/utils/skillTree';
+import { displayProgressPercent, formatProgressLabel, isMastered } from './home/utils/skillTree';
 
 function ExerciseScreen() {
   const controller = useExerciseController();
@@ -116,11 +117,26 @@ function ExerciseScreen() {
             <div className="prog-row">
               <span className="prog-label">{t('exercise.progress')}</span>
               <span className="prog-skill" data-tour="ex-meta">{t('exercise.skill', { name: controller.skillsName })}</span>
-              {answeredInSession && <span className="prog-frac">{startLabel} → {nowLabel}</span>}
-              <div className="prog-spacer"></div>
-              <span className="prog-pct">{nowLabel}</span>
+              {controller.completed ? (
+                <>
+                  {/* at 100% (from the start, or reached in this session): Progress is frozen, so no bar or number (ADR 0007) */}
+                  <div className="prog-spacer"></div>
+                  <span className="prog-done">
+                    <FaCircleCheck aria-hidden />
+                    <span>{t('exercise.review.badge')}</span>
+                  </span>
+                </>
+              ) : (
+                <>
+                  {answeredInSession && <span className="prog-frac">{startLabel} → {nowLabel}</span>}
+                  <div className="prog-spacer"></div>
+                  <span className="prog-pct">{nowLabel}</span>
+                </>
+              )}
             </div>
-            <div className="prog-track"><div className="prog-fill" style={{ width: `${pct}%` }}></div></div>
+            {!controller.completed && (
+              <div className="prog-track"><div className="prog-fill" style={{ width: `${pct}%` }}></div></div>
+            )}
           </div>
         </div>
 
@@ -172,6 +188,8 @@ function ExerciseScreen() {
         feedback={controller.feedback}
         open={controller.feedbackOpen}
         onNext={controller.next}
+        // the answer that reaches 100% shows the climb; answers made at 100% are reviews and move nothing
+        showProgress={!controller.feedback || !isMastered(controller.feedback.before)}
       />
 
       {controller.exitOpen && (
@@ -202,6 +220,7 @@ function ExerciseScreen() {
 
       <SessionSummary
         open={controller.sessionEnded}
+        reviewing={controller.reviewing}
         stopReason={controller.stopReason}
         summary={controller.summary}
         skillId={controller.skillId}

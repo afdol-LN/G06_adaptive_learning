@@ -4,6 +4,7 @@ import {
   FaBoxOpen,
   FaChartLine,
   FaCheck,
+  FaCircleCheck,
   FaClipboardCheck,
   FaFlagCheckered,
   FaHouse,
@@ -20,6 +21,8 @@ type StopReason = NonNullable<SubmitAnswerResponse['stopReason']>;
 
 interface SessionSummaryProps {
   open: boolean;
+  /** the session reviewed a skill already at 100% — P(L) stayed frozen (adt-learning/docs/adr/0007) */
+  reviewing: boolean;
   stopReason: SubmitAnswerResponse['stopReason'];
   summary: Summary | null;
   skillId: number | null;
@@ -46,6 +49,7 @@ const round2 = (n: number) => Math.round(n * 100) / 100;
  */
 export default function SessionSummary({
   open,
+  reviewing,
   stopReason,
   summary,
   skillId,
@@ -76,7 +80,14 @@ export default function SessionSummary({
   let icon: ReactNode;
   let title: string;
   let sub: string;
-  if (reason === 'mastered') {
+  if (reviewing) {
+    // a review never ends as 'mastered' (the backend skips that check) and never moves Progress
+    icon = <span className="ph-trophy ph-trophy--done"><FaCircleCheck aria-hidden /></span>;
+    title = reason === 'exhausted'
+      ? t('exercise.end.review.exhaustedTitle', { name: skillsName })
+      : t('exercise.end.review.title', { count: questionLimit ?? correctCount });
+    sub = t('exercise.end.review.sub');
+  } else if (reason === 'mastered') {
     icon = (
       <>
         {/* mounted when the session ends, so the animation plays from the start */}
@@ -140,7 +151,7 @@ export default function SessionSummary({
     );
   } else if (reason === 'mastered') {
     actions = <>{homeBtn}{nextBtn}</>;
-  } else if (reason === 'exhausted') {
+  } else if (reason === 'exhausted' || reviewing) {
     // practising again is the fallback when there is nowhere else to go
     actions = <>{homeBtn}{againBtn(!next)}{nextBtn}</>;
   } else {
@@ -171,13 +182,20 @@ export default function SessionSummary({
               <FaCheck aria-hidden />
               <span>{t('exercise.done.correct', { count: correctCount })}</span>
             </div>
-            <div className="spill sp-ps">
-              <FaChartLine aria-hidden />
-              {/* session start → end; summary.pLBefore is only "before the last answer" */}
-              <span>
-                {t('exercise.progress')}: {formatProgressLabel(progressStart, notStarted)} → {formatProgressLabel(progress, notStarted)}
-              </span>
-            </div>
+            {reviewing ? (
+              <div className="spill sp-cor">
+                <FaCircleCheck aria-hidden />
+                <span>{t('skill.mastered')}</span>
+              </div>
+            ) : (
+              <div className="spill sp-ps">
+                <FaChartLine aria-hidden />
+                {/* session start → end; summary.pLBefore is only "before the last answer" */}
+                <span>
+                  {t('exercise.progress')}: {formatProgressLabel(progressStart, notStarted)} → {formatProgressLabel(progress, notStarted)}
+                </span>
+              </div>
+            )}
           </div>
           {/* This answer completed the branch's goal (adt-learning/docs/adr/0005) */}
           {goalDone && (

@@ -101,6 +101,7 @@ export const th = {
   // ── Skill tree / side panel ──
   "skill.notStarted": "ยังไม่เริ่ม",
   "skill.locked": "ล็อก",
+  "skill.mastered": "สำเร็จ",
   "skill.emptyTree": "— ยังไม่มี Skill ในเส้นทางนี้ —",
   "skill.status.unlocked": "ปลดล็อกแล้ว",
   "skill.status.ready": "พร้อมปลดล็อก",
@@ -133,6 +134,10 @@ export const th = {
   "exercise.end.exhausted.title": "ทำโจทย์ของ {name} ครบทุกข้อแล้ว",
   "exercise.end.exhausted.sub": "ยังไม่ถึง 100% ลองฝึกอีกรอบ หรือไปฝึกทักษะอื่นก่อนก็ได้",
   "exercise.end.again": "ฝึกอีกรอบ",
+  "exercise.review.badge": "สำเร็จแล้ว · โหมดทบทวน",
+  "exercise.end.review.title": "ทบทวนครบ {count} ข้อแล้ว",
+  "exercise.end.review.exhaustedTitle": "ทบทวนโจทย์ของ {name} ครบทุกข้อแล้ว",
+  "exercise.end.review.sub": "ทักษะนี้สำเร็จแล้ว การทบทวนไม่เปลี่ยนความคืบหน้า",
   "exercise.done.correct": "ถูก {count} ข้อ",
   "exercise.done.home": "กลับ Home",
   "exercise.done.next": "ถัดไป: {name}",

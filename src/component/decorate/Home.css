@@ -18,6 +18,7 @@
   --border-soft: #e2e8f0;
   --card:      #ffffff;
   --node-shadow: rgba(0, 40, 120, 0.18);   /* skill-tree node drop shadow */
+  --sidebar-shadow: 4px 0 14px rgba(0, 40, 120, 0.08);   /* right edge of .sidebar */
   --text:      #000080;
   --ink:       #334155;   /* strong neutral text (names in lists) */
   --ink-soft:  var(--muted);
@@ -92,6 +93,7 @@
   --card:      #121b2e;
   --text:      #ffffff;   /* dark mode: body text is pure white */
   --node-shadow: rgba(0, 0, 0, 0.55);
+  --sidebar-shadow: 4px 0 14px rgba(0, 0, 0, 0.45);
   --ink:       #cbd5e1;
   --ink-soft:  var(--muted);
   --muted:     #a3b1cc;
@@ -203,6 +205,8 @@ body {
   padding: 14px 12px;
   background: var(--surface);   /* solid, like .ad-sidebar */
   border-right: 1px solid var(--border);
+  /* shadow to the right — z-index 50 keeps it over both the topbar (40) and the page */
+  box-shadow: var(--sidebar-shadow);
   transition: width 0.2s ease, padding 0.2s ease;
 }
 .sidebar.collapsed { width: var(--sidebar-w-collapsed); padding: 14px 10px; }

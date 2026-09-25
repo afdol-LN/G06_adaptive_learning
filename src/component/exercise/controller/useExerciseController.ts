@@ -8,6 +8,7 @@ import { NextQuestion, SessionSummary, SubmitAnswerResponse } from "../../../mod
 import { SkillProgress } from "../../../models/branchSkillModel";
 import { exerciseDraftService } from "../exerciseDraft.service";
 import { soundService } from "../../../services/soundService";
+import { isMastered } from "../../home/utils/skillTree";
 
 const NOT_STARTED: SkillProgress = { progressPercent: 0, attemptCount: 0 };
 
@@ -277,6 +278,12 @@ export function useExerciseController() {
     feedbackOpen: pending !== null,
     next,
     skillId: state?.skillId ?? null,
+    // started at 100% = a review: the backend keeps P(L) frozen, so there is no Progress to show
+    // or move (adt-learning/docs/adr/0007) — same test as the backend's pL ≥ 0.95 (ADR 0004)
+    reviewing: isMastered(progressStart),
+    // at 100% now — from the start (a review) or since an answer in this session; the session still
+    // runs its full round, and every answer after this one is a review with P(L) frozen (ADR 0007)
+    completed: isMastered(progress),
     goHome,
     goToSkillTree,
     startSkill,

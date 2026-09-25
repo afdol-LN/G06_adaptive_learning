@@ -11,10 +11,12 @@ interface AnswerSheetProps {
   feedback: AnswerFeedback | null;
   open: boolean;
   onNext: () => void;
+  /** false while reviewing a completed skill — Progress is frozen there, so only right/wrong is shown */
+  showProgress?: boolean;
 }
 
 // Slides up from the bottom once an answer is checked: right/wrong, how Progress moved, and "next".
-export default function AnswerSheet({ feedback, open, onNext }: AnswerSheetProps) {
+export default function AnswerSheet({ feedback, open, onNext, showProgress = true }: AnswerSheetProps) {
   const { t } = usePreferences();
   const nextRef = useRef<HTMLButtonElement>(null);
   // width is driven here, not through React state, so the jump to the start value can skip the transition
@@ -76,22 +78,26 @@ export default function AnswerSheet({ feedback, open, onNext }: AnswerSheetProps
             <div className="ex-sheet-title">
               {feedback.isCorrect ? t('exercise.correct') : t('exercise.incorrect')}
             </div>
-            <div className="ex-sheet-progress">
-              <span className="ex-sheet-plabel">{t('exercise.progress')}</span>
-              <span className="ex-sheet-pvals">
-                {formatProgressLabel(feedback.before, notStarted)} → {formatProgressLabel(feedback.after, notStarted)}
-              </span>
-              {delta !== 0 && (
-                <span className={`ex-sheet-delta ${delta > 0 ? 'up' : 'down'}`}>
-                  {delta > 0 ? '+' : ''}{delta}%
-                </span>
-              )}
-            </div>
-            <div className="ex-sheet-track">
-              {/* where the bar was: after a drop the lost part stays faintly visible behind the fill */}
-              <div className="ex-sheet-ghost" style={{ width: `${before}%` }} />
-              <div ref={fillRef} className="ex-sheet-fill" />
-            </div>
+            {showProgress && (
+              <>
+                <div className="ex-sheet-progress">
+                  <span className="ex-sheet-plabel">{t('exercise.progress')}</span>
+                  <span className="ex-sheet-pvals">
+                    {formatProgressLabel(feedback.before, notStarted)} → {formatProgressLabel(feedback.after, notStarted)}
+                  </span>
+                  {delta !== 0 && (
+                    <span className={`ex-sheet-delta ${delta > 0 ? 'up' : 'down'}`}>
+                      {delta > 0 ? '+' : ''}{delta}%
+                    </span>
+                  )}
+                </div>
+                <div className="ex-sheet-track">
+                  {/* where the bar was: after a drop the lost part stays faintly visible behind the fill */}
+                  <div className="ex-sheet-ghost" style={{ width: `${before}%` }} />
+                  <div ref={fillRef} className="ex-sheet-fill" />
+                </div>
+              </>
+            )}
           </div>
           <button ref={nextRef} type="button" className="ex-sheet-next" onClick={onNext}>
             {feedback.isLast ? (

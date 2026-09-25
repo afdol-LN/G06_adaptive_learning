@@ -101,6 +101,7 @@ export const en: Record<keyof typeof th, string> = {
   // ── Skill tree / side panel ──
   "skill.notStarted": "Not started",
   "skill.locked": "Locked",
+  "skill.mastered": "Completed",
   "skill.emptyTree": "— No skills in this path yet —",
   "skill.status.unlocked": "Unlocked",
   "skill.status.ready": "Ready to unlock",
@@ -133,6 +134,10 @@ export const en: Record<keyof typeof th, string> = {
   "exercise.end.exhausted.title": "You've done every {name} question",
   "exercise.end.exhausted.sub": "Not at 100% yet — practise again, or try another skill first.",
   "exercise.end.again": "Practise again",
+  "exercise.review.badge": "Completed · Review mode",
+  "exercise.end.review.title": "Reviewed all {count} questions",
+  "exercise.end.review.exhaustedTitle": "You've reviewed every {name} question",
+  "exercise.end.review.sub": "This skill is already completed — reviewing doesn't change its Progress.",
   "exercise.done.correct": "{count} correct",
   "exercise.done.home": "Back to Home",
   "exercise.done.next": "Next: {name}",

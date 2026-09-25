@@ -129,6 +129,8 @@ export const HomeTab: React.FC<HomeTabProps> = ({
         unlocked={unlocked}
         canUnlockFn={canUnlock}
         onStartExercise={onStartExercise}
+        goal={goal}
+        onOpenGoal={() => setGoalSelected(true)}
       />
       <GoalSidePanel
         goal={goal}
