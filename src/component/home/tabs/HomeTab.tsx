@@ -87,7 +87,6 @@ export const HomeTab: React.FC<HomeTabProps> = ({
           goalSelected={goalSelected}
           onGoalClick={onGoalClick}
           recommendedSkillId={recommendedSkillId}
-          onRecommendedClick={onStartExercise}
         />
 
         <div className="home-overlay-top">

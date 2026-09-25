@@ -73,16 +73,22 @@ export default function CodeBlock({ code, language, label }: CodeBlockProps) {
   const trimmed = source.replace(/\s+$/, "");
   const lang = (language || DEFAULT_LANGUAGE).toLowerCase();
 
-  const html = useMemo(() => {
-    if (!trimmed) return "";
-    ensureRegistered();
-    // ภาษาที่ไม่รู้จักไม่ควรทำให้ทั้งหน้าพัง แค่แสดงเป็นข้อความธรรมดา
-    if (!hljs.getLanguage(lang)) return highlightBlanks(escapeHtml(trimmed));
-    try {
-      return highlightBlanks(hljs.highlight(trimmed, { language: lang }).value);
-    } catch {
-      return highlightBlanks(escapeHtml(trimmed));
-    }
+  // memo the whole { __html } object, not just the string: React 19 compares this prop by
+  // reference and rewrites innerHTML whenever it is a new object — on every parent re-render
+  // that wiped the reader's text selection mid-drag (it flickered and nothing could be copied)
+  const innerHtml = useMemo(() => {
+    const render = () => {
+      if (!trimmed) return "";
+      ensureRegistered();
+      // ภาษาที่ไม่รู้จักไม่ควรทำให้ทั้งหน้าพัง แค่แสดงเป็นข้อความธรรมดา
+      if (!hljs.getLanguage(lang)) return highlightBlanks(escapeHtml(trimmed));
+      try {
+        return highlightBlanks(hljs.highlight(trimmed, { language: lang }).value);
+      } catch {
+        return highlightBlanks(escapeHtml(trimmed));
+      }
+    };
+    return { __html: render() };
   }, [trimmed, lang]);
 
   if (!trimmed) return null;
@@ -112,7 +118,7 @@ export default function CodeBlock({ code, language, label }: CodeBlockProps) {
       </div>
       <pre className="ctp-code-pre">
         {/* html มาจาก highlight.js ซึ่ง escape ให้แล้ว หรือจาก escapeHtml ข้างบน */}
-        <code dangerouslySetInnerHTML={{ __html: html }} />
+        <code dangerouslySetInnerHTML={innerHtml} />
       </pre>
     </div>
   );

@@ -159,7 +159,8 @@ export function useExerciseController() {
       if (res.sessionEnded) {
         if (sessionId) exerciseDraftService.clear(sessionId); // no draft left to resume
         setSessionEnded(true);
-        soundService.play("complete");
+        // the celebration sound is for mastering the skill — running out of questions or turns isn't a win
+        if (res.stopReason === "mastered") soundService.play("complete");
         setStopReason(res.stopReason);
         setSummary(res.summary ?? null);
       } else if (res.nextQuestion) {
@@ -228,6 +229,21 @@ export function useExerciseController() {
   // after completing the goal: the skill tree (and its goal node) now lives on the Home tab
   const goToSkillTree = useCallback(() => navigate("/home"), [navigate]);
 
+  // From the session summary straight into a new session. `replace` so Back goes to Home, not to the
+  // finished session; Exercise remounts on every navigation (key = location.key), so state starts clean.
+  const startSkill = useCallback(
+    (skill: { skillId: number; skillCode: string; skillsName: string }) =>
+      navigate("/exercise", {
+        replace: true,
+        state: { skillId: skill.skillId, skillCode: skill.skillCode, skillsName: skill.skillsName },
+      }),
+    [navigate],
+  );
+  // the finished session's questions are only excluded within that session, so a new one has them all again
+  const practiseAgain = useCallback(() => {
+    if (state) startSkill(state);
+  }, [state, startSkill]);
+
   // Leaving keeps the draft: answers are already saved server-side, the pick in localStorage
   const requestExit = useCallback(() => setExitOpen(true), []);
   const cancelExit = useCallback(() => setExitOpen(false), []);
@@ -260,8 +276,11 @@ export function useExerciseController() {
     feedback,
     feedbackOpen: pending !== null,
     next,
+    skillId: state?.skillId ?? null,
     goHome,
     goToSkillTree,
+    startSkill,
+    practiseAgain,
     pauseClock,
     resumeClock,
     exitOpen,

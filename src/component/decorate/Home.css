@@ -17,6 +17,7 @@
   --border:    #c2d3e0;
   --border-soft: #e2e8f0;
   --card:      #ffffff;
+  --node-shadow: rgba(0, 40, 120, 0.18);   /* skill-tree node drop shadow */
   --text:      #000080;
   --ink:       #334155;   /* strong neutral text (names in lists) */
   --ink-soft:  var(--muted);
@@ -90,6 +91,7 @@
   --border-soft: #1f2b42;
   --card:      #121b2e;
   --text:      #ffffff;   /* dark mode: body text is pure white */
+  --node-shadow: rgba(0, 0, 0, 0.55);
   --ink:       #cbd5e1;
   --ink-soft:  var(--muted);
   --muted:     #a3b1cc;
@@ -622,16 +624,6 @@ body {
   .tree-legend-label { display: none; }
 }
 
-/* ป้าย "เริ่มเลย" เหนือโหนดที่ระบบแนะนำ — สีผ่าน class (var() ใช้ใน fill="" ไม่ได้) */
-.tree-start-badge { cursor: pointer; animation: startBob 1.6s ease-in-out infinite; }
-.tree-start-badge-bg { fill: var(--surface); stroke: var(--accent); stroke-width: 2.5; }
-.tree-start-badge-text { fill: var(--accent); }
-.tree-start-badge:hover .tree-start-badge-bg { fill: var(--tint); }
-.tree-start-badge:focus { outline: none; }
-.tree-start-badge:focus-visible .tree-start-badge-bg { stroke-width: 4; }
-@keyframes startBob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
-@media (prefers-reduced-motion: reduce) { .tree-start-badge { animation: none; } }
-
 .btn-next-exercise {
   width: 100%; padding: 13px 0; border-radius: var(--r-md);
   font-size: 14px; font-weight: 700; 
@@ -895,6 +887,8 @@ body {
 /* โหนดนูน: หน้าโหนดลอยอยู่บนขอบล่าง 10px (NODE_DEPTH ใน SkillTreeSVG) —
    hover กดลงนิดหน่อย, คลิกกดลงจนสุด; 300ms linear ตาม motion spec */
 .tree-node-face { transition: transform 300ms linear; }
+/* เงาใต้โหนด: ใส่ที่ขอบล่าง (lip) ซึ่งไม่ขยับ เงาจึงอยู่นิ่งตอนหน้าโหนดถูกกดลง */
+.tree-node-lip { filter: drop-shadow(0 6px 10px var(--node-shadow)); }
 .tree-node.clickable:hover .tree-node-face,
 .tree-node.clickable .tree-node-face.hovered { transform: translateY(3px); }
 .tree-node.clickable:active .tree-node-face  { transform: translateY(10px); transition-duration: 80ms; }

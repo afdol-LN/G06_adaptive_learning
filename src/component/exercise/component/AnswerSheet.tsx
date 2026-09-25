@@ -23,7 +23,6 @@ export default function AnswerSheet({ feedback, open, onNext }: AnswerSheetProps
   useEffect(() => {
     const fill = fillRef.current;
     if (!open || !feedback || !fill) return;
-    nextRef.current?.focus(); // Enter goes on without reaching for the mouse
     // jump to the old Progress instantly — otherwise the bar would first animate from wherever
     // the previous answer left it (0 on the first answer) and then turn back
     fill.style.transition = 'none';
@@ -37,6 +36,22 @@ export default function AnswerSheet({ feedback, open, onNext }: AnswerSheetProps
     }, SLIDE_UP_MS);
     return () => clearTimeout(id);
   }, [open, feedback]);
+
+  // Enter goes on without reaching for the mouse. Listened for on the page instead of focusing
+  // the button, because a programmatic focus() draws the focus ring on it the moment the sheet opens.
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== 'Enter' || e.repeat) return;
+      // the button itself (Tab-focused) already clicks on Enter; an open dialog (e.g. exit) owns its Enter
+      const target = e.target instanceof Element ? e.target : null;
+      if (target === nextRef.current || target?.closest('[role="dialog"]')) return;
+      e.preventDefault();
+      onNext();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [open, onNext]);
 
   const notStarted = t('skill.notStarted');
   const before = feedback ? displayProgressPercent(feedback.before) : 0;

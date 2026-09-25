@@ -74,12 +74,15 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const tick = setInterval(() => {
       const now = performance.now();
-      setToasts((prev) =>
-        prev.map((t) => {
+      // Return prev untouched when nothing is counting down: a fresh [] every 80ms re-rendered every
+      // useToast() consumer (whole pages, e.g. Exercise) about 12 times a second even with no toast shown
+      setToasts((prev) => {
+        if (!prev.some((t) => !t.closing && !t.paused)) return prev;
+        return prev.map((t) => {
           if (t.closing || t.paused) return t;
           return { ...t, left: Math.max(0, t.endsAt - now) };
-        }),
-      );
+        });
+      });
     }, 80);
     return () => clearInterval(tick);
   }, []);

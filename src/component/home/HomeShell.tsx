@@ -21,7 +21,7 @@ import { NextExercisePicker } from "./skillTree/NextExercisePicker";
 import { ExerciseConfirmModal } from "./skillTree/ExerciseConfirmModal";
 import { Topbar } from "../common/Topbar";
 import CreateBranchModal from "../CreateBranchModal";
-import AppLogo from "../common/AppLogo";
+import AppBrand from "../common/AppBrand";
 import { GoalSwitcher } from "./GoalSwitcher";
 import { BranchBaseStateModal } from "./component/branchBaseState";
 import "../decorate/Home.css";
@@ -87,10 +87,7 @@ export const HomeShell: React.FC = () => {
           {sidebarCollapsed ? <FaChevronRight aria-hidden /> : <FaChevronLeft aria-hidden />}
         </button>
 
-        <div className="sb-header" data-tour="tour-logo">
-          <div className="sb-brand-icon"><AppLogo /></div>
-          <span className="sb-brand sb-label">G06 · ALS</span>
-        </div>
+        <AppBrand variant="sidebar" tourId="tour-logo" />
 
 
         {/* Navigation Tabs */}
