@@ -42,6 +42,7 @@ svg {
   /* ฟอนต์หลักทั้งแอป — Noto Sans (ละติน) + IBM Plex Sans Thai Looped (ภาษาไทย), โหลดจาก index.html
      Noto Serif Thai เป็นตัวสำรองเผื่อ IBM Plex โหลดไม่ขึ้น */
   --font-sans: 'Noto Sans', 'IBM Plex Sans Thai Looped', 'Noto Serif Thai', system-ui, sans-serif;
+  --focus-ring: rgba(0, 71, 171, 0.45);   /* keyboard focus on buttons — see button:focus-visible */
   font-family: var(--font-sans);
   font-size: 21px;
   line-height: 1.5;
@@ -96,9 +97,18 @@ button:hover {
   border-color: #646cff;
 }
 
-button:focus,
+/* No ring when a button is clicked with the mouse (the old Vite-template rule put a dark
+   -webkit-focus-ring-color outline on every :focus). Tab still shows a soft ring, so keyboard
+   users can see where they are. */
+:root[data-theme="dark"] {
+  --focus-ring: rgba(107, 155, 255, 0.6);
+}
+button:focus {
+  outline: none;
+}
 button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
 }
 
 @media (prefers-color-scheme: light) {
