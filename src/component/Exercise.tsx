@@ -4,6 +4,7 @@ import './decorate/Tour.css';
 import { useExerciseController } from './exercise/controller/useExerciseController';
 import { useExerciseGuideController } from './exercise/controller/useExerciseGuideController';
 import ExerciseRules from './exercise/component/ExerciseRules';
+import AnswerSheet from './exercise/component/AnswerSheet';
 import QuestionCard from './common/QuestionCard';
 import AppLogo from './common/AppLogo';
 import {
@@ -18,7 +19,6 @@ import {
   FaPlay,
   FaSpinner,
   FaTrophy,
-  FaXmark,
 } from 'react-icons/fa6';
 import { usePreferences } from '../context/PreferencesContext';
 import { displayProgressPercent, formatProgressLabel } from './home/utils/skillTree';
@@ -66,7 +66,7 @@ export default function Exercise() {
   return (
     <>
       <div className="glow-bg"><div className="g1"></div><div className="g2"></div><div className="g3"></div></div>
-      <div className="wrap">
+      <div className={controller.feedbackOpen ? 'wrap sheet-open' : 'wrap'}>
         <div className="topbar">
           <div className="logo">
             <div className="logo-box"><AppLogo /></div>
@@ -168,19 +168,11 @@ export default function Exercise() {
         </div>
       </div>
 
-      <div
-        className={`flash ${revealed && !controller.sessionEnded ? 'in' : 'out'}`}
-        style={{ color: revealed?.isCorrect ? 'var(--green)' : 'var(--red)' }}
-        role="status"
-        aria-live="polite"
-      >
-        {revealed &&
-          (revealed.isCorrect ? (
-            <FaCheck title={t('exercise.correct')} />
-          ) : (
-            <FaXmark title={t('exercise.incorrect')} />
-          ))}
-      </div>
+      <AnswerSheet
+        feedback={controller.feedback}
+        open={controller.feedbackOpen}
+        onNext={controller.next}
+      />
 
       {controller.exitOpen && (
         <div className="overlay open" onClick={controller.cancelExit}>

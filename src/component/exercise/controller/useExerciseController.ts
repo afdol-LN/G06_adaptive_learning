@@ -7,10 +7,9 @@ import { SessionService } from "../../../services/sessionService";
 import { NextQuestion, SessionSummary, SubmitAnswerResponse } from "../../../models/sessionModel";
 import { SkillProgress } from "../../../models/branchSkillModel";
 import { exerciseDraftService } from "../exerciseDraft.service";
+import { soundService } from "../../../services/soundService";
 
 const NOT_STARTED: SkillProgress = { progressPercent: 0, attemptCount: 0 };
-// ✓/✗ stays on the answered question this long before the next one (or the summary) appears
-const REVEAL_MS = 1200;
 
 interface ExerciseLocationState {
   skillId: number;
@@ -25,6 +24,17 @@ export interface AnswerResult {
   /** the option the student picked; null for fill-in-the-blank */
   choiceId: number | null;
   isCorrect: boolean;
+}
+
+/** What the bottom answer sheet shows. It outlives the result it came from so the sheet
+ *  keeps its content while sliding away. */
+export interface AnswerFeedback {
+  isCorrect: boolean;
+  /** Progress right before and right after this one answer */
+  before: SkillProgress;
+  after: SkillProgress;
+  /** this answer ended the session — the sheet's button opens the summary instead */
+  isLast: boolean;
 }
 
 export function useExerciseController() {
@@ -48,6 +58,9 @@ export function useExerciseController() {
   // true while /answer is in flight: the answer is locked but its result isn't known yet
   const [checking, setChecking] = useState(false);
   const [result, setResult] = useState<AnswerResult | null>(null);
+  // the answered response waits here until the student presses "next" on the answer sheet
+  const [pending, setPending] = useState<SubmitAnswerResponse | null>(null);
+  const [feedback, setFeedback] = useState<AnswerFeedback | null>(null);
   const [correctCount, setCorrectCount] = useState(0);
   const [sessionEnded, setSessionEnded] = useState(false);
   const [stopReason, setStopReason] = useState<SubmitAnswerResponse["stopReason"]>(null);
@@ -75,6 +88,11 @@ export function useExerciseController() {
     if (pausedAtRef.current === null) return;
     questionStartRef.current += Date.now() - pausedAtRef.current;
     pausedAtRef.current = null;
+  }, []);
+
+  // load the effect files now, so the first ✓/✗ plays without a delay
+  useEffect(() => {
+    soundService.preload();
   }, []);
 
   useEffect(() => {
@@ -141,6 +159,7 @@ export function useExerciseController() {
       if (res.sessionEnded) {
         if (sessionId) exerciseDraftService.clear(sessionId); // no draft left to resume
         setSessionEnded(true);
+        soundService.play("complete");
         setStopReason(res.stopReason);
         setSummary(res.summary ?? null);
       } else if (res.nextQuestion) {
@@ -186,10 +205,24 @@ export function useExerciseController() {
     // ✓/✗ exists only from here on, and only for this exercise
     setChecking(false);
     setResult({ exerciseId: question.exerciseId, choiceId, isCorrect: res.isCorrect });
+    soundService.play(res.isCorrect ? "correct" : "incorrect");
     if (res.isCorrect) setCorrectCount((c) => c + 1);
+    setFeedback({
+      isCorrect: res.isCorrect,
+      before: progress,
+      after: res.progress,
+      isLast: res.sessionEnded,
+    });
     setProgress(res.progress);
-    setTimeout(() => showNext(res), REVEAL_MS);
-  }, [sessionId, question, locked, selected, fillInBlankInput, toast, t, showNext]);
+    setPending(res);
+  }, [sessionId, question, locked, selected, fillInBlankInput, progress, toast, t]);
+
+  // "Next" on the answer sheet: the next question, or the summary after the last answer
+  const next = useCallback(() => {
+    if (!pending) return;
+    setPending(null);
+    showNext(pending);
+  }, [pending, showNext]);
 
   const goHome = useCallback(() => navigate("/home"), [navigate]);
   // after completing the goal: the skill tree (and its goal node) now lives on the Home tab
@@ -224,6 +257,9 @@ export function useExerciseController() {
     summary,
     pick,
     submit,
+    feedback,
+    feedbackOpen: pending !== null,
+    next,
     goHome,
     goToSkillTree,
     pauseClock,

@@ -5,6 +5,7 @@ import { usePreferences } from "../../../context/PreferencesContext";
 import type { BranchBaseState } from "../../../models/branchStatsModel";
 import { branchStatsService } from "../branchStats.service";
 import { LayoutSkill } from "../utils/skillTree";
+import { soundService } from "../../../services/soundService";
 import { useBranchSkillController } from "./branchSkill.controller";
 import { useBranchStatsController } from "./branchStats.controller";
 import { useSessionHistoryController } from "./sessionHistory.controller";
@@ -165,12 +166,14 @@ export function useHomeShellController() {
   };
 
   const handleNodeClick = (skill: LayoutSkill) => {
+    soundService.play("nodeClick");
     skillTreeController.setSelectedSkill(
       skillTreeController.selectedSkill?.skillId === skill.skillId ? null : skill
     );
   };
 
   const handleGoalClick = () => {
+    soundService.play("nodeClick");
     skillTreeController.setGoalSelected(!skillTreeController.goalSelected);
   };
 
