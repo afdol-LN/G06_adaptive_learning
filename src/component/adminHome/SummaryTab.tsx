@@ -11,6 +11,19 @@ import {
 } from 'react-icons/fa6';
 import { usePreferences } from '../../context/PreferencesContext';
 import { statusKey } from '../../utils/adminUi';
+import { AdminSummary, SummarySkillProgress, SummaryUserActivity } from '../../models/summaryModel';
+
+interface SummaryTabProps {
+  icon?: React.ReactNode;
+  SUMMARY: AdminSummary;
+  skills: SummarySkillProgress[];
+  users: SummaryUserActivity[];
+  getTierColor: (tier?: string | null) => string;
+  getScoreColor: (score?: number) => string;
+  getStatusColor: (status?: string) => string;
+  maxBar: number;
+  dayLabels: string[];
+}
 
 // --kpi = สีของการ์ด (token ใน Adminhome.css มีค่าแยกของธีมมืด) — พื้นไอคอนผสมจากสีนี้ใน CSS
 const kpiVar = (color: string) => ({ '--kpi': color } as React.CSSProperties);
@@ -25,17 +38,19 @@ export default function SummaryTab({
   getStatusColor,
   maxBar,
   dayLabels
-}) {
+}: SummaryTabProps) {
   const { t, locale } = usePreferences();
   const today = new Date().toLocaleDateString(locale, { day: 'numeric', month: 'short', year: 'numeric' });
 
+  // null = backend ยังไม่มีข้อมูลนี้ → "—" พร้อมคำอธิบายเมื่อ hover
+  const show = (v: number | string | null, suffix = '') => (v === null || v === undefined ? '—' : `${v}${suffix}`);
   const kpis = [
-    { label: t('admin.summary.kpi.users'),       value: SUMMARY.totalUsers,     icon: <FaUsers />,         color: 'var(--accent)' },
-    { label: t('admin.summary.kpi.activeToday'), value: SUMMARY.activeToday,    icon: <FaCircleCheck />,   color: 'var(--green)' },
-    { label: t('admin.summary.kpi.sessions'),    value: SUMMARY.totalSessions,  icon: <FaClipboardList />, color: 'var(--purple)' },
-    { label: t('admin.summary.kpi.avgScore'),    value: `${SUMMARY.avgScore}%`, icon: <FaBullseye />,      color: 'var(--orange)' },
-    { label: t('admin.summary.kpi.skills'),      value: skills.length,          icon: <FaTree />,          color: 'var(--blue)' },
-    { label: t('admin.summary.kpi.topSkill'),    value: SUMMARY.topSkill,       icon: <FaTrophy />,        color: 'var(--accent)' },
+    { label: t('admin.summary.kpi.users'),       value: SUMMARY.totalUsers,    text: show(SUMMARY.totalUsers),       icon: <FaUsers />,         color: 'var(--accent)' },
+    { label: t('admin.summary.kpi.activeToday'), value: SUMMARY.activeToday,   text: show(SUMMARY.activeToday),      icon: <FaCircleCheck />,   color: 'var(--green)' },
+    { label: t('admin.summary.kpi.sessions'),    value: SUMMARY.totalSessions, text: show(SUMMARY.totalSessions),    icon: <FaClipboardList />, color: 'var(--purple)' },
+    { label: t('admin.summary.kpi.avgScore'),    value: SUMMARY.avgScore,      text: show(SUMMARY.avgScore, '%'),    icon: <FaBullseye />,      color: 'var(--orange)' },
+    { label: t('admin.summary.kpi.skills'),      value: SUMMARY.totalSkills,   text: show(SUMMARY.totalSkills),      icon: <FaTree />,          color: 'var(--blue)' },
+    { label: t('admin.summary.kpi.topSkill'),    value: SUMMARY.topSkill,      text: show(SUMMARY.topSkill),         icon: <FaTrophy />,        color: 'var(--accent)' },
   ];
 
   return (
@@ -46,10 +61,15 @@ export default function SummaryTab({
       </div>
       <div className="ad-kpi-grid">
         {kpis.map((k, i) => (
-          <div key={i} className="ad-kpi-card" style={kpiVar(k.color)}>
+          <div
+            key={i}
+            className={`ad-kpi-card${k.value === null ? ' is-empty' : ''}`}
+            style={kpiVar(k.color)}
+            title={k.value === null ? t('admin.summary.noData') : undefined}
+          >
             <div className="ad-kpi-icon">{k.icon}</div>
             <div className="ad-kpi-info">
-              <div className="ad-kpi-value">{k.value}</div>
+              <div className="ad-kpi-value">{k.text}</div>
               <div className="ad-kpi-label">{k.label}</div>
             </div>
           </div>
@@ -58,6 +78,9 @@ export default function SummaryTab({
       <div className="ad-chart-row">
         <div className="ad-card">
           <div className="ad-card-title"><FaCalendarDays /> {t('admin.summary.dailySessions')}</div>
+          {!SUMMARY.weekSessions ? (
+            <div className="ad-summary-empty">{t('admin.summary.noData')}</div>
+          ) : (
           <div className="ad-bar-chart">
             {SUMMARY.weekSessions.map((v, i) => (
               <div key={i} className="ad-bar-col">
@@ -69,9 +92,13 @@ export default function SummaryTab({
               </div>
             ))}
           </div>
+          )}
         </div>
         <div className="ad-card">
           <div className="ad-card-title"><FaTree /> {t('admin.summary.skillProgress')}</div>
+          {skills.length === 0 ? (
+            <div className="ad-summary-empty">{t('admin.summary.noData')}</div>
+          ) : (
           <div className="ad-skill-progress-list">
             {[...skills].sort((a, b) => b.avgProgress - a.avgProgress).slice(0, 6).map(s => (
               <div key={s.id} className="ad-sp-row">
@@ -84,6 +111,7 @@ export default function SummaryTab({
               </div>
             ))}
           </div>
+          )}
         </div>
       </div>
       <div className="ad-card">
@@ -101,6 +129,13 @@ export default function SummaryTab({
             </tr>
           </thead>
           <tbody>
+            {users.length === 0 && (
+              <tr>
+                <td colSpan={7} style={{ textAlign: 'center', padding: 24 }} className="ad-muted">
+                  {t('admin.summary.noData')}
+                </td>
+              </tr>
+            )}
             {users.map(u => {
               const sk = statusKey(u.status);
               return (
@@ -115,7 +150,7 @@ export default function SummaryTab({
                   <td><span className="ad-mono">{u.sessions}</span></td>
                   <td><span className="ad-score" style={{ color: getScoreColor(u.avgScore) }}>{u.avgScore}%</span></td>
                   <td><span className="ad-mono"><FaFire /> {u.streak}</span></td>
-                  <td><span className="ad-muted">{u.lastActive}</span></td>
+                  <td><span className="ad-muted">{u.lastActive ?? '—'}</span></td>
                   <td><span className="ad-status-dot" style={{ background: getStatusColor(u.status) }} /><span className="ad-muted">{sk ? t(sk) : u.status}</span></td>
                 </tr>
               );

@@ -65,6 +65,7 @@ export const adminTh = {
   "admin.summary.col.streak": "Streak",
   "admin.summary.col.lastActive": "ใช้งานล่าสุด",
   "admin.summary.days": "จ|อ|พ|พฤ|ศ|ส|อา",
+  "admin.summary.noData": "ยังไม่มีข้อมูล — รอ API จาก backend",
 
   // ── History ──
   "admin.history.title": "ประวัติการทำโจทย์ทั้งหมด",
@@ -81,6 +82,7 @@ export const adminTh = {
   "admin.users.title": "จัดการผู้ใช้งาน",
   "admin.users.count": "ผู้ใช้ทั้งหมด {count} คน",
   "admin.users.add": "เพิ่มผู้ใช้ใหม่",
+  "admin.users.new": "ใหม่",
   "admin.users.col.name": "ชื่อ - นามสกุล",
   "admin.users.empty": "ไม่พบผู้ใช้งานที่ตรงกับเงื่อนไข",
   "admin.users.search": "ค้นหาชื่อ, วิทยาเขต, คณะ, สาขา ...",
@@ -135,6 +137,9 @@ export const adminTh = {
   "admin.skillForm.titleEdit": "แก้ไข Skill",
   "admin.skillForm.titleCreate": "เพิ่ม Skill ใหม่",
   "admin.skillForm.name": "ชื่อ Skill",
+  "admin.skillForm.basic": "ข้อมูลพื้นฐาน",
+  "admin.skillForm.prereqHint": "เลือกได้หลายรายการ",
+  "admin.skillForm.remove": "เอาออก",
   "admin.skillForm.prereq": "Prerequisite (เลือกได้หลายรายการ)",
   "admin.skillForm.prereqSearch": "ค้นหา Prerequisite...",
   "admin.skillForm.noOther": "— ไม่มี Skill อื่นให้เลือก —",

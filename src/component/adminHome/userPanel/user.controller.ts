@@ -11,6 +11,9 @@ import {
 } from "../../../models/userModel";
 import { getStatusColor, getScoreColor } from "../../../utils/adminUi";
 
+// ป้าย "ใหม่" ค้างไว้นานเท่านี้หลังสร้างผู้ใช้ แล้วแถวกลับไปอยู่ตามลำดับเดิมของ backend
+const NEW_USER_HIGHLIGHT_MS = 60_000;
+
 export function userController() {
   const toast = useToast();
   const { t } = usePreferences();
@@ -31,26 +34,38 @@ export function userController() {
   const [viewBranches, setViewBranches] = useState<any[]>([]);
   const [isLoadingViewBranches, setIsLoadingViewBranches] = useState<boolean>(false);
 
+  // id ของผู้ใช้ที่เพิ่งสร้างในหน้านี้ — ใช้ดันขึ้นบนสุดและแสดงป้าย "ใหม่" เท่านั้น (backend ไม่ส่งวันที่สร้างมา)
+  const [newUserIds, setNewUserIds] = useState<Set<number>>(new Set());
+
+  useEffect(() => {
+    if (newUserIds.size === 0) return;
+    const timer = setTimeout(() => setNewUserIds(new Set()), NEW_USER_HIGHLIGHT_MS);
+    return () => clearTimeout(timer);
+  }, [newUserIds]);
+
   useEffect(() => {
     loadUser();
     fetchOptions();
   }, []);
 
-  const loadUser = useCallback(async () => {
+  // คืนรายการที่โหลดมาด้วย ให้ handleSaveUser เทียบหา id ของผู้ใช้ที่เพิ่งสร้างได้
+  const loadUser = useCallback(async (): Promise<UserResponseAdmin[]> => {
     setIsLoading(true);
     const result = await userService.getAllUsers();
 
+    let data: UserResponseAdmin[] = [];
     if (result.isError) {
       setErrors(result.errorMessage);
       setUsers([]);
       setUserFiltered([]);
     } else {
-      const data = result?.data || [];
+      data = result?.data || [];
       setUsers(data);
       setUserFiltered(data);
       setErrors(null);
     }
     setIsLoading(false);
+    return data;
   }, []);
 
   const fetchOptions = useCallback(async () => {
@@ -82,8 +97,13 @@ export function userController() {
       if (statusFilter !== "all" && user.status !== statusFilter) return false;
       return true;
     });
+    // ผู้ใช้ใหม่ขึ้นบนสุด ที่เหลือคงลำดับเดิม (sort ของ JS เป็น stable)
+    if (newUserIds.size > 0) {
+      const rank = (u: UserResponseAdmin) => (u.id !== undefined && newUserIds.has(u.id) ? 0 : 1);
+      filtered.sort((a, b) => rank(a) - rank(b));
+    }
     setUserFiltered(filtered);
-  }, [userSearch, statusFilter, users]);
+  }, [userSearch, statusFilter, users, newUserIds]);
 
   const toggleUserStatus = async (targetUser: UserResponseAdmin) => {
     if (!targetUser.id) {
@@ -125,6 +145,8 @@ export function userController() {
 
   const handleSaveUser = async (data: CreateUserByAdminRequest | UpdateUserByAdminRequest) => {
     setIsSavingUser(true);
+    const isCreate = !editingUser?.id;
+    const idsBefore = new Set(users.map((u) => u.id));
     try {
       const result = editingUser?.id
         ? await userService.updateAdminUser(editingUser.id, data as UpdateUserByAdminRequest)
@@ -137,7 +159,18 @@ export function userController() {
         );
       }
       closeFormModal();
-      await loadUser();
+      const fresh = await loadUser();
+      if (isCreate) {
+        const createdIds = fresh
+          .map((u) => u.id)
+          .filter((id): id is number => id !== undefined && !idsBefore.has(id));
+        if (createdIds.length > 0) {
+          // ล้างตัวกรอง ไม่งั้นผู้ใช้ใหม่อาจถูกซ่อนจนดูเหมือนสร้างไม่สำเร็จ
+          setUserSearch("");
+          setStatusFilter("all");
+          setNewUserIds(new Set(createdIds));
+        }
+      }
     } finally {
       setIsSavingUser(false);
     }
@@ -183,5 +216,6 @@ export function userController() {
     isLoadingViewBranches,
     openViewModal,
     closeViewModal,
+    newUserIds,
   };
 }

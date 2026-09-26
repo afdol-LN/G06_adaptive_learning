@@ -1,12 +1,15 @@
 import { ApiResponse } from "./apiResponse";
 
+// null = ยังไม่มีข้อมูลจาก backend (หน้าแสดง "—" แทน 0 ที่ดูเหมือนค่าจริง)
 export interface AdminSummary {
-  totalUsers: number;
-  activeToday: number;
-  totalSessions: number;
-  avgScore: number;
-  topSkill: string;
-  weekSessions: number[];
+  totalUsers: number | null;
+  activeToday: number | null;
+  totalSessions: number | null;
+  avgScore: number | null;
+  totalSkills: number | null;
+  topSkill: string | null;
+  /** จันทร์ → อาทิตย์ */
+  weekSessions: number[] | null;
 }
 
 export interface SummarySkillProgress {
@@ -25,7 +28,7 @@ export interface SummaryUserActivity {
   sessions: number;
   avgScore: number;
   streak: number;
-  lastActive: string;
+  lastActive: string | null;
   status: string;
 }
 

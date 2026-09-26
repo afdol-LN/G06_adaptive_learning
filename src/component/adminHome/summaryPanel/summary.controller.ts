@@ -8,12 +8,13 @@ import {
 } from "../../../models/summaryModel";
 
 const EMPTY_SUMMARY: AdminSummary = {
-  totalUsers: 0,
-  activeToday: 0,
-  totalSessions: 0,
-  avgScore: 0,
-  topSkill: "-",
-  weekSessions: [0, 0, 0, 0, 0, 0, 0],
+  totalUsers: null,
+  activeToday: null,
+  totalSessions: null,
+  avgScore: null,
+  totalSkills: null,
+  topSkill: null,
+  weekSessions: null,
 };
 
 export function summaryController() {
@@ -42,7 +43,7 @@ export function summaryController() {
     loadSummary();
   }, [loadSummary]);
 
-  const maxBar = Math.max(1, ...summary.weekSessions);
+  const maxBar = Math.max(1, ...(summary.weekSessions ?? []));
 
   return {
     summary,

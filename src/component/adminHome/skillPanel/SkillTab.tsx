@@ -8,6 +8,7 @@ import SkillFormModal from "./component/SkillFormModal";
 import SkillViewModal from "./component/SkillViewModal";
 import { skillController } from "./skill.controller";
 import { ActionButtons } from "../../common/ActionButtons";
+import { TagList } from "../../common/TagList";
 import { StatusSwitch } from "../../common/StatusSwitch";
 import { usePreferences } from "../../../context/PreferencesContext";
 
@@ -143,17 +144,11 @@ export default function SkillTab({ icon, getSkillQuestions, setViewSkillQ }: Ski
                       </span>
                     </td>
                     <td className={fadeClass}>
-                      <div className="ad-req-tags">
-                        {!s.skillPrequisite || s.skillPrequisite.length === 0 ? (
-                          <span className="ad-muted">—</span>
-                        ) : (
-                          s.skillPrequisite.map((p) => (
-                            <span key={p.prerequisiteSkillId} className="ad-req-tag">
-                              {p.prerequisiteSkill?.skillsName || `#${p.prerequisiteSkillId}`}
-                            </span>
-                          ))
+                      <TagList
+                        names={(s.skillPrequisite || []).map(
+                          (p) => p.prerequisiteSkill?.skillsName || `#${p.prerequisiteSkillId}`,
                         )}
-                      </div>
+                      />
                     </td>
                     {getSkillQuestions && setViewSkillQ && (
                       <td className={fadeClass}>

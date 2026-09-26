@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { FaPlus, FaTrash } from "react-icons/fa6";
+import { FaPlus, FaTrash, FaListCheck } from "react-icons/fa6";
 import { Skill } from "../../../../models/skillModel";
 import { GoalSkillRequireInput } from "../../../../models/goalModel";
 import { usePreferences } from "../../../../context/PreferencesContext";
@@ -69,10 +69,14 @@ export default function SkillRequireEditor({
   const selectedBloom = bloomLevel(levelRequire === "" ? null : levelRequire);
 
   return (
-    <div className="ad-field">
-      <label className="ad-label">{t("admin.skillRequire.label")}</label>
+    <div className="ad-sf-card">
+      <div className="ad-uv-section-title">
+        <FaListCheck aria-hidden /> {t("admin.skillRequire.label")}
+        {value.length > 0 && <span className="ad-uv-count">{value.length}</span>}
+      </div>
 
-      <div className="ad-field-row ad-skill-require-row">
+      {/* แถวเพิ่ม: เลือก skill + level แล้วกดเพิ่ม */}
+      <div className="ad-sr-add">
         <select
           className="ad-select"
           value={selectedSkillId}
@@ -112,26 +116,30 @@ export default function SkillRequireEditor({
       </div>
       {selectedBloom && <div className="ad-hint-text">{t(selectedBloom.descKey)}</div>}
 
-      <div className="ad-choices-edit">
-        {value.length === 0 ? (
-          <span className="ad-muted">{t("admin.skillRequire.noneSelected")}</span>
-        ) : (
-          value.map((v) => (
-            <div key={v.skillId} className="ad-choice-row">
-              <span style={{ flex: 1 }}>{skillName(v.skillId)}</span>
-              <span className="ad-muted">{levelLabel(v.levelRequire)}</span>
+      {value.length === 0 ? (
+        <div className="ad-uv-empty">{t("admin.skillRequire.noneSelected")}</div>
+      ) : (
+        <div className="ad-sr-list">
+          {value.map((v, i) => (
+            <div key={v.skillId} className="ad-sr-row">
+              <span className="ad-sr-num">{i + 1}</span>
+              <span className="ad-sr-name" title={skillName(v.skillId)}>{skillName(v.skillId)}</span>
+              <span className={v.levelRequire != null ? "ad-uv-exp" : "ad-sr-nolevel"}>
+                {levelLabel(v.levelRequire)}
+              </span>
               <button
                 type="button"
-                className="ad-btn-sm ad-btn-del"
+                className="ad-sr-del"
                 onClick={() => handleRemove(v.skillId)}
                 aria-label={skillName(v.skillId)}
+                title={t("admin.skillForm.remove")}
               >
-                <FaTrash />
+                <FaTrash aria-hidden />
               </button>
             </div>
-          ))
-        )}
-      </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
