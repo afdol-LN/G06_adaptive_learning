@@ -1,0 +1,260 @@
+/* ══════════════════════════════════════
+   LearningReport.css — Profile → Export PDF (component/report/*), prefix lr-
+   The sheet is paper: white with dark ink in both themes, and exactly A4 when printed.
+   Only the desk around it and the toolbar follow the light/dark theme.
+   Tokens live on .lr-page (not :root) so no other stylesheet's :root can recolour the document.
+══════════════════════════════════════ */
+
+.lr-page {
+  /* desk + toolbar (themed) */
+  --lr-desk: #e9eef4;
+  --lr-bar: #ffffff;
+  --lr-bar-border: #d6dee8;
+  --lr-bar-ink: #000080;
+  --lr-bar-muted: #475569;
+  --lr-accent: #0047ab;
+  --lr-on-accent: #ffffff;
+  /* paper (fixed — a document looks the same whatever the screen theme) */
+  --lr-paper: #ffffff;
+  --lr-ink: #0f172a;
+  --lr-heading: #000080;
+  --lr-muted: #52607a;
+  --lr-rule: #d6dee8;
+  --lr-soft: #f3f6fa;
+  --lr-ok-bg: #ecfdf5;  --lr-ok-ink: #047857;  --lr-ok-border: #a7f3d0;
+  --lr-mid-bg: #eff6ff; --lr-mid-ink: #1d4ed8; --lr-mid-border: #bfdbfe;
+  --lr-off-bg: #f1f5f9; --lr-off-ink: #475569; --lr-off-border: #cbd5e1;
+
+  min-height: 100vh;
+  background: var(--lr-desk);
+  font-family: var(--font-sans);
+  color: var(--lr-ink);
+  padding-bottom: 40px;
+}
+
+:root[data-theme="dark"] .lr-page {
+  --lr-desk: #0b1220;
+  --lr-bar: #121b2e;
+  --lr-bar-border: #26344f;
+  --lr-bar-ink: #ffffff;
+  --lr-bar-muted: #a3b1cc;
+  --lr-accent: #6b9bff;
+  --lr-on-accent: #0b1220;
+}
+
+.lr-page svg { flex-shrink: 0; }
+
+/* ── toolbar (screen only) ── */
+.lr-toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 20px;
+  background: var(--lr-bar);
+  border-bottom: 1px solid var(--lr-bar-border);
+
+  /* PreferenceControls reads the tb-/app tokens other stylesheets put on :root — point them here */
+  --border: var(--lr-bar-border);
+  --surface: var(--lr-bar);
+  --surface-2: var(--lr-bar);
+  --text: var(--lr-bar-ink);
+  --muted: var(--lr-bar-muted);
+  --accent: var(--lr-accent);
+  --accent-fill: var(--lr-accent);
+  --on-accent: var(--lr-on-accent);
+}
+.lr-toolbar-hint {
+  flex: 1;
+  font-size: 13px;
+  color: var(--lr-bar-muted);
+}
+.lr-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border: 1px solid var(--lr-bar-border);
+  border-radius: 8px;
+  background: var(--lr-bar);
+  color: var(--lr-bar-ink);
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.lr-btn:hover:not(:disabled) { border-color: var(--lr-accent); color: var(--lr-accent); }
+.lr-btn--primary {
+  background: var(--lr-accent);
+  border-color: var(--lr-accent);
+  color: var(--lr-on-accent);
+}
+.lr-btn--primary:hover:not(:disabled) { color: var(--lr-on-accent); opacity: 0.92; }
+.lr-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* ── the A4 sheet ── */
+.lr-sheet {
+  box-sizing: border-box;
+  width: 210mm;
+  max-width: calc(100vw - 32px);
+  min-height: 297mm;
+  margin: 24px auto 0;
+  padding: 16mm 15mm;
+  background: var(--lr-paper);
+  color: var(--lr-ink);
+  box-shadow: 0 6px 30px rgba(15, 23, 42, 0.18);
+  font-size: 12.5px;
+  line-height: 1.5;
+}
+.lr-state { padding: 40px 0; text-align: center; color: var(--lr-muted); font-size: 14px; }
+.lr-state--error { color: #b91c1c; }
+
+.lr-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  padding-bottom: 12px;
+  border-bottom: 3px solid var(--lr-heading);
+}
+.lr-brand { display: flex; align-items: center; gap: 10px; }
+.lr-logo { display: block; width: 44px; height: 44px; }
+.lr-brand-name { font-size: 16px; font-weight: 800; color: var(--lr-heading); }
+.lr-brand-sub { font-size: 11px; color: var(--lr-muted); max-width: 260px; }
+.lr-doc { text-align: right; }
+.lr-title { margin: 0 0 4px; font-size: 20px; font-weight: 800; color: var(--lr-heading); }
+.lr-doc-meta { font-size: 11px; color: var(--lr-muted); }
+.lr-mono { font-family: 'DM Mono', ui-monospace, monospace; }
+
+.lr-statement {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 14px 0;
+  padding: 12px 14px;
+  border: 1px solid var(--lr-rule);
+  border-left: 4px solid var(--lr-mid-ink);
+  border-radius: 8px;
+  background: var(--lr-soft);
+  font-size: 13.5px;
+}
+.lr-statement p { margin: 0; }
+.lr-statement.is-complete { border-left-color: var(--lr-ok-ink); background: var(--lr-ok-bg); }
+.lr-statement-icon { font-size: 26px; color: var(--lr-mid-ink); display: flex; }
+.lr-statement.is-complete .lr-statement-icon { color: var(--lr-ok-ink); }
+
+.lr-two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.lr-block { margin-top: 14px; break-inside: avoid; }
+.lr-appendix { break-inside: auto; }
+.lr-h2 {
+  margin: 0 0 6px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--lr-rule);
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--lr-heading);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+.lr-dl {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 3px 12px;
+  margin: 0;
+}
+.lr-dl dt { color: var(--lr-muted); white-space: nowrap; }
+.lr-dl dd { margin: 0; }
+
+.lr-bar { height: 6px; margin-top: 8px; border-radius: 3px; background: var(--lr-off-bg); overflow: hidden; }
+.lr-bar span { display: block; height: 100%; background: var(--lr-ok-ink); }
+
+.lr-stats { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+.lr-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 8px 4px;
+  border: 1px solid var(--lr-rule);
+  border-radius: 8px;
+  text-align: center;
+}
+.lr-stat-num { font-size: 16px; font-weight: 800; color: var(--lr-heading); font-variant-numeric: tabular-nums; }
+.lr-stat-label { font-size: 10.5px; color: var(--lr-muted); }
+
+.lr-table { width: 100%; border-collapse: collapse; }
+.lr-table th {
+  padding: 5px 6px;
+  background: var(--lr-soft);
+  border-bottom: 1px solid var(--lr-rule);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--lr-muted);
+  text-align: left;
+}
+.lr-table td { padding: 5px 6px; border-bottom: 1px solid var(--lr-rule); vertical-align: top; }
+.lr-table tr { break-inside: avoid; }
+.lr-table--dense td { padding: 3px 6px; font-size: 11.5px; }
+.lr-num { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.lr-skill { display: block; font-weight: 700; }
+.lr-muted { display: block; font-size: 10.5px; color: var(--lr-muted); }
+.lr-status {
+  display: inline-block;
+  padding: 1px 8px;
+  border: 1px solid;
+  border-radius: 10px;
+  font-size: 10.5px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.lr-status.is-mastered    { background: var(--lr-ok-bg);  color: var(--lr-ok-ink);  border-color: var(--lr-ok-border); }
+.lr-status.is-in_progress { background: var(--lr-mid-bg); color: var(--lr-mid-ink); border-color: var(--lr-mid-border); }
+.lr-status.is-not_started { background: var(--lr-off-bg); color: var(--lr-off-ink); border-color: var(--lr-off-border); }
+
+.lr-note { margin: 6px 0 0; font-size: 10.5px; color: var(--lr-muted); }
+
+.lr-achievements { margin: 0; padding: 0; list-style: none; display: grid; gap: 6px; }
+.lr-achievements li { display: flex; align-items: center; gap: 10px; }
+.lr-achievements svg { color: var(--lr-ok-ink); font-size: 18px; }
+
+.lr-footer {
+  margin-top: 20px;
+  padding-top: 8px;
+  border-top: 1px solid var(--lr-rule);
+  font-size: 10px;
+  color: var(--lr-muted);
+  text-align: center;
+}
+
+/* ── narrow screens: the preview reflows; the printed page is still A4 ── */
+@media (max-width: 760px) {
+  .lr-toolbar { flex-wrap: wrap; padding: 10px 16px; }
+  .lr-toolbar-hint { flex-basis: 100%; order: 3; }
+  .lr-sheet { padding: 20px 16px; min-height: 0; }
+  .lr-header, .lr-two-col { display: block; }
+  .lr-doc { text-align: left; margin-top: 10px; }
+  .lr-stats { grid-template-columns: repeat(3, 1fr); }
+  .lr-table { display: block; overflow-x: auto; }
+}
+
+/* ── print: just the sheet, A4, colours kept ── */
+@page { size: A4; margin: 12mm; }
+@media print {
+  .lr-page { background: #ffffff; padding: 0; min-height: 0; }
+  .lr-toolbar { display: none; }
+  .lr-sheet {
+    width: auto;
+    max-width: none;
+    min-height: 0;
+    margin: 0;
+    padding: 0;
+    box-shadow: none;
+  }
+  .lr-page * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}
+/* other stylesheets theme <body>; only while a report is on the page, print it on white */
+@media print {
+  body:has(.lr-page) { background: #ffffff !important; }
+}

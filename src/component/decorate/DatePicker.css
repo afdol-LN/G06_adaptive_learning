@@ -251,3 +251,25 @@
 .dp-popup button { padding: 0; }
 .dp-day { min-width: 0; }
 .dp-foot-btn { padding: 8px 12px; }
+
+/* ── DateRangePicker (common/DateRangePicker.tsx) ── */
+.dp-range-title {
+  flex: 1;
+  text-align: center;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--dd-text);
+}
+/* days between the two ends: a soft band; the ends reuse .is-selected */
+.dp-day.is-in-range {
+  background: var(--dd-tint);
+  color: var(--dd-text);
+  border-radius: 0;
+}
+.dp-range-hint {
+  flex: 1;
+  align-self: center;
+  font-size: 13px;
+  color: var(--dd-muted);
+}
+.dp-popup .dp-foot-btn--auto { flex: 0 0 auto; }

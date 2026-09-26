@@ -1,5 +1,7 @@
-import React from "react";
+import React, { useState } from "react";
+import ExportReportModal from "../component/ExportReportModal";
 import {
+  FaFilePdf,
   FaClock,
   FaBullseye,
   FaBolt,
@@ -49,6 +51,7 @@ interface ProfileTabProps {
   stats: BranchStats | null;
   goalsCount: number;
   activeBranch: {
+    id?: string;
     goalName?: string;
   } | null;
 }
@@ -96,6 +99,7 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({
   activeBranch,
 }) => {
   const { t, locale } = usePreferences();
+  const [exportOpen, setExportOpen] = useState(false);
   const behavior = computeBehavior(sessions);
   const meta = BEHAVIOR_META[behavior.cls];
 
@@ -175,7 +179,15 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({
             <div className="profile-skill-count-label">{t("profile.skillsUnlocked")}</div>
             <div className="profile-skill-count-num">{unlocked.size}</div>
           </div>
+          <button type="button" className="profile-export-btn" onClick={() => setExportOpen(true)}>
+            <FaFilePdf aria-hidden /> {t("export.button")}
+          </button>
         </div>
+        <ExportReportModal
+          open={exportOpen}
+          onClose={() => setExportOpen(false)}
+          activeBranchId={activeBranch?.id ?? null}
+        />
 
         <div className="behavior-card" style={metaVar(meta.color)} data-tour="tour-behavior">
           <div className="behavior-class-header">

@@ -9,7 +9,6 @@ import {
   getScoreColor,
   getStatusColor,
   getTierColor,
-  gradeKey,
   TABS,
 } from "../../utils/adminUi";
 import AppBrand from "../common/AppBrand";
@@ -19,8 +18,7 @@ import "../decorate/Adminhome.css";
 import AiTab from "./aiPanel/AiTab";
 import ExerciseTab from "./exercisePanel/ExerciseTab";
 import GoalTab from "./goalPanel/GoalTab";
-import { historyController } from "./historyPanel/history.controller";
-import HistoryTab from "./HistoryTab";
+import HistoryTab from "./historyPanel/HistoryTab";
 import SkillTab from "./skillPanel/SkillTab";
 import { summaryController } from "./summaryPanel/summary.controller";
 import SummaryTab from "./SummaryTab";
@@ -41,13 +39,6 @@ export default function AdminHome() {
 
   const { summary, skillProgress, userActivity, maxBar, dayLabels } =
     summaryController();
-  const {
-    filteredHistory,
-    histSearch,
-    setHistSearch,
-    histGrade,
-    setHistGrade,
-  } = historyController();
 
   const tabIcon = (key: string) => TABS.find((tab) => tab.key === key)?.icon;
   const activeTabDef = TABS.find((tab) => tab.key === activeTab) ?? TABS[0];
@@ -172,16 +163,7 @@ export default function AdminHome() {
             <div
               style={{ display: activeTab === "history" ? undefined : "none" }}
             >
-              <HistoryTab
-                icon={tabIcon("history")}
-                filteredHistory={filteredHistory}
-                histSearch={histSearch}
-                setHistSearch={setHistSearch}
-                histGrade={histGrade}
-                setHistGrade={setHistGrade}
-                gradeLabel={(grade: string) => t(gradeKey(grade))}
-                getScoreColor={getScoreColor}
-              />
+              <HistoryTab icon={tabIcon("history")} />
             </div>
           )}
 
