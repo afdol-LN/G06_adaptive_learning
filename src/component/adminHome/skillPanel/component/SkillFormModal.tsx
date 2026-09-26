@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { FaPen, FaPlus, FaCheck } from "react-icons/fa6";
+import { FaPen, FaPlus, FaCheck, FaXmark, FaMagnifyingGlass, FaBookOpen, FaDiagramProject } from "react-icons/fa6";
 import { Skill, SkillPrerequisiteInput } from "../../../../models/skillModel";
 import { SkillFormValues, EMPTY_SKILL_FORM } from "../skill.controller";
 import { TIERS, getTierLabel, statusKey } from "../../../../utils/adminUi";
@@ -111,6 +111,8 @@ export default function SkillFormModal({
     .filter((s) => s.skillId !== editingSkill?.skillId)
     .sort((a, b) => a.skillsName.localeCompare(b.skillsName));
 
+  const selectedSkills = candidateSkills.filter((s) => prerequisiteIds.includes(s.skillId));
+
   const filteredCandidates = candidateSkills.filter(
     (s) =>
       s.skillsName.toLowerCase().includes(prereqSearch.toLowerCase()) ||
@@ -119,7 +121,7 @@ export default function SkillFormModal({
 
   return (
     <div className="ad-overlay" onClick={onClose}>
-      <div className="ad-modal" onClick={(e) => e.stopPropagation()}>
+      <div className="ad-modal ad-modal--detail ad-modal--form" onClick={(e) => e.stopPropagation()}>
         <div className="ad-modal-header">
           <span className="ad-modal-title">
             {isEdit ? (
@@ -138,30 +140,35 @@ export default function SkillFormModal({
           <div className="ad-modal-body">
             {formError && <div className="ad-form-error">{formError}</div>}
 
-            <div className="ad-field">
-              <label className="ad-label">{t("admin.skills.col.code")}</label>
-              <input
-                type="text"
-                className="ad-input"
-                value={skillCode}
-                onChange={(e) => setSkillCode(e.target.value)}
-                disabled={isEdit}
-                required
-              />
-            </div>
+            <div className="ad-sf-card">
+              <div className="ad-uv-section-title">
+                <FaBookOpen aria-hidden /> {t("admin.skillForm.basic")}
+              </div>
+              <div className="ad-sf-grid">
+                <div className="ad-field">
+                  <label className="ad-label">{t("admin.skills.col.code")}</label>
+                  <input
+                    type="text"
+                    className="ad-input"
+                    value={skillCode}
+                    onChange={(e) => setSkillCode(e.target.value)}
+                    disabled={isEdit}
+                    required
+                  />
+                </div>
+                <div className="ad-field">
+                  <label className="ad-label">{t("admin.skillForm.name")}</label>
+                  <input
+                    type="text"
+                    className="ad-input"
+                    value={skillsName}
+                    onChange={(e) => setSkillsName(e.target.value)}
+                    required
+                  />
+                </div>
+              </div>
 
-            <div className="ad-field">
-              <label className="ad-label">{t("admin.skillForm.name")}</label>
-              <input
-                type="text"
-                className="ad-input"
-                value={skillsName}
-                onChange={(e) => setSkillsName(e.target.value)}
-                required
-              />
-            </div>
-
-            <div className="ad-field-row">
+              <div className="ad-sf-grid">
               <div className="ad-field" style={{ flex: 1, minWidth: "120px", position: "relative" }}>
                 <label className="ad-label">{t("admin.skills.col.tier")}</label>
                 <button
@@ -234,21 +241,47 @@ export default function SkillFormModal({
                   </div>
                 )}
               </div>
+              </div>
             </div>
 
-            <div className="ad-field">
-              <label className="ad-label">{t("admin.skillForm.prereq")}</label>
-              <input
-                type="text"
-                className="ad-input"
-                placeholder={t("admin.skillForm.prereqSearch")}
-                value={prereqSearch}
-                onChange={(e) => setPrereqSearch(e.target.value)}
-                style={{ marginBottom: "8px" }}
-              />
-              <div className="ad-req-tags">
+            <div className="ad-sf-card">
+              <div className="ad-uv-section-title">
+                <FaDiagramProject aria-hidden /> {t("admin.skills.col.prereq")}
+                <span className="ad-sf-hint">{t("admin.skillForm.prereqHint")}</span>
+                {selectedSkills.length > 0 && <span className="ad-uv-count">{selectedSkills.length}</span>}
+              </div>
+
+              {/* ที่เลือกแล้วแยกไว้ด้านบน กด x เพื่อเอาออก — ไม่ต้องไล่หาในรายการยาว */}
+              {selectedSkills.length > 0 && (
+                <div className="ad-sf-selected">
+                  {selectedSkills.map((s) => (
+                    <button
+                      type="button"
+                      key={s.skillId}
+                      className="ad-sf-chip"
+                      onClick={() => togglePrerequisite(s.skillId)}
+                      title={t("admin.skillForm.remove")}
+                    >
+                      {s.skillsName} <FaXmark aria-hidden />
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              <div className="ad-sf-search">
+                <FaMagnifyingGlass aria-hidden />
+                <input
+                  type="text"
+                  className="ad-input"
+                  placeholder={t("admin.skillForm.prereqSearch")}
+                  value={prereqSearch}
+                  onChange={(e) => setPrereqSearch(e.target.value)}
+                />
+              </div>
+              {/* ตารางช่องเท่ากัน + checkbox — อ่านเป็นแถวได้ ไม่เป็นก้อนป้ายยาวไม่เท่ากัน */}
+              <div className="ad-sf-picker">
                 {filteredCandidates.length === 0 ? (
-                  <span className="ad-muted">
+                  <span className="ad-sf-picker-empty">
                     {candidateSkills.length === 0
                       ? t("admin.skillForm.noOther")
                       : t("admin.skillForm.noMatch")}
@@ -260,18 +293,13 @@ export default function SkillFormModal({
                       <button
                         type="button"
                         key={s.skillId}
-                        className={`ad-req-tag pickable${selected ? " selected" : ""}`}
+                        className={`ad-sf-option${selected ? " is-selected" : ""}`}
                         onClick={() => togglePrerequisite(s.skillId)}
                         aria-pressed={selected}
+                        title={s.skillsName}
                       >
-                        {selected ? (
-                          <>
-                            <FaCheck />{" "}
-                          </>
-                        ) : (
-                          ""
-                        )}
-                        {s.skillsName}
+                        <span className="ad-sf-check">{selected && <FaCheck aria-hidden />}</span>
+                        <span className="ad-sf-option-name">{s.skillsName}</span>
                       </button>
                     );
                   })

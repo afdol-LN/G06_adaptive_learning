@@ -38,6 +38,7 @@ export default function UsersTab({ icon }: UsersTabProps) {
     isLoadingViewBranches,
     openViewModal,
     closeViewModal,
+    newUserIds,
   } = userController();
 
   return (
@@ -98,9 +99,10 @@ export default function UsersTab({ icon }: UsersTabProps) {
             ) : (
               userFiltered.map((u: UserResponseAdmin) => {
                 const fadeClass = u.status === "inactive" ? "ad-fade-cell" : "";
+                const isNew = u.id !== undefined && newUserIds.has(u.id);
 
                 return (
-                  <tr key={u.id}>
+                  <tr key={u.id} className={isNew ? "ad-row-new" : undefined}>
                     <td className={fadeClass}>
                       <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                         <div className="ad-avatar-sm" style={{ textTransform: "uppercase" }}>
@@ -111,6 +113,7 @@ export default function UsersTab({ icon }: UsersTabProps) {
                             <span style={{ fontSize: "14px", fontWeight: 700, color: "var(--text)" }}>
                               {u.fullName}
                             </span>
+                            {isNew && <span className="ad-badge-new">{t("admin.users.new")}</span>}
                             {u.dayStreak !== undefined && u.dayStreak > 0 && (
                               <span
                                 style={{

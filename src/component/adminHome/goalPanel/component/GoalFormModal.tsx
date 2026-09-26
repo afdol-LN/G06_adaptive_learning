@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { FaPen, FaPlus } from "react-icons/fa6";
+import { FaPen, FaPlus, FaBullseye } from "react-icons/fa6";
 import { Goal } from "../../../../models/goalModel";
 import { Skill } from "../../../../models/skillModel";
 import { GoalFormValues, EMPTY_GOAL_FORM } from "../goal.controller";
@@ -69,7 +69,7 @@ export default function GoalFormModal({
 
   return (
     <div className="ad-overlay" onClick={onClose}>
-      <div className="ad-modal" onClick={(e) => e.stopPropagation()}>
+      <div className="ad-modal ad-modal--detail ad-modal--form" onClick={(e) => e.stopPropagation()}>
         <div className="ad-modal-header">
           <span className="ad-modal-title">
             {isEdit ? (
@@ -88,25 +88,29 @@ export default function GoalFormModal({
           <div className="ad-modal-body">
             {formError && <div className="ad-form-error">{formError}</div>}
 
-            <div className="ad-field">
-              <label className="ad-label">{t("admin.goalForm.name")}</label>
-              <input
-                type="text"
-                className="ad-input"
-                value={goal}
-                onChange={(e) => setGoal(e.target.value)}
-                required
-              />
-            </div>
-
-            <div className="ad-field">
-              <label className="ad-label">{t("admin.goalForm.description")}</label>
-              <textarea
-                className="ad-input"
-                value={goalDescription}
-                onChange={(e) => setGoalDescription(e.target.value)}
-                rows={3}
-              />
+            <div className="ad-sf-card">
+              <div className="ad-uv-section-title">
+                <FaBullseye aria-hidden /> {t("admin.skillForm.basic")}
+              </div>
+              <div className="ad-field">
+                <label className="ad-label">{t("admin.goalForm.name")}</label>
+                <input
+                  type="text"
+                  className="ad-input"
+                  value={goal}
+                  onChange={(e) => setGoal(e.target.value)}
+                  required
+                />
+              </div>
+              <div className="ad-field">
+                <label className="ad-label">{t("admin.goalForm.description")}</label>
+                <textarea
+                  className="ad-input"
+                  value={goalDescription}
+                  onChange={(e) => setGoalDescription(e.target.value)}
+                  rows={3}
+                />
+              </div>
             </div>
 
             <SkillRequireEditor

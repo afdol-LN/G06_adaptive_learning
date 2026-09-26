@@ -65,6 +65,7 @@ export const adminEn: Record<keyof typeof adminTh, string> = {
   "admin.summary.col.streak": "Streak",
   "admin.summary.col.lastActive": "Last active",
   "admin.summary.days": "Mon|Tue|Wed|Thu|Fri|Sat|Sun",
+  "admin.summary.noData": "No data yet — waiting for a backend API",
 
   // ── History ──
   "admin.history.title": "Activity history",
@@ -142,6 +143,7 @@ export const adminEn: Record<keyof typeof adminTh, string> = {
   "admin.users.title": "Manage users",
   "admin.users.count": "{count} users",
   "admin.users.add": "Add user",
+  "admin.users.new": "New",
   "admin.users.col.name": "Full name",
   "admin.users.empty": "No users match these filters",
   "admin.users.search": "Search name, campus, faculty, major…",
@@ -196,6 +198,9 @@ export const adminEn: Record<keyof typeof adminTh, string> = {
   "admin.skillForm.titleEdit": "Edit skill",
   "admin.skillForm.titleCreate": "Add skill",
   "admin.skillForm.name": "Skill name",
+  "admin.skillForm.basic": "Basic info",
+  "admin.skillForm.prereqHint": "Pick any number",
+  "admin.skillForm.remove": "Remove",
   "admin.skillForm.prereq": "Prerequisites (pick any number)",
   "admin.skillForm.prereqSearch": "Search prerequisites…",
   "admin.skillForm.noOther": "— No other skills to pick —",

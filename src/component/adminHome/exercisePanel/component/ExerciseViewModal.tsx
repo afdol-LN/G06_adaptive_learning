@@ -1,6 +1,6 @@
-import { FaMagnifyingGlass, FaCheck, FaPen } from "react-icons/fa6";
+import { FaMagnifyingGlass, FaCheck, FaPen, FaCircleQuestion, FaCode, FaListUl } from "react-icons/fa6";
 import { Exercise } from "../../../../models/exerciseModel";
-import { getStatusColor, statusKey } from "../../../../utils/adminUi";
+import { statusKey } from "../../../../utils/adminUi";
 import { usePreferences } from "../../../../context/PreferencesContext";
 import CodeBlock from "../../../common/CodeBlock";
 
@@ -29,83 +29,94 @@ export default function ExerciseViewModal({
 
   const choices = exercise.exerciseChoices || [];
   const sk = statusKey(exercise.status);
+  const isActive = exercise.status?.toLowerCase() === "active";
+  const isChoice = exercise.type === "CHOICE";
 
   return (
     <div className="ad-overlay" onClick={onClose}>
-      <div className="ad-modal ad-modal--wide" onClick={(e) => e.stopPropagation()}>
+      <div className="ad-modal ad-modal--wide ad-modal--detail" onClick={(e) => e.stopPropagation()}>
         <div className="ad-modal-header">
           <span className="ad-modal-title"><FaMagnifyingGlass /> {title ?? t("admin.exView.title")}</span>
         </div>
 
         <div className="ad-modal-body">
-          <div className="ad-field">
-            <label className="ad-label">{t("admin.exercises.col.description")}</label>
-            <div>{exercise.description}</div>
-          </div>
-
-          {exercise.code && (
-            <div className="ad-field">
-              <label className="ad-label">{t("admin.exView.code")}</label>
-              <CodeBlock code={exercise.code} language={exercise.language} />
+          {/* ข้อมูลประกอบก่อน แล้วค่อยอ่านโจทย์ → โค้ด → คำตอบ ตามลำดับที่ผู้เรียนเห็น */}
+          <div className="ad-ev-meta">
+            <div className="ad-uv-item">
+              <span className="ad-uv-label">{t("admin.exercises.col.skill")}</span>
+              <span className="ad-uv-value">{exercise.skill?.skillsName || skillName || `#${exercise.skillId}`}</span>
             </div>
-          )}
-
-          <div className="ad-field-row">
-            <div className="ad-field">
-              <label className="ad-label">{t("admin.exercises.col.level")}</label>
-              <div>{exercise.level}</div>
+            <div className="ad-uv-item">
+              <span className="ad-uv-label">{t("admin.exercises.col.level")}</span>
+              <span className="ad-uv-value">{exercise.level}</span>
             </div>
-            <div className="ad-field">
-              <label className="ad-label">{t("admin.exercises.col.skill")}</label>
-              <div>{exercise.skill?.skillsName || skillName || `#${exercise.skillId}`}</div>
-            </div>
-          </div>
-
-          <div className="ad-field-row">
-            <div className="ad-field">
-              <label className="ad-label">{t("admin.exercises.col.type")}</label>
-              <div>{exercise.type}</div>
+            <div className="ad-uv-item">
+              <span className="ad-uv-label">{t("admin.exercises.col.type")}</span>
+              <span className="ad-uv-value">
+                {isChoice ? t("admin.exForm.type.choice") : t("admin.exForm.type.fill")}
+              </span>
             </div>
             {!hideStatus && (
-              <div className="ad-field">
-                <label className="ad-label">{t("admin.common.status")}</label>
-                <div>
-                  <span className="ad-status-dot" style={{ background: getStatusColor(exercise.status) }} />
-                  <span className="ad-muted">{sk ? t(sk) : exercise.status}</span>
-                </div>
+              <div className="ad-uv-item">
+                <span className="ad-uv-label">{t("admin.common.status")}</span>
+                <span>
+                  <span className={`ad-uv-pill ${isActive ? "ad-uv-pill--ok" : "ad-uv-pill--bad"}`}>
+                    <span className="ad-uv-dot" />
+                    {sk ? t(sk) : exercise.status}
+                  </span>
+                </span>
               </div>
             )}
           </div>
 
-          {exercise.type === "CHOICE" ? (
-            <div className="ad-field">
-              <label className="ad-label">{t("admin.exView.choices")}</label>
-              <div className="ad-req-tags">
-                {choices.length === 0 ? (
-                  <span className="ad-muted">{t("admin.exView.noChoices")}</span>
-                ) : (
-                  choices.map((c) => (
-                    <span key={c.id} className={`ad-req-tag${c.isAnswer ? " is-answer" : ""}`}>
-                      {c.isAnswer ? (
-                        <>
-                          <FaCheck />{" "}
-                        </>
-                      ) : (
-                        ""
-                      )}
-                      {c.script}
-                    </span>
-                  ))
-                )}
+          <div className="ad-uv-section">
+            <div className="ad-uv-section-title">
+              <FaCircleQuestion aria-hidden /> {t("admin.exercises.col.description")}
+            </div>
+            <div className="ad-ev-question">{exercise.description}</div>
+          </div>
+
+          {exercise.code && (
+            <div className="ad-uv-section">
+              <div className="ad-uv-section-title">
+                <FaCode aria-hidden /> {t("admin.exView.code")}
               </div>
+              <CodeBlock code={exercise.code} language={exercise.language} />
+            </div>
+          )}
+
+          {isChoice ? (
+            <div className="ad-uv-section">
+              <div className="ad-uv-section-title">
+                <FaListUl aria-hidden /> {t("admin.exView.choices")}
+              </div>
+              {choices.length === 0 ? (
+                <div className="ad-uv-empty">{t("admin.exView.noChoices")}</div>
+              ) : (
+                <div className="ad-ev-choices">
+                  {choices.map((c, i) => (
+                    <div key={c.id} className={`ad-ev-choice${c.isAnswer ? " is-answer" : ""}`}>
+                      <span className="ad-ev-letter">{String.fromCharCode(65 + i)}</span>
+                      <span className="ad-ev-script">{c.script}</span>
+                      {c.isAnswer && (
+                        <span className="ad-ev-correct">
+                          <FaCheck aria-hidden /> {t("admin.exView.correctAnswer")}
+                        </span>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           ) : (
-            <div className="ad-field">
-              <label className="ad-label">{t("admin.exView.correctAnswer")}</label>
-              <div>
-                {exercise.fillInBlank}{" "}
-                <span className="ad-muted">
-                  ({exercise.isCasesensitive === "YES" ? t("admin.exView.caseOn") : t("admin.exView.caseOff")})
+            <div className="ad-uv-section">
+              <div className="ad-uv-section-title">
+                <FaCheck aria-hidden /> {t("admin.exView.correctAnswer")}
+              </div>
+              <div className="ad-ev-answer">
+                <code>{exercise.fillInBlank}</code>
+                <span className="ad-uv-pill">
+                  {exercise.isCasesensitive === "YES" ? t("admin.exView.caseOn") : t("admin.exView.caseOff")}
                 </span>
               </div>
             </div>

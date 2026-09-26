@@ -9,6 +9,7 @@ import GoalWorkspace from "./workspace/GoalWorkspace";
 import { goalController } from "./goal.controller";
 import { goalTabController } from "./goalTab.controller";
 import { ActionButtons } from "../../common/ActionButtons";
+import { TagList } from "../../common/TagList";
 import { StatusSwitch } from "../../common/StatusSwitch";
 import { usePreferences } from "../../../context/PreferencesContext";
 
@@ -127,20 +128,12 @@ function GoalList({
                       <span className="ad-skill-name">{g.goal}</span>
                     </td>
                     <td className={fadeClass}>
-                      <div className="ad-req-tags">
-                        {!g.goalSkillRequire || g.goalSkillRequire.length === 0 ? (
-                          <span className="ad-muted">—</span>
-                        ) : (
-                          g.goalSkillRequire.map((r) => (
-                            <span key={r.skillId} className="ad-req-tag">
-                              {r.skill?.skillsName || `#${r.skillId}`}
-                            </span>
-                          ))
-                        )}
-                      </div>
+                      <TagList
+                        names={(g.goalSkillRequire || []).map((r) => r.skill?.skillsName || `#${r.skillId}`)}
+                      />
                     </td>
                     <td>
-                      <div className="ad-ws-row-actions">
+                      <div className="ad-ws-row-actions ad-row-actions-nowrap">
                         <ActionButtons onView={() => openView(g)} onEdit={() => openEditForm(g)} />
                         <button className="ad-btn-sm ad-btn-view" onClick={() => onOpenWorkspace(g.id)}>
                           <FaDiagramProject aria-hidden /> {t("admin.workspace.open")}
