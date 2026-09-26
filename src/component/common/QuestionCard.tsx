@@ -146,6 +146,11 @@ export default function QuestionCard({
               }}
               disabled={locked}
               autoFocus
+              // no browser suggestions: past answers typed here would leak hints (or junk) into the next question
+              autoComplete="off"
+              autoCorrect="off"
+              autoCapitalize="off"
+              spellCheck={false}
             />
           </div>
         )}

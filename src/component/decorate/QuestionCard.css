@@ -21,6 +21,7 @@
   --qc-ok-bg:       #ecfdf5;
   --qc-no:          #dc2626;
   --qc-no-bg:       #fef2f2;
+  --qc-shadow:      0 10px 30px rgba(0, 40, 120, .10), 0 2px 6px rgba(0, 40, 120, .06);
 
   --qc-l1-ink: #059669; --qc-l1-bg: #ecfdf5; --qc-l1-bd: #a7f3d0;
   --qc-l2-ink: #4d7c0f; --qc-l2-bg: #f7fee7; --qc-l2-bd: #d9f99d;
@@ -35,6 +36,7 @@
   background: var(--qc-surface);
   border: 1px solid var(--qc-border);
   border-radius: 12px;
+  box-shadow: var(--qc-shadow);
   overflow: hidden;
   font-family: var(--font-sans);
   color: var(--qc-ink);
@@ -57,6 +59,7 @@
   --qc-ok-bg:       rgba(52, 211, 153, .12);
   --qc-no:          #f87171;
   --qc-no-bg:       rgba(248, 113, 113, .12);
+  --qc-shadow:      0 10px 30px rgba(0, 0, 0, .45), 0 2px 6px rgba(0, 0, 0, .3);
 
   --qc-l1-ink: #34d399; --qc-l1-bg: rgba(52, 211, 153, .12);  --qc-l1-bd: rgba(52, 211, 153, .35);
   --qc-l2-ink: #a3e635; --qc-l2-bg: rgba(163, 230, 53, .12);  --qc-l2-bd: rgba(163, 230, 53, .35);
@@ -110,7 +113,9 @@
   cursor: pointer; user-select: none;
   transition: border-color .2s, background .2s;
 }
-.qc-choice:hover:not(:disabled) { border-color: var(--qc-accent); background: var(--qc-surface-2); }
+.qc-choice:hover:not(:disabled) { border-color: var(--qc-accent); }
+/* hover tint only on unpicked choices — the picked one keeps its --qc-tint instead of going white */
+.qc-choice:hover:not(:disabled):not(.qc-choice--selected) { background: var(--qc-surface-2); }
 .qc-choice:focus-visible { outline: 2px solid var(--qc-accent); outline-offset: 2px; }
 .qc-choice:disabled { cursor: default; }
 .qc-choice--selected { border-color: var(--qc-accent); background: var(--qc-tint); }
@@ -157,6 +162,8 @@
   background: var(--qc-surface-2);
   display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
 }
+/* the action button (last item) always sits on the right — even when it's the only item (Exercise) */
+.qc-foot > :last-child { margin-left: auto; }
 
 @keyframes qcSlideIn { from { opacity: 0; transform: translateX(28px); } to { opacity: 1; transform: none; } }
 

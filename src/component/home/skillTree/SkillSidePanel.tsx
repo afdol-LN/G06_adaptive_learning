@@ -1,7 +1,16 @@
 import React from "react";
-import { FaBookOpen, FaXmark } from "react-icons/fa6";
+import { FaBookOpen, FaFlagCheckered, FaXmark } from "react-icons/fa6";
 import { usePreferences } from "../../../context/PreferencesContext";
-import { LayoutSkill, getProgressColor, displayProgressPercent, formatProgressLabel, getDraftCount } from "../utils/skillTree";
+import {
+  LayoutGoalNode,
+  LayoutSkill,
+  getGoalNodeColors,
+  getProgressColor,
+  displayProgressPercent,
+  formatProgressLabel,
+  getDraftCount,
+} from "../utils/skillTree";
+import { SkillProgressRow } from "./SkillProgressRow";
 
 interface SkillSidePanelProps {
   selected: LayoutSkill | null;
@@ -10,6 +19,9 @@ interface SkillSidePanelProps {
   unlocked: Set<number>;
   canUnlockFn: (skillId: number) => boolean;
   onStartExercise: (skill: LayoutSkill) => void;
+  /** the tree's goal node — a skill it is joined to lists the goal under "next" */
+  goal?: LayoutGoalNode | null;
+  onOpenGoal?: () => void;
 }
 
 export const SkillSidePanel: React.FC<SkillSidePanelProps> = ({
@@ -19,6 +31,8 @@ export const SkillSidePanel: React.FC<SkillSidePanelProps> = ({
   unlocked,
   canUnlockFn,
   onStartExercise,
+  goal = null,
+  onOpenGoal,
 }) => {
   const { t } = usePreferences();
   if (!selected) return null;
@@ -34,18 +48,22 @@ export const SkillSidePanel: React.FC<SkillSidePanelProps> = ({
   const nextNodes = skills.filter((s) =>
     (s.skillPrequisite || []).some((p) => p.prerequisiteSkillId === skill.skillId)
   );
+  // an end of the tree leads straight into the goal node (the same edges SkillTreeSVG draws)
+  const leadsToGoal = !!goal && goal.fromSkillIds.includes(skill.skillId);
 
   const isUnlocked = unlocked.has(skill.skillId);
   const canDo = canUnlockFn(skill.skillId);
   const draftCount = getDraftCount(skill);
 
   const nodeRow = (n: LayoutSkill) => (
-    <div key={n.skillId} className="node-row" onClick={() => setSelected(n)}>
-      <span className="node-row-name">{n.skillsName}</span>
-      <span className="node-row-pct" style={{ color: getProgressColor(displayProgressPercent(n)) }}>
-        {formatProgressLabel(n, notStarted)}
-      </span>
-    </div>
+    <SkillProgressRow
+      key={n.skillId}
+      skill={n}
+      isUnlocked={unlocked.has(n.skillId)}
+      canUnlock={canUnlockFn(n.skillId)}
+      notStartedLabel={notStarted}
+      onClick={setSelected}
+    />
   );
 
   return (
@@ -85,7 +103,9 @@ export const SkillSidePanel: React.FC<SkillSidePanelProps> = ({
       <div className="side-panel-section">
         <p className="side-panel-label">{t("skill.prereq")}</p>
         {prereqNodes.length === 0 ? (
-          <p className="side-panel-empty">{t("skill.prereqNone")}</p>
+          <div className="node-row node-row-empty">
+            <span className="node-row-name">{t("skill.prereqNone")}</span>
+          </div>
         ) : (
           prereqNodes.map(nodeRow)
         )}
@@ -93,10 +113,39 @@ export const SkillSidePanel: React.FC<SkillSidePanelProps> = ({
 
       <div className="side-panel-section">
         <p className="side-panel-label">{t("skill.unlocks")}</p>
-        {nextNodes.length === 0 ? (
-          <p className="side-panel-empty">{t("skill.unlocksNone")}</p>
-        ) : (
-          nextNodes.map(nodeRow)
+        {nextNodes.map(nodeRow)}
+        {leadsToGoal && goal && (() => {
+          // same row as a skill, coloured like the goal node; goal progress comes from the backend
+          const pct = goal.progressPercent;
+          const { bg, border, text } = getGoalNodeColors(goal.isComplete);
+          const label = (
+            <>
+              <FaFlagCheckered aria-hidden />
+              <span className="node-row-name">{t("goalNode.label")}: {goal.goalName}</span>
+              <span className="node-row-pct">{pct}%</span>
+            </>
+          );
+          return (
+            <div
+              className="node-row node-row-progress node-row-goal"
+              style={{ background: bg, borderColor: border, color: text }}
+              onClick={onOpenGoal}
+            >
+              {label}
+              <span
+                className="node-row-fill"
+                style={{ "--fill": getProgressColor(pct), "--clip": `${100 - pct}%` } as React.CSSProperties}
+                aria-hidden
+              >
+                {label}
+              </span>
+            </div>
+          );
+        })()}
+        {nextNodes.length === 0 && !leadsToGoal && (
+          <div className="node-row node-row-empty">
+            <span className="node-row-name">{t("skill.unlocksNone")}</span>
+          </div>
         )}
       </div>
 

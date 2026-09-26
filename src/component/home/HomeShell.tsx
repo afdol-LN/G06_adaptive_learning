@@ -7,7 +7,6 @@ import {
   FaCircleQuestion,
   FaClockRotateLeft,
   FaHouse,
-  FaSitemap,
   FaUser,
   FaUserGraduate,
 } from "react-icons/fa6";
@@ -16,14 +15,13 @@ import type { TKey } from "../../i18n";
 import LogoutButton from "../common/LogoutButton";
 import { useHomeShellController, type HomeTabKey } from "./controller/homeShell.controller";
 import { HomeTab } from "./tabs/HomeTab";
-import { SkillTreeTab } from "./tabs/SkillTreeTab";
 import { HistoryTab } from "./tabs/HistoryTab";
 import { ProfileTab } from "./tabs/ProfileTab";
 import { NextExercisePicker } from "./skillTree/NextExercisePicker";
 import { ExerciseConfirmModal } from "./skillTree/ExerciseConfirmModal";
 import { Topbar } from "../common/Topbar";
 import CreateBranchModal from "../CreateBranchModal";
-import AppLogo from "../common/AppLogo";
+import AppBrand from "../common/AppBrand";
 import { GoalSwitcher } from "./GoalSwitcher";
 import { BranchBaseStateModal } from "./component/branchBaseState";
 import "../decorate/Home.css";
@@ -31,7 +29,6 @@ import "../decorate/Tour.css";
 
 const NAV_ITEMS: { key: HomeTabKey; labelKey: TKey; Icon: IconType }[] = [
   { key: "Home", labelKey: "nav.home", Icon: FaHouse },
-  { key: "SkillTree", labelKey: "nav.skillTree", Icon: FaSitemap },
   { key: "History", labelKey: "nav.history", Icon: FaClockRotateLeft },
   { key: "Profile", labelKey: "nav.profile", Icon: FaUser },
 ];
@@ -90,10 +87,7 @@ export const HomeShell: React.FC = () => {
           {sidebarCollapsed ? <FaChevronRight aria-hidden /> : <FaChevronLeft aria-hidden />}
         </button>
 
-        <div className="sb-header" data-tour="tour-logo">
-          <div className="sb-brand-icon"><AppLogo /></div>
-          <span className="sb-brand sb-label">G06 · ALS</span>
-        </div>
+        <AppBrand variant="sidebar" tourId="tour-logo" />
 
 
         {/* Navigation Tabs */}
@@ -170,10 +164,13 @@ export const HomeShell: React.FC = () => {
         <div className="content">
           {activeTab === "Home" && (
             <HomeTab
-              userProfile={userProfile}
+              fullName={fullName}
+              profileStripCollapsed={controller.profileStripCollapsed}
+              onToggleProfileStrip={controller.toggleProfileStrip}
+              progressPanelCollapsed={controller.progressPanelCollapsed}
+              onToggleProgressPanel={controller.toggleProgressPanel}
               activeBranch={activeBranch}
               stats={statsController.stats}
-              skills={skillTreeController.skills}
               treeSkills={skillTreeController.treeSkills}
               unlocked={skillTreeController.unlockedSkills}
               canUnlock={skillTreeController.canUnlock}
@@ -181,34 +178,15 @@ export const HomeShell: React.FC = () => {
               setSelected={skillTreeController.setSelectedSkill}
               hovered={hovered}
               setHovered={setHovered}
-              sessions={historyController.sessions}
               onStartExercise={controller.handleStartExercise}
               setShowPicker={controller.setShowPicker}
               handleNodeClick={controller.handleNodeClick}
-              switchTab={controller.switchTab}
               goal={skillTreeController.goalNode}
               goalSelected={skillTreeController.goalSelected}
               onGoalClick={controller.handleGoalClick}
               setGoalSelected={skillTreeController.setGoalSelected}
               onShowBreakdown={activeBranch.isAlreadyPretest ? controller.openBreakdown : undefined}
-            />
-          )}
-
-          {activeTab === "SkillTree" && (
-            <SkillTreeTab
-              treeSkills={skillTreeController.treeSkills}
-              unlocked={skillTreeController.unlockedSkills}
-              canUnlockFn={skillTreeController.canUnlock}
-              onNodeClick={controller.handleNodeClick}
-              selected={skillTreeController.selectedSkill}
-              setSelected={skillTreeController.setSelectedSkill}
-              hovered={hovered}
-              setHovered={setHovered}
-              onStartExercise={controller.handleStartExercise}
-              goal={skillTreeController.goalNode}
-              goalSelected={skillTreeController.goalSelected}
-              onGoalClick={controller.handleGoalClick}
-              setGoalSelected={skillTreeController.setGoalSelected}
+              recommendedSkillId={controller.recommendedSkillId}
             />
           )}
 

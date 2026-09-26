@@ -48,6 +48,8 @@ export const BLOOM_LEVELS = [
 export function aiController() {
   const { t } = usePreferences();
   const [drafts, setDrafts] = useState<AiDraft[]>([]);
+  // id ของการ์ดที่เพิ่ง generate ออกมารอบล่าสุด — ใช้ไฮไลต์การ์ดใหม่ใน DraftCard เท่านั้น ไม่ใช่ state ทางธุรกิจ
+  const [newDraftIds, setNewDraftIds] = useState<Set<number>>(new Set());
   const [allSkills, setAllSkills] = useState<Skill[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -89,8 +91,8 @@ export function aiController() {
     }
   }, []);
 
-  const loadDrafts = useCallback(async () => {
-    setIsLoading(true);
+  // คืน array ที่ fetch มาด้วย (ไม่ใช่แค่ setDrafts) ให้ generate() เอาไปเทียบหา id ใหม่ได้
+  const fetchDrafts = useCallback(async (): Promise<AiDraft[]> => {
     const result = await aiService.getDrafts({
       status: statusFilter === "all" ? undefined : statusFilter,
       entityType: entityFilter === "all" ? undefined : entityFilter,
@@ -98,12 +100,19 @@ export function aiController() {
     if (result.isError) {
       setError(result.errorMessage);
       setDrafts([]);
-    } else {
-      setDrafts(result.data || []);
-      setError(null);
+      return [];
     }
-    setIsLoading(false);
+    const fetched = result.data || [];
+    setDrafts(fetched);
+    setError(null);
+    return fetched;
   }, [statusFilter, entityFilter]);
+
+  const loadDrafts = useCallback(async () => {
+    setIsLoading(true);
+    await fetchDrafts();
+    setIsLoading(false);
+  }, [fetchDrafts]);
 
   useEffect(() => {
     loadSkills();
@@ -158,7 +167,22 @@ export function aiController() {
       // ผลลัพธ์ใหม่เป็น pending เสมอ — เด้งตัวกรองไปที่ pending ให้เห็นทันที
       setStatusFilter("pending");
       setEntityFilter(form.entityType);
-      await loadDrafts();
+
+      // เทียบ id เก่า/ใหม่เพื่อไฮไลต์การ์ดที่เพิ่ง generate — ต้องยิงด้วยฟิลเตอร์ที่รู้แน่ชัด (pending, entityType นี้)
+      // เพราะ statusFilter/entityFilter ใน closure ยังเป็นค่าก่อน setState ด้านบน (React ยังไม่ re-render)
+      const beforeIds = new Set(drafts.map((d) => d.id));
+      const freshResult = await aiService.getDrafts({
+        status: "pending",
+        entityType: form.entityType,
+      });
+      if (!freshResult.isError) {
+        const fresh = freshResult.data || [];
+        setDrafts(fresh);
+        setError(null);
+        setNewDraftIds(new Set(fresh.filter((d) => !beforeIds.has(d.id)).map((d) => d.id)));
+      } else {
+        setError(freshResult.errorMessage);
+      }
       return true;
     } finally {
       setIsGenerating(false);
@@ -391,6 +415,7 @@ export function aiController() {
 
   return {
     drafts,
+    newDraftIds,
     allSkills,
     activeSkills,
     isLoading,

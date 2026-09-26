@@ -234,7 +234,7 @@
 .ad-nav-brand {
   font-size: 14px;
   font-weight: 700;
-  color: var(--accent2);
+  color: var(--text);
   letter-spacing: 0.05em;
 }
 
@@ -1253,7 +1253,18 @@
 }
 
 /* modal ดูรายละเอียด exercise — มีโค้ดยาว จึงกว้างกว่า modal ฟอร์มทั่วไป */
-.ad-modal.ad-modal--wide { max-width: 760px; }
+.ad-modal.ad-modal--wide { max-width: 880px; }
+
+/* modal ยืนยัน "อนุมัติร่าง" — เนื้อหาน้อย (แค่ select เดียว) เลยขยายทุกอย่างให้ใหญ่และอ่านง่ายขึ้น */
+.ad-modal--approve .ad-modal-header { padding: 24px 28px; }
+.ad-modal--approve .ad-modal-title { font-size: 20px; }
+.ad-modal--approve .ad-modal-body { padding: 28px; gap: 22px; }
+.ad-modal--approve .ad-label { font-size: 14px; }
+.ad-modal--approve .ad-select { font-size: 16px; padding: 13px 36px 13px 16px; }
+.ad-modal--approve .ad-hint-text { font-size: 13px; margin-top: 8px; }
+.ad-modal--approve .ad-modal-footer { padding: 20px 28px; }
+.ad-modal--approve .ad-btn-primary,
+.ad-modal--approve .ad-btn-cancel { font-size: 15px; padding: 12px 24px; }
 
 .ad-modal form {
   display: flex;
@@ -1788,6 +1799,62 @@
   margin-top: 4px;
 }
 
+/* ════ AI DRAFT — DATE FILTER (calendar dropdown) ════ */
+.ad-ai-date-filter { position: relative; display: flex; align-items: center; gap: 4px; }
+.ad-ai-date-filter-btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  cursor: pointer;
+}
+.ad-ai-date-filter-btn.is-active { border-color: var(--accent); color: var(--accent); font-weight: 700; }
+.ad-ai-date-filter-clear {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 26px; height: 26px; border-radius: 50%; flex-shrink: 0;
+  background: none; border: 1px solid var(--border); color: var(--muted); cursor: pointer;
+}
+.ad-ai-date-filter-clear:hover { color: var(--text); border-color: var(--muted); }
+
+.ad-ai-date-popover {
+  position: absolute; top: calc(100% + 8px); left: 0; z-index: 20;
+  width: 280px; padding: 14px;
+  background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.14);
+}
+.ad-ai-date-popover-head {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 10px;
+}
+.ad-ai-date-month { font-size: 13px; font-weight: 700; color: var(--text); }
+.ad-ai-date-nav {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 26px; height: 26px; border-radius: 6px;
+  background: none; border: 1px solid var(--border); color: var(--muted); cursor: pointer;
+}
+.ad-ai-date-nav:hover { color: var(--accent); border-color: var(--accent); }
+.ad-ai-date-weekdays {
+  display: grid; grid-template-columns: repeat(7, 1fr);
+  font-size: 11px; font-weight: 700; color: var(--faint); text-align: center;
+  margin-bottom: 4px;
+}
+.ad-ai-date-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
+.ad-ai-date-cell {
+  position: relative;
+  display: flex; align-items: center; justify-content: center;
+  height: 32px; border-radius: 8px; border: none; background: none;
+  font-size: 12px; color: var(--text); cursor: pointer;
+}
+.ad-ai-date-cell:hover { background: var(--bg); }
+.ad-ai-date-cell.is-outside { color: var(--faint); }
+.ad-ai-date-cell.is-today { font-weight: 700; color: var(--accent); }
+.ad-ai-date-cell.is-selected { background: var(--accent-fill); color: #fff; }
+.ad-ai-date-cell.is-selected:hover { background: var(--accent-fill); }
+/* จุดสีฟ้า — วันที่มีการ generate อย่างน้อย 1 ร่าง (ภายใต้ตัวกรอง status/entity ปัจจุบัน) */
+.ad-ai-date-dot {
+  position: absolute; bottom: 3px; left: 50%; transform: translateX(-50%);
+  width: 5px; height: 5px; border-radius: 50%;
+  background: var(--accent-fill);
+}
+.ad-ai-date-cell.is-selected .ad-ai-date-dot { background: #fff; }
+
 .ad-ai-alert-error {
   padding: 10px 14px;
   border-radius: 8px;
@@ -1835,9 +1902,42 @@
   gap: 12px;
 }
 
+/* การ์ดที่เพิ่ง generate ออกมารอบล่าสุด — ขอบฟ้าเด่น + pulse จังหวะคล้ายหัวใจเต้น ให้สังเกตง่ายกว่าการ์ด pending เดิม */
+.ad-ai-draft-card--new {
+  border: 2px solid var(--accent-fill);
+  animation: adDraftHeartbeat 3.6s ease-in-out infinite;
+}
+@keyframes adDraftHeartbeat {
+  0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent-fill) 45%, transparent); }
+  14%      { box-shadow: 0 0 0 6px color-mix(in srgb, var(--accent-fill) 22%, transparent); }
+  28%      { box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent-fill) 45%, transparent); }
+  42%      { box-shadow: 0 0 0 6px color-mix(in srgb, var(--accent-fill) 22%, transparent); }
+  70%      { box-shadow: 0 0 0 0 transparent; }
+}
+/* ผู้ใช้ที่เพิ่งสร้าง — พื้นฟ้าอ่อน + ป้าย "ใหม่" (หายเองหลัง 1 นาที ดู user.controller.ts) */
+.ad-table tr.ad-row-new td { background: var(--tint); }
+.ad-table tr.ad-row-new td:first-child { box-shadow: inset 3px 0 0 var(--accent-fill); }
+.ad-badge-new {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  background: var(--accent-fill);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+/* คนไวต่อ motion ปิด animation ไว้ — เหลือแค่ขอบฟ้าบอกว่าใหม่ */
+@media (prefers-reduced-motion: reduce) {
+  .ad-ai-draft-card--new { animation: none; }
+}
+
 .ad-ai-draft-head {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 8px;
 }
 
@@ -1856,11 +1956,32 @@
   border: 1px solid rgba(0, 71, 171, 0.25);
 }
 
-.ad-ai-status-badge {
+/* ป้ายชื่อ skill + วันที่ generate บนหัวการ์ด — แทนที่ป้ายสถานะ "รอตรวจ" เดิม พื้นหลังเข้มให้ตัดกับการ์ดขาว */
+.ad-ai-source-badge {
   padding: 3px 10px;
   border-radius: 999px;
   font-size: 12px;
   font-weight: 700;
+  background: var(--stat-bg);
+  color: var(--stat-ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 220px;
+  cursor: help; /* บอกว่า hover แล้วมี tooltip ข้อมูลเต็ม (skill + วันเวลาแบบไม่ตัด) */
+}
+
+/* ป้ายวันเวลา generate — แยกเป็น tag ของตัวเอง ไม่รวมกับชื่อ skill */
+.ad-ai-date-badge {
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  background: var(--surface-2);
+  color: var(--muted);
+  border: 1px solid var(--border);
+  white-space: nowrap;
+  cursor: help; /* hover ดูวันที่แบบเต็ม (เดือนสะกดเต็ม) ผ่าน title */
 }
 
 .ad-ai-draft-body {
@@ -1879,10 +2000,21 @@
 
 .ad-ai-draft-meta {
   display: flex;
+  align-items: center;
   flex-wrap: wrap;
   gap: 10px;
   font-size: 12px;
   color: var(--muted);
+}
+
+/* tag ระดับ (ระดับ 5) และประเภทโจทย์ (FILL_IN_BLANK) — พื้นหลังเข้มเหมือนป้ายชื่อ skill บนหัวการ์ด */
+.ad-ai-meta-tag {
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  background: var(--stat-bg);
+  color: var(--stat-ink);
 }
 
 .ad-ai-draft-answer {
@@ -1940,6 +2072,47 @@
   overflow-x: auto;
   tab-size: 4;
 }
+
+/* แถวหัวข้อ "โค้ดประกอบโจทย์" + ปุ่มแทรกช่องว่าง (เฉพาะตอน type = FILL_IN_BLANK) */
+.ad-code-label-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.ad-btn-insert-blank {
+  font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: var(--r-sm);
+  background: var(--accent-fill); color: #fff; border: 1px solid var(--accent-fill);
+  cursor: pointer; transition: opacity 0.15s;
+}
+.ad-btn-insert-blank:hover { opacity: 0.88; }
+
+/* overlay ไฮไลต์ blank สดขณะพิมพ์ — .ad-code-backdrop วาดอยู่ข้างหลัง textarea โปร่งใสที่ทับอยู่ด้านบน
+   padding/font/line-height ของทั้งคู่ต้องตรงกันเป๊ะ ไม่งั้นไฮไลต์จะเยื้องจากตัวอักษรจริง */
+.ad-code-editor {
+  position: relative;
+  border-radius: 9px;
+  border: 1.5px solid var(--border);
+  background: var(--bg);
+  overflow: hidden;
+  transition: border-color 0.18s;
+}
+.ad-code-editor:focus-within { border-color: var(--accent); }
+.ad-code-backdrop {
+  position: absolute; inset: 0; margin: 0;
+  padding: 9px 13px;
+  font-family: ui-monospace, "DM Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+  font-size: 13px; line-height: 1.7; white-space: pre; tab-size: 4;
+  overflow: hidden; pointer-events: none; color: transparent;
+}
+.ad-code-backdrop .ctp-code-blank {
+  background: color-mix(in srgb, var(--accent-fill) 25%, transparent);
+  border-radius: 4px;
+}
+.ad-code-editor-textarea.ad-code-input {
+  position: relative; z-index: 1;
+  border: none; background: transparent; border-radius: 0;
+  resize: none; /* ต้อง fix ขนาดไว้ ไม่งั้น backdrop (absolute เต็มกรอบ) จะไม่ resize ตาม */
+}
+
+/* preview ของ CodeBlock ใต้ช่องกรอก — ให้ admin เห็นตรงกับที่ student จะเห็นจริง (รวม blank ที่ไฮไลต์) */
+.ad-code-preview { margin-top: 10px; }
+.ad-code-preview .ad-hint-text { display: block; margin-bottom: 6px; }
 
 /* ══ GOAL WORKSPACE (goalPanel/workspace) ══
    สีทุกตัวมาจาก token ที่มีค่าธีมมืดอยู่แล้ว (--ok-*, --warn-*, --bad-*, --tint …)
@@ -2135,3 +2308,237 @@
 /* ── confirm dialog ── */
 .ad-ws-confirm-msg { margin: 0 0 8px; color: var(--text); }
 .ad-ws-confirm-list { margin: 0; padding-left: 20px; color: var(--text); }
+
+/* ════ modal ดูรายละเอียดผู้ใช้ — กว้างขึ้น, ส่วนหัวโปรไฟล์ + ตารางข้อมูลเรียบ ๆ + การ์ดเป้าหมาย ════ */
+.ad-modal.ad-modal--user { max-width: 860px; }
+.ad-modal.ad-modal--detail { max-width: 760px; }
+.ad-modal--user .ad-modal-body,
+.ad-modal--detail .ad-modal-body { padding: 26px 28px; gap: 22px; }
+.ad-modal--user .ad-modal-footer,
+.ad-modal--detail .ad-modal-footer { padding: 16px 28px; }
+
+.ad-uv-hero { align-items: center; padding: 20px; }
+.ad-uv-hero .ad-user-avatar-lg { width: 64px; height: 64px; font-size: 26px; text-transform: uppercase; }
+.ad-uv-hero-text { min-width: 0; }
+.ad-uv-name { font-size: 20px; font-weight: 800; color: var(--text); line-height: 1.3; overflow-wrap: anywhere; }
+.ad-uv-username { font-size: 13px; color: var(--muted); margin: 2px 0 10px; }
+.ad-uv-pills { display: flex; flex-wrap: wrap; gap: 6px; }
+.ad-uv-pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 4px 10px; border-radius: 9999px;
+  font-size: 12px; font-weight: 700;
+  background: var(--surface); color: var(--muted); border: 1px solid var(--border);
+}
+.ad-uv-dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.ad-uv-pill--ok { color: var(--green); border-color: color-mix(in srgb, var(--green) 40%, transparent); }
+.ad-uv-pill--off { color: var(--muted); }
+.ad-uv-pill--streak { color: var(--orange); border-color: color-mix(in srgb, var(--orange) 40%, transparent); }
+
+.ad-uv-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.ad-uv-item {
+  display: flex; flex-direction: column; gap: 4px;
+  padding: 12px 14px; border-radius: 12px;
+  background: var(--surface-2); border: 1px solid var(--border);
+}
+.ad-uv-item--full { grid-column: 1 / -1; }
+.ad-uv-label { font-size: 12px; font-weight: 700; color: var(--muted); }
+.ad-uv-value { font-size: 15px; font-weight: 600; color: var(--text); overflow-wrap: anywhere; }
+
+.ad-uv-section { display: flex; flex-direction: column; gap: 10px; }
+.ad-uv-section-title { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 800; color: var(--text); }
+.ad-uv-count {
+  font-size: 11px; font-weight: 700; padding: 1px 8px; border-radius: 9999px;
+  background: var(--accent-fill); color: #fff;
+}
+.ad-uv-empty {
+  padding: 16px; text-align: center; font-size: 13px; color: var(--muted);
+  border: 1px dashed var(--border); border-radius: 12px;
+}
+
+.ad-uv-goals { display: flex; flex-direction: column; gap: 8px; }
+.ad-uv-goal { border: 1px solid var(--border); border-radius: 12px; background: var(--surface); overflow: hidden; transition: border-color .15s; }
+.ad-uv-goal.is-open { border-color: var(--accent); }
+.ad-uv-goal-head {
+  width: 100%; display: flex; align-items: center; gap: 12px;
+  padding: 12px 16px; border: 0; background: transparent; cursor: pointer;
+  text-align: left; font: inherit; color: var(--text);
+}
+.ad-uv-goal-head:hover, .ad-uv-goal.is-open .ad-uv-goal-head { background: var(--tint); }
+.ad-uv-goal-name { flex: 1; min-width: 0; font-size: 14px; font-weight: 700; }
+.ad-uv-exp {
+  flex-shrink: 0; white-space: nowrap;
+  font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 9999px;
+  color: var(--accent); background: color-mix(in srgb, var(--accent) 10%, transparent);
+}
+.ad-uv-goal-head--static, .ad-uv-goal-head--static:hover { cursor: default; background: transparent; }
+.ad-uv-chevron { flex-shrink: 0; color: var(--muted); transition: transform .2s; }
+.ad-uv-goal.is-open .ad-uv-chevron { transform: rotate(180deg); }
+.ad-uv-goal-body { padding: 12px 16px 14px; border-top: 1px solid var(--border); font-size: 13px; color: var(--muted); }
+.ad-uv-goal-body p { margin: 0 0 10px; line-height: 1.6; }
+.ad-uv-goal-meta { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; }
+.ad-uv-ok, .ad-uv-wait { display: inline-flex; align-items: center; gap: 4px; font-weight: 700; }
+.ad-uv-ok { color: var(--green); }
+.ad-uv-wait { color: var(--orange); }
+.ad-uv-muted { font-size: 12px; }
+
+@media (max-width: 600px) {
+  .ad-modal--user .ad-modal-body,
+  .ad-modal--detail .ad-modal-body { padding: 18px 16px; }
+  .ad-uv-grid { grid-template-columns: minmax(0, 1fr); }
+  .ad-uv-hero { flex-direction: column; text-align: center; }
+  .ad-uv-pills { justify-content: center; }
+}
+
+/* ════ ฟอร์มเพิ่ม/แก้ Skill — กรอบกว้างแบบเดียวกับ modal รายละเอียด แบ่งเป็นการ์ด 2 ส่วน ════ */
+.ad-modal--form .ad-label { text-transform: none; letter-spacing: 0; font-size: 13px; }
+.ad-modal--form .ad-input:disabled { opacity: .7; cursor: not-allowed; }
+.ad-sf-card {
+  display: flex; flex-direction: column; gap: 14px;
+  padding: 18px; border-radius: 14px;
+  background: var(--surface-2); border: 1px solid var(--border);
+}
+.ad-sf-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.ad-sf-hint { font-size: 12px; font-weight: 500; color: var(--muted); }
+
+.ad-sf-selected { display: flex; flex-wrap: wrap; gap: 6px; }
+.ad-sf-chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 5px 10px; border-radius: 9999px; border: 0; cursor: pointer;
+  background: var(--accent-fill); color: #fff; font: inherit; font-size: 12px; font-weight: 700;
+}
+.ad-sf-chip:hover { filter: brightness(1.1); }
+
+.ad-sf-search { position: relative; }
+.ad-sf-search svg { position: absolute; left: 13px; top: 50%; transform: translateY(-50%); color: var(--muted); pointer-events: none; }
+.ad-sf-search .ad-input { width: 100%; padding-left: 36px; background: var(--surface); }
+
+/* รายการให้เลือกเลื่อนในกรอบของตัวเอง — modal ไม่ยืดตามจำนวน skill */
+.ad-sf-picker {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 6px;
+  max-height: 240px; overflow-y: auto;
+  padding: 8px; border-radius: 10px;
+  background: var(--surface); border: 1px solid var(--border);
+  scrollbar-width: thin; scrollbar-color: var(--border) transparent;
+}
+.ad-sf-picker-empty { grid-column: 1 / -1; padding: 12px; text-align: center; font-size: 13px; color: var(--muted); }
+.ad-sf-option {
+  display: flex; align-items: center; gap: 10px; min-width: 0;
+  padding: 8px 10px; border-radius: 8px; cursor: pointer; text-align: left;
+  border: 1px solid transparent; background: transparent;
+  font: inherit; font-size: 13px; font-weight: 600; color: var(--text);
+  transition: background .12s, border-color .12s;
+}
+.ad-sf-option:hover { background: var(--surface-2); border-color: var(--border); }
+.ad-sf-option:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.ad-sf-check {
+  flex-shrink: 0; width: 18px; height: 18px; border-radius: 5px;
+  display: inline-flex; align-items: center; justify-content: center;
+  border: 1.5px solid var(--border); background: var(--surface); color: #fff; font-size: 10px;
+}
+.ad-sf-option-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ad-sf-option.is-selected { background: var(--tint); border-color: color-mix(in srgb, var(--accent) 45%, transparent); color: var(--accent); }
+.ad-sf-option.is-selected .ad-sf-check { background: var(--accent-fill); border-color: var(--accent-fill); }
+
+@media (max-width: 600px) {
+  .ad-sf-grid { grid-template-columns: minmax(0, 1fr); }
+  .ad-sf-card { padding: 14px; }
+}
+
+/* ════ modal รายละเอียด Goal — ใช้ชุด ad-uv-* + รายการ skill 2 คอลัมน์ + กรอบ Learning Tree ════ */
+.ad-uv-pill--bad { color: var(--red); border-color: color-mix(in srgb, var(--red) 40%, transparent); }
+.ad-gv-desc { font-size: 14px; line-height: 1.5; overflow-wrap: anywhere; }
+.ad-gv-skills { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.ad-gv-skills .ad-uv-goal-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* ต้นไม้กว้างคงที่ — แคบกว่ากรอบให้อยู่กลาง, กว้างกว่าให้เลื่อนแนวนอนในกรอบนี้ */
+.ad-gv-tree {
+  overflow-x: auto; padding: 18px;
+  border-radius: 12px; background: var(--surface-2); border: 1px solid var(--border);
+  scrollbar-width: thin; scrollbar-color: var(--border) transparent;
+}
+.ad-gv-tree > svg { display: block; margin: 0 auto; }
+.ad-gv-tree > .ad-muted { display: block; text-align: center; font-size: 13px; }
+
+@media (max-width: 600px) {
+  .ad-gv-skills { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* ════ ฟอร์ม Goal — ส่วน "Skill ที่ต้องใช้" (SkillRequireEditor) ════ */
+.ad-sr-add { display: grid; grid-template-columns: minmax(0, 1fr) 190px auto; gap: 10px; align-items: center; }
+.ad-sr-add .ad-select { width: 100%; background-color: var(--surface); }
+.ad-sr-add .ad-btn-primary { white-space: nowrap; }
+.ad-sr-list { display: flex; flex-direction: column; gap: 6px; }
+.ad-sr-row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 12px; border-radius: 10px;
+  background: var(--surface); border: 1px solid var(--border);
+}
+.ad-sr-num {
+  flex-shrink: 0; width: 24px; height: 24px; border-radius: 50%;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 700; color: var(--accent); background: var(--tint);
+}
+.ad-sr-name { flex: 1; min-width: 0; font-size: 14px; font-weight: 700; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ad-sr-nolevel { flex-shrink: 0; font-size: 12px; color: var(--muted); }
+.ad-sr-del {
+  flex-shrink: 0; width: 32px; height: 32px; border-radius: 8px; cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center;
+  border: 1px solid transparent; background: transparent; color: var(--muted);
+  transition: color .12s, background .12s, border-color .12s;
+}
+.ad-sr-del:hover, .ad-sr-del:focus-visible {
+  color: var(--red); background: color-mix(in srgb, var(--red) 8%, transparent);
+  border-color: color-mix(in srgb, var(--red) 30%, transparent);
+}
+
+@media (max-width: 600px) {
+  .ad-sr-add { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* ════ modal รายละเอียด Exercise — ข้อมูลประกอบ → โจทย์ → โค้ด → คำตอบ ════ */
+.ad-modal.ad-modal--wide.ad-modal--detail { max-width: 880px; }
+.ad-ev-meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
+.ad-ev-question {
+  padding: 16px 18px; border-radius: 12px;
+  background: var(--surface-2); border: 1px solid var(--border);
+  font-size: 16px; line-height: 1.75; color: var(--text); white-space: pre-wrap; overflow-wrap: anywhere;
+}
+.ad-ev-choices { display: flex; flex-direction: column; gap: 8px; }
+.ad-ev-choice {
+  display: flex; align-items: center; gap: 12px;
+  padding: 11px 14px; border-radius: 10px;
+  background: var(--surface); border: 1px solid var(--border);
+}
+.ad-ev-letter {
+  flex-shrink: 0; width: 28px; height: 28px; border-radius: 8px;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 800; color: var(--muted); background: var(--surface-2); border: 1px solid var(--border);
+}
+.ad-ev-script { flex: 1; min-width: 0; font-size: 14px; color: var(--text); white-space: pre-wrap; overflow-wrap: anywhere; }
+.ad-ev-correct { flex-shrink: 0; display: inline-flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 700; color: var(--ok-ink); }
+.ad-ev-choice.is-answer {
+  border-color: color-mix(in srgb, var(--green) 55%, transparent);
+  background: color-mix(in srgb, var(--green) 8%, var(--surface));
+}
+.ad-ev-choice.is-answer .ad-ev-letter { background: var(--green); border-color: var(--green); color: #fff; }
+.ad-ev-answer {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px;
+  padding: 14px 16px; border-radius: 12px;
+  border: 1px solid color-mix(in srgb, var(--green) 55%, transparent);
+  background: color-mix(in srgb, var(--green) 8%, var(--surface));
+}
+.ad-ev-answer code { font-family: var(--font-mono, ui-monospace, monospace); font-size: 16px; font-weight: 700; color: var(--ok-ink); overflow-wrap: anywhere; }
+
+/* ════ ป้ายในตาราง Goal/Skill (TagList) — ขึ้นบรรทัดใหม่แทน scrollbar แนวนอน, เกินยุบเป็น +N ════ */
+.ad-tag-list { display: flex; flex-wrap: wrap; gap: 6px; max-width: 420px; }
+.ad-tag-list .ad-req-tag { padding: 4px 10px; border-radius: 9999px; }
+.ad-tag-more { background: var(--tint); color: var(--accent); border-color: color-mix(in srgb, var(--accent) 30%, transparent); cursor: help; }
+/* ปุ่ม ดู / แก้ไข / Workspace อยู่แถวเดียว ไม่ตกบรรทัด */
+.ad-row-actions-nowrap { flex-wrap: nowrap; white-space: nowrap; }
+
+/* ════ หน้าสรุป: ช่องที่ backend ยังไม่มีข้อมูล ════ */
+.ad-kpi-card.is-empty .ad-kpi-value { color: var(--muted); }
+.ad-summary-empty {
+  display: flex; align-items: center; justify-content: center; min-height: 180px;
+  padding: 16px; text-align: center; font-size: 13px; color: var(--muted);
+  border: 1px dashed var(--border); border-radius: 12px;
+}

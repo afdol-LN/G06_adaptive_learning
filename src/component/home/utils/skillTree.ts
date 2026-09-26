@@ -173,6 +173,13 @@ export function displayProgressPercent(skill: SkillProgress): number {
   return skill.attemptCount > 0 ? skill.progressPercent : 0;
 }
 
+// 100% = P(L) ≥ 0.95 (never rounded up, adt-learning/docs/adr/0004) — the same test the backend uses
+// to put a session into review mode, where P(L) stays frozen (adt-learning/docs/adr/0007).
+// Such a skill shows "completed" instead of a percentage and a bar.
+export function isMastered(skill: SkillProgress): boolean {
+  return displayProgressPercent(skill) === 100;
+}
+
 // จำนวนข้อที่ตอบแล้วในแบบร่างของทักษะนี้ — 0 = ไม่มีแบบร่างให้ทำต่อ (adt-learning/docs/adr/0003)
 export function getDraftCount(skill: { draftAnsweredCount?: number }): number {
   return skill.draftAnsweredCount ?? 0;

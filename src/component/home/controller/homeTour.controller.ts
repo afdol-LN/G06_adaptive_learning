@@ -5,7 +5,7 @@ import { homeTourService } from "../homeTour.service";
 import type { TKey, Translate } from "../../../i18n";
 
 // ตรงกับ HomeTabKey ใน HomeShell — แต่ละแท็บคือ "หน้า" หนึ่งที่มี tour ของตัวเอง
-export type TourPage = "Home" | "SkillTree" | "History" | "Profile";
+export type TourPage = "Home" | "History" | "Profile";
 
 // ไม่มี element = popover กลางจอ (ใช้เป็นหน้าแนะนำตัวของแต่ละหน้า)
 type TourStep = { element?: string; titleKey: TKey; descKey: TKey };
@@ -20,14 +20,9 @@ const TOURS: Record<TourPage, TourStep[]> = {
     { element: '[data-tour="tour-topbar-prefs"]', titleKey: "tour.prefs.title", descKey: "tour.prefs.desc" },
     { element: '[data-tour="tour-stats"]', titleKey: "tour.stats.title", descKey: "tour.stats.desc" },
     { element: '[data-tour="tour-skill-tree"]', titleKey: "tour.tree.title", descKey: "tour.tree.desc" },
+    { element: '[data-tour="tour-skill-tree"] .tree-node.clickable', titleKey: "tour.skillTree.node.title", descKey: "tour.skillTree.node.desc" },
     { element: ".btn-next-exercise", titleKey: "tour.next.title", descKey: "tour.next.desc" },
-    { element: '[data-tour="tour-sessions"]', titleKey: "tour.sessions.title", descKey: "tour.sessions.desc" },
     { element: '[data-tour="tour-profile-menu"]', titleKey: "tour.profile.title", descKey: "tour.profile.desc" },
-    HELP_STEP,
-  ],
-  SkillTree: [
-    { element: '[data-tour="tour-tree-canvas"]', titleKey: "tour.skillTree.canvas.title", descKey: "tour.skillTree.canvas.desc" },
-    { element: '[data-tour="tour-tree-canvas"] .tree-node.clickable', titleKey: "tour.skillTree.node.title", descKey: "tour.skillTree.node.desc" },
     HELP_STEP,
   ],
   History: [
@@ -61,7 +56,7 @@ export function useHomeTourController(t: Translate) {
     (async () => {
       const userId = userIdRef.current;
       if (!userId) {
-        if (!cancelled) setSeen({ Home: true, SkillTree: true, History: true, Profile: true });
+        if (!cancelled) setSeen({ Home: true, History: true, Profile: true });
         return;
       }
       const seenPages = homeTourService.getSeenPages(userId);

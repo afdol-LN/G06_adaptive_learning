@@ -1,7 +1,7 @@
 import React from "react";
 import { FaFlagCheckered } from "react-icons/fa6";
 import { usePreferences } from "../../../context/PreferencesContext";
-import { ZoomableSVG } from "./ZoomableSVG";
+import { ScrollableSVG } from "./ScrollableSVG";
 import {
   NODE_W,
   NODE_H,
@@ -14,6 +14,7 @@ import {
   displayProgressPercent,
   formatProgressLabel,
   getDraftCount,
+  isMastered,
 } from "../utils/skillTree";
 
 // ทุกสีในแผนผังเป็น CSS variable จาก Home.css (มีค่าของธีมมืดแยก) และต้องใส่ผ่าน style
@@ -27,14 +28,24 @@ interface SkillTreeSVGProps {
   selected: LayoutSkill | null;
   hovered: number | null;
   setHovered: (id: number | null) => void;
-  zoomable?: boolean;
   /** goal node ท้าย tree (adt-learning/docs/adr/0005) — null เมื่อ goal ไม่มีทักษะที่ต้องการ */
   goal?: LayoutGoalNode | null;
   goalSelected?: boolean;
   onGoalClick?: () => void;
+  /** โหนดที่ backend แนะนำให้ฝึกต่อ — tree เปิดมาโดยเลื่อนไปที่โหนดนี้ */
+  recommendedSkillId?: number | null;
 }
 
 const truncateName = (name: string) => (name.length > 20 ? name.slice(0, 19) + "…" : name);
+
+// ความหนาของขอบล่างที่ทำให้โหนดดูนูน — ต้องตรงกับ translateY ตอน :active ใน Home.css (.tree-node-face)
+const NODE_DEPTH = 10;
+// progress bar ในโหนด: เว้นจากขอบซ้าย/ขวา BAR_INSET และยกขึ้นจากขอบล่าง BAR_BOTTOM (ไม่ชนกรอบโหนด)
+const BAR_INSET = 16;
+const BAR_BOTTOM = 22;
+const BAR_W = NODE_W - BAR_INSET * 2;
+// วงรอบโหนด (pulse / selected) ยุบตามหน้าโหนด: ขอบบนเลื่อนลง ขอบล่างอยู่ที่เดิม — Home.css .tree-node-halo
+const HALO_STYLE = { "--halo-h": NODE_H + NODE_DEPTH + 8 } as React.CSSProperties;
 
 export const SkillTreeSVG: React.FC<SkillTreeSVGProps> = ({
   skills,
@@ -44,10 +55,10 @@ export const SkillTreeSVG: React.FC<SkillTreeSVGProps> = ({
   selected,
   hovered,
   setHovered,
-  zoomable = false,
   goal = null,
   goalSelected = false,
   onGoalClick,
+  recommendedSkillId = null,
 }) => {
   const { t, locale } = usePreferences();
 
@@ -58,6 +69,14 @@ export const SkillTreeSVG: React.FC<SkillTreeSVGProps> = ({
   const notStarted = t("skill.notStarted");
   const getNodeById = (id: number) => skills.find((s) => s.skillId === id);
   const isGoalParent = (skillId: number) => !!goal && goal.fromSkillIds.includes(skillId);
+
+  // เลื่อนไปเฉพาะโหนดที่เปิดได้จริง — กันกรณี backend กับ unlock rule ฝั่งนี้เห็นไม่ตรงกัน
+  const recommended =
+    recommendedSkillId != null
+      ? skills.find(
+          (s) => s.skillId === recommendedSkillId && (unlocked.has(s.skillId) || canUnlockFn(s.skillId))
+        ) ?? null
+      : null;
 
   const getEdgeColor = (fromId: number, toId: number) => {
     if (unlocked.has(toId)) return "var(--edge-open)";
@@ -121,21 +140,32 @@ export const SkillTreeSVG: React.FC<SkillTreeSVGProps> = ({
           e.stopPropagation();
           onGoalClick?.();
         }}
-        style={{ opacity: isRelated ? 1 : 0.25, transition: "opacity .2s" }}
+        style={{ opacity: isRelated ? 1 : 0.25, transition: "opacity 300ms linear" }}
       >
         {goalSelected && (
           <rect
             x={nx - 4}
             y={ny - 4}
             width={NODE_W + 8}
-            height={NODE_H + 8}
+            height={NODE_H + NODE_DEPTH + 8}
             rx={11}
             fill="none"
             strokeWidth={2.5}
             opacity={0.9}
-            className="tree-node-ring"
+            className="tree-node-ring tree-node-halo"
+            style={HALO_STYLE}
           />
         )}
+        <rect
+          x={nx}
+          y={ny + NODE_DEPTH}
+          width={NODE_W}
+          height={NODE_H}
+          rx={8}
+          className="tree-node-lip"
+          style={{ fill: `color-mix(in srgb, ${border} 78%, black)` }}
+        />
+        <g className="tree-node-face">
         <rect
           x={nx}
           y={ny}
@@ -148,11 +178,11 @@ export const SkillTreeSVG: React.FC<SkillTreeSVGProps> = ({
         />
 
         {/* Goal progress bar */}
-        <rect x={nx + 2} y={ny + NODE_H - 10} width={NODE_W - 4} height={7} rx={3.5} style={{ fill: bar }} />
+        <rect x={nx + BAR_INSET} y={ny + NODE_H - BAR_BOTTOM} width={BAR_W} height={7} rx={3.5} style={{ fill: bar }} />
         <rect
-          x={nx + 2}
-          y={ny + NODE_H - 10}
-          width={Math.max(0, ((NODE_W - 4) * pct) / 100)}
+          x={nx + BAR_INSET}
+          y={ny + NODE_H - BAR_BOTTOM}
+          width={Math.max(0, (BAR_W * pct) / 100)}
           height={7}
           rx={3.5}
           style={{ fill: getProgressColor(pct) }}
@@ -204,6 +234,7 @@ export const SkillTreeSVG: React.FC<SkillTreeSVGProps> = ({
               : ""
             : t("goalNode.count", { done: g.masteredCount, total: g.requiredCount })}
         </text>
+        </g>
       </g>
     );
   };
@@ -307,6 +338,10 @@ export const SkillTreeSVG: React.FC<SkillTreeSVGProps> = ({
         const nx = skill.x - NODE_W / 2;
         const ny = skill.y - NODE_H / 2;
         const pColor = getProgressColor(displayProgressPercent(skill));
+        // the pulse invites practice — a skill already at 100% has nothing left to invite
+        // (canUnlockFn is true for every open node, mastered ones included)
+        const mastered = isMastered(skill);
+        const pulses = canUnlockThis && !mastered;
 
         return (
           <g
@@ -320,19 +355,20 @@ export const SkillTreeSVG: React.FC<SkillTreeSVGProps> = ({
             onMouseLeave={() => setHovered(null)}
             style={{
               opacity: dimmed ? 0.25 : 1,
-              transition: "opacity .2s",
+              transition: "opacity 300ms linear",
             }}
           >
-            {canUnlockThis && (
+            {pulses && (
               <rect
                 x={nx - 4}
                 y={ny - 4}
                 width={NODE_W + 8}
-                height={NODE_H + 8}
+                height={NODE_H + NODE_DEPTH + 8}
                 rx={11}
                 fill="none"
                 strokeWidth={2}
-                className="pulse-ring-blue"
+                className="pulse-ring-blue tree-node-halo"
+                style={HALO_STYLE}
               />
             )}
             {isSelected && (
@@ -340,27 +376,26 @@ export const SkillTreeSVG: React.FC<SkillTreeSVGProps> = ({
                 x={nx - 4}
                 y={ny - 4}
                 width={NODE_W + 8}
-                height={NODE_H + 8}
+                height={NODE_H + NODE_DEPTH + 8}
                 rx={11}
                 fill="none"
                 strokeWidth={2.5}
                 opacity={0.9}
-                className="tree-node-ring"
+                className="tree-node-ring tree-node-halo"
+                style={HALO_STYLE}
               />
             )}
-            {isHov && !isSelected && (
-              <rect
-                x={nx - 3}
-                y={ny - 3}
-                width={NODE_W + 6}
-                height={NODE_H + 6}
-                rx={10}
-                fill="none"
-                style={{ stroke: border }}
-                strokeWidth={1.5}
-                opacity={0.5}
-              />
-            )}
+            {/* ขอบล่าง (lip) ที่ทำให้โหนดดูนูน — หน้าโหนดเลื่อนลงมาทับเมื่อ hover/กด */}
+            <rect
+              x={nx}
+              y={ny + NODE_DEPTH}
+              width={NODE_W}
+              height={NODE_H}
+              rx={8}
+              className="tree-node-lip"
+              style={{ fill: `color-mix(in srgb, ${border} 78%, black)` }}
+            />
+            <g className={`tree-node-face${isHov ? " hovered" : ""}`}>
             <rect
               x={nx}
               y={ny}
@@ -371,21 +406,24 @@ export const SkillTreeSVG: React.FC<SkillTreeSVGProps> = ({
               style={{
                 fill: bg,
                 stroke: isSelected ? "var(--accent)" : border,
-                filter: isUnlocked ? "drop-shadow(0 2px 6px rgba(0,71,171,0.10))" : "none",
               }}
             />
 
-            {/* Progress bar */}
-            <rect x={nx + 2} y={ny + NODE_H - 10} width={NODE_W - 4} height={7} rx={3.5} style={{ fill: bar }} />
-            <rect
-              x={nx + 2}
-              y={ny + NODE_H - 10}
-              width={Math.max(0, ((NODE_W - 4) * displayProgressPercent(skill)) / 100)}
-              height={7}
-              rx={3.5}
-              style={{ fill: pColor }}
-              opacity={0.9}
-            />
+            {/* Progress bar — a completed skill shows "completed" instead (adt-learning/docs/adr/0007) */}
+            {!mastered && (
+              <>
+                <rect x={nx + BAR_INSET} y={ny + NODE_H - BAR_BOTTOM} width={BAR_W} height={7} rx={3.5} style={{ fill: bar }} />
+                <rect
+                  x={nx + BAR_INSET}
+                  y={ny + NODE_H - BAR_BOTTOM}
+                  width={Math.max(0, (BAR_W * displayProgressPercent(skill)) / 100)}
+                  height={7}
+                  rx={3.5}
+                  style={{ fill: pColor }}
+                  opacity={0.9}
+                />
+              </>
+            )}
 
             {/* Name */}
             <text
@@ -428,6 +466,19 @@ export const SkillTreeSVG: React.FC<SkillTreeSVGProps> = ({
               >
                 {t("skill.locked")}
               </text>
+            ) : mastered ? (
+              // no bar below it, so the word sits lower and larger than the percentage did
+              <text
+                x={skill.x}
+                y={skill.y + 24}
+                textAnchor="middle"
+                dominantBaseline="central"
+                fontSize={17}
+                fontWeight="800"
+                style={{ fill: pColor }}
+              >
+                {t("skill.mastered")}
+              </text>
             ) : (
               <text
                 x={skill.x}
@@ -441,6 +492,7 @@ export const SkillTreeSVG: React.FC<SkillTreeSVGProps> = ({
                 {formatProgressLabel(skill, notStarted)}
               </text>
             )}
+            </g>
           </g>
         );
       })}
@@ -450,19 +502,24 @@ export const SkillTreeSVG: React.FC<SkillTreeSVGProps> = ({
     </>
   );
 
-  const viewBox = `${minX} ${minY} ${svgWidth} ${svgHeight}`;
-  if (zoomable) {
-    return (
-      <ZoomableSVG viewBox={viewBox} className="skill-tree-svg">
-        {inner}
-      </ZoomableSVG>
-    );
-  }
-
   return (
-    <svg viewBox={viewBox} className="skill-tree-svg">
+    <ScrollableSVG
+      minX={minX}
+      minY={minY}
+      width={svgWidth}
+      height={svgHeight}
+      className="skill-tree-svg"
+      focus={recommended ? { x: recommended.x, y: recommended.y } : null}
+      // กล่องรวมขอบล่าง (lip) ด้วย — ปุ่มจะหายเมื่อเห็นส่วนใดของโหนดเป้าหมายก็ได้
+      jumpTarget={
+        goal
+          ? { x: goal.x, y: goal.y + NODE_DEPTH / 2, width: NODE_W, height: NODE_H + NODE_DEPTH, label: t("goalNode.jump") }
+          : null
+      }
+      backToTopLabel={t("goalNode.backToTop")}
+    >
       {inner}
-    </svg>
+    </ScrollableSVG>
   );
 };
 export default SkillTreeSVG;

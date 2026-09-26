@@ -6,21 +6,30 @@ import {
   LayoutSkill,
   getProgressColor,
   formatGoalCompletedOn,
-  displayProgressPercent,
-  formatProgressLabel,
 } from "../utils/skillTree";
+import { SkillProgressRow } from "./SkillProgressRow";
 
 interface GoalSidePanelProps {
   goal: LayoutGoalNode | null;
   open: boolean;
   onClose: () => void;
   skills: LayoutSkill[];
+  unlocked: Set<number>;
+  canUnlockFn: (skillId: number) => boolean;
   onSelectSkill: (skill: LayoutSkill) => void;
 }
 
 // แผงสรุปของ goal node ท้าย skill tree — ความคืบหน้าเป้าหมาย (ตัวเลขเดียวกับการ์ดหน้า Home)
 // และทักษะที่เป้าหมายต้องการ ไม่มีปุ่มไปทำ exercise เพราะ goal node ไม่ใช่ทักษะ (adt-learning/docs/adr/0005)
-export const GoalSidePanel: React.FC<GoalSidePanelProps> = ({ goal, open, onClose, skills, onSelectSkill }) => {
+export const GoalSidePanel: React.FC<GoalSidePanelProps> = ({
+  goal,
+  open,
+  onClose,
+  skills,
+  unlocked,
+  canUnlockFn,
+  onSelectSkill,
+}) => {
   const { t, locale } = usePreferences();
   if (!open || !goal) return null;
 
@@ -60,12 +69,14 @@ export const GoalSidePanel: React.FC<GoalSidePanelProps> = ({ goal, open, onClos
       <div className="side-panel-section">
         <p className="side-panel-label">{t("goalNode.required")}</p>
         {required.map((n) => (
-          <div key={n.skillId} className="node-row" onClick={() => onSelectSkill(n)}>
-            <span className="node-row-name">{n.skillsName}</span>
-            <span className="node-row-pct" style={{ color: getProgressColor(displayProgressPercent(n)) }}>
-              {formatProgressLabel(n, notStarted)}
-            </span>
-          </div>
+          <SkillProgressRow
+            key={n.skillId}
+            skill={n}
+            isUnlocked={unlocked.has(n.skillId)}
+            canUnlock={canUnlockFn(n.skillId)}
+            notStartedLabel={notStarted}
+            onClick={onSelectSkill}
+          />
         ))}
       </div>
     </div>

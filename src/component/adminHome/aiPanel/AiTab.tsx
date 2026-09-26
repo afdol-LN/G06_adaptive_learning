@@ -1,7 +1,8 @@
-import { ReactNode } from "react";
+import { ReactNode, useMemo, useState } from "react";
 import { aiController } from "./ai.controller";
 import AiGenerateForm from "./component/AiGenerateForm";
 import DraftCard from "./component/DraftCard";
+import DraftDateFilter from "./component/DraftDateFilter";
 import ApproveModal from "./component/ApproveModal";
 import RegenerateModal from "./component/RegenerateModal";
 import ExerciseFormModal from "../exercisePanel/component/ExerciseFormModal";
@@ -21,6 +22,7 @@ export default function AiTab({ icon }: AiTabProps) {
   const { t } = usePreferences();
   const {
     drafts,
+    newDraftIds,
     allSkills,
     activeSkills,
     isLoading,
@@ -63,6 +65,18 @@ export default function AiTab({ icon }: AiTabProps) {
   } = aiController();
 
   const pendingCount = drafts.filter((d) => d.status === "pending").length;
+
+  // กรองวันที่ทำฝั่งหน้าเว็บ ต่อจาก drafts ที่ backend กรอง status/entity มาแล้ว —
+  // ไม่มี endpoint กรองตามวันที่ และ list นี้ไม่ใหญ่พอที่จะต้องรีเควสต์ backend เพิ่ม
+  const [dateFilter, setDateFilter] = useState<string | null>(null);
+  const dateKeyOf = (iso: string) => {
+    const d = new Date(iso);
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  };
+  const visibleDrafts = useMemo(
+    () => (dateFilter ? drafts.filter((d) => dateKeyOf(d.createdAt) === dateFilter) : drafts),
+    [drafts, dateFilter],
+  );
 
   return (
     <div className="ad-tab-ai">
@@ -110,22 +124,27 @@ export default function AiTab({ icon }: AiTabProps) {
           <option value="skill">Skill</option>
           <option value="goal">Goal</option>
         </select>
+
+        <DraftDateFilter drafts={drafts} selectedDate={dateFilter} onSelect={setDateFilter} />
       </div>
 
       {error && <div className="ad-ai-alert-error">{error}</div>}
 
       {isLoading ? (
         <div className="ad-muted">{t("admin.common.loading")}</div>
-      ) : drafts.length === 0 ? (
+      ) : visibleDrafts.length === 0 ? (
         <div className="ad-card ad-ai-empty">
-          <span className="ad-muted">{t("admin.ai.empty")}</span>
+          <span className="ad-muted">
+            {dateFilter ? t("admin.ai.dateFilter.empty") : t("admin.ai.empty")}
+          </span>
         </div>
       ) : (
         <div className="ad-ai-draft-grid">
-          {drafts.map((draft) => (
+          {visibleDrafts.map((draft) => (
             <DraftCard
               key={draft.id}
               draft={draft}
+              isNew={newDraftIds.has(draft.id)}
               isBusy={busyDraftId === draft.id}
               skillNameById={skillNameById}
               onApprove={() => setApproveTarget(draft)}

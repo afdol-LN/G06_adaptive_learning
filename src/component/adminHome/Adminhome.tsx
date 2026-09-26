@@ -12,7 +12,7 @@ import {
   gradeKey,
   TABS,
 } from "../../utils/adminUi";
-import AppLogo from "../common/AppLogo";
+import AppBrand from "../common/AppBrand";
 import LogoutButton from "../common/LogoutButton";
 import { Topbar } from "../common/Topbar";
 import "../decorate/Adminhome.css";
@@ -74,15 +74,7 @@ export default function AdminHome() {
           )}
         </button>
 
-        <div className="ad-sidebar-head">
-          <div className="ad-nav-icon">
-            <AppLogo />
-          </div>
-          <div className="ad-sidebar-brand-text">
-            <span className="ad-nav-brand">G06 · ALS</span>
-            <span className="ad-nav-badge">{t("admin.badge")}</span>
-          </div>
-        </div>
+        <AppBrand variant="admin" badge={t("admin.badge")} />
 
         <div className="ad-sidebar-tabs">
           {TABS.map((tab) => {

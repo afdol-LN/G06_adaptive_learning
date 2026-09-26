@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import { useToast } from '../context/ToastContext';
-import { FaFire, FaInbox, FaMoon, FaSun } from 'react-icons/fa6';
+import { FaChevronDown, FaFire, FaInbox, FaMoon, FaSun } from 'react-icons/fa6';
 import { usePreferences } from '../context/PreferencesContext';
 import LogoutButton from './common/LogoutButton';
 import '../component/decorate/SelectBranch.css';
@@ -22,12 +22,14 @@ export default function SelectBranch() {
   const dark = theme === 'dark';
   const [rippleId, setRippleId] = useState<string | null>(null);
   const [ripplePos, setRipplePos] = useState({ x: 0, y: 0 });
+  const [showUserMenu, setShowUserMenu] = useState(false);
 
   const heroRef = useRef<HTMLDivElement>(null);
   const heroSheenRef = useRef<HTMLDivElement>(null);
   const railRef = useRef<HTMLDivElement>(null);
   const cardRefs = useRef<RefMap>({});
   const sheenRefs = useRef<RefMap>({});
+  const userMenuRef = useRef<HTMLDivElement>(null);
   const rippleTimer = useRef<ReturnType<typeof setTimeout>>();
   const navTimer = useRef<ReturnType<typeof setTimeout>>();
 
@@ -41,6 +43,16 @@ export default function SelectBranch() {
       clearTimeout(rippleTimer.current);
       clearTimeout(navTimer.current);
     };
+  }, []);
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
+        setShowUserMenu(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
   function getRef(map: React.MutableRefObject<RefMap>, id: string) {
@@ -121,14 +133,6 @@ export default function SelectBranch() {
             <div className="sb2-title">Select Branch</div>
           </div>
 
-          <div className="sb2-pill sb2-userpill">
-            <div className="sb2-avatar">{initial}</div>
-            <div className="sb2-usertext">
-              <div className="sb2-fullname">{fullname || 'ผู้ใช้งาน'}</div>
-              {username && <div className="sb2-username">@{username}</div>}
-            </div>
-          </div>
-
           <div className="sb2-topbar-actions">
             <button
               type="button"
@@ -139,7 +143,40 @@ export default function SelectBranch() {
             >
               {dark ? <FaSun aria-hidden /> : <FaMoon aria-hidden />}
             </button>
-            <LogoutButton className="sb2-logout-btn" />
+
+            <div className="sb2-user-wrapper" ref={userMenuRef}>
+              <button
+                type="button"
+                className="sb2-pill sb2-userpill"
+                onClick={() => setShowUserMenu((open) => !open)}
+                aria-expanded={showUserMenu}
+                aria-haspopup="menu"
+              >
+                <div className="sb2-avatar">{initial}</div>
+                <div className="sb2-usertext">
+                  <div className="sb2-fullname">{fullname || 'ผู้ใช้งาน'}</div>
+                  {username && <div className="sb2-username">@{username}</div>}
+                </div>
+                <FaChevronDown
+                  aria-hidden
+                  className={`sb2-user-chevron${showUserMenu ? ' open' : ''}`}
+                />
+              </button>
+
+              {showUserMenu && (
+                <div className="sb2-user-dropdown" role="menu">
+                  <div className="sb2-dropdown-header">
+                    <div className="sb2-avatar">{initial}</div>
+                    <div className="sb2-usertext">
+                      <div className="sb2-fullname">{fullname || 'ผู้ใช้งาน'}</div>
+                      {username && <div className="sb2-username">@{username}</div>}
+                    </div>
+                  </div>
+                  <div className="sb2-dropdown-sep" />
+                  <LogoutButton className="sb2-dropdown-item" />
+                </div>
+              )}
+            </div>
           </div>
         </div>
 

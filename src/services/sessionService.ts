@@ -24,9 +24,12 @@ export class SessionService {
       endTime: string;
     },
   ): Promise<SubmitAnswerResponse> => {
+    // the submit button shows its own "checking…" state and the answer is locked meanwhile,
+    // so no full-screen GlobalLoader over the question
     return AppClient.post<SubmitAnswerResponse>(
       `/session/${sessionId}/answer`,
       payload,
+      { skipGlobalLoader: true },
     );
   };
 }

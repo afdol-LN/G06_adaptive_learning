@@ -20,6 +20,12 @@
   padding: 0 24px 0 32px;
   background: var(--glass, var(--surface, #ffffff));
   border-bottom: 1px solid var(--border, #c2d3e0);
+  /* soft shadow under the bar; z-index 40 above keeps it on top of the page content */
+  --tb-shadow: 0 4px 14px rgba(0, 40, 120, 0.08);
+  box-shadow: var(--tb-shadow);
+}
+:root[data-theme="dark"] .tb-bar {
+  --tb-shadow: 0 4px 14px rgba(0, 0, 0, 0.45);
 }
 
 /* ฝั่งซ้าย: title + extra (GoalSwitcher ฯลฯ) */

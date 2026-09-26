@@ -7,10 +7,10 @@ import { SessionService } from "../../../services/sessionService";
 import { NextQuestion, SessionSummary, SubmitAnswerResponse } from "../../../models/sessionModel";
 import { SkillProgress } from "../../../models/branchSkillModel";
 import { exerciseDraftService } from "../exerciseDraft.service";
+import { soundService } from "../../../services/soundService";
+import { isMastered } from "../../home/utils/skillTree";
 
 const NOT_STARTED: SkillProgress = { progressPercent: 0, attemptCount: 0 };
-// ✓/✗ stays on the answered question this long before the next one (or the summary) appears
-const REVEAL_MS = 1200;
 
 interface ExerciseLocationState {
   skillId: number;
@@ -25,6 +25,17 @@ export interface AnswerResult {
   /** the option the student picked; null for fill-in-the-blank */
   choiceId: number | null;
   isCorrect: boolean;
+}
+
+/** What the bottom answer sheet shows. It outlives the result it came from so the sheet
+ *  keeps its content while sliding away. */
+export interface AnswerFeedback {
+  isCorrect: boolean;
+  /** Progress right before and right after this one answer */
+  before: SkillProgress;
+  after: SkillProgress;
+  /** this answer ended the session — the sheet's button opens the summary instead */
+  isLast: boolean;
 }
 
 export function useExerciseController() {
@@ -48,6 +59,9 @@ export function useExerciseController() {
   // true while /answer is in flight: the answer is locked but its result isn't known yet
   const [checking, setChecking] = useState(false);
   const [result, setResult] = useState<AnswerResult | null>(null);
+  // the answered response waits here until the student presses "next" on the answer sheet
+  const [pending, setPending] = useState<SubmitAnswerResponse | null>(null);
+  const [feedback, setFeedback] = useState<AnswerFeedback | null>(null);
   const [correctCount, setCorrectCount] = useState(0);
   const [sessionEnded, setSessionEnded] = useState(false);
   const [stopReason, setStopReason] = useState<SubmitAnswerResponse["stopReason"]>(null);
@@ -75,6 +89,11 @@ export function useExerciseController() {
     if (pausedAtRef.current === null) return;
     questionStartRef.current += Date.now() - pausedAtRef.current;
     pausedAtRef.current = null;
+  }, []);
+
+  // load the effect files now, so the first ✓/✗ plays without a delay
+  useEffect(() => {
+    soundService.preload();
   }, []);
 
   useEffect(() => {
@@ -141,6 +160,8 @@ export function useExerciseController() {
       if (res.sessionEnded) {
         if (sessionId) exerciseDraftService.clear(sessionId); // no draft left to resume
         setSessionEnded(true);
+        // the celebration sound is for mastering the skill — running out of questions or turns isn't a win
+        if (res.stopReason === "mastered") soundService.play("complete");
         setStopReason(res.stopReason);
         setSummary(res.summary ?? null);
       } else if (res.nextQuestion) {
@@ -186,14 +207,43 @@ export function useExerciseController() {
     // ✓/✗ exists only from here on, and only for this exercise
     setChecking(false);
     setResult({ exerciseId: question.exerciseId, choiceId, isCorrect: res.isCorrect });
+    soundService.play(res.isCorrect ? "correct" : "incorrect");
     if (res.isCorrect) setCorrectCount((c) => c + 1);
+    setFeedback({
+      isCorrect: res.isCorrect,
+      before: progress,
+      after: res.progress,
+      isLast: res.sessionEnded,
+    });
     setProgress(res.progress);
-    setTimeout(() => showNext(res), REVEAL_MS);
-  }, [sessionId, question, locked, selected, fillInBlankInput, toast, t, showNext]);
+    setPending(res);
+  }, [sessionId, question, locked, selected, fillInBlankInput, progress, toast, t]);
+
+  // "Next" on the answer sheet: the next question, or the summary after the last answer
+  const next = useCallback(() => {
+    if (!pending) return;
+    setPending(null);
+    showNext(pending);
+  }, [pending, showNext]);
 
   const goHome = useCallback(() => navigate("/home"), [navigate]);
-  // after completing the goal: open Home straight on the Skill Tree tab, where the goal node is
-  const goToSkillTree = useCallback(() => navigate("/home", { state: { tab: "SkillTree" } }), [navigate]);
+  // after completing the goal: the skill tree (and its goal node) now lives on the Home tab
+  const goToSkillTree = useCallback(() => navigate("/home"), [navigate]);
+
+  // From the session summary straight into a new session. `replace` so Back goes to Home, not to the
+  // finished session; Exercise remounts on every navigation (key = location.key), so state starts clean.
+  const startSkill = useCallback(
+    (skill: { skillId: number; skillCode: string; skillsName: string }) =>
+      navigate("/exercise", {
+        replace: true,
+        state: { skillId: skill.skillId, skillCode: skill.skillCode, skillsName: skill.skillsName },
+      }),
+    [navigate],
+  );
+  // the finished session's questions are only excluded within that session, so a new one has them all again
+  const practiseAgain = useCallback(() => {
+    if (state) startSkill(state);
+  }, [state, startSkill]);
 
   // Leaving keeps the draft: answers are already saved server-side, the pick in localStorage
   const requestExit = useCallback(() => setExitOpen(true), []);
@@ -224,8 +274,20 @@ export function useExerciseController() {
     summary,
     pick,
     submit,
+    feedback,
+    feedbackOpen: pending !== null,
+    next,
+    skillId: state?.skillId ?? null,
+    // started at 100% = a review: the backend keeps P(L) frozen, so there is no Progress to show
+    // or move (adt-learning/docs/adr/0007) — same test as the backend's pL ≥ 0.95 (ADR 0004)
+    reviewing: isMastered(progressStart),
+    // at 100% now — from the start (a review) or since an answer in this session; the session still
+    // runs its full round, and every answer after this one is a review with P(L) frozen (ADR 0007)
+    completed: isMastered(progress),
     goHome,
     goToSkillTree,
+    startSkill,
+    practiseAgain,
     pauseClock,
     resumeClock,
     exitOpen,

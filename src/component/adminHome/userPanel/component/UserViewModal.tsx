@@ -3,13 +3,13 @@ import {
   FaMagnifyingGlass,
   FaPen,
   FaChevronDown,
-  FaCircleInfo,
   FaFire,
   FaCircleCheck,
   FaHourglassHalf,
+  FaUserShield,
+  FaBullseye,
 } from "react-icons/fa6";
 import { UserResponseAdmin } from "../../../../models/userModel";
-import { getStatusColor } from "../../../../utils/adminUi";
 import { usePreferences } from "../../../../context/PreferencesContext";
 
 interface UserViewModalProps {
@@ -32,11 +32,12 @@ export default function UserViewModal({
 
   if (!user) return null;
 
-  const statusColor = getStatusColor(user.status);
+  const isActive = user.status === "active";
+  const education = [user.campusName, user.facultyName, user.majorName].filter(Boolean).join(" • ");
 
   return (
     <div className="ad-overlay" onClick={onClose}>
-      <div className="ad-modal" onClick={(e) => e.stopPropagation()}>
+      <div className="ad-modal ad-modal--user" onClick={(e) => e.stopPropagation()}>
         <div className="ad-modal-header">
           <span className="ad-modal-title">
             <FaMagnifyingGlass /> {t("admin.userView.title")}
@@ -44,163 +45,90 @@ export default function UserViewModal({
         </div>
 
         <div className="ad-modal-body">
-          <div className="ad-field">
-            <label className="ad-label">{t("admin.users.col.name")}</label>
-            <div>{user.fullName}</div>
-          </div>
-
-          <div className="ad-field-row">
-            <div className="ad-field">
-              <label className="ad-label">{t("admin.common.status")}</label>
-              <div>
-                <span className="ad-status-dot" style={{ background: statusColor }} />
-                <span className="ad-muted">
-                  {user.status === "active" ? t("admin.status.active") : t("admin.status.inactive")}
+          {/* ส่วนหัว: ใคร + สถานะ/บทบาท/streak เป็นป้ายเล็ก อ่านจบในบรรทัดเดียว */}
+          <div className="ad-user-hero ad-uv-hero">
+            <div className="ad-user-avatar-lg">{user.fullName[0] || "?"}</div>
+            <div className="ad-uv-hero-text">
+              <div className="ad-uv-name">{user.fullName}</div>
+              <div className="ad-uv-username">@{user.username || "-"}</div>
+              <div className="ad-uv-pills">
+                <span className={`ad-uv-pill ${isActive ? "ad-uv-pill--ok" : "ad-uv-pill--off"}`}>
+                  <span className="ad-uv-dot" />
+                  {isActive ? t("admin.status.active") : t("admin.status.inactive")}
+                </span>
+                <span className="ad-uv-pill">
+                  <FaUserShield aria-hidden /> {user.role || "-"}
+                </span>
+                <span className="ad-uv-pill ad-uv-pill--streak">
+                  <FaFire aria-hidden /> {t("admin.summary.col.streak")} {user.dayStreak ?? 0}
                 </span>
               </div>
             </div>
-            <div className="ad-field">
-              <label className="ad-label">{t("admin.userForm.username")}</label>
-              <div>{user.username || "-"}</div>
+          </div>
+
+          <div className="ad-uv-grid">
+            <div className="ad-uv-item">
+              <span className="ad-uv-label">{t("admin.userForm.dob")}</span>
+              <span className="ad-uv-value">{user.birthDate || "-"}</span>
+            </div>
+            <div className="ad-uv-item">
+              <span className="ad-uv-label">{t("admin.userForm.gender")}</span>
+              <span className="ad-uv-value">{user.genderName || "-"}</span>
+            </div>
+            <div className="ad-uv-item ad-uv-item--full">
+              <span className="ad-uv-label">{t("admin.userView.education")}</span>
+              <span className="ad-uv-value">{education || "-"}</span>
             </div>
           </div>
 
-          <div className="ad-field-row">
-            <div className="ad-field">
-              <label className="ad-label">{t("admin.userForm.dob")}</label>
-              <div>{user.birthDate || "-"}</div>
+          <div className="ad-uv-section">
+            <div className="ad-uv-section-title">
+              <FaBullseye aria-hidden /> {t("admin.userView.goals")}
+              {!isLoadingBranches && branches.length > 0 && (
+                <span className="ad-uv-count">{branches.length}</span>
+              )}
             </div>
-            <div className="ad-field">
-              <label className="ad-label">{t("admin.userForm.gender")}</label>
-              <div>{user.genderName || "-"}</div>
-            </div>
-          </div>
-
-          <div className="ad-field-row">
-            <div className="ad-field">
-              <label className="ad-label">{t("admin.userForm.role")}</label>
-              <div>{user.role || "-"}</div>
-            </div>
-            <div className="ad-field">
-              <label className="ad-label">{t("admin.summary.col.streak")}</label>
-              <div>
-                <FaFire /> {user.dayStreak ?? 0}
-              </div>
-            </div>
-          </div>
-
-          <div className="ad-field">
-            <label className="ad-label">{t("admin.userView.education")}</label>
-            <div>
-              {user.campusName} • {user.facultyName} • {user.majorName}
-            </div>
-          </div>
-
-          <div className="ad-field">
-            <label
-              className="ad-label"
-              style={{ display: "flex", alignItems: "center", gap: 6 }}
-            >
-              <FaCircleInfo /> {t("admin.userView.goals")}
-            </label>
 
             {isLoadingBranches ? (
-              <div style={{ fontSize: "12px", color: "var(--muted)", padding: 8 }}>
-                {t("admin.common.loadingData")}
-              </div>
+              <div className="ad-uv-empty">{t("admin.common.loadingData")}</div>
             ) : branches.length === 0 ? (
-              <div style={{ fontSize: "12px", color: "var(--muted)", padding: 8 }}>
-                {t("admin.userView.noGoals")}
-              </div>
+              <div className="ad-uv-empty">{t("admin.userView.noGoals")}</div>
             ) : (
-              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              <div className="ad-uv-goals">
                 {branches.map((branch) => {
-                  const isBranchExpanded = expandedBranchId === branch.id;
+                  const isOpen = expandedBranchId === branch.id;
                   return (
-                    <div
-                      key={branch.id}
-                      style={{
-                        border: "1px solid var(--border)",
-                        borderRadius: 10,
-                        background: "var(--bg)",
-                        overflow: "hidden",
-                      }}
-                    >
-                      <div
-                        onClick={() => setExpandedBranchId(isBranchExpanded ? null : branch.id)}
-                        style={{
-                          padding: "10px 14px",
-                          display: "flex",
-                          justifyContent: "space-between",
-                          alignItems: "center",
-                          cursor: "pointer",
-                          background: isBranchExpanded
-                            ? "color-mix(in srgb, var(--accent) 5%, transparent)"
-                            : "transparent",
-                        }}
+                    <div key={branch.id} className={`ad-uv-goal${isOpen ? " is-open" : ""}`}>
+                      <button
+                        type="button"
+                        className="ad-uv-goal-head"
+                        onClick={() => setExpandedBranchId(isOpen ? null : branch.id)}
+                        aria-expanded={isOpen}
                       >
-                        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                          <span style={{ fontWeight: 700, fontSize: "13px", color: "var(--text)" }}>
-                            {branch.goal?.goal || `Goal #${branch.goalId}`}
-                          </span>
-                          <span
-                            style={{
-                              fontSize: "11px",
-                              fontWeight: 700,
-                              color: "var(--accent)",
-                              background: "color-mix(in srgb, var(--accent) 8%, transparent)",
-                              padding: "2px 8px",
-                              borderRadius: 6,
-                              border: "1px solid color-mix(in srgb, var(--accent) 15%, transparent)",
-                            }}
-                          >
-                            EXP: {branch.expForGoal ?? 0}
-                          </span>
-                        </div>
-                        <span
-                          style={{
-                            transform: isBranchExpanded ? "rotate(180deg)" : "rotate(0deg)",
-                            transition: "transform 0.2s",
-                            display: "inline-block",
-                            fontSize: 14,
-                            color: "var(--muted)",
-                          }}
-                        >
-                          <FaChevronDown />
+                        <span className="ad-uv-goal-name">
+                          {branch.goal?.goal || `Goal #${branch.goalId}`}
                         </span>
-                      </div>
+                        <span className="ad-uv-exp">EXP {branch.expForGoal ?? 0}</span>
+                        <FaChevronDown className="ad-uv-chevron" aria-hidden />
+                      </button>
 
-                      {isBranchExpanded && (
-                        <div
-                          style={{
-                            padding: "12px 14px",
-                            borderTop: "1px solid var(--border)",
-                            display: "flex",
-                            flexDirection: "column",
-                            gap: 10,
-                            fontSize: "12px",
-                          }}
-                        >
-                          <div>
-                            <strong>{t("admin.userView.goalDesc")}</strong>{" "}
-                            {branch.goal?.goalDescription || t("admin.userView.noDesc")}
-                          </div>
-                          <div style={{ display: "flex", gap: 20 }}>
-                            <div>
-                              <strong>{t("admin.userView.pretest")}</strong>{" "}
+                      {isOpen && (
+                        <div className="ad-uv-goal-body">
+                          <p>{branch.goal?.goalDescription || t("admin.userView.noDesc")}</p>
+                          <div className="ad-uv-goal-meta">
+                            <span>
+                              {t("admin.userView.pretest")}{" "}
                               {branch.isAlreadyPretest ? (
-                                <span style={{ color: "var(--green)" }}>
-                                  {t("admin.userView.pretestDone")} <FaCircleCheck aria-hidden />
+                                <span className="ad-uv-ok">
+                                  <FaCircleCheck aria-hidden /> {t("admin.userView.pretestDone")}
                                 </span>
                               ) : (
-                                <span style={{ color: "var(--orange)" }}>
-                                  {t("admin.userView.pretestPending")} <FaHourglassHalf aria-hidden />
+                                <span className="ad-uv-wait">
+                                  <FaHourglassHalf aria-hidden /> {t("admin.userView.pretestPending")}
                                 </span>
                               )}
-                            </div>
-                            <div>
-                              <strong>Goal ID:</strong> {branch.goalId}
-                            </div>
+                            </span>
+                            <span className="ad-uv-muted">Goal ID: {branch.goalId}</span>
                           </div>
                         </div>
                       )}

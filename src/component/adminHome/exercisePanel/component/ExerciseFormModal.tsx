@@ -1,10 +1,11 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { FaPen, FaPlus } from "react-icons/fa6";
 import { Skill } from "../../../../models/skillModel";
 import { Exercise, ExerciseType, IsCaseSensitive } from "../../../../models/exerciseModel";
 import { ExerciseFormValues, EMPTY_EXERCISE_FORM } from "../exercise.controller";
 import { TimeUnit, fromSeconds } from "../../../../utils/timeUnit";
 import { usePreferences } from "../../../../context/PreferencesContext";
+import CodeBlock, { escapeHtml, highlightBlanks } from "../../../common/CodeBlock";
 
 interface ExerciseFormModalProps {
   isOpen: boolean;
@@ -52,6 +53,35 @@ export default function ExerciseFormModal({
   const [expectTimeValue, setExpectTimeValue] = useState<number>(EMPTY_EXERCISE_FORM.expectTimeValue);
   const [expectTimeUnit, setExpectTimeUnit] = useState<TimeUnit>(EMPTY_EXERCISE_FORM.expectTimeUnit);
   const formRef = useRef<HTMLFormElement>(null);
+  const codeTextareaRef = useRef<HTMLTextAreaElement>(null);
+  const codeBackdropRef = useRef<HTMLPreElement>(null);
+
+  // overlay ไฮไลต์ blank สด ๆ ขณะพิมพ์ในกล่องโค้ด (ไม่ใช่แค่ preview แยกด้านล่าง) —
+  // ใช้ highlightBlanks ตัวเดียวกับที่ CodeBlock ใช้ render ให้ student ดูจริง
+  const codeOverlayHtml = useMemo(() => highlightBlanks(escapeHtml(code)) || "​", [code]);
+  const syncBackdropScroll = (e: React.UIEvent<HTMLTextAreaElement>) => {
+    const backdrop = codeBackdropRef.current;
+    if (!backdrop) return;
+    backdrop.scrollTop = e.currentTarget.scrollTop;
+    backdrop.scrollLeft = e.currentTarget.scrollLeft;
+  };
+
+  // แทรก "_____" ตรงตำแหน่ง cursor ในกล่องโค้ด (หรือทับ selection ถ้าลากคลุมไว้) —
+  // ให้ตรงกับ BLANK_PATTERN ใน CodeBlock.tsx (>=3 underscore ไม่ติดตัวอักษร/ตัวเลข)
+  const insertBlank = () => {
+    const el = codeTextareaRef.current;
+    if (!el) return;
+    const start = el.selectionStart ?? code.length;
+    const end = el.selectionEnd ?? code.length;
+    const next = code.slice(0, start) + "_____" + code.slice(end);
+    setCode(next);
+    // คืน focus + วาง cursor ไว้ท้ายช่องว่างที่เพิ่งแทรก ให้พิมพ์ต่อได้ทันที
+    requestAnimationFrame(() => {
+      el.focus();
+      const caret = start + 5;
+      el.setSelectionRange(caret, caret);
+    });
+  };
 
   useEffect(() => {
     if (!isOpen) return;
@@ -143,7 +173,7 @@ export default function ExerciseFormModal({
 
   return (
     <div className="ad-overlay" onClick={onClose}>
-      <div className="ad-modal" onClick={(e) => e.stopPropagation()}>
+      <div className="ad-modal ad-modal--wide" onClick={(e) => e.stopPropagation()}>
         <div className="ad-modal-header">
           <span className="ad-modal-title">
             {isEdit ? (
@@ -174,16 +204,57 @@ export default function ExerciseFormModal({
             </div>
 
             <div className="ad-field">
-              <label className="ad-label">{t("admin.exForm.code")}</label>
-              <textarea
-                className="ad-input ad-code-input"
-                value={code}
-                onChange={(e) => setCode(e.target.value)}
-                rows={6}
-                spellCheck={false}
-                placeholder={t("admin.exForm.codePh")}
-              />
-              <span className="ad-hint-text">{t("admin.exForm.codeHint")}</span>
+              <div className="ad-code-label-row">
+                <label className="ad-label">{t("admin.exForm.code")}</label>
+                {type === "FILL_IN_BLANK" && (
+                  <button
+                    type="button"
+                    className="ad-btn-insert-blank"
+                    onClick={insertBlank}
+                    title={t("admin.exForm.insertBlankHint")}
+                  >
+                    {t("admin.exForm.insertBlank")}
+                  </button>
+                )}
+              </div>
+              {type === "FILL_IN_BLANK" ? (
+                // overlay: <pre> ไฮไลต์ blank อยู่ข้างหลัง + textarea จริงโปร่งใสอยู่ข้างหน้า ตำแหน่งต้องตรงกันทุก px
+                // (padding/font/line-height ต้องเหมือนกันเป๊ะ) ถึงจะเห็นไฮไลต์ตรงตัวอักษรที่พิมพ์จริง
+                <div className="ad-code-editor">
+                  <pre className="ad-code-backdrop" aria-hidden="true">
+                    <code dangerouslySetInnerHTML={{ __html: codeOverlayHtml }} />
+                  </pre>
+                  <textarea
+                    ref={codeTextareaRef}
+                    className="ad-input ad-code-input ad-code-editor-textarea"
+                    value={code}
+                    onChange={(e) => setCode(e.target.value)}
+                    onScroll={syncBackdropScroll}
+                    rows={6}
+                    spellCheck={false}
+                    placeholder={t("admin.exForm.codePh")}
+                  />
+                </div>
+              ) : (
+                <textarea
+                  ref={codeTextareaRef}
+                  className="ad-input ad-code-input"
+                  value={code}
+                  onChange={(e) => setCode(e.target.value)}
+                  rows={6}
+                  spellCheck={false}
+                  placeholder={t("admin.exForm.codePh")}
+                />
+              )}
+              <span className="ad-hint-text">
+                {type === "FILL_IN_BLANK" ? t("admin.exForm.codeHintBlank") : t("admin.exForm.codeHint")}
+              </span>
+              {type === "FILL_IN_BLANK" && code.trim() !== "" && (
+                <div className="ad-code-preview">
+                  <span className="ad-hint-text">{t("admin.exForm.codePreview")}</span>
+                  <CodeBlock code={code} language={language} />
+                </div>
+              )}
             </div>
 
             {code.trim() !== "" && (

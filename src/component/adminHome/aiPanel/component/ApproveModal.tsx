@@ -21,10 +21,10 @@ export default function ApproveModal({
   onClose,
 }: ApproveModalProps) {
   const { t } = usePreferences();
-  const [status, setStatus] = useState<"active" | "inactive">("inactive");
+  const [status, setStatus] = useState<"active" | "inactive">("active");
 
   useEffect(() => {
-    if (draft) setStatus("inactive");
+    if (draft) setStatus("active");
   }, [draft]);
 
   if (!draft) return null;
@@ -37,8 +37,8 @@ export default function ApproveModal({
   return (
     <div className="ad-overlay" onClick={onClose}>
       <div
-        className="ad-modal"
-        style={{ maxWidth: 420 }}
+        className="ad-modal ad-modal--approve"
+        style={{ maxWidth: 560 }}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="ad-modal-header">
@@ -58,8 +58,8 @@ export default function ApproveModal({
                   setStatus(e.target.value as "active" | "inactive")
                 }
               >
-                <option value="inactive">{t("admin.ai.approve.optInactive")}</option>
                 <option value="active">{t("admin.ai.approve.optActive")}</option>
+                <option value="inactive">{t("admin.ai.approve.optInactive")}</option>
               </select>
               <span className="ad-hint-text">{t("admin.ai.approve.hint")}</span>
             </div>

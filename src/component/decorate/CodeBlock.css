@@ -169,6 +169,16 @@
   font-weight: 700;
 }
 
+/* fill-in-blank: ช่อง "_____" ในโค้ด — ไฮไลต์เป็น block ขาวให้เด่นจากพื้นมืด บอก user ว่าต้องเติมตรงนี้ */
+.ctp-code-blank {
+  display: inline-block;
+  min-width: 2.2em;
+  background: var(--ctp-text);
+  border-radius: 4px;
+  color: transparent;
+  user-select: none;
+}
+
 @media (max-width: 600px) {
   .ctp-code-pre code {
     font-size: 11.5px;

@@ -5,13 +5,14 @@ import {
   GoalDraftPayload,
   SkillDraftPayload,
 } from "../../../../models/aiDraftModel";
-import { getStatusColor, getTierColor, getTierLabel } from "../../../../utils/adminUi";
+import { getTierColor, getTierLabel } from "../../../../utils/adminUi";
 import { usePreferences } from "../../../../context/PreferencesContext";
-import type { TKey } from "../../../../i18n";
 import CodeBlock from "../../../common/CodeBlock";
 
 interface DraftCardProps {
   draft: AiDraft;
+  /** true เฉพาะการ์ดที่เพิ่ง generate ออกมารอบล่าสุด — ใส่ border ฟ้า + pulse ให้เด่นจากการ์ดเก่า */
+  isNew?: boolean;
   isBusy: boolean;
   skillNameById: (skillId: number) => string;
   onApprove: () => void;
@@ -26,35 +27,15 @@ const ENTITY_LABEL: Record<AiDraft["entityType"], string> = {
   goal: "Goal",
 };
 
-const STATUS_KEY: Record<AiDraft["status"], TKey> = {
-  pending: "admin.ai.status.pending",
-  approved: "admin.ai.status.approved",
-  rejected: "admin.ai.status.rejected",
-};
-
-/** pending ยังไม่มีสีใน getStatusColor ของเดิม จึง map เอง */
-function statusColor(status: AiDraft["status"]): string {
-  if (status === "approved") return getStatusColor("active");
-  if (status === "rejected") return getStatusColor("inactive");
-  return getStatusColor("pending");
-}
-
-function ExerciseBody({
-  payload,
-  skillNameById,
-}: {
-  payload: ExerciseDraftPayload;
-  skillNameById: (skillId: number) => string;
-}) {
+function ExerciseBody({ payload }: { payload: ExerciseDraftPayload }) {
   const { t } = usePreferences();
   return (
     <>
       <p className="ad-ai-draft-title">{payload.description}</p>
       <CodeBlock code={payload.code} language={payload.language} />
       <div className="ad-ai-draft-meta">
-        <span>Skill: {skillNameById(payload.skillId)}</span>
-        <span>{t("admin.ai.draft.level", { n: payload.skillLevel })}</span>
-        <span>{payload.type}</span>
+        <span className="ad-ai-meta-tag">{t("admin.ai.draft.level", { n: payload.skillLevel })}</span>
+        <span className="ad-ai-meta-tag">{payload.type}</span>
         {payload.expectTime ? <span>{t("admin.ai.draft.seconds", { n: payload.expectTime })}</span> : null}
       </div>
 
@@ -149,6 +130,7 @@ function GoalBody({
 
 export default function DraftCard({
   draft,
+  isNew = false,
   isBusy,
   skillNameById,
   onApprove,
@@ -156,34 +138,53 @@ export default function DraftCard({
   onRegenerate,
   onReject,
 }: DraftCardProps) {
-  const { t } = usePreferences();
+  const { t, locale } = usePreferences();
   const isPending = draft.status === "pending";
 
+  // แทนที่ป้ายสถานะ "รอตรวจ" เดิมด้วยชื่อ skill + วันที่ generate — สถานะจริงยังดูได้จากปุ่ม action /
+  // ข้อความ "savedAs"/"reason" ด้านล่างการ์ดอยู่แล้ว ไม่ต้องพึ่งป้ายนี้
+  const draftSkillId =
+    draft.entityType === "exercise" ? (draft.payload as ExerciseDraftPayload).skillId : null;
+  const draftSkillName = draftSkillId != null ? skillNameById(draftSkillId) : null;
+  const createdAtDate = new Date(draft.createdAt);
+  // ป้ายตัดคำด้วย ellipsis (มีแค่บรรทัดเดียว) จึงใส่เวลาสั้น ๆ พอ ส่วนวันที่/เวลาเต็มไปอยู่ที่ title (tooltip ตอน hover)
+  const generatedDate = createdAtDate.toLocaleDateString(locale, {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+  const generatedTime = createdAtDate.toLocaleTimeString(locale, {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+  const generatedFull = createdAtDate.toLocaleString(locale, {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+
   return (
-    <div className="ad-card ad-ai-draft-card">
+    <div className={`ad-card ad-ai-draft-card${isNew ? " ad-ai-draft-card--new" : ""}`}>
       <div className="ad-ai-draft-head">
         <span className="ad-ai-entity-badge">
           {ENTITY_LABEL[draft.entityType]}
         </span>
-        <span
-          className="ad-ai-status-badge"
-          style={{
-            background: `${statusColor(draft.status)}18`,
-            color: statusColor(draft.status),
-            border: `1px solid ${statusColor(draft.status)}40`,
-          }}
-        >
-          {t(STATUS_KEY[draft.status])}
+        {draftSkillName && (
+          <span className="ad-ai-source-badge" title={draftSkillName}>
+            {draftSkillName}
+          </span>
+        )}
+        <span className="ad-ai-date-badge" title={generatedFull}>
+          {generatedDate} {generatedTime}
         </span>
         <span className="ad-muted ad-ai-draft-id">#{draft.id}</span>
       </div>
 
       <div className="ad-ai-draft-body">
         {draft.entityType === "exercise" && (
-          <ExerciseBody
-            payload={draft.payload as ExerciseDraftPayload}
-            skillNameById={skillNameById}
-          />
+          <ExerciseBody payload={draft.payload as ExerciseDraftPayload} />
         )}
         {draft.entityType === "skill" && (
           <SkillBody

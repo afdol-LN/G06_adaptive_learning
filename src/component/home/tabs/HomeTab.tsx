@@ -1,28 +1,25 @@
-import React, { useState, useEffect } from "react";
-import { FaChartSimple, FaClipboardList, FaUserGraduate } from "react-icons/fa6";
-import { BranchSkill } from "../../../models/branchSkillModel";
+import React from "react";
 import { BranchStats } from "../../../models/branchStatsModel";
-import { SessionHistoryItem } from "../../../models/sessionHistoryModel";
-import { usePreferences } from "../../../context/PreferencesContext";
 import { SkillTreeSVG } from "../skillTree/SkillTreeSVG";
 import { SkillSidePanel } from "../skillTree/SkillSidePanel";
 import { GoalSidePanel } from "../skillTree/GoalSidePanel";
-import { LayoutGoalNode, LayoutSkill, getProgressColor, displayProgressPercent } from "../utils/skillTree";
-import { SessionCard } from "../../common/SessionCard";
+import { LayoutGoalNode, LayoutSkill, getProgressColor } from "../utils/skillTree";
+import { HomeProfileStrip } from "../component/HomeProfileStrip";
+import { HomeProgressPanel } from "../component/HomeProgressPanel";
+import { HomeGoalBar } from "../component/HomeGoalBar";
 
 interface HomeTabProps {
-  userProfile: {
-    fname?: string;
-    lname?: string;
-    gender?: string;
-  } | null;
+  fullName: string;
+  profileStripCollapsed: boolean;
+  onToggleProfileStrip: () => void;
+  progressPanelCollapsed: boolean;
+  onToggleProgressPanel: () => void;
   activeBranch: {
     goalId?: number;
     goalName?: string;
     exp?: number;
   } | null;
   stats: BranchStats | null;
-  skills: BranchSkill[];
   treeSkills: LayoutSkill[];
   unlocked: Set<number>;
   canUnlock: (skillId: number) => boolean;
@@ -30,24 +27,34 @@ interface HomeTabProps {
   setSelected: (skill: LayoutSkill | null) => void;
   hovered: number | null;
   setHovered: (id: number | null) => void;
-  sessions: SessionHistoryItem[];
   onStartExercise: (skill: LayoutSkill) => void;
   setShowPicker: (show: boolean) => void;
   handleNodeClick: (skill: LayoutSkill) => void;
-  switchTab: (tab: "Home" | "SkillTree" | "History" | "Profile") => void;
   goal: LayoutGoalNode | null;
   goalSelected: boolean;
   onGoalClick: () => void;
   setGoalSelected: (selected: boolean) => void;
   /** เปิด modal ที่มาของคะแนนเริ่มต้นจาก pretest — ไม่ส่งมา = ยังไม่ได้ทำ pretest ไม่ต้องแสดงปุ่ม */
   onShowBreakdown?: () => void;
+  recommendedSkillId: number | null;
 }
 
+const LEGEND = [
+  { pct: 10, label: "1–19%" },
+  { pct: 50, label: "20–74%" },
+  { pct: 90, label: "75–99%" },
+  { pct: 100, label: "100%" },
+];
+
+// Home = skill tree เต็มพื้นที่ ส่วนอื่น (strip, legend, ความคืบหน้า, ปุ่มแบบฝึกหัด) ลอยทับ
 export const HomeTab: React.FC<HomeTabProps> = ({
-  userProfile,
+  fullName,
+  profileStripCollapsed,
+  onToggleProfileStrip,
+  progressPanelCollapsed,
+  onToggleProgressPanel,
   activeBranch,
   stats,
-  skills,
   treeSkills,
   unlocked,
   canUnlock,
@@ -55,209 +62,63 @@ export const HomeTab: React.FC<HomeTabProps> = ({
   setSelected,
   hovered,
   setHovered,
-  sessions,
   onStartExercise,
   setShowPicker,
   handleNodeClick,
-  switchTab,
   goal,
   goalSelected,
   onGoalClick,
   setGoalSelected,
   onShowBreakdown,
+  recommendedSkillId,
 }) => {
-  const { t } = usePreferences();
-  const [twText, setTwText] = useState("");
-  const [showCursor, setShowCursor] = useState(true);
-
-  const profileFullName = [userProfile?.fname, userProfile?.lname].filter(Boolean).join(" ");
-  const fullName = profileFullName || localStorage.getItem("fullname") || t("user.fallbackName");
-
-  // Typewriter effect
-  useEffect(() => {
-    let i = 0;
-    setTwText("");
-    setShowCursor(true);
-    const timer = setInterval(() => {
-      setTwText(fullName.substring(0, i + 1));
-      i++;
-      if (i >= fullName.length) {
-        clearInterval(timer);
-        setTimeout(() => setShowCursor(false), 1500);
-      }
-    }, 70);
-    return () => clearInterval(timer);
-  }, [fullName]);
-
-  // Safe Stats mapping from backend API values
-  const statsList = [
-    { num: stats ? `${stats.skillsUnlockedCount}` : "0", label: t("home.stat.skills"), cls: "gold" },
-    { num: stats ? `${stats.sessionsCount}` : "0", label: t("home.stat.sessions"), cls: "green" },
-    { num: stats ? `${stats.dayStreak}` : "0", label: t("home.stat.streak"), cls: "blue" },
-    {
-      num: stats ? `${stats.goalProgressPercent}%` : "0%",
-      label: t("home.stat.progress"),
-      cls: "purple",
-      // the same numbers as the goal node at the end of the tree (adt-learning/docs/adr/0005)
-      sub:
-        !stats || stats.goalRequiredCount === 0
-          ? undefined
-          : stats.goalComplete
-            ? t("goalNode.complete")
-            : t("goalNode.count", { done: stats.goalMasteredCount, total: stats.goalRequiredCount }),
-    },
-  ];
-
   return (
     <div className="tab-home">
-      <div className="tab-home-main">
-        <div className="home-top">
-          {/* Hero */}
-          <div className="home-hero">
-            <div className="home-hero-avatar"><FaUserGraduate aria-hidden /></div>
-            <div className="home-hero-info">
-              <div className="home-greeting">{t("home.greeting")}</div>
-              <h1 className="home-username">
-                {twText}
-                {showCursor && <span className="cursor" />}
-              </h1>
-              <div className="home-goal">
-                {t("home.goal")} <span className="goal-badge">{activeBranch?.goalName || t("home.goalUnset")}</span>
-              </div>
-            </div>
-          </div>
+      <div className="home-canvas" data-tour="tour-skill-tree">
+        <SkillTreeSVG
+          skills={treeSkills}
+          unlocked={unlocked}
+          canUnlockFn={canUnlock}
+          onNodeClick={handleNodeClick}
+          selected={selected}
+          hovered={hovered}
+          setHovered={setHovered}
+          goal={goal}
+          goalSelected={goalSelected}
+          onGoalClick={onGoalClick}
+          recommendedSkillId={recommendedSkillId}
+        />
 
-          {/* Stats grid */}
-          <div className="stats-grid" data-tour="tour-stats">
-            {statsList.map((s, i) => (
-              <div key={i} className={`stat-card ${s.cls}`}>
-                <div className="stat-num">{s.num}</div>
-                <div className="stat-label">{s.label}</div>
-                {s.sub && <div className="stat-sub">{s.sub}</div>}
-              </div>
-            ))}
-          </div>
-
-          {/* Progress summary */}
-          <div className="progress-summary">
-            <span className="progress-summary-label">{t("home.progressSummary")}</span>
-            {skills
-              .filter((s) => s.attemptCount > 0)
-              .map((s) => {
-                const positionedSkill = treeSkills.find((ts) => ts.skillId === s.skillId);
-                const pct = displayProgressPercent(s);
-                return (
-                  <div
-                    key={s.skillId}
-                    className="progress-summary-item"
-                    onClick={() => positionedSkill && handleNodeClick(positionedSkill)}
-                    title={t("home.progressTooltip", { name: s.skillsName, pct })}
-                  >
-                    <span className="progress-summary-name">
-                      {s.skillsName.length > 12 ? s.skillsName.substring(0, 10) + "…" : s.skillsName}
-                    </span>
-                    <div className="progress-summary-track">
-                      <div
-                        className="progress-summary-fill"
-                        style={{ width: `${pct}%`, background: getProgressColor(pct) }}
-                      />
-                    </div>
-                  </div>
-                );
-              })}
-            {onShowBreakdown && (
-              <button type="button" className="progress-summary-breakdown" onClick={onShowBreakdown}>
-                <FaChartSimple aria-hidden />
-                <span>{t("pretestBreakdown.reopen")}</span>
-              </button>
-            )}
-          </div>
-
-          <div className="section-label">{t("home.treeLabel")}</div>
-        </div>
-
-        {/* Tree */}
-        <div className="home-tree-wrap" data-tour="tour-skill-tree">
-          {/* Legend — มุมขวาบน อธิบายสี progress bar */}
-          <div className="tree-legend">
-            {[
-              { pct: 10,  label: "1–19%" },
-              { pct: 50,  label: "20–74%" },
-              { pct: 90,  label: "75–99%" },
-              { pct: 100, label: "100%" },
-            ].map(({ pct, label }) => (
-              <div key={pct} className="tree-legend-row">
-                <span
-                  className="tree-legend-dot"
-                  style={{ background: getProgressColor(pct) }}
-                />
-                <span className="tree-legend-label">{label}</span>
-              </div>
-            ))}
-          </div>
-
-          <SkillTreeSVG
-            skills={treeSkills}
-            unlocked={unlocked}
-            canUnlockFn={canUnlock}
-            onNodeClick={handleNodeClick}
-            selected={selected}
-            hovered={hovered}
-            setHovered={setHovered}
-            zoomable={false}
-            goal={goal}
-            goalSelected={goalSelected}
-            onGoalClick={onGoalClick}
+        <div className="home-overlay-top">
+          <HomeProfileStrip
+            fullName={fullName}
+            goalName={activeBranch?.goalName}
+            stats={stats}
+            collapsed={profileStripCollapsed}
+            onToggle={onToggleProfileStrip}
+            onShowBreakdown={onShowBreakdown}
           />
-          <button
-            className="tree-expand-btn"
-            onClick={(e) => {
-              e.stopPropagation();
-              switchTab("SkillTree");
-            }}
-            title={t("home.expandTree")}
-            aria-label={t("home.expandTree")}
-          >
-            <svg
-              width="18"
-              height="18"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-hidden
-            >
-              <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" />
-            </svg>
-          </button>
         </div>
 
-        {/* Next exercise */}
-        <div className="home-next-ex-bar">
-          <button className="btn-next-exercise" onClick={() => setShowPicker(true)}>
-            {t("home.nextExercise")}
-          </button>
-        </div>
+        <HomeGoalBar goalName={activeBranch?.goalName} onNextExercise={() => setShowPicker(true)} />
 
-        {/* Recent sessions (last 5) */}
-        <div className="home-sessions" data-tour="tour-sessions">
-          <div className="section-label section-label-icon">
-            <FaClipboardList aria-hidden /> {t("home.recentSessions")}
-          </div>
-          {sessions.length === 0 ? (
-            <p className="empty-note">{t("home.noSessions")}</p>
-          ) : (
-            <div className="session-list">
-              {[...sessions]
-                .reverse()
-                .slice(0, 5)
-                .map((s) => (
-                  <SessionCard key={s.sessionId} session={s} />
-                ))}
+        <HomeProgressPanel
+          skills={treeSkills}
+          unlocked={unlocked}
+          canUnlock={canUnlock}
+          collapsed={progressPanelCollapsed}
+          onToggle={onToggleProgressPanel}
+          onSkillClick={handleNodeClick}
+        />
+
+        {/* Legend — อธิบายสี progress bar — มุมล่างขวา (เดิมอยู่ใน .home-overlay-top) */}
+        <div className="tree-legend home-legend">
+          {LEGEND.map(({ pct, label }) => (
+            <div key={pct} className="tree-legend-row">
+              <span className="tree-legend-dot" style={{ background: getProgressColor(pct) }} />
+              <span className="tree-legend-label">{label}</span>
             </div>
-          )}
+          ))}
         </div>
       </div>
 
@@ -268,12 +129,16 @@ export const HomeTab: React.FC<HomeTabProps> = ({
         unlocked={unlocked}
         canUnlockFn={canUnlock}
         onStartExercise={onStartExercise}
+        goal={goal}
+        onOpenGoal={() => setGoalSelected(true)}
       />
       <GoalSidePanel
         goal={goal}
         open={goalSelected}
         onClose={() => setGoalSelected(false)}
         skills={treeSkills}
+        unlocked={unlocked}
+        canUnlockFn={canUnlock}
         onSelectSkill={setSelected}
       />
     </div>

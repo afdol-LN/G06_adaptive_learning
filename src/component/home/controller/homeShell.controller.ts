@@ -5,16 +5,23 @@ import { usePreferences } from "../../../context/PreferencesContext";
 import type { BranchBaseState } from "../../../models/branchStatsModel";
 import { branchStatsService } from "../branchStats.service";
 import { LayoutSkill } from "../utils/skillTree";
+import { soundService } from "../../../services/soundService";
 import { useBranchSkillController } from "./branchSkill.controller";
 import { useBranchStatsController } from "./branchStats.controller";
 import { useSessionHistoryController } from "./sessionHistory.controller";
 import { useHomeTourController } from "./homeTour.controller";
 import { useUserProfileController } from "./userProfile.controller";
+import { useRecommendationController } from "./recommendation.controller";
 
-export type HomeTabKey = "Home" | "SkillTree" | "History" | "Profile";
+export type HomeTabKey = "Home" | "History" | "Profile";
+const HOME_TABS: HomeTabKey[] = ["Home", "History", "Profile"];
 
 // จำสถานะ sidebar (ย่อ/ขยาย) ไว้ข้าม session
 const SIDEBAR_COLLAPSED_KEY = "homeSidebarCollapsed";
+// จำสถานะ Profile strip บนหน้า Home (พับ/กาง) — ค่าเริ่มต้นกาง
+const PROFILE_STRIP_COLLAPSED_KEY = "homeProfileCollapsed";
+// จำสถานะการ์ด "ความคืบหน้าโดยรวม" ที่ลอยบน tree — ครั้งแรกบนจอแคบให้เริ่มแบบพับ
+const PROGRESS_PANEL_COLLAPSED_KEY = "homeProgressCollapsed";
 
 // state + handler ทั้งหมดของ HomeShell — ตัว component เหลือแค่การจัดวาง UI
 export function useHomeShellController() {
@@ -30,18 +37,33 @@ export function useHomeShellController() {
   const historyController = useSessionHistoryController(branchId);
   const homeTour = useHomeTourController(t);
   const profileController = useUserProfileController();
+  const recommendationController = useRecommendationController(branchId);
+  // แสดงป้ายเฉพาะเมื่อ skill ที่แนะนำอยู่ใน tree ของ branch นี้จริง
+  const recommendedSkillId =
+    skillTreeController.treeSkills.find((s) => s.skillId === recommendationController.recommendedSkillId)
+      ?.skillId ?? null;
 
-  // Tab State
-  // Exercise's "View skill tree" (after completing the goal) opens a tab directly via router state
+  // Tab State — เปิดแท็บตรงได้ผ่าน router state { tab }
+  // ชื่อแท็บที่ไม่มีแล้ว (เช่น "SkillTree" เดิม ที่รวมเข้า Home) → Home
   const location = useLocation();
-  const [activeTab, setActiveTab] = useState<HomeTabKey>(
-    () => (location.state as { tab?: HomeTabKey } | null)?.tab ?? "Home"
-  );
+  const [activeTab, setActiveTab] = useState<HomeTabKey>(() => {
+    const tab = (location.state as { tab?: string } | null)?.tab;
+    return HOME_TABS.includes(tab as HomeTabKey) ? (tab as HomeTabKey) : "Home";
+  });
 
   // Sidebar State — ครั้งแรกบนจอแคบให้เริ่มแบบย่อ
   const [sidebarCollapsed, setSidebarCollapsed] = useState<boolean>(() => {
     const stored = localStorage.getItem(SIDEBAR_COLLAPSED_KEY);
     return stored !== null ? stored === "1" : window.innerWidth < 768;
+  });
+
+  const [profileStripCollapsed, setProfileStripCollapsed] = useState<boolean>(
+    () => localStorage.getItem(PROFILE_STRIP_COLLAPSED_KEY) === "1"
+  );
+
+  const [progressPanelCollapsed, setProgressPanelCollapsed] = useState<boolean>(() => {
+    const stored = localStorage.getItem(PROGRESS_PANEL_COLLAPSED_KEY);
+    return stored !== null ? stored === "1" : window.innerWidth < 1024;
   });
 
   // Dropdown States
@@ -67,6 +89,14 @@ export function useHomeShellController() {
   useEffect(() => {
     localStorage.setItem(SIDEBAR_COLLAPSED_KEY, sidebarCollapsed ? "1" : "0");
   }, [sidebarCollapsed]);
+
+  useEffect(() => {
+    localStorage.setItem(PROFILE_STRIP_COLLAPSED_KEY, profileStripCollapsed ? "1" : "0");
+  }, [profileStripCollapsed]);
+
+  useEffect(() => {
+    localStorage.setItem(PROGRESS_PANEL_COLLAPSED_KEY, progressPanelCollapsed ? "1" : "0");
+  }, [progressPanelCollapsed]);
 
   // Close profile dropdown on click outside
   useEffect(() => {
@@ -105,8 +135,18 @@ export function useHomeShellController() {
   // Help replays the tour of the tab the user is on — no jump back to Home
   const handleHelpClick = () => {
     setShowProfileMenu(false);
+    // strip พับอยู่ → กางก่อน ไม่งั้น step tour-stats ไม่มี element ให้ชี้และถูกข้าม
+    if (activeTab === "Home" && profileStripCollapsed) {
+      setProfileStripCollapsed(false);
+      requestAnimationFrame(() => homeTour.startTour(activeTab, { force: true }));
+      return;
+    }
     homeTour.startTour(activeTab, { force: true });
   };
+
+  const toggleProfileStrip = () => setProfileStripCollapsed((c) => !c);
+
+  const toggleProgressPanel = () => setProgressPanelCollapsed((c) => !c);
 
   const toggleSidebar = () => {
     setShowProfileMenu(false);
@@ -126,12 +166,14 @@ export function useHomeShellController() {
   };
 
   const handleNodeClick = (skill: LayoutSkill) => {
+    soundService.play("nodeClick");
     skillTreeController.setSelectedSkill(
       skillTreeController.selectedSkill?.skillId === skill.skillId ? null : skill
     );
   };
 
   const handleGoalClick = () => {
+    soundService.play("nodeClick");
     skillTreeController.setGoalSelected(!skillTreeController.goalSelected);
   };
 
@@ -187,11 +229,17 @@ export function useHomeShellController() {
     profileMenuRef,
     fullName,
     handleHelpClick,
+    // home profile strip
+    profileStripCollapsed,
+    toggleProfileStrip,
+    progressPanelCollapsed,
+    toggleProgressPanel,
     // skill tree interaction
     hovered,
     setHovered,
     handleNodeClick,
     handleGoalClick,
+    recommendedSkillId,
     // exercise flow
     showPicker,
     setShowPicker,

@@ -1,30 +1,25 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import './decorate/Exercise.css';
 import './decorate/Tour.css';
 import { useExerciseController } from './exercise/controller/useExerciseController';
 import { useExerciseGuideController } from './exercise/controller/useExerciseGuideController';
 import ExerciseRules from './exercise/component/ExerciseRules';
+import AnswerSheet from './exercise/component/AnswerSheet';
+import SessionSummary from './exercise/component/SessionSummary';
 import QuestionCard from './common/QuestionCard';
-import AppLogo from './common/AppLogo';
+import AppBrand from './common/AppBrand';
 import {
   FaArrowRight,
   FaArrowRightFromBracket,
-  FaChartLine,
-  FaCheck,
+  FaCircleCheck,
   FaCircleQuestion,
-  FaClipboardCheck,
-  FaFlagCheckered,
-  FaHouse,
-  FaPlay,
   FaSpinner,
-  FaTrophy,
-  FaXmark,
 } from 'react-icons/fa6';
 import { usePreferences } from '../context/PreferencesContext';
-import { displayProgressPercent, formatProgressLabel } from './home/utils/skillTree';
-import { ANIMATIONS } from '../utils/animations';
+import { displayProgressPercent, formatProgressLabel, isMastered } from './home/utils/skillTree';
 
-export default function Exercise() {
+function ExerciseScreen() {
   const controller = useExerciseController();
   const { t } = usePreferences();
   const guide = useExerciseGuideController(t);
@@ -37,6 +32,18 @@ export default function Exercise() {
     if (clockPaused) pauseClock();
     else resumeClock();
   }, [clockPaused, pauseClock, resumeClock]);
+
+  // The sticky progress bar gets its background only once the page has scrolled (Exercise.css .scrolled)
+  const [scrolled, setScrolled] = useState(false);
+  useEffect(() => {
+    // Exercise.css sets overflow on both <html> and <body>, so either can end up the scroller:
+    // listen in the capture phase (element scroll events don't bubble) and read both
+    const onScroll = () =>
+      setScrolled(Math.max(window.scrollY, document.documentElement.scrollTop, document.body.scrollTop) > 0);
+    onScroll();
+    document.addEventListener('scroll', onScroll, { capture: true, passive: true });
+    return () => document.removeEventListener('scroll', onScroll, { capture: true });
+  }, []);
 
   if (controller.isLoading || !controller.question) {
     return (
@@ -66,14 +73,9 @@ export default function Exercise() {
   return (
     <>
       <div className="glow-bg"><div className="g1"></div><div className="g2"></div><div className="g3"></div></div>
-      <div className="wrap">
+      <div className={controller.feedbackOpen ? 'wrap sheet-open' : 'wrap'}>
         <div className="topbar">
-          <div className="logo">
-            <div className="logo-box"><AppLogo /></div>
-            <span className="logo-txt">G06 · ALS</span>
-            <div className="logo-dot"></div>
-            <span className="logo-sub">Adaptive Learning</span>
-          </div>
+          <AppBrand variant="topbar" />
           <div className="topbar-r">
             <button
               type="button"
@@ -109,18 +111,32 @@ export default function Exercise() {
           </div>
         </div>
 
-        <div className="prog-area">
+        <div className={scrolled ? 'prog-area scrolled' : 'prog-area'}>
           <div data-tour="ex-progress">
+            {/* one line: "Progress · Skill: x", then start → now, then the current value */}
             <div className="prog-row">
               <span className="prog-label">{t('exercise.progress')}</span>
-              {answeredInSession && <span className="prog-frac">{startLabel} → {nowLabel}</span>}
-              <div className="prog-spacer"></div>
-              <span className="prog-pct">{nowLabel}</span>
+              <span className="prog-skill" data-tour="ex-meta">{t('exercise.skill', { name: controller.skillsName })}</span>
+              {controller.completed ? (
+                <>
+                  {/* at 100% (from the start, or reached in this session): Progress is frozen, so no bar or number (ADR 0007) */}
+                  <div className="prog-spacer"></div>
+                  <span className="prog-done">
+                    <FaCircleCheck aria-hidden />
+                    <span>{t('exercise.review.badge')}</span>
+                  </span>
+                </>
+              ) : (
+                <>
+                  {answeredInSession && <span className="prog-frac">{startLabel} → {nowLabel}</span>}
+                  <div className="prog-spacer"></div>
+                  <span className="prog-pct">{nowLabel}</span>
+                </>
+              )}
             </div>
-            <div className="prog-track"><div className="prog-fill" style={{ width: `${pct}%` }}></div></div>
-          </div>
-          <div className="prog-meta" data-tour="ex-meta">
-            <span className="prog-skill">{t('exercise.skill', { name: controller.skillsName })}</span>
+            {!controller.completed && (
+              <div className="prog-track"><div className="prog-fill" style={{ width: `${pct}%` }}></div></div>
+            )}
           </div>
         </div>
 
@@ -168,19 +184,13 @@ export default function Exercise() {
         </div>
       </div>
 
-      <div
-        className={`flash ${revealed && !controller.sessionEnded ? 'in' : 'out'}`}
-        style={{ color: revealed?.isCorrect ? 'var(--green)' : 'var(--red)' }}
-        role="status"
-        aria-live="polite"
-      >
-        {revealed &&
-          (revealed.isCorrect ? (
-            <FaCheck title={t('exercise.correct')} />
-          ) : (
-            <FaXmark title={t('exercise.incorrect')} />
-          ))}
-      </div>
+      <AnswerSheet
+        feedback={controller.feedback}
+        open={controller.feedbackOpen}
+        onNext={controller.next}
+        // the answer that reaches 100% shows the climb; answers made at 100% are reviews and move nothing
+        showProgress={!controller.feedback || !isMastered(controller.feedback.before)}
+      />
 
       {controller.exitOpen && (
         <div className="overlay open" onClick={controller.cancelExit}>
@@ -208,83 +218,29 @@ export default function Exercise() {
         </div>
       )}
 
-      <div className={`overlay ${controller.sessionEnded ? 'open' : ''}`}>
-        {/* พลุเต็มจอ: อยู่บนพื้นหลังเบลอของ overlay แต่หลังการ์ด — mount ตอนจบ session จึงเล่นตั้งแต่ต้นทุกครั้ง */}
-        {controller.sessionEnded && (
-          <div className="session-end-layer" aria-hidden>
-            <iframe
-              className="session-end-anim"
-              src={ANIMATIONS.sessionEnd}
-              title="session complete animation"
-              tabIndex={-1}
-              sandbox="allow-scripts allow-same-origin"
-            />
-          </div>
-        )}
-        <div className="popup">
-          <div className="ph">
-            {controller.stopReason === 'mastered' ? (
-              <>
-                {/* ถ้วยแบบ animation — mount ตอนจบ session จึงเล่นตั้งแต่ต้น */}
-                {controller.sessionEnded && (
-                  <iframe
-                    className="ph-trophy-anim"
-                    src={ANIMATIONS.trophy}
-                    title="trophy animation"
-                    aria-hidden
-                    tabIndex={-1}
-                    sandbox="allow-scripts allow-same-origin"
-                  />
-                )}
-                {/* ผู้ใช้ที่ตั้ง "ลดการเคลื่อนไหว" เห็นไอคอนถ้วยเดิมแทน (สลับด้วย CSS) */}
-                <span className="ph-trophy ph-trophy-fallback"><FaTrophy aria-hidden /></span>
-              </>
-            ) : (
-              <span className="ph-trophy"><FaClipboardCheck aria-hidden /></span>
-            )}
-            <div className="ph-title">{t('exercise.done.title')}</div>
-            <div className="score-pills">
-              <div className="spill sp-cor">
-                <FaCheck aria-hidden />
-                <span>{t('exercise.done.correct', { count: controller.correctCount })}</span>
-              </div>
-              {controller.summary && (
-                <div className="spill sp-ps">
-                  <FaChartLine aria-hidden />
-                  {/* session start → end; summary.pLBefore is only "before the last answer" */}
-                  <span>{t('exercise.progress')}: {startLabel} → {nowLabel}</span>
-                </div>
-              )}
-            </div>
-            {/* This answer completed the branch's goal (adt-learning/docs/adr/0005) */}
-            {controller.summary?.goalCompleted && (
-              <div className="ph-goal" role="status">
-                <FaFlagCheckered aria-hidden />
-                <span>{t('exercise.goalDone.title', { name: controller.summary.goalCompleted.goalName })}</span>
-              </div>
-            )}
-          </div>
-          <div className="pf">
-            <button className="btn-home" onClick={controller.goHome}>
-              <FaHouse aria-hidden />
-              <span>{t('exercise.done.home')}</span>
-            </button>
-            {controller.summary?.goalCompleted ? (
-              <button className="btn-sess" onClick={controller.goToSkillTree}>
-                <FaFlagCheckered aria-hidden />
-                <span>{t('exercise.goalDone.cta')}</span>
-              </button>
-            ) : (
-              controller.summary?.nextRecommendation && (
-                <button className="btn-sess" onClick={controller.goHome}>
-                  <FaPlay aria-hidden />
-                  <span>{t('exercise.done.next', { name: controller.summary.nextRecommendation.skillsName })}</span>
-                </button>
-              )
-            )}
-          </div>
-        </div>
-      </div>
+      <SessionSummary
+        open={controller.sessionEnded}
+        reviewing={controller.reviewing}
+        stopReason={controller.stopReason}
+        summary={controller.summary}
+        skillId={controller.skillId}
+        skillsName={controller.skillsName}
+        correctCount={controller.correctCount}
+        questionLimit={controller.questionLimit}
+        progressStart={controller.progressStart}
+        progress={controller.progress}
+        onHome={controller.goHome}
+        onSkillTree={controller.goToSkillTree}
+        onStartSkill={controller.startSkill}
+        onPractiseAgain={controller.practiseAgain}
+      />
     </>
   );
+}
+
+// Every navigation to /exercise (from Home, or "practise again" / "next skill" on the summary) is a new
+// session: keying on location.key remounts the screen, so no state from the finished one carries over.
+export default function Exercise() {
+  const location = useLocation();
+  return <ExerciseScreen key={location.key} />;
 }
