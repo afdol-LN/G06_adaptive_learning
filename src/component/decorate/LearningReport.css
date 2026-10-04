@@ -252,6 +252,8 @@
     padding: 0;
     box-shadow: none;
   }
+  /* several goals in one PDF: each starts on a fresh page */
+  .lr-sheet + .lr-sheet { break-before: page; }
   .lr-page * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 }
 /* other stylesheets theme <body>; only while a report is on the page, print it on white */

@@ -31,6 +31,7 @@
   --accent-fill: #0047AB; /* solid fills under white text */
   --accent2:   #82C8E5;
   --on-accent: #ffffff;
+  --check-bg: #ffffff; /* unticked checkbox box */
   --tint:      #e8f0fe;   /* accent-tinted fill (active rows, hero) */
   --tint-2:    #f0f9ff;
   --green:     #10b981;
@@ -102,6 +103,7 @@
   --accent-fill: #2f5fd0;
   --accent2:   #82C8E5;
   --on-accent: #ffffff;
+  --check-bg: #ffffff; /* unticked checkbox box */
   --tint:      #1a2a4a;
   --tint-2:    #142238;
   --green:     #34d399;
@@ -1604,7 +1606,7 @@ body {
 }
 .profile-export-btn:hover { border-color: var(--accent); background: var(--tint-2); }
 
-.confirm-modal.export-modal { max-width: 460px; text-align: left; }
+.confirm-modal.export-modal { width: 640px; max-width: calc(100vw - 32px); text-align: left; box-sizing: border-box; }
 .export-modal .confirm-icon-wrap,
 .export-modal .confirm-title,
 .export-modal .confirm-desc { text-align: center; }
@@ -1620,16 +1622,44 @@ body {
   color: var(--ink);
   cursor: pointer;
 }
-.export-option input { accent-color: var(--accent-fill); }
+/* drawn checkbox: the native one renders as a filled grey box when unticked */
+.export-option input[type="checkbox"],
+.export-check input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  border: 1.5px solid var(--border);
+  border-radius: 4px;
+  background: var(--check-bg) center / 12px 12px no-repeat;
+  cursor: pointer;
+  transition: background-color 0.15s, border-color 0.15s;
+}
+.export-option input[type="checkbox"]:hover,
+.export-check input[type="checkbox"]:hover { border-color: var(--accent); }
+.export-option input[type="checkbox"]:checked,
+.export-check input[type="checkbox"]:checked {
+  border-color: var(--accent-fill);
+  background-color: var(--accent-fill);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M2.5 6.2 5 8.6l4.5-5' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+.export-option input[type="checkbox"]:focus-visible,
+.export-check input[type="checkbox"]:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .export-option svg { font-size: 20px; color: var(--accent); }
 .export-option span { display: flex; flex-direction: column; gap: 2px; }
 .export-option strong { color: var(--text); font-size: 14px; }
 .export-option small { color: var(--muted); font-size: 12px; }
 .export-option.is-active { border-color: var(--accent); background: var(--tint); }
-.export-branch { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
+.export-branch { display: flex; flex-direction: column; gap: 6px; width: 100%; margin: 16px 0; padding: 0; border: 0; min-width: 0; }
+.export-branch .export-options { margin: 4px 0 6px; max-height: 280px; overflow-y: auto; }
 .export-label { font-size: 13px; font-weight: 700; color: var(--text); }
 .export-kind { margin: 0; font-size: 12px; color: var(--muted); }
 .export-check { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--ink); cursor: pointer; }
-.export-check input { accent-color: var(--accent-fill); }
-.export-modal .confirm-btn-ok { display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
-.export-modal .confirm-btn-ok:disabled { opacity: 0.5; cursor: not-allowed; }
+.export-modal .confirm-btn-row { flex-wrap: wrap; }
+.export-modal .confirm-btn-ok,
+.export-modal .export-all-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 10px; }
+.export-modal .export-all-btn { flex: 1.5; color: var(--accent); border-color: var(--accent); }
+.export-modal .confirm-btn-ok:disabled,
+.export-modal .export-all-btn:disabled { opacity: 0.5; cursor: not-allowed; }

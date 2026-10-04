@@ -40,6 +40,7 @@ function AppContent() {
           <Route path="/skilltree" element={<SkillTree />}></Route>
           <Route path="/report/branch/:branchId" element={<LearningReportPage />}></Route>
           <Route path="/report/all" element={<LearningReportPage />}></Route>
+          <Route path="/report/branches" element={<LearningReportPage multi />}></Route>
         </Routes>
       </Router>
     </>

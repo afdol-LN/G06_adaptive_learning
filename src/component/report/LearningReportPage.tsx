@@ -7,39 +7,52 @@ import PreferenceControls from "../common/PreferenceControls";
 import { useAutoPrint, useLearningReport } from "./learningReport.controller";
 import BranchReportView from "./BranchReportView";
 import SummaryReportView from "./SummaryReportView";
-import { reportFileName } from "./reportFormat";
+import { bundleFileName, reportFileName } from "./reportFormat";
 import "../decorate/LearningReport.css";
 
+const isId = (id: number) => Number.isInteger(id) && id > 0;
+
 /**
- * /report/branch/:branchId?sessions=1 and /report/all — an A4 document the browser saves as PDF.
+ * /report/branches?ids=1,2&sessions=1, /report/branch/:branchId?sessions=1 and /report/all — an A4
+ * document the browser saves as PDF; several goals are one sheet each, each starting a new page.
  * The toolbar is screen-only; the print dialog opens by itself once the report has rendered.
  */
-export default function LearningReportPage() {
+export default function LearningReportPage({ multi = false }: { multi?: boolean }) {
   const { t } = usePreferences();
   const navigate = useNavigate();
   const { branchId } = useParams();
   const [search] = useSearchParams();
 
   const scope: ReportScope | null = useMemo(() => {
+    const withSessions = search.get("sessions") === "1";
+    if (multi) {
+      const ids = [...new Set((search.get("ids") ?? "").split(",").filter(Boolean).map(Number))];
+      if (ids.length === 0 || !ids.every(isId)) return null;
+      return { kind: "branches", branchIds: ids, withSessions };
+    }
     if (branchId === undefined) return { kind: "all" };
     const id = Number(branchId);
-    if (!Number.isInteger(id) || id <= 0) return null;
-    return { kind: "branch", branchId: id, withSessions: search.get("sessions") === "1" };
-  }, [branchId, search]);
+    if (!isId(id)) return null;
+    return { kind: "branches", branchIds: [id], withSessions };
+  }, [multi, branchId, search]);
 
-  const { branch, summary, error, isLoading } = useLearningReport(scope);
+  const { branches, summary, error, isLoading } = useLearningReport(scope);
+  const ready = !!(branches || summary);
 
   // "Save as PDF" names the file after document.title — set it before the print dialog opens
-  const fileName = branch
+  const only = branches?.length === 1 ? branches[0] : null;
+  const fileName = only
     ? reportFileName(
-        branch.goal.isComplete ? "certificate" : "progress",
-        branch.documentNo,
-        branch.learner.username,
-        branch.goal.name,
+        only.goal.isComplete ? "certificate" : "progress",
+        only.documentNo,
+        only.learner.username,
+        only.goal.name,
       )
-    : summary
-      ? reportFileName("transcript", summary.documentNo, summary.learner.username)
-      : null;
+    : branches?.length
+      ? bundleFileName(branches[0].learner.username, branches.length)
+      : summary
+        ? reportFileName("transcript", summary.documentNo, summary.learner.username)
+        : null;
   useEffect(() => {
     if (!fileName) return;
     const previous = document.title;
@@ -49,7 +62,7 @@ export default function LearningReportPage() {
     };
   }, [fileName]);
 
-  useAutoPrint(!!(branch || summary));
+  useAutoPrint(ready);
 
   return (
     <div className="lr-page">
@@ -63,24 +76,37 @@ export default function LearningReportPage() {
           type="button"
           className="lr-btn lr-btn--primary"
           onClick={() => window.print()}
-          disabled={!(branch || summary)}
+          disabled={!ready}
         >
           <FaPrint aria-hidden /> {t("report.print")}
         </button>
       </div>
 
-      <main className="lr-sheet">
-        {isLoading && <p className="lr-state">{t("report.loading")}</p>}
-        {error && (
-          <p className="lr-state lr-state--error" role="alert">
-            {t("report.loadError")} ({error})
-          </p>
+      <main>
+        {!ready && (
+          <div className="lr-sheet">
+            {isLoading && <p className="lr-state">{t("report.loading")}</p>}
+            {error && (
+              <p className="lr-state lr-state--error" role="alert">
+                {t("report.loadError")} ({error})
+              </p>
+            )}
+          </div>
         )}
-        {branch && scope?.kind === "branch" && (
-          <BranchReportView report={branch} withSessions={scope.withSessions} />
+        {branches &&
+          scope?.kind === "branches" &&
+          branches.map((report) => (
+            <article key={report.goal.branchId} className="lr-sheet">
+              <BranchReportView report={report} withSessions={scope.withSessions} />
+              <footer className="lr-footer">{t("report.footer")}</footer>
+            </article>
+          ))}
+        {summary && (
+          <article className="lr-sheet">
+            <SummaryReportView report={summary} />
+            <footer className="lr-footer">{t("report.footer")}</footer>
+          </article>
         )}
-        {summary && <SummaryReportView report={summary} />}
-        {(branch || summary) && <footer className="lr-footer">{t("report.footer")}</footer>}
       </main>
     </div>
   );
