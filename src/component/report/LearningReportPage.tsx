@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { FaArrowLeft, FaPrint } from "react-icons/fa6";
 import { usePreferences } from "../../context/PreferencesContext";
@@ -7,6 +7,7 @@ import PreferenceControls from "../common/PreferenceControls";
 import { useAutoPrint, useLearningReport } from "./learningReport.controller";
 import BranchReportView from "./BranchReportView";
 import SummaryReportView from "./SummaryReportView";
+import { reportFileName } from "./reportFormat";
 import "../decorate/LearningReport.css";
 
 /**
@@ -27,6 +28,27 @@ export default function LearningReportPage() {
   }, [branchId, search]);
 
   const { branch, summary, error, isLoading } = useLearningReport(scope);
+
+  // "Save as PDF" names the file after document.title — set it before the print dialog opens
+  const fileName = branch
+    ? reportFileName(
+        branch.goal.isComplete ? "certificate" : "progress",
+        branch.documentNo,
+        branch.learner.username,
+        branch.goal.name,
+      )
+    : summary
+      ? reportFileName("transcript", summary.documentNo, summary.learner.username)
+      : null;
+  useEffect(() => {
+    if (!fileName) return;
+    const previous = document.title;
+    document.title = fileName;
+    return () => {
+      document.title = previous;
+    };
+  }, [fileName]);
+
   useAutoPrint(!!(branch || summary));
 
   return (

@@ -1,8 +1,10 @@
 import { BranchSkill, GoalNode, SkillProgress } from "../../../models/branchSkillModel";
+import { drawnPrerequisiteEdgeKeys } from "../../../utils/prerequisiteEdges";
 
 export const NODE_W = 260;
 export const NODE_H = 120;
 const ROW_GAP = 130;
+const COL_GAP = 50;
 
 export interface LayoutSkill extends BranchSkill {
   x: number;
@@ -22,6 +24,14 @@ export function treeEndSkillIds(skills: BranchSkill[]): number[] {
     skills.flatMap((s) => (s.skillPrequisite || []).map((p) => p.prerequisiteSkillId))
   );
   return skills.filter((s) => !builtOn.has(s.skillId)).map((s) => s.skillId);
+}
+
+// Prerequisite edges worth drawing (A→C hidden when A→B→C already shows it) — see utils/prerequisiteEdges.
+// Key = `${prerequisiteId}-${skillId}`
+export function drawnPrerequisiteEdges(skills: BranchSkill[]): Set<string> {
+  return drawnPrerequisiteEdgeKeys(
+    skills.map((s) => ({ id: s.skillId, prerequisiteIds: (s.skillPrequisite || []).map((p) => p.prerequisiteSkillId) }))
+  );
 }
 
 // The skill tree above stays exactly as it is; the goal node hangs one row below the deepest skill,
@@ -63,6 +73,15 @@ export function layoutSkills(skills: BranchSkill[]): LayoutSkill[] {
   }
   skills.forEach(s => getDepth(s.skillId));
 
+  // Standalone skills (no prerequisite in this tree, nothing built on them) only connect to the goal node,
+  // so they sit on the last skill row — a short edge to the goal instead of one running past the whole tree
+  const maxDepth = Math.max(0, ...Object.values(depth));
+  const builtOn = new Set(skills.flatMap(s => (s.skillPrequisite || []).map(p => p.prerequisiteSkillId)));
+  const standalone = new Set(
+    skills.filter(s => depth[s.skillId] === 0 && !builtOn.has(s.skillId)).map(s => s.skillId)
+  );
+  standalone.forEach(id => { depth[id] = maxDepth; });
+
   const layers: Record<number, number[]> = {};
   skills.forEach(s => {
     const d = depth[s.skillId];
@@ -78,17 +97,19 @@ export function layoutSkills(skills: BranchSkill[]): LayoutSkill[] {
       ids.sort((a, b) => {
         const avgX = (id: number) => {
           const parents = (byId[id]?.skillPrequisite || []).filter(r => positions[r.prerequisiteSkillId]);
-          if (!parents.length) return 0;
+          // standalone skills moved down here have no parent — keep them at the right end of the row
+          if (!parents.length) return standalone.has(id) ? Number.MAX_SAFE_INTEGER : 0;
           return parents.reduce((s, r) => s + positions[r.prerequisiteSkillId].x, 0) / parents.length;
         };
         return avgX(a) - avgX(b);
       });
     }
-    const total = ids.length * NODE_W + (ids.length - 1) * 70;
+    // one gap for both the width and the step — they used to differ (70 vs 50), pushing every row off-centre
+    const total = ids.length * NODE_W + (ids.length - 1) * COL_GAP;
     const startX = -total / 2 + NODE_W / 2;
     ids.forEach((id, i) => {
       positions[id] = {
-        x: startX + i * (NODE_W + 50),
+        x: startX + i * (NODE_W + COL_GAP),
         y: d * (NODE_H + ROW_GAP),
       };
     });

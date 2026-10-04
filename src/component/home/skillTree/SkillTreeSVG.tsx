@@ -15,6 +15,7 @@ import {
   formatProgressLabel,
   getDraftCount,
   isMastered,
+  drawnPrerequisiteEdges,
 } from "../utils/skillTree";
 
 // ทุกสีในแผนผังเป็น CSS variable จาก Home.css (มีค่าของธีมมืดแยก) และต้องใส่ผ่าน style
@@ -69,6 +70,8 @@ export const SkillTreeSVG: React.FC<SkillTreeSVGProps> = ({
   const notStarted = t("skill.notStarted");
   const getNodeById = (id: number) => skills.find((s) => s.skillId === id);
   const isGoalParent = (skillId: number) => !!goal && goal.fromSkillIds.includes(skillId);
+  // เส้น A→C ที่มีทาง A→B→C อยู่แล้วไม่ต้องวาดซ้ำ (แค่การวาด — unlock ยังใช้ prerequisite ทุกตัว)
+  const drawnEdges = drawnPrerequisiteEdges(skills);
 
   // เลื่อนไปเฉพาะโหนดที่เปิดได้จริง — กันกรณี backend กับ unlock rule ฝั่งนี้เห็นไม่ตรงกัน
   const recommended =
@@ -248,7 +251,7 @@ export const SkillTreeSVG: React.FC<SkillTreeSVGProps> = ({
         (skill.skillPrequisite || []).map((req) => {
           const reqId = req.prerequisiteSkillId;
           const from = getNodeById(reqId);
-          if (!from || isRelatedEdge(reqId, skill.skillId)) return null;
+          if (!from || !drawnEdges.has(`${reqId}-${skill.skillId}`) || isRelatedEdge(reqId, skill.skillId)) return null;
 
           const isActive = unlocked.has(skill.skillId);
           const x1 = from.x;
@@ -282,7 +285,7 @@ export const SkillTreeSVG: React.FC<SkillTreeSVGProps> = ({
           (skill.skillPrequisite || []).map((req) => {
             const reqId = req.prerequisiteSkillId;
             const from = getNodeById(reqId);
-            if (!from || !isRelatedEdge(reqId, skill.skillId)) return null;
+            if (!from || !drawnEdges.has(`${reqId}-${skill.skillId}`) || !isRelatedEdge(reqId, skill.skillId)) return null;
 
             const isActive = unlocked.has(skill.skillId);
             const x1 = from.x;

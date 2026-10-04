@@ -49,3 +49,28 @@ export const STOP_LABEL: Record<string, TKey> = {
   exhausted: "session.end.exhausted",
   abandoned: "session.end.abandoned",
 };
+
+/** one piece of a file name: only characters every OS/upload form accepts, words joined by "-" */
+export const fileSafe = (text: string) =>
+  text
+    // keep letters, digits and marks (Thai vowels / tone marks are \p{M}); spaces, / \ : * ? " < > | & … → "-"
+    .replace(/[^\p{L}\p{M}\p{N}]+/gu, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 60);
+
+/**
+ * The default name "Save as PDF" offers — browsers take it from document.title.
+ * Always English and built from the username (not the full name) so it stays ASCII-friendly
+ * for mail clients and upload forms; the learner can still rename it in the save dialog.
+ */
+export function reportFileName(
+  kind: "certificate" | "progress" | "transcript",
+  documentNo: string,
+  username: string,
+  goalName?: string,
+) {
+  const label = { certificate: "Certificate", progress: "Progress-Report", transcript: "Transcript" }[kind];
+  return [label, documentNo, goalName && fileSafe(goalName), fileSafe(username)]
+    .filter(Boolean)
+    .join("_");
+}
