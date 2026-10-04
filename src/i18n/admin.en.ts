@@ -85,6 +85,7 @@ export const adminEn: Record<keyof typeof adminTh, string> = {
   "admin.users.new": "New",
   "admin.users.col.name": "Full name",
   "admin.users.empty": "No users match these filters",
+  "admin.users.loadFailed": "Could not load users",
   "admin.users.search": "Search name, campus, faculty, major…",
   "admin.users.toast.noId": "No user ID to act on",
   "admin.users.toast.statusFailed": "Couldn't update status",

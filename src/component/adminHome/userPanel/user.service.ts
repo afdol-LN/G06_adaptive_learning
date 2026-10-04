@@ -18,7 +18,9 @@ export class UserService {
       return {
         isError: true,
         data: null,
-        errorMessage: error.message,
+        errorMessage:
+          (typeof error === "string" ? error : error?.errorMessage || error?.message) ||
+          "Failed to fetch users",
       };
     }
   };

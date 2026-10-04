@@ -90,6 +90,12 @@ export default function UsersTab({ icon }: UsersTabProps) {
                   {t("admin.common.loading")}
                 </td>
               </tr>
+            ) : erros ? (
+              <tr>
+                <td colSpan={3} className="ad-load-error">
+                  {t("admin.users.loadFailed")}: {erros}
+                </td>
+              </tr>
             ) : userFiltered.length === 0 ? (
               <tr>
                 <td colSpan={3} style={{ textAlign: "center", padding: 24 }}>

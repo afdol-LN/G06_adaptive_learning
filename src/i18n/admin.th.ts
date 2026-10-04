@@ -85,6 +85,7 @@ export const adminTh = {
   "admin.users.new": "ใหม่",
   "admin.users.col.name": "ชื่อ - นามสกุล",
   "admin.users.empty": "ไม่พบผู้ใช้งานที่ตรงกับเงื่อนไข",
+  "admin.users.loadFailed": "โหลดรายชื่อผู้ใช้ไม่สำเร็จ",
   "admin.users.search": "ค้นหาชื่อ, วิทยาเขต, คณะ, สาขา ...",
   "admin.users.toast.noId": "ไม่พบรหัสผู้ใช้ (ID) สำหรับทำรายการ",
   "admin.users.toast.statusFailed": "อัปเดตสถานะไม่สำเร็จ",

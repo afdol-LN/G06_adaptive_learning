@@ -7,6 +7,8 @@ import { LayoutGoalNode, LayoutSkill, getProgressColor } from "../utils/skillTre
 import { HomeProfileStrip } from "../component/HomeProfileStrip";
 import { HomeProgressPanel } from "../component/HomeProgressPanel";
 import { HomeGoalBar } from "../component/HomeGoalBar";
+import { OwlMascot } from "../component/OwlMascot";
+import { TreeBranchDecor } from "../component/TreeBranchDecor";
 
 interface HomeTabProps {
   fullName: string;
@@ -75,6 +77,8 @@ export const HomeTab: React.FC<HomeTabProps> = ({
   return (
     <div className="tab-home">
       <div className="home-canvas" data-tour="tour-skill-tree">
+        {/* พื้นหลังกิ่งไม้ — ลูกแรก z-index 0 อยู่หลัง tree (.skill-tree-scroll z-index 1) */}
+        <TreeBranchDecor />
         <SkillTreeSVG
           skills={treeSkills}
           unlocked={unlocked}
@@ -120,6 +124,9 @@ export const HomeTab: React.FC<HomeTabProps> = ({
             </div>
           ))}
         </div>
+
+        {/* ของตกแต่ง — absolute อ้างอิง .home-canvas (position:relative) เหนือ legend */}
+        <OwlMascot />
       </div>
 
       <SkillSidePanel

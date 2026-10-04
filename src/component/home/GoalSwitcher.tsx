@@ -11,6 +11,14 @@ import {
 import { useApp } from "../../context/AppContext";
 import { usePreferences } from "../../context/PreferencesContext";
 
+// รูปร่างของ branch ใน AppContext (context ยังเป็น any) — เฉพาะฟิลด์ที่ dropdown ใช้
+interface BranchOption {
+  id: number | string;
+  goalName?: string;
+  campus?: string;
+  year?: number;
+}
+
 interface GoalSwitcherProps {
   onCreateBranch: () => void;
 }
@@ -82,7 +90,7 @@ export const GoalSwitcher: React.FC<GoalSwitcherProps> = ({ onCreateBranch }) =>
       {showGoalMenu && (
         <div className="gs-dropdown" role="listbox">
           <div className="goal-dropdown-list">
-            {branches.map((b) => {
+            {branches.map((b: BranchOption) => {
               const isActive = String(b.id) === String(activeBranch.id);
               return (
                 <button

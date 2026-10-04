@@ -2542,3 +2542,6 @@
   padding: 16px; text-align: center; font-size: 13px; color: var(--muted);
   border: 1px dashed var(--border); border-radius: 12px;
 }
+
+/* ตารางโหลดไม่สำเร็จ — แสดงข้อความจริงจาก backend แทน "ไม่พบข้อมูล" */
+.ad-table td.ad-load-error { text-align: center; padding: 24px; color: var(--red); font-weight: 600; }
