@@ -2315,6 +2315,8 @@
 /* ════ HISTORY — activity timeline ════ */
 .ad-hist-filter { display: inline-flex; align-items: center; gap: 6px; }
 .ad-hist-user { min-width: 200px; margin-left: auto; }
+/* ช่องเลือกผู้ใช้ใช้ Dropdown (dd-trigger กว้าง 100% โดยปริยาย) — คุมความกว้างเองไม่ให้ยืดเต็มแถว */
+.dd-trigger.ad-hist-user { width: 280px; flex: 0 0 auto; min-height: 0; padding: 9px 14px; font-size: 14px; } /* สูงเท่าปุ่มแท็บข้าง ๆ */
 
 .ad-hist-error {
   margin-bottom: 16px;
@@ -2429,6 +2431,8 @@
 }
 .ad-filter-btn.ad-filter-btn--sm { padding: 6px 12px; font-size: 12px; }
 .ad-hist-row .ad-select-sm { max-width: 220px; }
+/* Goal/Skill แบบค้นหาได้ (Dropdown) — ขนาดเท่า .ad-select-sm ข้าง ๆ ไม่ยืดเต็มแถว */
+.ad-hist-row .dd-trigger.ad-hist-dd { width: 220px; flex: 0 0 auto; min-height: 32px; padding: 6px 10px 6px 12px; font-size: 13px; }
 /* the calendar trigger sits in the chip row: chip height, not form-field height */
 .ad-hist-row .dp-trigger.ad-hist-range {
   width: auto;
@@ -2744,3 +2748,74 @@
   padding: 16px; text-align: center; font-size: 13px; color: var(--muted);
   border: 1px dashed var(--border); border-radius: 12px;
 }
+
+/* ───────── ประวัติการทำโจทย์ (สถิติรายข้อ) ───────── */
+.ad-stats-count { margin: 0 0 10px; font-size: 14px; font-weight: 600; color: var(--muted); }
+.ad-stats-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.dd-trigger.ad-stats-skill { width: 260px; flex: 0 0 auto; min-height: 0; padding: 9px 14px; font-size: 14px; }
+.dd-trigger.ad-stats-level { width: 180px; flex: 0 0 auto; min-height: 0; padding: 9px 14px; font-size: 14px; }
+.ad-stats-check { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--muted); margin-left: auto; cursor: pointer; }
+
+.ad-stats-table td { vertical-align: middle; }
+.ad-stats-q { max-width: 420px; overflow: hidden; text-overflow: ellipsis; }
+.ad-stats-ok { color: var(--ok-ink); font-weight: 600; }
+.ad-stats-bad { color: var(--bad-ink); font-weight: 600; }
+.ad-stats-rate-cell { min-width: 170px; }
+.ad-stats-rate { display: flex; align-items: center; gap: 8px; }
+.ad-stats-pct { font-size: 12px; font-weight: 600; min-width: 44px; }
+.ad-stats-pct.is-bad { color: var(--bad-ink); }
+.ad-stats-pct.is-mid { color: #d97706; }
+.ad-stats-pct.is-ok  { color: var(--ok-ink); }
+
+.ad-stats-bar { flex: 1; height: 8px; border-radius: 99px; background: var(--border); overflow: hidden; min-width: 90px; }
+.ad-stats-bar-fill { height: 100%; border-radius: 99px; transition: width .3s ease; }
+.ad-stats-bar-fill.is-bad  { background: var(--bad-ink); }
+.ad-stats-bar-fill.is-mid  { background: #f59e0b; }
+.ad-stats-bar-fill.is-ok   { background: var(--ok-ink); }
+.ad-stats-bar-fill.is-pick { background: var(--mid-ink); }
+
+.ad-stats-head { display: flex; flex-direction: column; gap: 10px; margin-bottom: 18px; }
+.ad-stats-qtext { margin: 0; font-size: 15px; line-height: 1.6; white-space: pre-wrap; }
+.ad-stats-summary { margin: 0; font-size: 13px; color: var(--muted); }
+.ad-stats-h { margin: 18px 0 8px; font-size: 14px; font-weight: 600; }
+
+.ad-stats-choices { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.ad-stats-choice { padding: 10px 12px; border: 1px solid var(--border); border-radius: 10px; display: flex; flex-direction: column; gap: 6px; }
+.ad-stats-choice.is-correct { border-color: var(--ok-border); background: var(--ok-bg); }
+.ad-stats-choice-top { display: flex; justify-content: space-between; gap: 12px; font-size: 14px; }
+.ad-stats-choice-text { display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.ad-stats-choice-n { color: var(--muted); font-size: 12px; white-space: nowrap; }
+
+.ad-stats-scroll { overflow-x: auto; }
+.ad-stats-answer { max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* ════ modal สถิติข้อ (ExerciseStatDetailModal) — ชุด ad-uv-* / ad-ev-* + ตัวเลขสรุปแบบการ์ด ════ */
+.ad-sd-kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; }
+.ad-sd-kpi {
+  display: flex; flex-direction: column; gap: 2px;
+  padding: 12px 14px; border-radius: 12px;
+  background: var(--surface-2); border: 1px solid var(--border);
+}
+.ad-sd-kpi-val { font-size: 22px; font-weight: 800; line-height: 1.2; color: var(--text); }
+.ad-sd-kpi-lbl { font-size: 12px; font-weight: 600; color: var(--muted); }
+.ad-sd-kpi.is-ok  { background: var(--ok-bg);  border-color: var(--ok-border); }
+.ad-sd-kpi.is-ok  .ad-sd-kpi-val { color: var(--ok-ink); }
+.ad-sd-kpi.is-bad { background: var(--bad-bg); border-color: var(--bad-border); }
+.ad-sd-kpi.is-bad .ad-sd-kpi-val { color: var(--bad-ink); }
+.ad-sd-kpi.is-mid .ad-sd-kpi-val { color: #d97706; }
+
+.ad-sd-correct { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 700; color: var(--ok-ink); }
+.ad-modal--detail .ad-stats-choice { padding: 12px 14px; gap: 8px; background: var(--surface); }
+.ad-modal--detail .ad-stats-choice.is-correct { background: var(--ok-bg); }
+.ad-modal--detail .ad-stats-choice-text { font-weight: 600; color: var(--text); }
+
+.ad-sd-table-wrap { border: 1px solid var(--border); border-radius: 12px; }
+.ad-sd-table { margin: 0; }
+.ad-sd-table th.is-num, .ad-sd-table td.is-num { text-align: center; }
+.ad-sd-table td { vertical-align: middle; }
+.ad-sd-answer {
+  display: inline-block; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle;
+  padding: 2px 8px; border-radius: 6px; background: var(--surface-2); border: 1px solid var(--border);
+  font-family: var(--font-mono, ui-monospace, monospace); font-size: 13px; color: var(--text);
+}
+.ad-sd-date { white-space: nowrap; font-size: 13px; }

@@ -10,6 +10,7 @@ import {
   TimePreset,
 } from "../../../models/historyModel";
 import { DateRangePicker } from "../../common/DateRangePicker";
+import { Dropdown } from "../../common/Dropdown";
 import { toIso, startOfDay } from "../../common/calendarDate";
 import type { Option } from "./history.controller";
 
@@ -86,32 +87,39 @@ export function TabFilters({ tab, filter, update, clear, activeCount, goals, ski
 
   const idOrNull = (v: string) => (v ? Number(v) : null);
 
+  // goal / skill มีหลายสิบรายการ — พิมพ์ค้นหาได้ (ตัวกรองอื่นในแถวมีไม่กี่ค่า คง <select> ไว้)
   const goalSelect = (
-    <select
-      className="ad-select ad-select-sm"
-      value={filter.goalId ?? ""}
-      onChange={(e) => update({ goalId: idOrNull(e.target.value) })}
-      aria-label={t("admin.history.f.goal")}
-    >
-      <option value="">{t("admin.history.f.allGoals")}</option>
-      {goals.map((g) => (
-        <option key={g.id} value={g.id}>{g.name}</option>
-      ))}
-    </select>
+    <Dropdown
+      className="ad-hist-dd"
+      value={filter.goalId === null ? "" : String(filter.goalId)}
+      onChange={(v) => update({ goalId: idOrNull(v) })}
+      options={[
+        { value: "", label: t("admin.history.f.allGoals") },
+        ...goals.map((g) => ({ value: String(g.id), label: g.name })),
+      ]}
+      ariaLabel={t("admin.history.f.goal")}
+      searchable
+      popupMinWidth={340}
+      searchPlaceholder={t("admin.history.f.searchGoal")}
+      emptyText={t("admin.history.f.noMatch")}
+    />
   );
 
   const skillSelect = (
-    <select
-      className="ad-select ad-select-sm"
-      value={filter.skillId ?? ""}
-      onChange={(e) => update({ skillId: idOrNull(e.target.value) })}
-      aria-label={t("admin.history.f.skill")}
-    >
-      <option value="">{t("admin.history.f.allSkills")}</option>
-      {skills.map((s) => (
-        <option key={s.id} value={s.id}>{s.name}</option>
-      ))}
-    </select>
+    <Dropdown
+      className="ad-hist-dd"
+      value={filter.skillId === null ? "" : String(filter.skillId)}
+      onChange={(v) => update({ skillId: idOrNull(v) })}
+      options={[
+        { value: "", label: t("admin.history.f.allSkills") },
+        ...skills.map((s) => ({ value: String(s.id), label: s.name })),
+      ]}
+      ariaLabel={t("admin.history.f.skill")}
+      searchable
+      popupMinWidth={340}
+      searchPlaceholder={t("admin.history.f.searchSkill")}
+      emptyText={t("admin.history.f.noMatch")}
+    />
   );
 
   return (

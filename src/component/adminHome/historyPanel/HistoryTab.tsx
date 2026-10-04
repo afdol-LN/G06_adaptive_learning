@@ -16,6 +16,7 @@ import {
   ActivityTab,
 } from "../../../models/historyModel";
 import Pagination from "../../common/Pagination";
+import { Dropdown } from "../../common/Dropdown";
 import { historyController } from "./history.controller";
 import { STOP_REASON_LABEL, TabFilters, TimeMenu } from "./HistoryFilters";
 import SessionDetailModal from "./SessionDetailModal";
@@ -109,17 +110,25 @@ export default function HistoryTab({ icon }: { icon?: ReactNode }) {
           })}
         </div>
 
-        <select
-          className="ad-select ad-hist-user"
-          value={c.userId ?? ""}
-          onChange={(e) => c.setUserId(e.target.value ? Number(e.target.value) : null)}
-          aria-label={t("admin.history.userFilter")}
-        >
-          <option value="">{t("admin.history.allUsers")}</option>
-          {c.users.map((u) => (
-            <option key={u.id} value={u.id}>{u.name}</option>
-          ))}
-        </select>
+        {/* ผู้ใช้มีหลายสิบคน — พิมพ์ค้นหาชื่อหรือ username ได้ (ชื่อซ้ำแยกด้วย @username) */}
+        <Dropdown
+          className="ad-hist-user"
+          value={c.userId === null ? "" : String(c.userId)}
+          onChange={(v) => c.setUserId(v ? Number(v) : null)}
+          options={[
+            { value: "", label: t("admin.history.allUsers") },
+            ...c.users.map((u) => ({
+              value: String(u.id),
+              label: u.name,
+              hint: u.username ? `@${u.username}` : undefined,
+            })),
+          ]}
+          ariaLabel={t("admin.history.userFilter")}
+          searchable
+          popupMinWidth={320}
+          searchPlaceholder={t("admin.history.userSearch")}
+          emptyText={t("admin.history.userNoMatch")}
+        />
 
         <button
           type="button"

@@ -5,6 +5,7 @@ import {
   FaBullseye,
   FaPenToSquare,
   FaClipboardList,
+  FaChartColumn,
   FaWandMagicSparkles,
 } from "react-icons/fa6";
 import type { TKey } from "../i18n";
@@ -74,5 +75,6 @@ export const TABS: { key: string; icon: React.ReactNode; labelKey: TKey }[] = [
   { key: "goals", icon: <FaBullseye />, labelKey: "admin.tab.goals" },
   { key: "exercises", icon: <FaPenToSquare />, labelKey: "admin.tab.exercises" },
   { key: "history", icon: <FaClipboardList />, labelKey: "admin.tab.history" },
+  { key: "exerciseStats", icon: <FaChartColumn />, labelKey: "admin.tab.exerciseStats" },
   { key: "ai", icon: <FaWandMagicSparkles />, labelKey: "admin.tab.ai" },
 ];

@@ -20,6 +20,10 @@ export interface Option {
   id: number;
   name: string;
 }
+// username ใช้แยกคนชื่อซ้ำในช่องเลือกผู้ใช้ และค้นหาได้
+export interface UserOption extends Option {
+  username?: string;
+}
 interface GoalOption extends Option {
   skillIds: number[];
 }
@@ -75,7 +79,7 @@ export function historyController() {
   const [userId, setUserIdState] = useState<number | null>(null);
   const [time, setTimeState] = useState<TimeFilter>({ preset: "all", from: "", to: "" });
 
-  const [users, setUsers] = useState<Option[]>([]);
+  const [users, setUsers] = useState<UserOption[]>([]);
   const [goals, setGoals] = useState<GoalOption[]>([]);
   const [skills, setSkills] = useState<Option[]>([]);
 
@@ -145,7 +149,7 @@ export function historyController() {
         setUsers(
           u.data
             .filter((x) => x.id !== undefined)
-            .map((x) => ({ id: x.id as number, name: x.fullName }))
+            .map((x) => ({ id: x.id as number, name: x.fullName, username: x.username }))
             .sort(byName),
         );
       }
