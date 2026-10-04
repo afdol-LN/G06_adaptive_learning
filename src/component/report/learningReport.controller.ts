@@ -8,12 +8,12 @@ import {
 
 /** loads the report the route asks for */
 export function useLearningReport(scope: ReportScope | null) {
-  const [branch, setBranch] = useState<BranchReport | null>(null);
+  const [branches, setBranches] = useState<BranchReport[] | null>(null);
   const [summary, setSummary] = useState<SummaryReport | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  const key = scope ? (scope.kind === "all" ? "all" : `b${scope.branchId}`) : "none";
+  const key = scope ? (scope.kind === "all" ? "all" : `b${scope.branchIds.join(",")}`) : "none";
 
   useEffect(() => {
     if (!scope) {
@@ -25,19 +25,23 @@ export function useLearningReport(scope: ReportScope | null) {
     setIsLoading(true);
     setError(null);
     (async () => {
-      const result =
-        scope.kind === "all"
-          ? await learningReportService.getSummaryReport()
-          : await learningReportService.getBranchReport(scope.branchId);
+      if (scope.kind === "all") {
+        const result = await learningReportService.getSummaryReport();
+        if (cancelled) return;
+        setIsLoading(false);
+        if (result.isError || !result.data) setError(result.errorMessage || "error");
+        else setSummary(result.data);
+        return;
+      }
+      // one request per goal, in parallel; the document is only shown when every goal loaded
+      const results = await Promise.all(
+        scope.branchIds.map((id) => learningReportService.getBranchReport(id)),
+      );
       if (cancelled) return;
       setIsLoading(false);
-      if (result.isError || !result.data) {
-        setError(result.errorMessage || "error");
-      } else if (scope.kind === "all") {
-        setSummary(result.data as SummaryReport);
-      } else {
-        setBranch(result.data as BranchReport);
-      }
+      const failed = results.find((r) => r.isError || !r.data);
+      if (failed) setError(failed.errorMessage || "error");
+      else setBranches(results.map((r) => r.data as BranchReport));
     })();
     return () => {
       cancelled = true;
@@ -46,7 +50,7 @@ export function useLearningReport(scope: ReportScope | null) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [key]);
 
-  return { branch, summary, error, isLoading };
+  return { branches, summary, error, isLoading };
 }
 
 /**

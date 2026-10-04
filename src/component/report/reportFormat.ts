@@ -74,3 +74,7 @@ export function reportFileName(
     .filter(Boolean)
     .join("_");
 }
+
+/** several goals exported together: each keeps its own document number inside the file */
+export const bundleFileName = (username: string, goals: number) =>
+  ["Learning-Reports", `${goals}-goals`, fileSafe(username)].join("_");

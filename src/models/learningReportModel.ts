@@ -81,7 +81,7 @@ export interface SummaryReport {
   totals: ReportEffort & { goals: number; completedGoals: number };
 }
 
-/** which report the export modal asked for */
+/** which report the export modal asked for — one or more goals in one document, or the transcript */
 export type ReportScope =
-  | { kind: "branch"; branchId: number; withSessions: boolean }
+  | { kind: "branches"; branchIds: number[]; withSessions: boolean }
   | { kind: "all" };
