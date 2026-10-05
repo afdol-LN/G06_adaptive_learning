@@ -12,6 +12,7 @@ import HomeShell from "./component/home/HomeShell";
 import Exercise from "./component/Exercise";
 import AdminHome from "./component/adminHome/Adminhome";
 import SkillTree from "./component/SkillTree";
+import LearningReportPage from "./component/report/LearningReportPage";
 import { AppProvider, useApp } from "./context/AppContext";
 import { PreferencesProvider } from "./context/PreferencesContext";
 import { ToastProvider } from "./context/ToastContext";
@@ -37,6 +38,9 @@ function AppContent() {
           <Route path="/exercise" element={<Exercise />}></Route>
           <Route path="/admin/home" element={<AdminHome />}></Route>
           <Route path="/skilltree" element={<SkillTree />}></Route>
+          <Route path="/report/branch/:branchId" element={<LearningReportPage />}></Route>
+          <Route path="/report/all" element={<LearningReportPage />}></Route>
+          <Route path="/report/branches" element={<LearningReportPage multi />}></Route>
         </Routes>
       </Router>
     </>

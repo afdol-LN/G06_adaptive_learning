@@ -1,6 +1,7 @@
 import dagre from "dagre";
 import { MarkerType, type Edge, type Node } from "@xyflow/react";
 import { GoalWorkspace, WorkspaceSkill } from "../../../../../../models/goalModel";
+import { drawnPrerequisiteEdgeKeys } from "../../../../../../utils/prerequisiteEdges";
 
 // ขนาดต้องตรงกับ .ad-ws-node / .ad-ws-goal-node ใน Adminhome.css ไม่งั้นเส้นจะไม่ตรงกลางกล่อง
 export const SKILL_NODE_WIDTH = 200;
@@ -45,10 +46,17 @@ export function layoutWorkspaceTree(
   });
   g.setNode(GOAL_NODE_ID, { width: GOAL_NODE_WIDTH, height: GOAL_NODE_HEIGHT });
 
+  // เส้น A→C ที่มีทาง A→B→C อยู่แล้วไม่วาด (และไม่ส่งให้ dagre จัดวาง) — ตรงกับ skill tree ฝั่งนักศึกษา;
+  // แผงด้านข้างยังแสดง prerequisite ครบทุกตัว
+  const drawn = drawnPrerequisiteEdgeKeys(
+    workspace.skills.map((s) => ({ id: s.skillId, prerequisiteIds: s.prerequisiteSkillIds })),
+  );
+
   workspace.skills.forEach((s) => {
     s.prerequisiteSkillIds.forEach((p) => {
       if (!closureIds.has(p)) return;
       hasDependents.add(p);
+      if (!drawn.has(`${p}-${s.skillId}`)) return;
       g.setEdge(String(p), String(s.skillId));
       edges.push(makeEdge(String(p), String(s.skillId)));
     });

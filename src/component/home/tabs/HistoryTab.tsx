@@ -1,20 +1,35 @@
-import React, { useState } from "react";
+import React from "react";
+import { FaBullseye, FaCircleQuestion, FaLayerGroup, FaStopwatch } from "react-icons/fa6";
 import { SessionHistoryItem } from "../../../models/sessionHistoryModel";
 import { usePreferences } from "../../../context/PreferencesContext";
 import type { TKey } from "../../../i18n";
 import { SessionCard } from "../../common/SessionCard";
+import { StatCard } from "../../common/StatCard";
+import { HistoryTrendChart } from "../component/HistoryTrendChart";
+import {
+  GRADES,
+  PERIODS,
+  PeriodFilter,
+  TopicFilter,
+  useHistoryFilterController,
+} from "../controller/historyFilter.controller";
+import type { DayGroup, SessionGrade } from "../utils/sessionHistory";
 
-type Topic = "all" | "pretest" | "practice";
-type Grade = "great" | "good" | "poor";
-
-const TOPIC_KEYS: Record<Exclude<Topic, "all">, TKey> = {
-  pretest: "session.type.pretest",
-  practice: "session.type.practice",
-};
-const GRADE_KEYS: Record<Grade, TKey> = {
+const GRADE_KEYS: Record<SessionGrade, TKey> = {
   great: "grade.great",
   good: "grade.good",
   poor: "grade.poor",
+};
+const PERIOD_KEYS: Record<PeriodFilter, TKey> = {
+  "7": "history.period.7",
+  "30": "history.period.30",
+  all: "history.period.all",
+};
+const GROUP_KEYS: Record<DayGroup, TKey> = {
+  today: "history.group.today",
+  yesterday: "history.group.yesterday",
+  week: "history.group.week",
+  earlier: "history.group.earlier",
 };
 
 interface HistoryTabProps {
@@ -23,78 +38,99 @@ interface HistoryTabProps {
 
 export const HistoryTab: React.FC<HistoryTabProps> = ({ sessions }) => {
   const { t } = usePreferences();
-  const [topicFilter, setTopicFilter] = useState<Topic>("all");
-  const [historyFilter, setHistoryFilter] = useState<Set<string>>(new Set(["all"]));
-
-  const handleHistoryFilter = (filter: string) => {
-    setHistoryFilter((prev) => {
-      const next = new Set(prev);
-      if (filter === "all") {
-        next.clear();
-        next.add("all");
-      } else {
-        next.delete("all");
-        if (next.has(filter)) {
-          next.delete(filter);
-          if (next.size === 0) next.add("all");
-        } else {
-          next.add(filter);
-        }
-      }
-      return next;
-    });
-  };
-
-  const getSessionGrade = (s: SessionHistoryItem): Grade => {
-    const correctCount = s.questions.filter((q) => q.isCorrect).length;
-    const totalCount = s.questions.length;
-    const score = totalCount > 0 ? Math.round((correctCount / totalCount) * 100) : 0;
-    if (score >= 80) return "great";
-    if (score >= 55) return "good";
-    return "poor"; // matches SessionCard
-  };
-
-  const getSessionTopic = (s: SessionHistoryItem): Exclude<Topic, "all"> =>
-    s.isPretest ? "pretest" : "practice";
-
-  const filteredSessions = sessions.filter((s) => {
-    const gm = historyFilter.has("all") || historyFilter.has(getSessionGrade(s));
-    const tm = topicFilter === "all" || getSessionTopic(s) === topicFilter;
-    return gm && tm;
-  });
+  const c = useHistoryFilterController(sessions);
 
   return (
     <div className="tab-history">
       <div className="history-header">
         <h2 className="history-title">{t("history.title", { count: sessions.length })}</h2>
-        <div className="history-filter" data-tour="tour-history-filter">
+      </div>
+
+      {/* overview of what the filters currently show */}
+      <div className="history-stats">
+        <StatCard icon={<FaLayerGroup />} value={c.stats.sessions} title={t("history.stats.sessions")} />
+        <StatCard icon={<FaCircleQuestion />} value={c.stats.questions} title={t("history.stats.questions")} />
+        <StatCard icon={<FaBullseye />} value={`${c.stats.accuracy}%`} title={t("history.stats.accuracy")} />
+        <StatCard
+          icon={<FaStopwatch />}
+          value={c.stats.avgSeconds === null ? "—" : t("history.stats.seconds", { sec: c.stats.avgSeconds })}
+          title={t("history.stats.avgTime")}
+        />
+      </div>
+
+      <HistoryTrendChart points={c.trend} />
+
+      <div className="history-filter" data-tour="tour-history-filter">
+        <select
+          className="filter-select"
+          value={c.topic}
+          onChange={(e) => c.setTopic(e.target.value as TopicFilter)}
+          aria-label={t("history.allTypes")}
+        >
+          <option value="all">{t("history.allTypes")}</option>
+          <option value="pretest">{t("session.type.pretest")}</option>
+          <option value="practice">{t("session.type.practice")}</option>
+        </select>
+        {c.skillOptions.length > 0 && (
           <select
             className="filter-select"
-            value={topicFilter}
-            onChange={(e) => setTopicFilter(e.target.value as Topic)}
+            value={c.skill}
+            onChange={(e) => c.setSkill(e.target.value)}
+            aria-label={t("history.allSkills")}
           >
-            <option value="all">{t("history.allTypes")}</option>
-            <option value="pretest">{t(TOPIC_KEYS.pretest)}</option>
-            <option value="practice">{t(TOPIC_KEYS.practice)}</option>
+            <option value="all">{t("history.allSkills")}</option>
+            {c.skillOptions.map((name) => (
+              <option key={name} value={name}>{name}</option>
+            ))}
           </select>
-          {(["all", "great", "good", "poor"] as const).map((f) => (
+        )}
+        <div className="filter-group" role="group" aria-label={t("history.period.label")}>
+          {PERIODS.map((p) => (
             <button
-              key={f}
-              className={`filter-btn ${historyFilter.has(f) ? "active" : ""}`}
-              aria-pressed={historyFilter.has(f)}
-              onClick={() => handleHistoryFilter(f)}
+              key={p}
+              type="button"
+              className={`filter-btn ${c.period === p ? "active" : ""}`}
+              aria-pressed={c.period === p}
+              onClick={() => c.setPeriod(p)}
             >
-              {f === "all" ? t("history.all") : t(GRADE_KEYS[f])}
+              {t(PERIOD_KEYS[p])}
+            </button>
+          ))}
+        </div>
+        <div className="filter-group" role="group" aria-label={t("history.grade.label")}>
+          <button
+            type="button"
+            className={`filter-btn ${c.grades.size === 0 ? "active" : ""}`}
+            aria-pressed={c.grades.size === 0}
+            onClick={() => c.toggleGrade("all")}
+          >
+            {t("history.all")}
+          </button>
+          {GRADES.map((g) => (
+            <button
+              key={g}
+              type="button"
+              className={`filter-btn ${c.grades.has(g) ? "active" : ""}`}
+              aria-pressed={c.grades.has(g)}
+              onClick={() => c.toggleGrade(g)}
+            >
+              {t(GRADE_KEYS[g])}
             </button>
           ))}
         </div>
       </div>
+
       <div className="history-list" data-tour="tour-history-list">
-        {filteredSessions.length === 0 ? (
+        {c.shownCount === 0 ? (
           <p className="empty-note lg">{t("history.empty")}</p>
         ) : (
-          [...filteredSessions].reverse().map((s) => (
-            <SessionCard key={s.sessionId} session={s} />
+          c.groups.map((g) => (
+            <section key={g.key} className="history-group">
+              <h3 className="history-group-label">{t(GROUP_KEYS[g.key])}</h3>
+              {g.sessions.map((s) => (
+                <SessionCard key={s.sessionId} session={s} />
+              ))}
+            </section>
           ))
         )}
       </div>

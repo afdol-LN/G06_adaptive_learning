@@ -22,7 +22,8 @@ const baseURL = import.meta.env.VITE_API_BASE_URL+"/"                           
 
 const instance: AxiosInstance = axios.create({
   baseURL: baseURL,
-  timeout: 5000,
+  // 60s, not 5s: a free-tier host (Render) sleeps when idle and the first request wakes it (~30–60s)
+  timeout: 60000,
   headers: {
     "Content-Type": "application/json",
   },

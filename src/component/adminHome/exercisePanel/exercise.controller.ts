@@ -230,6 +230,7 @@ export function exerciseController() {
     viewingExercise,
     openView,
     closeView,
+    reload: loadExercises,
 
     togglingId,
     toggleExerciseStatus,

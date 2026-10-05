@@ -153,6 +153,7 @@ export function goalController() {
     viewingGoal,
     openView,
     closeView,
+    reload: loadGoals,
 
     toggleGoalStatus,
   };

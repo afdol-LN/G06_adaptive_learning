@@ -12,6 +12,14 @@ import { FaCalendarDays, FaChevronLeft, FaChevronRight } from "react-icons/fa6";
 import { usePreferences } from "../../context/PreferencesContext";
 import "../decorate/DatePicker.css";
 import { Dropdown, DropdownOption } from "./Dropdown";
+import {
+  addDays,
+  addMonths,
+  monthGrid,
+  parseIso,
+  startOfDay,
+  toIso,
+} from "./calendarDate";
 
 interface DatePickerProps {
   /** ค่าเป็น ISO `yyyy-mm-dd` เท่านั้น (รูปแบบเดียวกับ <input type="date"> เดิม) */
@@ -40,37 +48,6 @@ const POPUP_W = 324;
 /** ความสูงโดยประมาณของปฏิทิน 6 สัปดาห์ + หัว + แถบล่าง */
 const POPUP_H = 400;
 
-/** yyyy-mm-dd → Date (เที่ยงวันตามเวลาเครื่อง) — เที่ยงวันกันวันเลื่อนเพราะ timezone */
-function parseIso(iso: string): Date | null {
-  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso);
-  if (!m) return null;
-  const d = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]), 12);
-  return Number.isNaN(d.getTime()) ? null : d;
-}
-
-function toIso(d: Date): string {
-  const p = (n: number) => String(n).padStart(2, "0");
-  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
-}
-
-function startOfDay(d: Date): Date {
-  return new Date(d.getFullYear(), d.getMonth(), d.getDate(), 12);
-}
-
-function addDays(d: Date, n: number): Date {
-  return new Date(d.getFullYear(), d.getMonth(), d.getDate() + n, 12);
-}
-
-function addMonths(d: Date, n: number): Date {
-  const target = new Date(d.getFullYear(), d.getMonth() + n, 1, 12);
-  const lastDay = new Date(
-    target.getFullYear(),
-    target.getMonth() + 1,
-    0,
-  ).getDate();
-  target.setDate(Math.min(d.getDate(), lastDay));
-  return target;
-}
 
 /**
  * ปฏิทินเลือกวันที่ที่คุมหน้าตาได้ทั้งตัว
@@ -319,11 +296,7 @@ export const DatePicker: React.FC<DatePickerProps> = ({
   };
 
   /** 6 สัปดาห์เสมอ ความสูงของปฏิทินจะได้ไม่กระตุกตอนเปลี่ยนเดือน */
-  const days = useMemo(() => {
-    const first = new Date(viewDate.getFullYear(), viewDate.getMonth(), 1, 12);
-    const start = addDays(first, -first.getDay());
-    return Array.from({ length: 42 }, (_, i) => addDays(start, i));
-  }, [viewDate]);
+  const days = useMemo(() => monthGrid(viewDate), [viewDate]);
 
   const todayIso = toIso(startOfDay(new Date()));
   const selectedIso = selected ? toIso(selected) : "";

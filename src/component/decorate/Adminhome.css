@@ -1962,8 +1962,10 @@
   border-radius: 999px;
   font-size: 12px;
   font-weight: 700;
-  background: var(--stat-bg);
-  color: var(--stat-ink);
+  /* --stat-bg/--stat-ink live only in Home.css (and there --stat-bg is the white surface), so on the
+     admin page this badge had no background at all — use the admin's own solid accent pair */
+  background: var(--accent-fill);
+  color: var(--on-accent);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -2013,8 +2015,9 @@
   border-radius: 999px;
   font-size: 12px;
   font-weight: 700;
-  background: var(--stat-bg);
-  color: var(--stat-ink);
+  /* same fix as .ad-ai-source-badge: the Home.css stat tokens don't exist on the admin page */
+  background: var(--accent-fill);
+  color: var(--on-accent);
 }
 
 .ad-ai-draft-answer {
@@ -2309,6 +2312,209 @@
 .ad-ws-confirm-msg { margin: 0 0 8px; color: var(--text); }
 .ad-ws-confirm-list { margin: 0; padding-left: 20px; color: var(--text); }
 
+/* ════ HISTORY — activity timeline ════ */
+.ad-hist-filter { display: inline-flex; align-items: center; gap: 6px; }
+.ad-hist-user { min-width: 200px; margin-left: auto; }
+/* ช่องเลือกผู้ใช้ใช้ Dropdown (dd-trigger กว้าง 100% โดยปริยาย) — คุมความกว้างเองไม่ให้ยืดเต็มแถว */
+.dd-trigger.ad-hist-user { width: 280px; flex: 0 0 auto; min-height: 0; padding: 9px 14px; font-size: 14px; } /* สูงเท่าปุ่มแท็บข้าง ๆ */
+
+.ad-hist-error {
+  margin-bottom: 16px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  background: var(--bad-bg);
+  color: var(--bad-ink);
+  border: 1px solid var(--bad-border);
+  font-size: 14px;
+}
+
+.ad-hist-time { white-space: nowrap; }
+.ad-hist-time > span { display: block; }
+.ad-hist-date { color: var(--text); font-size: 13px; }
+
+.ad-hist-user-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-family: inherit;
+  color: inherit;
+  text-align: left;
+}
+.ad-hist-user-link:hover .ad-user-name-sm { color: var(--accent); text-decoration: underline; }
+
+.ad-hist-type {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+  border: 1px solid transparent;
+}
+.ad-hist-type--goal     { background: var(--warn-bg); color: var(--warn-ink); border-color: var(--warn-border); }
+.ad-hist-type--skill    { background: var(--mid-bg);  color: var(--mid-ink);  border-color: var(--mid-border); }
+.ad-hist-type--exercise { background: var(--ok-bg);   color: var(--ok-ink);   border-color: var(--ok-border); }
+.ad-hist-type--login    { background: var(--surface-2); color: var(--ink);  border-color: var(--border); }
+
+.ad-hist-detail {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  color: var(--text);
+  font-size: 14px;
+}
+.ad-hist-tag {
+  padding: 1px 8px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  background: var(--tint);
+  color: var(--muted);
+}
+.ad-hist-sub {
+  margin-top: 2px;
+  max-width: 520px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--muted);
+  font-size: 12px;
+}
+.ad-hist-tabs { display: flex; flex-wrap: wrap; gap: 8px; }
+.ad-hist-count {
+  margin-left: 2px;
+  padding: 0 7px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  background: var(--tint);
+  color: var(--muted);
+}
+.ad-filter-btn.active .ad-hist-count { background: rgba(255, 255, 255, 0.25); color: inherit; }
+.ad-hist-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 16px;
+}
+.ad-hist-footer .ad-pagination { margin-left: auto; }
+
+/* ── History filters: shared time row + the open tab's options ── */
+.ad-hist-filters {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: -8px 0 16px;
+  padding: 12px 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+.ad-hist-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.ad-hist-row--tab { padding-top: 10px; border-top: 1px dashed var(--border); }
+.ad-hist-row-label {
+  min-width: 72px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+.ad-filter-btn.ad-filter-btn--sm { padding: 6px 12px; font-size: 12px; }
+.ad-hist-row .ad-select-sm { max-width: 220px; }
+/* Goal/Skill แบบค้นหาได้ (Dropdown) — ขนาดเท่า .ad-select-sm ข้าง ๆ ไม่ยืดเต็มแถว */
+.ad-hist-row .dd-trigger.ad-hist-dd { width: 220px; flex: 0 0 auto; min-height: 32px; padding: 6px 10px 6px 12px; font-size: 13px; }
+/* the calendar trigger sits in the chip row: chip height, not form-field height */
+.ad-hist-row .dp-trigger.ad-hist-range {
+  width: auto;
+  min-width: 220px;
+  min-height: 32px;
+  padding: 5px 12px;
+  font-size: 13px;
+}
+.ad-hist-row .dp-trigger.ad-hist-range.is-active { border-color: var(--accent); }
+.ad-hist-clear {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+  padding: 6px 10px;
+  border: none;
+  border-radius: 8px;
+  background: none;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--bad-ink);
+  cursor: pointer;
+}
+.ad-hist-clear:hover { background: var(--bad-bg); }
+
+/* ── exercise-session rows open the session popup ── */
+.ad-hist-row-link { cursor: pointer; }
+.ad-hist-row-link:hover td { background: var(--tint-2); }
+.ad-hist-score {
+  padding: 1px 8px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  border: 1px solid transparent;
+}
+.ad-hist-score.is-great { background: var(--ok-bg);  color: var(--ok-ink);  border-color: var(--ok-border); }
+.ad-hist-score.is-good  { background: var(--mid-bg); color: var(--mid-ink); border-color: var(--mid-border); }
+.ad-hist-score.is-poor  { background: var(--bad-bg); color: var(--bad-ink); border-color: var(--bad-border); }
+.ad-hist-open {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 4px;
+  padding: 0;
+  border: none;
+  background: none;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--accent);
+  cursor: pointer;
+}
+.ad-hist-open:hover { text-decoration: underline; }
+.ad-hist-open svg { width: 10px; height: 10px; }
+
+/* ── session popup ── */
+.ad-hist-modal-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--muted);
+  cursor: pointer;
+}
+.ad-hist-modal-close:hover { border-color: var(--accent); color: var(--accent); }
+/* the body is the scroller: min-height 0 lets it shrink inside the 90vh modal (a flex child
+   defaults to its content height, so overflow-y never kicked in), and its children keep their
+   full height instead of being squeezed and clipping the questions */
+.ad-hist-modal-body { gap: 12px; min-height: 0; }
+.ad-hist-modal-body > * { flex-shrink: 0; }
+/* the student card's hover lift/shadow means nothing inside a popup */
+.ad-hist-modal-body .session-card:hover { box-shadow: none; }
+/* History "Name" column: goal / skill name — wraps rather than widening the table */
+.ad-hist-name { max-width: 220px; font-weight: 700; color: var(--text); overflow-wrap: anywhere; }
+
 /* ════ modal ดูรายละเอียดผู้ใช้ — กว้างขึ้น, ส่วนหัวโปรไฟล์ + ตารางข้อมูลเรียบ ๆ + การ์ดเป้าหมาย ════ */
 .ad-modal.ad-modal--user { max-width: 860px; }
 .ad-modal.ad-modal--detail { max-width: 760px; }
@@ -2542,3 +2748,140 @@
   padding: 16px; text-align: center; font-size: 13px; color: var(--muted);
   border: 1px dashed var(--border); border-radius: 12px;
 }
+
+/* ───────── ประวัติการทำโจทย์ (สถิติรายข้อ) ───────── */
+.ad-stats-count { margin: 0 0 10px; font-size: 14px; font-weight: 600; color: var(--muted); }
+.ad-stats-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.dd-trigger.ad-stats-skill { width: 260px; flex: 0 0 auto; min-height: 0; padding: 9px 14px; font-size: 14px; }
+.dd-trigger.ad-stats-level { width: 180px; flex: 0 0 auto; min-height: 0; padding: 9px 14px; font-size: 14px; }
+.ad-stats-check { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--muted); margin-left: auto; cursor: pointer; }
+
+.ad-stats-table td { vertical-align: middle; }
+.ad-stats-q { max-width: 420px; overflow: hidden; text-overflow: ellipsis; }
+.ad-stats-ok { color: var(--ok-ink); font-weight: 600; }
+.ad-stats-bad { color: var(--bad-ink); font-weight: 600; }
+.ad-stats-rate-cell { min-width: 170px; }
+.ad-stats-rate { display: flex; align-items: center; gap: 8px; }
+.ad-stats-pct { font-size: 12px; font-weight: 600; min-width: 44px; }
+.ad-stats-pct.is-bad { color: var(--bad-ink); }
+.ad-stats-pct.is-mid { color: #d97706; }
+.ad-stats-pct.is-ok  { color: var(--ok-ink); }
+
+.ad-stats-bar { flex: 1; height: 8px; border-radius: 99px; background: var(--border); overflow: hidden; min-width: 90px; }
+.ad-stats-bar-fill { height: 100%; border-radius: 99px; transition: width .3s ease; }
+.ad-stats-bar-fill.is-bad  { background: var(--bad-ink); }
+.ad-stats-bar-fill.is-mid  { background: #f59e0b; }
+.ad-stats-bar-fill.is-ok   { background: var(--ok-ink); }
+.ad-stats-bar-fill.is-pick { background: var(--mid-ink); }
+
+.ad-stats-head { display: flex; flex-direction: column; gap: 10px; margin-bottom: 18px; }
+.ad-stats-qtext { margin: 0; font-size: 15px; line-height: 1.6; white-space: pre-wrap; }
+.ad-stats-summary { margin: 0; font-size: 13px; color: var(--muted); }
+.ad-stats-h { margin: 18px 0 8px; font-size: 14px; font-weight: 600; }
+
+.ad-stats-choices { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.ad-stats-choice { padding: 10px 12px; border: 1px solid var(--border); border-radius: 10px; display: flex; flex-direction: column; gap: 6px; }
+.ad-stats-choice.is-correct { border-color: var(--ok-border); background: var(--ok-bg); }
+.ad-stats-choice-top { display: flex; justify-content: space-between; gap: 12px; font-size: 14px; }
+.ad-stats-choice-text { display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.ad-stats-choice-n { color: var(--muted); font-size: 12px; white-space: nowrap; }
+
+.ad-stats-scroll { overflow-x: auto; }
+.ad-stats-answer { max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* ════ modal สถิติข้อ (ExerciseStatDetailModal) — ชุด ad-uv-* / ad-ev-* + ตัวเลขสรุปแบบการ์ด ════ */
+.ad-sd-kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; }
+.ad-sd-kpi {
+  display: flex; flex-direction: column; gap: 2px;
+  padding: 12px 14px; border-radius: 12px;
+  background: var(--surface-2); border: 1px solid var(--border);
+}
+.ad-sd-kpi-val { font-size: 22px; font-weight: 800; line-height: 1.2; color: var(--text); }
+.ad-sd-kpi-lbl { font-size: 12px; font-weight: 600; color: var(--muted); }
+.ad-sd-kpi.is-ok  { background: var(--ok-bg);  border-color: var(--ok-border); }
+.ad-sd-kpi.is-ok  .ad-sd-kpi-val { color: var(--ok-ink); }
+.ad-sd-kpi.is-bad { background: var(--bad-bg); border-color: var(--bad-border); }
+.ad-sd-kpi.is-bad .ad-sd-kpi-val { color: var(--bad-ink); }
+.ad-sd-kpi.is-mid .ad-sd-kpi-val { color: #d97706; }
+
+.ad-sd-correct { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 700; color: var(--ok-ink); }
+.ad-modal--detail .ad-stats-choice { padding: 12px 14px; gap: 8px; background: var(--surface); }
+.ad-modal--detail .ad-stats-choice.is-correct { background: var(--ok-bg); }
+.ad-modal--detail .ad-stats-choice-text { font-weight: 600; color: var(--text); }
+
+.ad-sd-table-wrap { border: 1px solid var(--border); border-radius: 12px; }
+.ad-sd-table { margin: 0; }
+.ad-sd-table th.is-num, .ad-sd-table td.is-num { text-align: center; }
+.ad-sd-table td { vertical-align: middle; }
+.ad-sd-answer {
+  display: inline-block; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle;
+  padding: 2px 8px; border-radius: 6px; background: var(--surface-2); border: 1px solid var(--border);
+  font-family: var(--font-mono, ui-monospace, monospace); font-size: 13px; color: var(--text);
+}
+.ad-sd-date { white-space: nowrap; font-size: 13px; }
+
+/* ════ แท็บ รายละเอียด / สถิติ ที่หัว modal รายละเอียด Exercise ════ */
+.ad-ev-tabs {
+  display: inline-flex; gap: 4px; padding: 4px;
+  border-radius: 10px; background: var(--surface); border: 1px solid var(--border);
+}
+.ad-ev-tab {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 7px 14px; border: 0; border-radius: 7px; cursor: pointer;
+  background: transparent; color: var(--muted);
+  font-family: inherit; font-size: 13px; font-weight: 700; white-space: nowrap;
+  transition: background .15s, color .15s;
+}
+.ad-ev-tab:hover { color: var(--accent); background: var(--tint); }
+.ad-ev-tab.is-active { background: var(--accent-fill); color: #fff; }
+.ad-ev-tab:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.ad-ev-pretest { margin-left: 0; align-self: flex-end; }
+
+@media (max-width: 600px) {
+  .ad-modal--detail .ad-modal-header:has(.ad-ev-tabs) { flex-wrap: wrap; gap: 10px; }
+  .ad-ev-tab { padding: 6px 10px; }
+}
+
+/* ════ แท็บสถิติของ Goal / Skill (learnerStatsPanel) ════ */
+.ad-ls-username { font-size: 12px; color: var(--muted); }
+.ad-ls-goal { max-width: 220px; font-size: 13px; color: var(--ink, var(--text)); }
+.ad-ls-ok, .ad-ls-wait { display: inline-flex; align-items: center; gap: 4px; font-size: 13px; font-weight: 600; white-space: nowrap; }
+.ad-ls-ok { color: var(--ok-ink); }
+.ad-ls-wait { color: var(--muted); }
+.ad-modal--detail .ad-stats-rate { min-width: 150px; }
+
+/* ════ แท็บสถิติ: ขยาย modal ให้ตารางนักเรียนแสดงครบไม่ต้องเลื่อนแนวนอน (แท็บรายละเอียดคงขนาดเดิม) ════
+   .ad-overlay > ... (0,3,0) วางท้ายไฟล์ จึงชนะ --user / --detail / --wide.--detail ที่กำหนดความกว้างไว้ก่อน */
+.ad-overlay > .ad-modal.ad-modal--stats { max-width: min(1180px, 94vw); }
+.ad-sd-table th { white-space: nowrap; }
+.ad-sd-table .ad-user-name-sm { white-space: nowrap; }
+.ad-modal--stats .ad-ls-goal { max-width: 260px; }
+
+/* ════ ปุ่ม "ลบ" มุมซ้ายล่างของ modal รายละเอียด + dialog ยืนยัน (deletePanel/DeleteButton) ════ */
+.ad-btn-del-outline {
+  margin-right: auto; /* ดันไปซ้ายสุดของ footer — ปิด/แก้ไขอยู่ขวาเหมือนเดิม */
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 10px 18px; border-radius: 10px; cursor: pointer;
+  border: 1px solid color-mix(in srgb, var(--red) 45%, transparent);
+  background: transparent; color: var(--red);
+  font-family: inherit; font-size: 14px; font-weight: 700;
+  transition: background .15s, border-color .15s;
+}
+.ad-btn-del-outline:hover { background: color-mix(in srgb, var(--red) 8%, transparent); border-color: var(--red); }
+.ad-btn-del-outline:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
+.ad-btn-danger { display: inline-flex; align-items: center; gap: 8px; }
+.ad-btn-danger:disabled { opacity: .6; cursor: not-allowed; }
+
+/* dialog ซ้อนบน modal รายละเอียด (portal → body) */
+.ad-overlay.ad-del-overlay { z-index: 300; }
+.ad-del-dialog { max-width: 440px; }
+.ad-del-dialog .ad-modal-title { color: var(--red); }
+.ad-del-dialog.is-blocked .ad-modal-title { color: var(--text); }
+.ad-del-msg { margin: 0; font-size: 15px; line-height: 1.6; color: var(--text); }
+.ad-del-name {
+  margin: 0; padding: 10px 14px; border-radius: 10px;
+  background: var(--surface-2); border: 1px solid var(--border);
+  font-weight: 700; color: var(--text); overflow-wrap: anywhere;
+  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+}
+.ad-del-warn { margin: 0; font-size: 13px; font-weight: 600; color: var(--red); }

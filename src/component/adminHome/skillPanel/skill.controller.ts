@@ -196,6 +196,7 @@ export function skillController() {
     viewingSkill,
     openView,
     closeView,
+    reload: loadSkills,
 
     toggleSkillStatus,
 
