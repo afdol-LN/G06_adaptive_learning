@@ -29,7 +29,8 @@ export interface ExerciseStatStudent {
   attempts: number;
   firstAnswer: string | null;
   timeSpentSec: number | null;
-  latestPL: number | null;
+  /** skill progress % (0-100) after the student's latest practice answer on this question */
+  latestProgress: number | null;
   lastAnsweredAt: string;
 }
 

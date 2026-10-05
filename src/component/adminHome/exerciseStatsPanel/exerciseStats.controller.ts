@@ -131,3 +131,7 @@ export function exerciseStatDetailController(
 
   return { detail, isLoading, error };
 }
+
+/** <40% red, 40-70% yellow, >70% green */
+export const rateTone = (rate: number | null) =>
+  rate === null ? "none" : rate < 40 ? "bad" : rate <= 70 ? "mid" : "ok";

@@ -43,6 +43,7 @@ export default function ExerciseTab({ icon }: ExerciseTabProps) {
     viewingExercise,
     openView,
     closeView,
+    reload,
 
     togglingId,
     toggleExerciseStatus,
@@ -179,6 +180,10 @@ export default function ExerciseTab({ icon }: ExerciseTabProps) {
       <ExerciseViewModal
         exercise={viewingExercise}
         onClose={closeView}
+        onDeleted={() => {
+          closeView();
+          void reload();
+        }}
         onEdit={(ex) => {
           closeView();
           openEditForm(ex);

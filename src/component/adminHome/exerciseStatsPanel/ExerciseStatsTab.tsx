@@ -2,12 +2,9 @@ import { useState, type ReactNode } from "react";
 import { FaChevronRight, FaRotateRight } from "react-icons/fa6";
 import { usePreferences } from "../../../context/PreferencesContext";
 import { Dropdown } from "../../common/Dropdown";
-import { exerciseStatsController } from "./exerciseStats.controller";
+import { exerciseStatsController, rateTone } from "./exerciseStats.controller";
 import ExerciseStatDetailModal from "./ExerciseStatDetailModal";
 
-/** <40% red, 40-70% yellow, >70% green */
-export const rateTone = (rate: number | null) =>
-  rate === null ? "none" : rate < 40 ? "bad" : rate <= 70 ? "mid" : "ok";
 
 export default function ExerciseStatsTab({ icon }: { icon?: ReactNode }) {
   const { t } = usePreferences();
