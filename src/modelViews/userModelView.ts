@@ -2,6 +2,7 @@ import { AppClient } from "../API/appRestApi";
 import {
   AccessResponse,
   AuthenResponse,
+  GenderOption,
   getUsersResponseAdmin,
   RegisterCredentials,
 } from "../models/userModel";
@@ -57,17 +58,12 @@ export class userViewModel {
       localStorage.setItem("accessToken", accessData.accessToken || "");
       localStorage.setItem("access_token", accessData.accessToken || "");
 
-      console.log("user_id", localStorage.getItem("user_id"));
-      console.log("fullname", localStorage.getItem("fullname"));
-      console.log("branch_id", localStorage.getItem("branch_id"));
-      console.log("accessToken", localStorage.getItem("accessToken"));
       response = {
         isError: false,
         data: accessData,
         errorMessage: "Login successful",
       };
     } catch (error: any) {
-      console.log("login failed: ", error);
       console.error("Login failed:", error);
       response = {
         isError: true,
@@ -147,7 +143,6 @@ export class userViewModel {
         }
       }
     } catch (error: any) {
-      console.log("register failed: ", error);
       console.error("Register failed:", error);
       response = {
         isError: true,
@@ -172,12 +167,21 @@ export class userViewModel {
     return result;
   };
 
+  // รายการเพศจากตาราง gender — ใช้ในหน้าสมัครสมาชิก (GET /gender ไม่ต้อง login)
+  getGenders = async (): Promise<GenderOption[]> => {
+    try {
+      const result = await AppClient.get<GenderOption[]>("/gender");
+      return Array.isArray(result) ? result : [];
+    } catch (error) {
+      console.error("Fetch genders failed:", error);
+      return [];
+    }
+  };
+
   //authen request
   private authenRequest = async (username: string): Promise<AuthenResponse> => {
     const data = username + "&" + formatDateTime();
-    console.log("this is data before hashe", data);
     const authenRequest = await sha256Hash(data);
-    console.log('authen request : ', authenRequest)
 
     const result = await AppClient.post<AuthenResponse>("/authen/authen_request", {
       authenRequest: authenRequest,
@@ -196,8 +200,6 @@ export class userViewModel {
       password,
       authenToken,
     );
-    console.log("this is authenToken", authenToken);
-    console.log("this is authenSignature", authenSignature);
     const result = await AppClient.post<AccessResponse>(
       "/authen/access_request",
       {

@@ -16,6 +16,8 @@ declare module "axios" {
 
 export interface AppRequestOptions {
   skipGlobalLoader?: boolean;
+  /** override the 60s default for one request (ms) */
+  timeout?: number;
 }
 
 const baseURL = import.meta.env.VITE_API_BASE_URL+"/"                                   ;
