@@ -6,6 +6,7 @@ import type { BranchBaseState } from "../../../models/branchStatsModel";
 import { branchStatsService } from "../branchStats.service";
 import { LayoutSkill } from "../utils/skillTree";
 import { soundService } from "../../../services/soundService";
+import { SessionService } from "../../../services/sessionService";
 import { useBranchSkillController } from "./branchSkill.controller";
 import { useBranchStatsController } from "./branchStats.controller";
 import { useSessionHistoryController } from "./sessionHistory.controller";
@@ -81,9 +82,10 @@ export function useHomeShellController() {
 
   const profileMenuRef = useRef<HTMLDivElement>(null);
 
-  // Fetch branches on mount
+  // Fetch branches on mount, and wake the KT engine so the first answer doesn't wait for it
   useEffect(() => {
     fetchMyBranches();
+    SessionService.warmUpEngine();
   }, []);
 
   useEffect(() => {

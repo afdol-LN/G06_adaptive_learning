@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { FaEye, FaEyeSlash } from "react-icons/fa6";
-import {RegisterCredentials} from "../../models/userModel";
+import {GenderOption, RegisterCredentials} from "../../models/userModel";
+import { userViewModel } from "../../modelViews/userModelView";
 import { usePreferences } from "../../context/PreferencesContext";
 import { DatePicker } from "../common/DatePicker";
 import type { TKey } from "../../i18n";
@@ -21,8 +22,19 @@ export default function RegisterPanel({ onSubmit, isLoading, onSwitchTab }: Regi
   const [fname, setFname] = useState("");
   const [lname, setLname] = useState("");
   const [dob, setDob] = useState("");
-  // 0 = ยังไม่ได้เลือก (placeholder). ค่าจริงต้องตรงกับ id ในตาราง gender (1-3)
+  // 0 = ยังไม่ได้เลือก (placeholder). ตัวเลือกจริงดึงจากตาราง gender
   const [gender, setGender] = useState(0);
+  const [genders, setGenders] = useState<GenderOption[]>([]);
+
+  useEffect(() => {
+    let alive = true;
+    new userViewModel().getGenders().then((list) => {
+      if (alive) setGenders(list);
+    });
+    return () => {
+      alive = false;
+    };
+  }, []);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
@@ -121,9 +133,11 @@ export default function RegisterPanel({ onSubmit, isLoading, onSwitchTab }: Regi
               <option value={0} disabled>
                 {t("auth.gender.placeholder")}
               </option>
-              <option value={1}>{t("auth.gender.male")}</option>
-              <option value={2}>{t("auth.gender.female")}</option>
-              <option value={3}>{t("auth.gender.lgbtq")}</option>
+              {genders.map((g) => (
+                <option key={g.id} value={g.id}>
+                  {g.gender}
+                </option>
+              ))}
             </select>
           </div>
         </div>
