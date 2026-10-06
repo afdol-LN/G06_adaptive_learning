@@ -16,7 +16,7 @@ import {
 export class AiService {
   generate = async (
     data: GenerateDraftRequest,
-  ): Promise<ApiResponse<GenerateDraftResult>> => {
+  ): Promise<ApiResponse<GenerateDraftResult> & { isTimeout?: boolean }> => {
     try {
       const result = await AiClient.post("/ai-draft/generate", data);
       return {
@@ -29,6 +29,8 @@ export class AiService {
         isError: true,
         data: null,
         errorMessage: error.message || "สร้างร่างไม่สำเร็จ",
+        // หน้าจอเลิกรอ แต่ backend อาจยังสร้างร่างต่อจนเสร็จ — controller ใช้แยกข้อความ
+        isTimeout: error.code === "ECONNABORTED",
       };
     }
   };
