@@ -19,7 +19,8 @@ const baseURL = import.meta.env.VITE_API_BASE_URL + "/";
 
 const instance: AxiosInstance = axios.create({
   baseURL: baseURL,
-  timeout: 180000,
+  // ต้องนานกว่าผลรวม <NAME>_TIMEOUT_MS ของทุกตัวใน LLM_CHAIN ไม่งั้นหน้าจอเลิกรอทั้งที่ backend ยังสร้างร่างอยู่
+  timeout: 300000,
   headers: { "Content-Type": "application/json" },
 });
 
@@ -39,7 +40,10 @@ instance.interceptors.response.use(
       localStorage.removeItem("access_token");
       window.location.href = "/";
     }
-    return Promise.reject(error.response?.data ?? error.message);
+    // ส่งเป็น object เสมอ — ถ้าส่งสตริงตอน timeout/เน็ตหลุด service ที่อ่าน error.message จะได้ undefined
+    return Promise.reject(
+      error.response?.data ?? { message: error.message, code: error.code },
+    );
   },
 );
 
@@ -61,5 +65,9 @@ export class AiClient {
     data: Record<string, any> = {},
   ): Promise<T> {
     return instance.put(endpoint, data);
+  }
+  // ใช้กับการลบแบบ cascade ของ admin ด้วย — goal/user ที่มีข้อมูลนักศึกษาเยอะอาจเกิน 5 วินาทีของ AppClient
+  static delete<T = any>(endpoint: string): Promise<T> {
+    return instance.delete(endpoint);
   }
 }
