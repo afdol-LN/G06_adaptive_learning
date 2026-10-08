@@ -6,6 +6,9 @@ import {
 import { skillService } from "../skillPanel/skill.service";
 import { exerciseStatsService } from "./exerciseStats.service";
 
+/** default = ลำดับจาก server (ข้อที่ยากสุดก่อน); desc/asc = เรียงตามระดับ */
+export type LevelSort = "default" | "desc" | "asc";
+
 export interface SkillOption {
   id: number;
   name: string;
@@ -16,6 +19,7 @@ export function exerciseStatsController() {
   const [skillId, setSkillId] = useState<number | null>(null);
   const [includePretest, setIncludePretest] = useState(false);
   const [level, setLevel] = useState<number | null>(null);
+  const [levelSort, setLevelSort] = useState<LevelSort>("default");
   const [rows, setRows] = useState<ExerciseStatSummary[]>([]);
   const [skills, setSkills] = useState<SkillOption[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -64,10 +68,13 @@ export function exerciseStatsController() {
     [rows],
   );
 
-  const filtered = useMemo(
-    () => (level === null ? rows : rows.filter((r) => r.level === level)),
-    [rows, level],
-  );
+  const filtered = useMemo(() => {
+    const list = level === null ? rows : rows.filter((r) => r.level === level);
+    if (levelSort === "default") return list;
+    // sort ของ JS เป็น stable → ข้อระดับเดียวกันยังคงลำดับเดิมจาก server
+    const dir = levelSort === "desc" ? -1 : 1;
+    return [...list].sort((a, b) => (a.level - b.level) * dir);
+  }, [rows, level, levelSort]);
 
   // a level that disappears after switching skill/pretest must not leave an empty table
   useEffect(() => {
@@ -84,6 +91,8 @@ export function exerciseStatsController() {
     level,
     setLevel,
     levels,
+    levelSort,
+    setLevelSort,
     rows: filtered,
     skills,
     isLoading,

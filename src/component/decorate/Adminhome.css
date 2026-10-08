@@ -2885,3 +2885,23 @@
   display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
 }
 .ad-del-warn { margin: 0; font-size: 13px; font-weight: 600; color: var(--red); }
+
+/* ════ หน้าประวัติการทำโจทย์: "ข้อ n" + แท็บเรียงตามระดับ ════ */
+.ad-stats-qno { font-weight: 700; color: var(--muted); white-space: nowrap; }
+.ad-stats-sort .ad-ev-tab { padding: 6px 12px; }
+.ad-stats-sort-mark { margin-left: 6px; vertical-align: -2px; color: var(--accent); }
+
+/* ════ หน้าจัดการ Exercise: ป้าย "ผู้ทำ" (มีนักเรียนตอบข้อนี้แล้วหรือยัง) ════ */
+.ad-usage-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 4px 10px; border-radius: 9999px; white-space: nowrap;
+  font-family: inherit; font-size: 12px; font-weight: 700; line-height: 1.4;
+  border: 1px solid transparent;
+}
+.ad-usage-badge.is-used {
+  color: var(--ok-ink); background: var(--ok-bg); border-color: var(--ok-border);
+  cursor: pointer; transition: filter .15s, box-shadow .15s;
+}
+.ad-usage-badge.is-used:hover { filter: brightness(.97); box-shadow: 0 0 0 3px color-mix(in srgb, var(--green) 18%, transparent); }
+.ad-usage-badge.is-used:focus-visible { outline: 2px solid var(--green); outline-offset: 2px; }
+.ad-usage-badge.is-unused { color: var(--muted); background: var(--surface-2); border-color: var(--border); }

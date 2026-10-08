@@ -1,10 +1,23 @@
 import { useState, type ReactNode } from "react";
-import { FaChevronRight, FaRotateRight } from "react-icons/fa6";
+import {
+  FaArrowDownWideShort,
+  FaArrowUpShortWide,
+  FaChevronRight,
+  FaListOl,
+  FaRotateRight,
+} from "react-icons/fa6";
+import type { TKey } from "../../../i18n";
 import { usePreferences } from "../../../context/PreferencesContext";
 import { Dropdown } from "../../common/Dropdown";
-import { exerciseStatsController, rateTone } from "./exerciseStats.controller";
+import { exerciseStatsController, LevelSort, rateTone } from "./exerciseStats.controller";
 import ExerciseStatDetailModal from "./ExerciseStatDetailModal";
 
+
+const LEVEL_SORTS: { key: LevelSort; label: TKey; icon: ReactNode }[] = [
+  { key: "default", label: "admin.stats.sort.default", icon: <FaListOl aria-hidden /> },
+  { key: "desc", label: "admin.stats.sort.desc", icon: <FaArrowDownWideShort aria-hidden /> },
+  { key: "asc", label: "admin.stats.sort.asc", icon: <FaArrowUpShortWide aria-hidden /> },
+];
 
 export default function ExerciseStatsTab({ icon }: { icon?: ReactNode }) {
   const { t } = usePreferences();
@@ -54,6 +67,21 @@ export default function ExerciseStatsTab({ icon }: { icon?: ReactNode }) {
           ariaLabel={t("admin.stats.levelFilter")}
         />
 
+        {/* เรียงตามระดับ — แท็บแบบเดียวกับ รายละเอียด/สถิติ ใน modal */}
+        <div className="ad-ev-tabs ad-stats-sort" role="group" aria-label={t("admin.stats.sort.label")}>
+          {LEVEL_SORTS.map(({ key, label, icon }) => (
+            <button
+              key={key}
+              type="button"
+              className={`ad-ev-tab${c.levelSort === key ? " is-active" : ""}`}
+              aria-pressed={c.levelSort === key}
+              onClick={() => c.setLevelSort(key)}
+            >
+              {icon} {t(label)}
+            </button>
+          ))}
+        </div>
+
         <label className="ad-stats-check">
           <input
             type="checkbox"
@@ -86,7 +114,11 @@ export default function ExerciseStatsTab({ icon }: { icon?: ReactNode }) {
             <tr>
               <th>{t("admin.stats.col.question")}</th>
               <th>{t("admin.stats.col.skill")}</th>
-              <th>{t("admin.stats.col.level")}</th>
+              <th>
+                {t("admin.stats.col.level")}
+                {c.levelSort === "desc" && <FaArrowDownWideShort className="ad-stats-sort-mark" aria-hidden />}
+                {c.levelSort === "asc" && <FaArrowUpShortWide className="ad-stats-sort-mark" aria-hidden />}
+              </th>
               <th>{t("admin.stats.col.students")}</th>
               <th>{t("admin.stats.col.correct")}</th>
               <th>{t("admin.stats.col.wrong")}</th>
@@ -104,7 +136,7 @@ export default function ExerciseStatsTab({ icon }: { icon?: ReactNode }) {
                   onClick={() => setOpenId(r.exerciseId)}
                 >
                   <td className="ad-stats-q">
-                    <span className="ad-mono ad-muted">#{r.exerciseId}</span>{" "}
+                    <span className="ad-stats-qno">{t("admin.stats.qNo", { n: r.exerciseId })}</span>{" "}
                     {r.description}
                   </td>
                   <td>{r.skillName}</td>
