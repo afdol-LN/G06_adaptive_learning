@@ -9,6 +9,11 @@ import {
 } from "../../../models/exerciseModel";
 import { TimeUnit, toSeconds } from "../../../utils/timeUnit";
 import { usePreferences } from "../../../context/PreferencesContext";
+import { exerciseStatsService } from "../exerciseStatsPanel/exerciseStats.service";
+import type { DetailTab } from "../learnerStatsPanel/DetailTabs";
+
+/** ตัวกรอง "ผู้ทำ": ทุกข้อ / มีคนทำแล้ว / ยังไม่มีคนทำ */
+export type UsageFilter = "all" | "used" | "unused";
 
 export interface ExerciseFormValues {
   description: string;
@@ -61,12 +66,29 @@ export function exerciseController() {
   const [formError, setFormError] = useState<string | null>(null);
 
   const [viewingExercise, setViewingExercise] = useState<Exercise | null>(null);
+  // แท็บที่ modal รายละเอียดเปิดขึ้นมา — กดป้าย "ผู้ทำ" จะเปิดตรงแท็บสถิติ
+  const [viewTab, setViewTab] = useState<DetailTab>("detail");
+
+  // exerciseId → จำนวนนักเรียนที่ตอบข้อนี้แล้ว (รวม Pretest — ตรงกับเงื่อนไขของปุ่มลบ)
+  // null = ยังโหลดไม่เสร็จ/โหลดไม่สำเร็จ → ป้ายแสดง "—" และตัวกรองไม่ตัดอะไรทิ้ง
+  const [answeredBy, setAnsweredBy] = useState<Map<number, number> | null>(null);
+  const [usageFilter, setUsageFilter] = useState<UsageFilter>("all");
 
   const [togglingId, setTogglingId] = useState<number | null>(null);
+
+  const loadUsage = useCallback(async () => {
+    const result = await exerciseStatsService.getList(null, true);
+    if (result.isError || !result.data) {
+      setAnsweredBy(null);
+      return;
+    }
+    setAnsweredBy(new Map(result.data.map((r) => [r.exerciseId, r.totalStudents])));
+  }, []);
 
   useEffect(() => {
     loadExercises();
     loadSkills();
+    loadUsage();
   }, []);
 
   const loadExercises = useCallback(async () => {
@@ -96,9 +118,13 @@ export function exerciseController() {
       if (skillFilter !== "all" && ex.skillId !== skillFilter) return false;
       if (typeFilter !== "all" && ex.type !== typeFilter) return false;
       if (statusFilter !== "all" && ex.status !== statusFilter) return false;
+      if (usageFilter !== "all" && answeredBy) {
+        const used = (answeredBy.get(ex.id) ?? 0) > 0;
+        if (usageFilter === "used" ? !used : used) return false;
+      }
       return true;
     });
-  }, [exercises, search, skillFilter, typeFilter, statusFilter]);
+  }, [exercises, search, skillFilter, typeFilter, statusFilter, usageFilter, answeredBy]);
 
   const openCreateForm = () => {
     setFormError(null);
@@ -122,7 +148,8 @@ export function exerciseController() {
     setFormError(null);
   };
 
-  const openView = async (exercise: Exercise) => {
+  const openView = async (exercise: Exercise, tab: DetailTab = "detail") => {
+    setViewTab(tab);
     setViewingExercise(exercise);
     const result = await exerciseService.getExercise(exercise.id);
     if (!result.isError && result.data) {
@@ -230,7 +257,14 @@ export function exerciseController() {
     viewingExercise,
     openView,
     closeView,
-    reload: loadExercises,
+    viewTab,
+    // โหลดจำนวนผู้ทำใหม่ด้วย — ลบ/แก้ข้อแล้วตัวเลขต้องตรง
+    reload: async () => {
+      await Promise.all([loadExercises(), loadUsage()]);
+    },
+    answeredBy,
+    usageFilter,
+    setUsageFilter,
 
     togglingId,
     toggleExerciseStatus,

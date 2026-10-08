@@ -1,10 +1,11 @@
 import {
+  FaCircleCheck,
   FaMagnifyingGlass,
   FaPlus,
 } from "react-icons/fa6";
 import ExerciseFormModal from "./component/ExerciseFormModal";
 import ExerciseViewModal from "./component/ExerciseViewModal";
-import { exerciseController } from "./exercise.controller";
+import { exerciseController, UsageFilter } from "./exercise.controller";
 import { ActionButtons } from "../../common/ActionButtons";
 import { StatusSwitch } from "../../common/StatusSwitch";
 import { usePreferences } from "../../../context/PreferencesContext";
@@ -44,6 +45,10 @@ export default function ExerciseTab({ icon }: ExerciseTabProps) {
     openView,
     closeView,
     reload,
+    viewTab,
+    answeredBy,
+    usageFilter,
+    setUsageFilter,
 
     togglingId,
     toggleExerciseStatus,
@@ -100,6 +105,18 @@ export default function ExerciseTab({ icon }: ExerciseTabProps) {
           <option value="inactive">{t("admin.status.inactive")}</option>
         </select>
 
+        <select
+          className="ad-select"
+          value={usageFilter}
+          onChange={(e) => setUsageFilter(e.target.value as UsageFilter)}
+          aria-label={t("admin.exercises.col.usage")}
+          disabled={!answeredBy}
+        >
+          <option value="all">{t("admin.exercises.usage.all")}</option>
+          <option value="used">{t("admin.exercises.usage.used")}</option>
+          <option value="unused">{t("admin.exercises.usage.unused")}</option>
+        </select>
+
         <button className="ad-btn-primary ad-btn-add" onClick={openCreateForm}>
           <FaPlus /> {t("admin.exercises.add")}
         </button>
@@ -115,6 +132,7 @@ export default function ExerciseTab({ icon }: ExerciseTabProps) {
               <th>{t("admin.exercises.col.skill")}</th>
               <th>{t("admin.exercises.col.level")}</th>
               <th>{t("admin.exercises.col.type")}</th>
+              <th>{t("admin.exercises.col.usage")}</th>
               <th>{t("admin.common.actions")}</th>
               <th>{t("admin.common.status")}</th>
             </tr>
@@ -122,13 +140,13 @@ export default function ExerciseTab({ icon }: ExerciseTabProps) {
           <tbody>
             {isLoading ? (
               <tr>
-                <td colSpan={6} style={{ textAlign: "center", padding: 24 }}>
+                <td colSpan={7} style={{ textAlign: "center", padding: 24 }}>
                   {t("admin.common.loading")}
                 </td>
               </tr>
             ) : filteredExercises.length === 0 ? (
               <tr>
-                <td colSpan={6} style={{ textAlign: "center", padding: 24 }}>
+                <td colSpan={7} style={{ textAlign: "center", padding: 24 }}>
                   {t("admin.exercises.empty")}
                 </td>
               </tr>
@@ -149,6 +167,24 @@ export default function ExerciseTab({ icon }: ExerciseTabProps) {
                     <td className={fadeClass}>{ex.skill?.skillsName || `#${ex.skillId}`}</td>
                     <td className={fadeClass}>{ex.level}</td>
                     <td className={fadeClass}>{ex.type}</td>
+                    <td>
+                      {/* ผู้ทำ: กดป้ายเขียว → เปิดแท็บสถิติ (ใครทำถูก/ผิด) */}
+                      {!answeredBy ? (
+                        <span className="ad-muted">—</span>
+                      ) : (answeredBy.get(ex.id) ?? 0) > 0 ? (
+                        <button
+                          type="button"
+                          className="ad-usage-badge is-used"
+                          onClick={() => openView(ex, "stats")}
+                          title={t("admin.exercises.usage.open")}
+                        >
+                          <FaCircleCheck aria-hidden />{" "}
+                          {t("admin.exercises.usage.done", { n: answeredBy.get(ex.id) ?? 0 })}
+                        </button>
+                      ) : (
+                        <span className="ad-usage-badge is-unused">{t("admin.exercises.usage.none")}</span>
+                      )}
+                    </td>
                     <td>
                       <ActionButtons onView={() => openView(ex)} onEdit={() => openEditForm(ex)} />
                     </td>
@@ -179,6 +215,7 @@ export default function ExerciseTab({ icon }: ExerciseTabProps) {
 
       <ExerciseViewModal
         exercise={viewingExercise}
+        initialTab={viewTab}
         onClose={closeView}
         onDeleted={() => {
           closeView();

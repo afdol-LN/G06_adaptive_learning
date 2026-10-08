@@ -27,6 +27,8 @@ interface ExerciseViewModalProps {
   hideStatus?: boolean;
   /** แท็บ "สถิติ" (ใครทำถูก/ผิด) — ค่าเริ่มต้น: มีเฉพาะโจทย์จริง (ร่างจาก AI ยังไม่มีคนทำ) */
   showStats?: boolean;
+  /** แท็บที่เปิดขึ้นมาตอนแรก (ค่าเริ่มต้น: รายละเอียด) */
+  initialTab?: DetailTab;
   /** มีค่า = แสดงปุ่ม "ลบ" มุมซ้ายล่าง; เรียกหลังลบสำเร็จ (ปิด modal + โหลดรายการใหม่) */
   onDeleted?: () => void;
 }
@@ -39,17 +41,18 @@ export default function ExerciseViewModal({
   skillName,
   hideStatus = false,
   showStats = !hideStatus,
+  initialTab = "detail",
   onDeleted,
 }: ExerciseViewModalProps) {
   const { t } = usePreferences();
-  const [tab, setTab] = useState<DetailTab>("detail");
+  const [tab, setTab] = useState<DetailTab>(initialTab);
   const [includePretest, setIncludePretest] = useState(false);
 
   // เปิดข้อใหม่ → เริ่มที่แท็บรายละเอียดเสมอ
   const exerciseId = exercise?.id;
   useEffect(() => {
-    setTab("detail");
-  }, [exerciseId]);
+    setTab(initialTab);
+  }, [exerciseId, initialTab]);
 
   if (!exercise) return null;
 
