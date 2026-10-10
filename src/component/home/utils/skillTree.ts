@@ -84,21 +84,6 @@ export function computeUnlockedSkills(skills: BranchSkill[]): Set<number> {
   return unlocked;
 }
 
-export function canUnlockSkill(skillId: number, skills: BranchSkill[], unlockedSkills: Set<number>): boolean {
-  if (unlockedSkills.has(skillId)) return true;
-  const node = skills.find(s => s.skillId === skillId);
-  if (!node) return false;
-
-  const reqs = node.skillPrequisite || [];
-  if (reqs.length === 0) return true;
-
-  const progressMap = new Map(skills.map(s => [s.skillId, s.progressPercent]));
-  return reqs.every(req => {
-    const parentProgress = progressMap.get(req.prerequisiteSkillId) || 0;
-    return parentProgress === 100;
-  });
-}
-
 // สีคืนค่าเป็น CSS variable (ประกาศใน Home.css พร้อมค่าของธีมมืด)
 // ใช้ได้ผ่าน style={{ ... }} เท่านั้น — var() ใช้ไม่ได้ใน presentation attribute ของ SVG
 export function getProgressColor(p: number): string {
