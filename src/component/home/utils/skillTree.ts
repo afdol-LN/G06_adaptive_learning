@@ -1,10 +1,16 @@
 import { BranchSkill, GoalNode, SkillProgress } from "../../../models/branchSkillModel";
 import { drawnPrerequisiteEdgeKeys } from "../../../utils/prerequisiteEdges";
+import {
+  NODE_H,
+  NODE_W,
+  layoutGoalPosition,
+  layoutTreePositions,
+  treeEndIds,
+  type TreeLayoutInput,
+} from "../../../utils/skillTreeLayout";
 
-export const NODE_W = 260;
-export const NODE_H = 120;
-const ROW_GAP = 130;
-const COL_GAP = 50;
+// the layout itself lives in utils/skillTreeLayout — the admin goal workspace draws the same tree
+export { NODE_W, NODE_H };
 
 export interface LayoutSkill extends BranchSkill {
   x: number;
@@ -18,35 +24,28 @@ export interface LayoutGoalNode extends GoalNode {
   fromSkillIds: number[];
 }
 
+const toLayoutInput = (skills: BranchSkill[]): TreeLayoutInput[] =>
+  skills.map((s) => ({ id: s.skillId, prerequisiteIds: (s.skillPrequisite || []).map((p) => p.prerequisiteSkillId) }));
+
 // Ends of the tree: skills that no other skill in this tree lists as a prerequisite
 export function treeEndSkillIds(skills: BranchSkill[]): number[] {
-  const builtOn = new Set(
-    skills.flatMap((s) => (s.skillPrequisite || []).map((p) => p.prerequisiteSkillId))
-  );
-  return skills.filter((s) => !builtOn.has(s.skillId)).map((s) => s.skillId);
+  return treeEndIds(toLayoutInput(skills));
 }
 
 // Prerequisite edges worth drawing (A→C hidden when A→B→C already shows it) — see utils/prerequisiteEdges.
 // Key = `${prerequisiteId}-${skillId}`
 export function drawnPrerequisiteEdges(skills: BranchSkill[]): Set<string> {
-  return drawnPrerequisiteEdgeKeys(
-    skills.map((s) => ({ id: s.skillId, prerequisiteIds: (s.skillPrequisite || []).map((p) => p.prerequisiteSkillId) }))
-  );
+  return drawnPrerequisiteEdgeKeys(toLayoutInput(skills));
 }
 
 // The skill tree above stays exactly as it is; the goal node hangs one row below the deepest skill,
 // joined only to the ends of the tree and centred under them (adt-learning/docs/adr/0005)
 export function layoutGoalNode(goal: GoalNode | null, skills: LayoutSkill[]): LayoutGoalNode | null {
-  if (!goal || skills.length === 0) return null;
-  const fromSkillIds = treeEndSkillIds(skills);
-  const ends = skills.filter((s) => fromSkillIds.includes(s.skillId));
-  const anchor = ends.length > 0 ? ends : skills;
-  return {
-    ...goal,
-    fromSkillIds,
-    x: anchor.reduce((sum, s) => sum + s.x, 0) / anchor.length,
-    y: Math.max(...skills.map((s) => s.y)) + NODE_H + ROW_GAP,
-  };
+  if (!goal) return null;
+  const positions = new Map(skills.map((s) => [s.skillId, { x: s.x, y: s.y }]));
+  const placed = layoutGoalPosition(toLayoutInput(skills), positions);
+  if (!placed) return null;
+  return { ...goal, fromSkillIds: placed.fromIds, x: placed.x, y: placed.y };
 }
 
 // "13 Sep 2026" / "13 ก.ย. 2569" — the day the goal was first completed (adt-learning/docs/adr/0005)
@@ -55,70 +54,11 @@ export function formatGoalCompletedOn(iso: string, locale: string): string {
 }
 
 export function layoutSkills(skills: BranchSkill[]): LayoutSkill[] {
-  const byId = Object.fromEntries(skills.map(s => [s.skillId, s]));
-
-  const depth: Record<number, number> = {};
-  const visiting = new Set<number>();
-  function getDepth(id: number): number {
-    if (depth[id] !== undefined) return depth[id];
-    if (visiting.has(id)) return 0;
-    visiting.add(id);
-    const node = byId[id];
-    if (!node) { visiting.delete(id); return depth[id] = 0; }
-    const reqs = node.skillPrequisite || [];
-    if (reqs.length === 0) { visiting.delete(id); return depth[id] = 0; }
-    const d = 1 + Math.max(...reqs.map(r => byId[r.prerequisiteSkillId] ? getDepth(r.prerequisiteSkillId) : 0));
-    visiting.delete(id);
-    return depth[id] = d;
-  }
-  skills.forEach(s => getDepth(s.skillId));
-
-  // Standalone skills (no prerequisite in this tree, nothing built on them) only connect to the goal node,
-  // so they sit on the last skill row — a short edge to the goal instead of one running past the whole tree
-  const maxDepth = Math.max(0, ...Object.values(depth));
-  const builtOn = new Set(skills.flatMap(s => (s.skillPrequisite || []).map(p => p.prerequisiteSkillId)));
-  const standalone = new Set(
-    skills.filter(s => depth[s.skillId] === 0 && !builtOn.has(s.skillId)).map(s => s.skillId)
-  );
-  standalone.forEach(id => { depth[id] = maxDepth; });
-
-  const layers: Record<number, number[]> = {};
-  skills.forEach(s => {
-    const d = depth[s.skillId];
-    (layers[d] = layers[d] || []).push(s.skillId);
-  });
-
-  const positions: Record<number, { x: number; y: number }> = {};
-  const sortedLayerKeys = Object.keys(layers).map(Number).sort((a, b) => a - b);
-
-  sortedLayerKeys.forEach(d => {
-    const ids = layers[d];
-    if (d > 0) {
-      ids.sort((a, b) => {
-        const avgX = (id: number) => {
-          const parents = (byId[id]?.skillPrequisite || []).filter(r => positions[r.prerequisiteSkillId]);
-          // standalone skills moved down here have no parent — keep them at the right end of the row
-          if (!parents.length) return standalone.has(id) ? Number.MAX_SAFE_INTEGER : 0;
-          return parents.reduce((s, r) => s + positions[r.prerequisiteSkillId].x, 0) / parents.length;
-        };
-        return avgX(a) - avgX(b);
-      });
-    }
-    // one gap for both the width and the step — they used to differ (70 vs 50), pushing every row off-centre
-    const total = ids.length * NODE_W + (ids.length - 1) * COL_GAP;
-    const startX = -total / 2 + NODE_W / 2;
-    ids.forEach((id, i) => {
-      positions[id] = {
-        x: startX + i * (NODE_W + COL_GAP),
-        y: d * (NODE_H + ROW_GAP),
-      };
-    });
-  });
-
+  const positions = layoutTreePositions(toLayoutInput(skills));
   return skills.map(s => ({
     ...s,
-    x: positions[s.skillId]?.x ?? 0,
-    y: positions[s.skillId]?.y ?? 0,
+    x: positions.get(s.skillId)?.x ?? 0,
+    y: positions.get(s.skillId)?.y ?? 0,
   }));
 }
 
