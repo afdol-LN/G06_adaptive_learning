@@ -2166,11 +2166,12 @@
   font-family: var(--font-sans);
   background: var(--surface);
 }
-/* ขนาดตรงกับ SKILL_NODE_* / GOAL_NODE_* ใน treeLayout.ts */
+/* ขนาดตรงกับ SKILL_NODE_* / GOAL_NODE_* ใน treeLayout.ts (= NODE_W × NODE_H ของ skill tree นักศึกษา)
+   height คงที่ ไม่ใช่ min-height — กล่องสูงเกินแล้วเส้นจะไม่ชนขอบกล่อง */
 .ad-ws-node {
-  width: 200px; min-height: 76px;
-  padding: 8px 12px; border-radius: 10px; border: 2px solid var(--border);
-  display: flex; flex-direction: column; gap: 2px;
+  width: 260px; height: 120px;
+  padding: 12px 16px; border-radius: 12px; border: 2px solid var(--border);
+  display: flex; flex-direction: column; justify-content: center; gap: 4px;
 }
 /* ทุก node ใช้กรอบ navy สีเดียว (จำนวนข้อดูจากตัวเลขในกล่อง)
    node ที่ inactive เป็นสีเทาทั้งกล่อง + มี tag "inactive" */
@@ -2190,8 +2191,8 @@
 .ad-ws-tag--off { color: var(--node-off-ink); border-color: var(--node-off-border); background: var(--surface); }
 
 .ad-ws-goal-node {
-  width: 220px; min-height: 64px;
-  padding: 8px 12px; border-radius: 12px; border: 2px solid var(--node-border);
+  width: 260px; height: 120px;
+  padding: 12px 16px; border-radius: 12px; border: 2px solid var(--node-border);
   background: var(--node-bg);
   display: flex; align-items: center; gap: 10px;
 }
