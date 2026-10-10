@@ -48,6 +48,11 @@ const BAR_W = NODE_W - BAR_INSET * 2;
 // วงรอบโหนด (pulse / selected) ยุบตามหน้าโหนด: ขอบบนเลื่อนลง ขอบล่างอยู่ที่เดิม — Home.css .tree-node-halo
 const HALO_STYLE = { "--halo-h": NODE_H + NODE_DEPTH + 8 } as React.CSSProperties;
 
+// เส้นหักมุมฉาก: ลงจาก (x1,y1) ถึง midY แล้วไปทางข้างถึง x2 แล้วลงถึง (x2,y2)
+// เส้น prerequisite หักกลางระหว่างสองแถว; เส้นเข้า goal ส่ง midY เองให้ไปรวมกันเหนือ goal
+const elbowPath = (x1: number, y1: number, x2: number, y2: number, midY = y1 + (y2 - y1) / 2) =>
+  `M${x1},${y1} L${x1},${midY} L${x2},${midY} L${x2},${y2}`;
+
 export const SkillTreeSVG: React.FC<SkillTreeSVGProps> = ({
   skills,
   unlocked,
@@ -68,7 +73,9 @@ export const SkillTreeSVG: React.FC<SkillTreeSVGProps> = ({
   }
 
   const notStarted = t("skill.notStarted");
-  const getNodeById = (id: number) => skills.find((s) => s.skillId === id);
+  // สร้างครั้งเดียวต่อ render (ไม่ใช้ useMemo เพราะอยู่หลัง early return) — ทุกเส้น/โหนดค้นจากที่นี่
+  const byId = new Map(skills.map((s) => [s.skillId, s]));
+  const getNodeById = (id: number) => byId.get(id);
   const isGoalParent = (skillId: number) => !!goal && goal.fromSkillIds.includes(skillId);
   // เส้น A→C ที่มีทาง A→B→C อยู่แล้วไม่ต้องวาดซ้ำ (แค่การวาด — unlock ยังใช้ prerequisite ทุกตัว)
   const drawnEdges = drawnPrerequisiteEdges(skills);
@@ -88,7 +95,23 @@ export const SkillTreeSVG: React.FC<SkillTreeSVGProps> = ({
   };
 
   const isRelatedEdge = (fromId: number, toId: number) =>
-    selected && (fromId === selected.skillId || toId === selected.skillId);
+    !!selected && (fromId === selected.skillId || toId === selected.skillId);
+
+  // prerequisite edges worth drawing, computed once — the dim and highlighted passes below only filter this list
+  const edges = skills.flatMap((skill) =>
+    (skill.skillPrequisite || []).flatMap((req) => {
+      const from = getNodeById(req.prerequisiteSkillId);
+      if (!from || !drawnEdges.has(`${from.skillId}-${skill.skillId}`)) return [];
+      return [{
+        key: `${from.skillId}-${skill.skillId}`,
+        fromId: from.skillId,
+        toId: skill.skillId,
+        isActive: unlocked.has(skill.skillId),
+        related: isRelatedEdge(from.skillId, skill.skillId),
+        d: elbowPath(from.x, from.y + NODE_H / 2, skill.x, skill.y - NODE_H / 2),
+      }];
+    })
+  );
 
   // the goal node sits below every skill, so it counts toward the canvas bounds too
   const placed: { x: number; y: number }[] = goal ? [...skills, goal] : skills;
@@ -108,15 +131,11 @@ export const SkillTreeSVG: React.FC<SkillTreeSVGProps> = ({
       if (!from) return null;
       const mastered = from.progressPercent === 100;
       const related = goalSelected || selected?.skillId === reqId;
-      const x1 = from.x;
-      const y1 = from.y + NODE_H / 2;
-      const x2 = goal.x;
       const y2 = goal.y - NODE_H / 2;
-      const midY = y2 - 40;
       return (
         <path
           key={`edge-goal-${reqId}`}
-          d={`M${x1},${y1} L${x1},${midY} L${x2},${midY} L${x2},${y2}`}
+          d={elbowPath(from.x, from.y + NODE_H / 2, goal.x, y2, y2 - 40)}
           fill="none"
           style={{ stroke: related ? "var(--accent)" : mastered ? "var(--edge-open)" : "var(--edge-locked)" }}
           strokeWidth={related ? 2.6 : mastered ? 2 : 1.5}
@@ -247,59 +266,34 @@ export const SkillTreeSVG: React.FC<SkillTreeSVGProps> = ({
 
 
       {/* Dim edges */}
-      {skills.map((skill) =>
-        (skill.skillPrequisite || []).map((req) => {
-          const reqId = req.prerequisiteSkillId;
-          const from = getNodeById(reqId);
-          if (!from || !drawnEdges.has(`${reqId}-${skill.skillId}`) || isRelatedEdge(reqId, skill.skillId)) return null;
-
-          const isActive = unlocked.has(skill.skillId);
-          const x1 = from.x;
-          const y1 = from.y + NODE_H / 2;
-          const x2 = skill.x;
-          const y2 = skill.y - NODE_H / 2;
-          const midY = y1 + (y2 - y1) / 2;
-          const path = `M${x1},${y1} L${x1},${midY} L${x2},${midY} L${x2},${y2}`;
-
-          return (
-            <path
-              key={`edge-${reqId}-${skill.skillId}`}
-              d={path}
-              fill="none"
-              style={{ stroke: getEdgeColor(reqId, skill.skillId) }}
-              strokeWidth={isActive ? 2 : 1.5}
-              strokeLinejoin="round"
-              strokeDasharray={isActive ? "none" : "6,4"}
-              // edges into locked / not-yet-unlocked skills stay dashed but must be readable (was 0.3 opacity)
-              strokeOpacity={selected || goalSelected ? 0.08 : isActive ? 0.85 : 0.9}
-            />
-          );
-        })
-      )}
+      {edges
+        .filter((e) => !e.related)
+        .map((e) => (
+          <path
+            key={`edge-${e.key}`}
+            d={e.d}
+            fill="none"
+            style={{ stroke: getEdgeColor(e.fromId, e.toId) }}
+            strokeWidth={e.isActive ? 2 : 1.5}
+            strokeLinejoin="round"
+            strokeDasharray={e.isActive ? "none" : "6,4"}
+            // edges into locked / not-yet-unlocked skills stay dashed but must be readable (was 0.3 opacity)
+            strokeOpacity={selected || goalSelected ? 0.08 : e.isActive ? 0.85 : 0.9}
+          />
+        ))}
 
       {goalEdges}
 
-      {/* Highlighted edges */}
+      {/* Highlighted edges — drawn last so they sit on top */}
       {selected &&
-        skills.map((skill) =>
-          (skill.skillPrequisite || []).map((req) => {
-            const reqId = req.prerequisiteSkillId;
-            const from = getNodeById(reqId);
-            if (!from || !drawnEdges.has(`${reqId}-${skill.skillId}`) || !isRelatedEdge(reqId, skill.skillId)) return null;
-
-            const isActive = unlocked.has(skill.skillId);
-            const x1 = from.x;
-            const y1 = from.y + NODE_H / 2;
-            const x2 = skill.x;
-            const y2 = skill.y - NODE_H / 2;
-            const midY = y1 + (y2 - y1) / 2;
-            const path = `M${x1},${y1} L${x1},${midY} L${x2},${midY} L${x2},${y2}`;
-            const hc = reqId === selected.skillId ? "var(--accent)" : "var(--node-done-border)";
-
+        edges
+          .filter((e) => e.related)
+          .map((e) => {
+            const hc = e.fromId === selected.skillId ? "var(--accent)" : "var(--node-done-border)";
             return (
-              <g key={`edge-rel-${reqId}-${skill.skillId}`}>
+              <g key={`edge-rel-${e.key}`}>
                 <path
-                  d={path}
+                  d={e.d}
                   fill="none"
                   style={{ stroke: hc }}
                   strokeWidth={7}
@@ -308,19 +302,18 @@ export const SkillTreeSVG: React.FC<SkillTreeSVGProps> = ({
                   strokeLinejoin="round"
                 />
                 <path
-                  d={path}
+                  d={e.d}
                   fill="none"
                   style={{ stroke: hc }}
-                  strokeWidth={isActive ? 2.6 : 2.2}
+                  strokeWidth={e.isActive ? 2.6 : 2.2}
                   strokeLinejoin="round"
-                  strokeDasharray={isActive ? "none" : "5,4"}
+                  strokeDasharray={e.isActive ? "none" : "5,4"}
                   strokeOpacity={1}
                   strokeLinecap="round"
                 />
               </g>
             );
-          })
-        )}
+          })}
 
       {/* Nodes */}
       {skills.map((skill) => {

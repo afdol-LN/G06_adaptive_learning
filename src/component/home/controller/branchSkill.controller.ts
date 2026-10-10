@@ -5,7 +5,6 @@ import {
   layoutSkills,
   layoutGoalNode,
   computeUnlockedSkills,
-  canUnlockSkill,
   LayoutSkill,
   LayoutGoalNode,
 } from "../utils/skillTree";
@@ -78,11 +77,11 @@ export function useBranchSkillController(branchId: number | null) {
     fetchSkills();
   }, [branchId]);
 
+  // "ปลดล็อกได้" ใช้เงื่อนไขเดียวกับ computeUnlockedSkills ทุกประการ (prerequisite ทุกตัว 100%)
+  // จึงอ่านจาก Set ที่คำนวณไว้แล้ว — เดิมคำนวณใหม่ทั้ง tree ทุกครั้งที่ถูกเรียก (ต่อโหนด ต่อเส้น)
   const canUnlock = useCallback(
-    (skillId: number) => {
-      return canUnlockSkill(skillId, skills, unlockedSkills);
-    },
-    [skills, unlockedSkills]
+    (skillId: number) => unlockedSkills.has(skillId),
+    [unlockedSkills]
   );
 
   return {
