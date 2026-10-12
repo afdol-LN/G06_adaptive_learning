@@ -2,6 +2,10 @@ import { FaMagnifyingGlass, FaPen, FaBullseye, FaListCheck } from "react-icons/f
 import { Goal } from "../../../../models/goalModel";
 import { statusKey } from "../../../../utils/adminUi";
 import { usePreferences } from "../../../../context/PreferencesContext";
+import { useEffect, useState } from "react";
+import { DetailTabs, DetailTab } from "../../learnerStatsPanel/DetailTabs";
+import GoalLearnersBody from "../../learnerStatsPanel/GoalLearnersBody";
+import { DeleteButton } from "../../deletePanel/DeleteButton";
 
 interface GoalViewModalProps {
   goal: Goal | null;
@@ -79,8 +83,8 @@ export default function GoalViewModal({ goal, onClose, onEdit, onDeleted }: Goal
                   </div>
                 )}
               </div>
-            )}
-          </div>
+            </>
+          )}
         </div>
 
         <div className="ad-modal-footer">
