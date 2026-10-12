@@ -39,6 +39,7 @@ export default function UsersTab({ icon }: UsersTabProps) {
     openViewModal,
     closeViewModal,
     newUserIds,
+    reloadUsers,
   } = userController();
 
   return (
@@ -171,6 +172,10 @@ export default function UsersTab({ icon }: UsersTabProps) {
         branches={viewBranches}
         isLoadingBranches={isLoadingViewBranches}
         onClose={closeViewModal}
+        onDeleted={() => {
+          closeViewModal();
+          void reloadUsers();
+        }}
         onEdit={(user) => {
           closeViewModal();
           openEditModal(user);

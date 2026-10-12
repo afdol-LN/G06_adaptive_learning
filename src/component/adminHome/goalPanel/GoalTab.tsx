@@ -57,6 +57,7 @@ function GoalList({
     viewingGoal,
     openView,
     closeView,
+    reload,
 
     toggleGoalStatus,
   } = goalController();
@@ -164,6 +165,10 @@ function GoalList({
       <GoalViewModal
         goal={viewingGoal}
         onClose={closeView}
+        onDeleted={() => {
+          closeView();
+          void reload();
+        }}
         onEdit={(g) => {
           closeView();
           openEditForm(g);

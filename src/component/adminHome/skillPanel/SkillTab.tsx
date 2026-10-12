@@ -45,6 +45,7 @@ export default function SkillTab({ icon, getSkillQuestions, setViewSkillQ }: Ski
     viewingSkill,
     openView,
     closeView,
+    reload,
 
     toggleSkillStatus,
 
@@ -184,6 +185,10 @@ export default function SkillTab({ icon, getSkillQuestions, setViewSkillQ }: Ski
       <SkillViewModal
         skill={viewingSkill}
         onClose={closeView}
+        onDeleted={() => {
+          closeView();
+          void reload();
+        }}
         onEdit={(s) => {
           closeView();
           openEditForm(s);

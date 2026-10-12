@@ -11,6 +11,7 @@ import {
 } from "react-icons/fa6";
 import { UserResponseAdmin } from "../../../../models/userModel";
 import { usePreferences } from "../../../../context/PreferencesContext";
+import { DeleteButton } from "../../deletePanel/DeleteButton";
 
 interface UserViewModalProps {
   user: UserResponseAdmin | null;
@@ -18,6 +19,8 @@ interface UserViewModalProps {
   isLoadingBranches: boolean;
   onClose: () => void;
   onEdit: (user: UserResponseAdmin) => void;
+  /** มีค่า = แสดงปุ่ม "ลบ" มุมซ้ายล่าง; เรียกหลังลบสำเร็จ (ปิด modal + โหลดรายการใหม่) */
+  onDeleted?: () => void;
 }
 
 export default function UserViewModal({
@@ -26,6 +29,7 @@ export default function UserViewModal({
   isLoadingBranches,
   onClose,
   onEdit,
+  onDeleted,
 }: UserViewModalProps) {
   const { t } = usePreferences();
   const [expandedBranchId, setExpandedBranchId] = useState<number | null>(null);
@@ -141,6 +145,9 @@ export default function UserViewModal({
         </div>
 
         <div className="ad-modal-footer">
+          {onDeleted && user.id !== undefined && (
+            <DeleteButton kind="user" id={user.id} name={user.fullName} onDeleted={onDeleted} />
+          )}
           <button type="button" className="ad-btn-cancel" onClick={onClose}>
             {t("admin.common.close")}
           </button>

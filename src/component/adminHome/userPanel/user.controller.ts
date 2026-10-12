@@ -216,6 +216,7 @@ export function userController() {
     isLoadingViewBranches,
     openViewModal,
     closeViewModal,
+    reloadUsers: loadUser,
     newUserIds,
   };
 }

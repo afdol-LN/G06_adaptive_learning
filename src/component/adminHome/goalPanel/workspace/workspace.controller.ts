@@ -686,6 +686,11 @@ export function workspaceController(goalId: number) {
     exerciseView: {
       exercise: viewingExercise,
       onClose: closeViewExercise,
+      // ลบแล้วโหลด workspace ใหม่ — จำนวนข้อเปลี่ยน readiness ของ skill/goal
+      onDeleted: () => {
+        closeViewExercise();
+        void reload();
+      },
       onEdit: (exercise: Exercise) => {
         closeViewExercise();
         openEditExercise(exercise);
