@@ -1,8 +1,7 @@
-import { FaMagnifyingGlass, FaPen, FaBullseye, FaListCheck, FaSitemap } from "react-icons/fa6";
+import { FaMagnifyingGlass, FaPen, FaBullseye, FaListCheck } from "react-icons/fa6";
 import { Goal } from "../../../../models/goalModel";
 import { statusKey } from "../../../../utils/adminUi";
 import { usePreferences } from "../../../../context/PreferencesContext";
-import GoalLearningTree from "./GoalLearningTree";
 
 interface GoalViewModalProps {
   goal: Goal | null;
@@ -65,15 +64,6 @@ export default function GoalViewModal({ goal, onClose, onEdit }: GoalViewModalPr
                 ))}
               </div>
             )}
-          </div>
-
-          <div className="ad-uv-section">
-            <div className="ad-uv-section-title">
-              <FaSitemap aria-hidden /> {t("admin.goalView.tree")}
-            </div>
-            <div className="ad-gv-tree">
-              <GoalLearningTree requires={requires} />
-            </div>
           </div>
         </div>
 
