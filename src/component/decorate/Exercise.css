@@ -173,8 +173,38 @@ html, body {
   align-items:flex-start;   /* ไม่ center แนวตั้ง — ให้ยืดลงได้ */
   padding:20px 20px 60px;
 }
-/* การ์ดตอนกำลังโหลด — ใช้กรอบของ QuestionCard */
-.ex-loading-card{padding:32px;text-align:center}
+/* SKELETON — ExerciseSkeleton.tsx, shown while the question loads; same boxes as the real screen.
+   Outside the card it shimmers on the Exercise tokens; inside .qc-card it switches to the card's own
+   --qc-* tokens (QuestionCard.css keeps those off :root), so both themes work */
+.ex-sk{
+  --sk-base:var(--s2);--sk-hi:var(--bdr);
+  display:block;border-radius:6px;
+  background:linear-gradient(90deg,var(--sk-base) 25%,var(--sk-hi) 50%,var(--sk-base) 75%);
+  background-size:200% 100%;animation:exSkShimmer 1.2s linear infinite;
+}
+/* border tones, not --qc-surface-2: the card's head/foot bars are painted --qc-surface-2 already */
+.qc-card .ex-sk{--sk-base:var(--qc-border-soft);--sk-hi:var(--qc-border)}
+@keyframes exSkShimmer{from{background-position:200% 0}to{background-position:-200% 0}}
+.ex-sk-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.ex-sk-btn{width:84px;height:30px;border-radius:10px}
+.ex-sk-chip{width:72px;height:22px;border-radius:20px}
+.ex-sk-line{height:14px;max-width:100%}
+.ex-sk-pill{height:26px;border-radius:9999px}
+.ex-sk-track{height:12px}
+.ex-sk-card{animation:none}
+.ex-sk-question{display:flex;flex-direction:column;align-items:center;gap:12px;padding:24px 20px;margin-bottom:24px;border:1px solid var(--qc-border);border-radius:8px}
+.ex-sk-question .ex-sk-line{height:18px}
+.ex-sk-choice{display:flex;align-items:center;gap:12px;padding:14px 16px;border:1px solid var(--qc-border);border-radius:8px}
+.ex-sk-letter{width:30px;height:30px;border-radius:8px;flex-shrink:0}
+.ex-sk-submit{width:150px;height:44px;border-radius:12px}
+@media (prefers-reduced-motion: reduce){
+  .ex-sk{animation:none;background:var(--sk-base)}
+}
+@media(max-width:600px){
+  /* keep the brand on one line beside the placeholder buttons */
+  .ex-sk-btn{width:34px}
+  .ex-sk-chip{width:48px}
+}
 
 /* CARD */
 .card-head{padding:18px 28px;border-bottom:1px solid var(--bdr);background:var(--bg);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}

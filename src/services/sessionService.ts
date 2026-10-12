@@ -9,10 +9,12 @@ export class SessionService {
     branchId: number,
     skillId: number,
   ): Promise<StartSessionResponse> => {
-    return AppClient.post<StartSessionResponse>("/session/start", {
-      branchId,
-      skillId,
-    });
+    // the Exercise screen shows ExerciseSkeleton while this loads, so no full-screen GlobalLoader over it
+    return AppClient.post<StartSessionResponse>(
+      "/session/start",
+      { branchId, skillId },
+      { skipGlobalLoader: true },
+    );
   };
 
   static submitAnswer = async (
