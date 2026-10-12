@@ -240,8 +240,6 @@ export const adminEn: Record<keyof typeof adminTh, string> = {
   "admin.goalView.title": "Goal details",
   "admin.goalView.skillsNeeded": "Required skills (target level)",
   "admin.goalView.noSkills": "— No required skills —",
-  "admin.goalView.tree": "Learning tree",
-  "admin.goalView.treeEmpty": "— No required skills yet —",
   "admin.skillRequire.label": "Required skills",
   "admin.skillRequire.levelPh": "-- Level --",
   "admin.skillRequire.noneSelected": "— No skills selected —",

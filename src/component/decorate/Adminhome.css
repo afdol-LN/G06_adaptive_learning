@@ -140,13 +140,6 @@
 .ad-req-tag.is-answer { background: var(--ok-bg);  border-color: var(--ok-border);  color: var(--ok-ink); }
 .ad-btn-questions     { border-color: color-mix(in srgb, var(--purple) 30%, transparent); color: var(--purple); }
 
-/* Goal learning tree (GoalLearningTree.tsx) — colours via class, not SVG attributes */
-.ad-goal-tree-arrow { fill: var(--faint); }
-.ad-goal-tree-edge  { stroke: var(--faint); }
-.ad-goal-tree-node  { fill: var(--node-bg); stroke: var(--mid-border); }
-.ad-goal-tree-name  { fill: var(--ink); }
-.ad-goal-tree-level { fill: var(--ink-soft); }
-
 *,
 *::before,
 *::after {
@@ -2656,14 +2649,6 @@
 .ad-gv-desc { font-size: 14px; line-height: 1.5; overflow-wrap: anywhere; }
 .ad-gv-skills { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
 .ad-gv-skills .ad-uv-goal-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-/* ต้นไม้กว้างคงที่ — แคบกว่ากรอบให้อยู่กลาง, กว้างกว่าให้เลื่อนแนวนอนในกรอบนี้ */
-.ad-gv-tree {
-  overflow-x: auto; padding: 18px;
-  border-radius: 12px; background: var(--surface-2); border: 1px solid var(--border);
-  scrollbar-width: thin; scrollbar-color: var(--border) transparent;
-}
-.ad-gv-tree > svg { display: block; margin: 0 auto; }
-.ad-gv-tree > .ad-muted { display: block; text-align: center; font-size: 13px; }
 
 @media (max-width: 600px) {
   .ad-gv-skills { grid-template-columns: minmax(0, 1fr); }

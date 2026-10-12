@@ -27,6 +27,7 @@ export function layoutTreePositions(nodes: TreeLayoutInput[]): Map<number, TreeP
 
   const depth: Record<number, number> = {};
   const visiting = new Set<number>();
+  // get dept per skill by using recursive
   function getDepth(id: number): number {
     if (depth[id] !== undefined) return depth[id];
     if (visiting.has(id)) return 0;
@@ -38,7 +39,7 @@ export function layoutTreePositions(nodes: TreeLayoutInput[]): Map<number, TreeP
     const d = 1 + Math.max(...reqs.map(r => byId[r] ? getDepth(r) : 0));
     visiting.delete(id);
     return depth[id] = d;
-  }
+    }
   nodes.forEach(n => getDepth(n.id));
 
   // Standalone skills (no prerequisite in this tree, nothing built on them) only connect to the goal node,

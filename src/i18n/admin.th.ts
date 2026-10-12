@@ -240,8 +240,6 @@ export const adminTh = {
   "admin.goalView.title": "รายละเอียด Goal",
   "admin.goalView.skillsNeeded": "Skill ที่ต้องใช้ (Level ที่ต้องการ)",
   "admin.goalView.noSkills": "— ไม่มี Skill ที่ต้องใช้ —",
-  "admin.goalView.tree": "Learning Tree",
-  "admin.goalView.treeEmpty": "— ยังไม่มี Skill ที่ต้องใช้ —",
   "admin.skillRequire.label": "Skill ที่ต้องใช้",
   "admin.skillRequire.levelPh": "-- Level --",
   "admin.skillRequire.noneSelected": "— ยังไม่ได้เลือก Skill —",
