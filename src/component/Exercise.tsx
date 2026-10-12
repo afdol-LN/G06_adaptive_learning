@@ -7,6 +7,7 @@ import { useExerciseGuideController } from './exercise/controller/useExerciseGui
 import ExerciseRules from './exercise/component/ExerciseRules';
 import AnswerSheet from './exercise/component/AnswerSheet';
 import SessionSummary from './exercise/component/SessionSummary';
+import ExerciseSkeleton from './exercise/component/ExerciseSkeleton';
 import QuestionCard from './common/QuestionCard';
 import AppBrand from './common/AppBrand';
 import {
@@ -49,11 +50,7 @@ function ExerciseScreen() {
     return (
       <>
         <div className="glow-bg"><div className="g1"></div><div className="g2"></div><div className="g3"></div></div>
-        <div className="wrap">
-          <div className="stage">
-            <div className="qc-card ex-loading-card">{t('exercise.loading')}</div>
-          </div>
-        </div>
+        <ExerciseSkeleton />
       </>
     );
   }
