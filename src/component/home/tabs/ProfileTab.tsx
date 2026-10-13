@@ -20,23 +20,35 @@ import {
   FaFire,
   FaListCheck,
   FaFlagCheckered,
+  FaCalendarCheck,
+  FaArrowTrendUp,
 } from "react-icons/fa6";
+import BehaviorRadar from "../component/BehaviorRadar";
 import { SessionHistoryItem } from "../../../models/sessionHistoryModel";
 import { UserProfileDetail } from "../../../models/userModel";
 import { BranchStats } from "../../../models/branchStatsModel";
 import { usePreferences } from "../../../context/PreferencesContext";
 import {
   computeBehavior,
+  computeHabits,
   BEHAVIOR_META,
   DIM_LABEL_KEYS,
+  HABIT_LABEL_KEYS,
+  RADAR_LABEL_KEYS,
   type BehaviorClass,
   type BehaviorDim,
+  type HabitDim,
 } from "../utils/behavior";
 
 const DIM_ICONS: Record<BehaviorDim, React.ReactNode> = {
   time: <FaClock aria-hidden />,
   streak: <FaBullseye aria-hidden />,
   momentum: <FaBolt aria-hidden />,
+};
+
+const HABIT_ICONS: Record<HabitDim, React.ReactNode> = {
+  consistency: <FaCalendarCheck aria-hidden />,
+  growth: <FaArrowTrendUp aria-hidden />,
 };
 
 // --meta = สีของ behavior class (token --beh-* ใน Home.css) ใช้ผสมสีพื้น/ขอบให้เข้ากับทั้งสองธีม
@@ -102,6 +114,28 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({
   const [exportOpen, setExportOpen] = useState(false);
   const behavior = computeBehavior(sessions);
   const meta = BEHAVIOR_META[behavior.cls];
+  const habits = computeHabits(sessions);
+
+  // 3 มิติแรกคือคะแนนพฤติกรรม, 2 มิติหลังเป็นนิสัยการเรียน (แสดงอย่างเดียว ไม่นับในคะแนน)
+  const dimRows = [
+    ...(Object.keys(behavior.dims) as BehaviorDim[]).map((key) => ({
+      key,
+      icon: DIM_ICONS[key],
+      label: t(DIM_LABEL_KEYS[key]),
+      value: behavior.dims[key],
+    })),
+    ...(Object.keys(habits) as HabitDim[]).map((key) => ({
+      key,
+      icon: HABIT_ICONS[key],
+      label: t(HABIT_LABEL_KEYS[key]),
+      value: habits[key],
+    })),
+  ];
+  const radarAxes = dimRows.map((row) => ({
+    key: row.key,
+    label: t(RADAR_LABEL_KEYS[row.key]),
+    value: row.value,
+  }));
 
   const fullName = profile?.fullName || localStorage.getItem("fullname") || t("user.fallbackName");
   const initial = fullName.trim().charAt(0).toUpperCase();
@@ -203,27 +237,28 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({
             </div>
           </div>
           <p className="behavior-desc">{t(meta.descKey)}</p>
-          <div className="behavior-dims" data-tour="tour-behavior-dims">
-            <div className="behavior-dim-row behavior-dim-avg">
-              <span className="bdim-icon"><FaClock aria-hidden /></span>
-              <span className="bdim-label">{t("profile.avgTime")}</span>
-              <span className="bdim-val">{t("profile.avgTimeVal", { sec: behavior.avgTime })}</span>
-            </div>
-            {(Object.keys(behavior.dims) as BehaviorDim[]).map((key) => {
-              const val = behavior.dims[key];
-              return (
-                <div key={key} className="behavior-dim-row">
-                  <span className="bdim-icon">{DIM_ICONS[key]}</span>
-                  <span className="bdim-label">{t(DIM_LABEL_KEYS[key])}</span>
+          <div className="behavior-body">
+            <BehaviorRadar axes={radarAxes} ariaLabel={t("profile.radar.label")} />
+            <div className="behavior-dims" data-tour="tour-behavior-dims">
+              <div className="behavior-dim-row behavior-dim-avg">
+                <span className="bdim-icon"><FaClock aria-hidden /></span>
+                <span className="bdim-label">{t("profile.avgTime")}</span>
+                <span className="bdim-val">{t("profile.avgTimeVal", { sec: behavior.avgTime })}</span>
+              </div>
+              {dimRows.map((row) => (
+                <div key={row.key} className="behavior-dim-row">
+                  <span className="bdim-icon">{row.icon}</span>
+                  <span className="bdim-label">{row.label}</span>
                   <div className="bdim-track">
-                    <div className="bdim-fill" style={{ width: `${val}%` }} />
+                    <div className="bdim-fill" style={{ width: `${row.value}%` }} />
                     <div className="bdim-marker" style={{ left: "50%" }} />
                     <div className="bdim-marker" style={{ left: "70%" }} />
                   </div>
-                  <span className="bdim-val">{val}%</span>
+                  <span className="bdim-val">{row.value}%</span>
                 </div>
-              );
-            })}
+              ))}
+              <p className="behavior-radar-hint">{t("profile.radar.hint")}</p>
+            </div>
           </div>
           <div className="behavior-class-legend">
             {(Object.keys(BEHAVIOR_META) as BehaviorClass[]).map((k) => (
