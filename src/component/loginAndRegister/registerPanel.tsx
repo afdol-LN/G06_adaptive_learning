@@ -4,6 +4,7 @@ import {GenderOption, RegisterCredentials} from "../../models/userModel";
 import { userViewModel } from "../../modelViews/userModelView";
 import { usePreferences } from "../../context/PreferencesContext";
 import { DatePicker } from "../common/DatePicker";
+import { startOfDay, toIso } from "../common/calendarDate";
 import type { TKey } from "../../i18n";
 
 
@@ -122,7 +123,7 @@ export default function RegisterPanel({ onSubmit, isLoading, onSwitchTab }: Regi
           <DatePicker
             id="reg-dob"
             value={dob}
-            max="2010-12-31"
+            max={toIso(startOfDay(new Date()))}
             onChange={setDob}
           />
         </div>
