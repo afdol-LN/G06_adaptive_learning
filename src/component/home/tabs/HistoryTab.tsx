@@ -4,7 +4,7 @@ import { SessionHistoryItem } from "../../../models/sessionHistoryModel";
 import { usePreferences } from "../../../context/PreferencesContext";
 import type { TKey } from "../../../i18n";
 import { SessionCard } from "../../common/SessionCard";
-import { StatCard } from "../../common/StatCard";
+import { formatSeconds, StatCard } from "../../common/StatCard";
 import { HistoryTrendChart } from "../component/HistoryTrendChart";
 import {
   GRADES,
@@ -53,8 +53,14 @@ export const HistoryTab: React.FC<HistoryTabProps> = ({ sessions }) => {
         <StatCard icon={<FaBullseye />} value={`${c.stats.accuracy}%`} title={t("history.stats.accuracy")} />
         <StatCard
           icon={<FaStopwatch />}
-          value={c.stats.avgSeconds === null ? "—" : t("history.stats.seconds", { sec: c.stats.avgSeconds })}
-          title={t("history.stats.avgTime")}
+          value={c.stats.totalSeconds ?? "—"}
+          isTime
+          title={t("history.stats.totalTime")}
+          sub={
+            c.stats.avgSeconds !== null
+              ? t("history.stats.avgTimeSub", { time: formatSeconds(c.stats.avgSeconds, t) })
+              : undefined
+          }
         />
       </div>
 

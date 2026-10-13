@@ -57,6 +57,8 @@ export interface HistoryStats {
   questions: number;
   /** % right over every answer shown, not an average of session scores (a 2-question session weighs less) */
   accuracy: number;
+  /** total seconds over answers with usable times; null if none */
+  totalSeconds: number | null;
   /** average seconds per answer, over answers with usable times; null if none */
   avgSeconds: number | null;
 }
@@ -65,10 +67,12 @@ export function historyStats(sessions: SessionHistoryItem[]): HistoryStats {
   const questions = sessions.flatMap((s) => s.questions);
   const correct = questions.filter((q) => q.isCorrect).length;
   const times = questions.map(answerSeconds).filter((x): x is number => x !== null);
+  const total = times.reduce((a, b) => a + b, 0);
   return {
     sessions: sessions.length,
     questions: questions.length,
     accuracy: questions.length > 0 ? Math.round((correct / questions.length) * 100) : 0,
-    avgSeconds: times.length > 0 ? Math.round(times.reduce((a, b) => a + b, 0) / times.length) : null,
+    totalSeconds: times.length > 0 ? total : null,
+    avgSeconds: times.length > 0 ? Math.round(total / times.length) : null,
   };
 }
