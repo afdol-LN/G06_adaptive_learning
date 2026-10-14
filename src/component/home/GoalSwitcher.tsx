@@ -98,7 +98,6 @@ export const GoalSwitcher: React.FC<GoalSwitcherProps> = ({ onCreateBranch }) =>
                   <div>
                     <div className="goal-dropdown-name">{b.goalName}</div>
                     <div className="goal-dropdown-meta">
-                      {b.campus} · {t("goal.year", { year: b.year || 1 })}
                     </div>
                   </div>
                   {isActive && (
